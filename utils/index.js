@@ -1,5 +1,5 @@
 import { openArray, HTTPStore } from 'zarr';
-import { ZarrLoader } from '@hubmap/vitessce-image-viewer';
+import { ZarrLoader } from '../node_modules/@hubmap/vitessce-image-viewer/dist/bundle.es.js';
 
 async function getJson(store, key) {
   const bytes = new Uint8Array(await store.getItem(key));
@@ -32,6 +32,7 @@ export class OMEZarrReader {
     const promises = resolutions.map(r =>
       openArray({ store: this.zarrStore, path: r })
     );
+    window.store = this.zarrStore;
     const pyramid = await Promise.all(promises);
     const dimensions = ['t', 'c', 'z', 'y', 'x'].map(field => ({ field }));
 
@@ -51,19 +52,37 @@ export class OMEZarrReader {
   }
 }
 
-export async function createZarrLoader(store) {
+export async function createZarrLoader(store, dimensions) {
   if (typeof store === 'string') {
     store = new HTTPStore(store);
   }
 
   // If group, check if OME-Zarr
   if (await store.containsItem('.zgroup')) {
+    console.log('inside')
     const reader = await OMEZarrReader.fromStore(store);
     const { loader } = await reader.loadOMEZarr();
     return loader;
   }
 
   // Get the dimensions from the store and open the array 
-  const [data, { dimensions }] = await Promise.all([openArray({ store }), getJson(store, '.zattrs')]);
-  return new ZarrLoader({ data, dimensions });
+  const data = await openArray({ store });
+  // Hack right now, provide dimensions manually for array
+  const formatted_dims = dimensions.split("").map(field => ({ field }));
+  return new ZarrLoader({ data, dimensions: formatted_dims });
 }
+
+export function channelsToVivProps(channels) {
+  const sliderValues = [];
+  const colorValues = []; 
+  const channelIsOn = [];
+  const loaderSelection = [];
+  for (let { color = [255, 255, 255], slider, selection, on = true } of channels) {
+    sliderValues.push(slider);
+    colorValues.push(color);
+    channelIsOn.push(on);
+    loaderSelection.push(selection);
+  }
+  return { sliderValues, colorValues, channelIsOn, loaderSelection }
+}
+
