@@ -67,6 +67,7 @@ export async function createZarrLoader(store, dimensions) {
 
   // Get the dimensions from the store and open the array 
   const data = await openArray({ store });
+  // Hack right now, provide dimensions manually for array
   const formatted_dims = dimensions.split("").map(field => ({ field }));
   return new ZarrLoader({ data, dimensions: formatted_dims });
 }
