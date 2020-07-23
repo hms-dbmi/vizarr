@@ -17,6 +17,7 @@ function App() {
 
         async function add_image({ source, channels, dimensions, colormap = null, opacity = 1 }) {
           const loader = await createZarrLoader(source, dimensions);
+          loader.dtype = "<" + loader.dtype.slice(1); // internal Viv bug, coerce all dtype strings to "littleEndian"
           const vivProps = channelsToVivProps(channels);
           const id = Math.random().toString()
           setLayerProps(prev => { 
