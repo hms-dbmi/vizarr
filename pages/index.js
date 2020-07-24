@@ -5,8 +5,11 @@ import { VivViewerLayer, StaticImageLayer } from '../node_modules/@hubmap/vitess
 
 import { createZarrLoader, channelsToVivProps } from '../utils';
 
+const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0] };
+
 function App() {
   const [layerProps, setLayerProps] = useState([]);
+  const [viewState, setViewState] = useState(DEFAULT_VIEW_STATE);
 
   useEffect(() => {
     async function init() {
@@ -20,12 +23,27 @@ function App() {
           loader.dtype = "<" + loader.dtype.slice(1); // internal Viv bug, coerce all dtype strings to "littleEndian"
           const vivProps = channelsToVivProps(channels);
           const id = Math.random().toString()
-          setLayerProps(prev => { 
-            return [...prev, { loader, id, colormap, opacity, ...vivProps }];
-          })
+          setLayerProps(prev => {
+            if (prev.length === 0) {
+              // If there are no layers, use the first image to determine initial view state
+              const [height, width] = loader.base.shape.slice(-2);
+              setViewState(prevViewState => {
+                // Only override view state if it's the default
+                if (JSON.stringify(prevViewState) === JSON.stringify(DEFAULT_VIEW_STATE)) {
+                  return { zoom: -loader.numLevels, target: [width/2, height/2, 0]};
+                }
+                return prevViewState;
+              });
+            }
+            return [...prev, { loader, id, colormap, opacity, ...vivProps }]
+          });
         }
 
-        api.export({ add_image });
+        async function set_view_state(nextViewState) {
+          setViewState(nextViewState)
+        }
+
+        api.export({ add_image, set_view_state });
       }
     }
     init();
@@ -36,18 +54,13 @@ function App() {
     return new Layer(d)
   });
 
-  const deck = (
+  return (
     <DeckGL
       layers={layers}
-      initialViewState={{zoom: 0, target: [0,0,0]}}
+      viewState={viewState}
+      onViewStateChange={e => setViewState(e.viewState)}
       views={new OrthographicView({ id: 'ortho', controller: true })}
     />
-  )
-
-  return (
-    <>
-      {layers.length > 0 ? deck : null}
-    </>
   );
 }
 
