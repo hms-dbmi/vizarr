@@ -32,7 +32,6 @@ export class OMEZarrReader {
     const promises = resolutions.map(r =>
       openArray({ store: this.zarrStore, path: r })
     );
-    window.store = this.zarrStore;
     const pyramid = await Promise.all(promises);
     const dimensions = ['t', 'c', 'z', 'y', 'x'].map(field => ({ field }));
 
@@ -59,7 +58,6 @@ export async function createZarrLoader(store, dimensions) {
 
   // If group, check if OME-Zarr
   if (await store.containsItem('.zgroup')) {
-    console.log('inside')
     const reader = await OMEZarrReader.fromStore(store);
     const { loader } = await reader.loadOMEZarr();
     return loader;
@@ -83,6 +81,5 @@ export function channelsToVivProps(channels) {
     channelIsOn.push(on);
     loaderSelection.push(selection);
   }
-  return { sliderValues, colorValues, channelIsOn, loaderSelection }
+  return { sliderValues, colorValues, channelIsOn, loaderSelection };
 }
-
