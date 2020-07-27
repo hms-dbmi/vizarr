@@ -1,24 +1,48 @@
 import { useEffect } from 'react';
 import { useRecoilValue, useRecoilState } from 'recoil';
+import styled from 'styled-components';
 import { StaticImageLayer, VivViewerLayer } from '../node_modules/@hubmap/vitessce-image-viewer/dist/bundle.es.js';
 
 import { sourceInfoState, layerStateFamily }from '../state/atoms';
 import { createZarrLoader, channelsToVivProps } from '../utils';
 
+const Container = styled.div`
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: white;
+  font-size: 0.75em;
+`;
+
+const Row = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const Name = styled.span`
+  font-size: 1em;
+  font-weight: bold;
+`
+
 const OpacitySlider = ({ id }) => {
   const [layer, setLayer] = useRecoilState(layerStateFamily(id));
-  const handleChange = (e) => {
+  const handleChange = e => {
     const opacity = +e.target.value;
     setLayer(([prevLayer, prevProps]) => [prevLayer, {...prevProps, opacity }])
   }
-  return <input 
-    value={layer[1].opacity}
-    onChange={handleChange}
-    type="range" 
-    min="0" 
-    max="1" 
-    step="0.01" 
-  />
+  const inputId = `opacity-${id}`;
+  return (
+    <Row>
+      <label for={inputId}>opacity:</label>
+      <input
+        id={inputId}
+        value={layer[1].opacity}
+        onChange={handleChange}
+        type="range"
+        min="0"
+        max="1"
+        step="0.01"
+      />
+    </Row>
+  )
 }
 
 const ContrastLimitSlider = ({ id, index }) => {
@@ -68,9 +92,11 @@ function LayerController({ id }) {
   if (!layerProps?.loader) return null;
 
   const { name } = sourceInfo[id];
-  console.log(name)
   return (
-    <OpacitySlider id={id} />
+    <Container>
+      <Name>{name}</Name>
+      <OpacitySlider id={id} />
+    </Container>
   );
 }
 
