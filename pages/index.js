@@ -17,13 +17,23 @@ function App() {
         const { setupRPC } = await import('imjoy-rpc');
         const api = await setupRPC({ name: "vitessce-image-viewer-plugin" });
 
-        async function add_image({ source, channels, dimensions, colormap = null, opacity = 1 }) { 
+        async function add_image({ 
+          source,
+          name,
+          channels,
+          dimensions,
+          colormap = null,
+          opacity = 1
+        }) { 
           const id = Math.random().toString(36).slice(2);
           setLayerIds(prevIds => [...prevIds, id]);
-          setSourceInfo(prevSourceInfo => ({
-            ...prevSourceInfo, 
-            [id]: { source, channels, dimensions, colormap, opacity }
-          }));
+          setSourceInfo(prevSourceInfo => {
+            if (!name) name = `image_${Object.keys(prevSourceInfo).length}`;
+            return {
+              ...prevSourceInfo,
+              [id]: { source, name, channels, dimensions, colormap, opacity }
+            }
+          });
         }
 
         async function set_view_state(nextViewState) {

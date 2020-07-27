@@ -3,7 +3,6 @@ import { StaticImageLayer } from '../node_modules/@hubmap/vitessce-image-viewer/
 
 export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
 export const DEFAULT_LAYER_PROPS = {
-  loader: null,
   colorValues: [],
   sliderValues: [], 
   loaderSelection: [],

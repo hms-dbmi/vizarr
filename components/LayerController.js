@@ -67,6 +67,8 @@ function LayerController({ id }) {
   const layerProps = layer[1];
   if (!layerProps?.loader) return null;
 
+  const { name } = sourceInfo[id];
+  console.log(name)
   return (
     <OpacitySlider id={id} />
   );

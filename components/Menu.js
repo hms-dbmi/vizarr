@@ -11,9 +11,7 @@ function Menu() {
       borderRadius: 2,
       opacity: 0.7,
       position: "absolute",
-      zIndex: 2,
-      width: 200, 
-      height: 200 
+      zIndex: 2, 
     }}>
       {layerIds.map(id => <LayerController id={id} key={id}/>)}
     </div>
