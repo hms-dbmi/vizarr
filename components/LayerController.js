@@ -20,7 +20,7 @@ const Row = styled.div`
 const Name = styled.span`
   font-size: 1em;
   font-weight: bold;
-`
+`;
 
 const OpacitySlider = ({ id }) => {
   const [layer, setLayer] = useRecoilState(layerStateFamily(id));
@@ -45,28 +45,6 @@ const OpacitySlider = ({ id }) => {
   )
 }
 
-const ContrastLimitSlider = ({ id, index }) => {
-  const [layer, setLayer] = useRecoilState(layerStateFamily(id));
-  const handleChange = (v) => {
-    setLayer(([prevLayer, prevProps]) => {
-      const sliderValues = prevProps.sliderValues;
-      sliderValues[index] = v;
-      return [prevLayer, {...prevProps, sliderValues }]
-    });
-  }
-  const value = layer.sliderValues[index];
-  // TODO
-}
-
-const VisibilityButton = ({ id, index }) => {
-  const [layer, setLayer] = useRecoilState(layerStateFamily(id));
-  // TODO
-}
-
-const ColorSelector = ({ id, index }) => {
-  const [layer, setLayer] = useRecoilState(layerStateFamily(id));
-  // TODO
-}
 
 function LayerController({ id }) {
   const sourceInfo = useRecoilValue(sourceInfoState);
@@ -75,6 +53,10 @@ function LayerController({ id }) {
   useEffect(() => {
     async function initLayer({ source, dimensions, channels, colormap = '', opacity = 1 }) {
       const loader = await createZarrLoader(source, dimensions);
+      // Internal viv issue, this is a hack to get the appropriate WebGL textures.
+      // Loader dtypes only have littleendian lookups, but all loaders return little endian
+      // regardless of source.
+      loader.dtype = '<' + loader.dtype.slice(1);
       const vivProps = channelsToVivProps(channels);
       const Layer = loader.numLevels === 1 ? StaticImageLayer : VivViewerLayer;
       return [Layer, { id, loader, colormap, opacity, ...vivProps }];
