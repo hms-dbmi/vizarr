@@ -28,7 +28,10 @@ function WrappedViewStateDeck({ layers }) {
 
 function Viewer() {
   const layerConstructors = useRecoilValue(layersSelector);
-  const layers = layerConstructors.map(([Layer, props]) => new Layer(props));
+  const layers = layerConstructors.map(([Layer, props]) => {
+    // Optimization: disables data fetching for hidden layers
+    return (props.opacity === 0 || !props.on) ? null : new Layer(props);
+  });
   return <WrappedViewStateDeck layers={layers}/>
 }
 

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useReducer } from 'react';
 import { useRecoilValue, useRecoilState } from 'recoil';
 import styled from 'styled-components';
 import { StaticImageLayer, VivViewerLayer } from '../node_modules/@hubmap/vitessce-image-viewer/dist/bundle.es.js';
@@ -10,6 +10,11 @@ const Container = styled.div`
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: white;
   font-size: 0.75em;
+  border-radius: 0.3em;
+  overflow: hidden;
+  background-color: rgba(50, 50, 50, 0.7);
+  margin-bottom: 0.2em;
+  padding: 0.3em 0.2em;
 `;
 
 const Row = styled.div`
@@ -22,7 +27,7 @@ const Name = styled.span`
   font-weight: bold;
 `;
 
-const OpacitySlider = ({ id }) => {
+function OpacitySlider({ id }) {
   const [layer, setLayer] = useRecoilState(layerStateFamily(id));
   const handleChange = e => {
     const opacity = +e.target.value;
@@ -45,13 +50,35 @@ const OpacitySlider = ({ id }) => {
   )
 }
 
+function HideButton({ id }) {
+  const [layer, setLayer] = useRecoilState(layerStateFamily(id));
+  const handleChange = () => {
+    setLayer(([prevLayer, prevProps]) => {
+      const on = !prevProps.on;
+      return [prevLayer, {...prevProps, on }];
+    });
+  }
+  const label = layer[1].on ? 'Hide' : 'Show';
+  return (
+    <button onClick={handleChange}>{label}</button>
+  );
+}
+
 
 function LayerController({ id }) {
   const sourceInfo = useRecoilValue(sourceInfoState);
+  const [open, toggle] = useReducer(v => !v, true);
   const [layer, setLayer] = useRecoilState(layerStateFamily(id));
 
   useEffect(() => {
-    async function initLayer({ source, dimensions, channels, colormap = '', opacity = 1 }) {
+    async function initLayer({
+      source,
+      dimensions,
+      channels,
+      colormap = '',
+      opacity = 1,
+      on = true,
+    }) {
       const loader = await createZarrLoader(source, dimensions);
       // Internal viv issue, this is a hack to get the appropriate WebGL textures.
       // Loader dtypes only have littleendian lookups, but all loaders return little endian
@@ -59,7 +86,7 @@ function LayerController({ id }) {
       loader.dtype = '<' + loader.dtype.slice(1);
       const vivProps = channelsToVivProps(channels);
       const Layer = loader.numLevels === 1 ? StaticImageLayer : VivViewerLayer;
-      return [Layer, { id, loader, colormap, opacity, ...vivProps }];
+      return [Layer, { id, on, loader, colormap, opacity, ...vivProps }];
     }
 
     if (id in sourceInfo) {
@@ -76,8 +103,11 @@ function LayerController({ id }) {
   const { name } = sourceInfo[id];
   return (
     <Container>
-      <Name>{name}</Name>
-      <OpacitySlider id={id} />
+      <Row>
+        <HideButton id={id}/>
+        <Name>{name}</Name>
+      </Row>
+      {open ? <OpacitySlider id={id} /> : null}
     </Container>
   );
 }

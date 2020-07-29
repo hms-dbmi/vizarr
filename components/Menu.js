@@ -7,9 +7,9 @@ import LayerController from './LayerController';
 
 const Container = styled.div`
   background-color: rgba(50, 50, 50, 0.7);
-  padding: 0.75em 0.75em;
+  padding: 0.3em 0.3em;
   width: 175px;
-  border-radius: 1em;
+  border-radius: 0.5em;
   position: absolute;
   display: flex;
   flex-direction: column;

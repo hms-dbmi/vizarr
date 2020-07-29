@@ -3,13 +3,14 @@ import { StaticImageLayer } from '../node_modules/@hubmap/vitessce-image-viewer/
 
 export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
 export const DEFAULT_LAYER_PROPS = {
+  on: true,
   colorValues: [],
   sliderValues: [], 
   loaderSelection: [],
   channelIsOn: [],
   opacity: 1,
   colormap: '',
-}
+};
 
 export const sourceInfoState = atom({
   key: 'sourceInfo',
@@ -19,7 +20,7 @@ export const sourceInfoState = atom({
 export const layerIdsState = atom({
   key: 'layerIds',
   default: [],
-})
+});
 
 export const viewerViewState = atom({
   key: 'viewerViewState',
