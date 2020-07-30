@@ -1,5 +1,5 @@
 import { openArray, HTTPStore } from 'zarr';
-import { ZarrLoader } from '../node_modules/@hubmap/vitessce-image-viewer/dist/bundle.es.js';
+import { ZarrLoader } from '@hubmap/viv';
 
 async function getJson(store, key) {
   const bytes = new Uint8Array(await store.getItem(key));
@@ -46,7 +46,7 @@ export class OMEZarrReader {
     const data = pyramid.length === 1 || shouldUseBase ? pyramid[0] : pyramid;
     return {
       loader: new ZarrLoader({ data, dimensions }),
-      metadata: this.imageData
+      metadata: this.imageData,
     };
   }
 }
@@ -66,7 +66,7 @@ export async function createZarrLoader(store, dimensions) {
   // Get the dimensions from the store and open the array 
   const data = await openArray({ store });
   // Hack right now, provide dimensions manually for array
-  const formatted_dims = dimensions.split("").map(field => ({ field }));
+  const formatted_dims = dimensions.split('').map(field => ({ field }));
   return new ZarrLoader({ data, dimensions: formatted_dims });
 }
 

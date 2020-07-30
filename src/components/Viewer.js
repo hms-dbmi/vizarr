@@ -12,7 +12,9 @@ function WrappedViewStateDeck({ layers }) {
   if (viewState?.default && layers[0]?.props?.loader?.base) {
     const { loader } = layers[0].props;
     const [height, width] = loader.base.shape.slice(-2);
-    setViewState({ zoom: -loader.numLevels, target: [width/2, height/2, 0] });
+    const zoom = -loader.numLevels;
+    const target = [width / 2, height / 2, 0];
+    setViewState({ zoom, target });
   }
   
   return (
@@ -22,7 +24,7 @@ function WrappedViewStateDeck({ layers }) {
       onViewStateChange={e => setViewState(e.viewState)}
       views={new OrthographicView({ id: 'ortho', controller: true })}
     />
-  )
+  );
 }
 
 function Viewer() {
@@ -31,7 +33,9 @@ function Viewer() {
     // Optimization: disables data fetching for hidden layers
     return !props.on ? null : new Layer(props);
   });
-  return <WrappedViewStateDeck layers={layers}/>
+  return (
+    <WrappedViewStateDeck layers={layers}/>
+  );
 }
 
 export default Viewer;
