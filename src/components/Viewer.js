@@ -2,8 +2,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import DeckGL from 'deck.gl';
 import { OrthographicView } from '@deck.gl/core';
 
-import { viewerViewState } from '../state/atoms';
-import { layersSelector } from '../state/selectors';
+import { viewerViewState, layersSelector } from '../state';
 
 function WrappedViewStateDeck({ layers }) {
   const [viewState, setViewState] = useRecoilState(viewerViewState);

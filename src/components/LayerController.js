@@ -1,9 +1,9 @@
 import { useEffect, useReducer } from 'react';
 import { useRecoilValue, useRecoilState } from 'recoil';
 import styled from 'styled-components';
-import { StaticImageLayer, VivViewerLayer } from '../node_modules/@hubmap/vitessce-image-viewer/dist/bundle.es.js';
+import { StaticImageLayer, VivViewerLayer } from '@hms-dbmi/viv';
 
-import { sourceInfoState, layerStateFamily }from '../state/atoms';
+import { sourceInfoState, layerStateFamily }from '../state';
 import { createZarrLoader, channelsToVivProps } from '../utils';
 
 const Container = styled.div`

@@ -3,7 +3,7 @@ import { useSetRecoilState } from 'recoil';
 
 import Viewer from '../components/Viewer'
 import Menu from '../components/Menu';
-import { layerIdsState, sourceInfoState, viewerViewState } from '../state/atoms';
+import { layerIdsState, sourceInfoState, viewerViewState } from '../state';
 
 function App() {
   const setViewState = useSetRecoilState(viewerViewState);

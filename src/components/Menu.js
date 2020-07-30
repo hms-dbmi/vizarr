@@ -1,7 +1,7 @@
 import { useRecoilValue } from 'recoil';
 import styled from 'styled-components'
 
-import { layerIdsState } from '../state/atoms';
+import { layerIdsState } from '../state';
 import LayerController from './LayerController';
 
 
