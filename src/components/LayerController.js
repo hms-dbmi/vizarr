@@ -5,7 +5,7 @@ import { Eye, EyeWithLine } from '@styled-icons/entypo';
 import { StaticImageLayer, VivViewerLayer } from '@hms-dbmi/viv';
 
 import { sourceInfoState, layerStateFamily }from '../state';
-import { createZarrLoader, channelsToVivProps } from '../utils';
+import { createZarrLoader, channelsToVivProps, OMEMetaToVivProps } from '../utils';
 
 const Container = styled.div`
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -94,12 +94,15 @@ function LayerController({ id }) {
       opacity = 1,
       on = true,
     }) {
-      const loader = await createZarrLoader(source, dimensions);
+      const { loader, metadata = null } = await createZarrLoader(source, dimensions);
       // Internal viv issue, this is a hack to get the appropriate WebGL textures.
       // Loader dtypes only have littleendian lookups, but all loaders return little endian
       // regardless of source.
       loader.dtype = '<' + loader.dtype.slice(1);
-      const vivProps = channelsToVivProps(channels);
+      // If there is metadata (from OME-Zarr) and no channels, parse the source info. Otherwise override.
+      const vivProps = metadata && !channels ?
+        OMEMetaToVivProps(metadata) :
+        channelsToVivProps(channels);
       const Layer = loader.numLevels === 1 ? StaticImageLayer : VivViewerLayer;
       return [Layer, { id, on, loader, colormap, opacity, ...vivProps }];
     }

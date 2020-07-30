@@ -1,5 +1,5 @@
 import { openArray, HTTPStore } from 'zarr';
-import { ZarrLoader } from '@hubmap/viv';
+import { ZarrLoader } from '@hms-dbmi/viv';
 
 async function getJson(store, key) {
   const bytes = new Uint8Array(await store.getItem(key));
@@ -59,15 +59,18 @@ export async function createZarrLoader(store, dimensions) {
   // If group, check if OME-Zarr
   if (await store.containsItem('.zgroup')) {
     const reader = await OMEZarrReader.fromStore(store);
-    const { loader } = await reader.loadOMEZarr();
-    return loader;
+    const { loader, metadata } = await reader.loadOMEZarr();
+    // Contains rendering information if none provided
+    return { loader, metadata };
   }
 
   // Get the dimensions from the store and open the array 
   const data = await openArray({ store });
   // Hack right now, provide dimensions manually for array
   const formatted_dims = dimensions.split('').map(field => ({ field }));
-  return new ZarrLoader({ data, dimensions: formatted_dims });
+  const loader = new ZarrLoader({ data, dimensions: formatted_dims });
+  // No metadata for non OME-Zarr
+  return { loader };
 }
 
 export function channelsToVivProps(channels) {
@@ -82,4 +85,30 @@ export function channelsToVivProps(channels) {
     loaderSelection.push(selection);
   }
   return { sliderValues, colorValues, channelIsOn, loaderSelection };
+}
+
+export function OMEMetaToVivProps(omeMeta) {
+  const channels = [];
+  for (const [i, c] of omeMeta.channels.entries()) {
+    if (c.active) {
+      const channel = {
+        color: hexToRGB(c.color),
+        slider: [c.window.start, c.window.end],
+        selection: {
+          c: i,
+          t: omeMeta.rdefs?.defaultT || 0,
+          z: omeMeta.rdefs?.defaultZ || 0,
+        }
+      }
+      channels.push(channel);
+    }
+  }
+  return channelsToVivProps(channels);
+}
+
+function hexToRGB(hex) {
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  return [r, g, b];
 }
