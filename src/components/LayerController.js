@@ -1,6 +1,7 @@
 import { useEffect, useReducer } from 'react';
 import { useRecoilValue, useRecoilState } from 'recoil';
 import styled from 'styled-components';
+import { Eye, EyeWithLine } from '@styled-icons/entypo';
 import { StaticImageLayer, VivViewerLayer } from '@hms-dbmi/viv';
 
 import { sourceInfoState, layerStateFamily }from '../state';
@@ -14,17 +15,29 @@ const Container = styled.div`
   overflow: hidden;
   background-color: rgba(50, 50, 50, 0.7);
   margin-bottom: 0.2em;
-  padding: 0.3em 0.2em;
+  padding: 0.3em;
 `;
 
 const Row = styled.div`
   display: flex;
+  align-items: center;
+  justify-content: flex-start;
   flex-direction: row;
 `;
 
 const Name = styled.span`
   font-size: 1em;
   font-weight: bold;
+  max-width: 150px;
+`;
+
+const IconButton = styled.button`
+  background-color: Transparent;
+  background-repeat: no-repeat;
+  border: none;
+  cursor: pointer;
+  width: 3em;
+  color: ${props => props.visible ? 'white' : 'gray'};
 `;
 
 function OpacitySlider({ id }) {
@@ -58,9 +71,11 @@ function HideButton({ id }) {
       return [prevLayer, {...prevProps, on }];
     });
   }
-  const label = layer[1].on ? 'Hide' : 'Show';
+  const { on } = layer[1];
   return (
-    <button onClick={handleChange}>{label}</button>
+    <IconButton onClick={handleChange} visible={on}>
+      {on ? <Eye/> : <EyeWithLine/>}
+    </IconButton>
   );
 }
 
