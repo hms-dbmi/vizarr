@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "@hubmap/vitessce-image-viewer": "^0.2.8",
-    "deck.gl": "^8.1.12",
+    "@hubmap/vitessce-image-viewer": "^0.3.2",
+    "deck.gl": "^8.2.4",
     "imjoy-rpc": "^0.2.14",
     "next": "^9.4.4",
     "react": "^16.13.1",
