@@ -21,12 +21,25 @@ const Container = styled.div`
 const Row = styled.div`
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   flex-direction: row;
 `;
 
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-direction: row;
+  cursor: pointer;
+  transition: 0.4s;
+  &:hover {
+    background-color: rgba(50, 50, 50, 1);
+  }
+`;
+
 const Name = styled.span`
-  font-size: 1em;
+  font-size: 12px;
+  background: transparent;
   font-weight: bold;
   max-width: 150px;
 `;
@@ -36,8 +49,14 @@ const IconButton = styled.button`
   background-repeat: no-repeat;
   border: none;
   cursor: pointer;
-  width: 3em;
+  width: 35px;
   color: ${props => props.visible ? 'white' : 'gray'};
+`;
+
+const Panel = styled.div`
+  max-height: ${props => props.open ? '200px' : '0px'};
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
 `;
 
 function OpacitySlider({ id }) {
@@ -65,7 +84,8 @@ function OpacitySlider({ id }) {
 
 function HideButton({ id }) {
   const [layer, setLayer] = useRecoilState(layerStateFamily(id));
-  const handleChange = () => {
+  const handleChange = (e) => {
+    e.stopPropagation();
     setLayer(([prevLayer, prevProps]) => {
       const on = !prevProps.on;
       return [prevLayer, {...prevProps, on }];
@@ -76,6 +96,33 @@ function HideButton({ id }) {
     <IconButton onClick={handleChange} visible={on}>
       {on ? <Eye/> : <EyeWithLine/>}
     </IconButton>
+  );
+}
+
+function ContrastSlider({ id, index, max = 60000 }) {
+  const [layer, setLayer] = useRecoilState(layerStateFamily(id));
+  const handleChange = e => {
+    const value = +e.target.value;
+    setLayer(([prevLayer, prevProps]) => {
+      const sliderValues = [...prevProps.sliderValues];
+      sliderValues[index] = [0, value];
+      return [prevLayer, {...prevProps, sliderValues }];
+    });
+  }
+  const inputId = `contrast-limit-${id}-${index}`;
+  return (
+    <Row>
+      <label for={inputId}>color:</label>
+      <input
+        id={inputId}
+        value={layer[1].sliderValues[index][1]}
+        onChange={handleChange}
+        type="range"
+        min="0"
+        max={max}
+        step="1"
+      />
+    </Row>
   );
 }
 
@@ -119,13 +166,17 @@ function LayerController({ id }) {
   if (!layerProps?.loader) return null;
 
   const { name } = sourceInfo[id];
+  const { loaderSelection } = layerProps;
   return (
     <Container>
-      <Row>
+      <Header onClick={toggle}>
         <HideButton id={id}/>
         <Name>{name}</Name>
-      </Row>
-      {open ? <OpacitySlider id={id} /> : null}
+      </Header>
+      <Panel open={open}>
+        <OpacitySlider id={id} /> 
+        {loaderSelection.map((_, i) => <ContrastSlider id={id} index={i} key={i + id} />)}
+      </Panel> 
     </Container>
   );
 }
