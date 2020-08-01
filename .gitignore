@@ -26,3 +26,4 @@ yarn-error.log*
 out/*
 
 example/*.zarr
+example/.ipynb_checkpoints/*

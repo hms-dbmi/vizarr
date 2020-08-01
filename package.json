@@ -3,12 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "@hubmap/vitessce-image-viewer": "^0.2.8",
-    "deck.gl": "^8.1.12",
-    "imjoy-rpc": "^0.2.14",
-    "next": "^9.4.4",
+    "@hubmap/vitessce-image-viewer": "^0.3.2",
+    "deck.gl": "^8.2.4",
+    "imjoy-rpc": "^0.2.19",
+    "next": "^9.5.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "recoil": "0.0.10",
+    "styled-components": "^5.1.1",
+    "styled-icons": "^10.13.0",
     "zarr": "^0.3.0"
   },
   "scripts": {
