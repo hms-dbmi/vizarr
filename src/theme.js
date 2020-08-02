@@ -1,8 +1,11 @@
 import { createMuiTheme } from '@material-ui/core/styles';
+import grey from '@material-ui/core/colors/grey';
 
 export default createMuiTheme({
   palette: {
     type: 'dark',
+    primary: grey,
+    secondary: grey, 
   },
   props: {
     MuiButton: {
@@ -50,6 +53,13 @@ export default createMuiTheme({
       root: {
         height: '5px'
       },
+    },
+    MuiSlider:{
+      thumb: {
+        '&:focus, &:hover':{
+          boxShadow: 'none',
+        }
+      }
     },
   },
 });

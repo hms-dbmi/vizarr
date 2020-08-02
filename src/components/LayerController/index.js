@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useRecoilValue, useRecoilState } from 'recoil';
 import MuiAccordion from '@material-ui/core/Accordion';
-import { AccordionDetails, Grid } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import { StaticImageLayer, VivViewerLayer } from '@hms-dbmi/viv';
 
@@ -9,9 +8,7 @@ import { sourceInfoState, layerStateFamily }from '../../state';
 import { createZarrLoader, channelsToVivProps, OMEMetaToVivProps } from '../../utils';
 
 import Header from './Header';
-import OpacitySlider from './OpacitySlider';
-import ChannelController from './ChannelController';
-
+import Content from './Content';
 
 const Accordion = withStyles({
   root: {
@@ -70,16 +67,10 @@ function LayerController({ id }) {
   if (!layerProps?.loader) return null;
 
   const { name } = sourceInfo[id];
-  const { loaderSelection } = layerProps;
   return (
     <Accordion>
       <Header id={id} name={name} />
-      <AccordionDetails>
-        <Grid container>
-          <OpacitySlider id={id} /> 
-          {loaderSelection.map((_, i) => <ChannelController id={id} index={i} key={i + id} />)}
-        </Grid>
-      </AccordionDetails> 
+      <Content id={id} nChannels={layerProps.loaderSelection.length}/>
     </Accordion>
   );
 }

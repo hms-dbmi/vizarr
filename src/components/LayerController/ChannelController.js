@@ -3,7 +3,7 @@ import { Slider, Typography } from '@material-ui/core';
 
 import { layerStateFamily } from '../../state';
 
-function ChannelController({ id, index, min = 0, max = 1 }) {
+function ChannelController({ id, index, min = 0, max = 255 }) {
   const [layer, setLayer] = useRecoilState(layerStateFamily(id));
   const handleChange = (e, v) => {
     setLayer(([prevLayer, prevProps]) => {
