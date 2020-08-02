@@ -44,11 +44,12 @@ export default createMuiTheme({
     MuiTextField: {
       margin: 'dense',
     },
-    MuiToolbar: {
-      variant: 'dense',
+  },
+  overrides: {
+    MuiAccordianSummary: {
+      root: {
+        height: '5px'
+      },
     },
-    MuiAccordionSummary: {
-      
-    }
   },
 });

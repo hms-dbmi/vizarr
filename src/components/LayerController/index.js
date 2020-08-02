@@ -1,25 +1,19 @@
 import { useEffect } from 'react';
 import { useRecoilValue, useRecoilState } from 'recoil';
-import { 
-  Accordion, 
-  AccordionSummary, 
-  AccordionDetails, 
-  Grid,
-  Typography
-} from '@material-ui/core';
+import MuiAccordion from '@material-ui/core/Accordion';
+import { AccordionDetails, Grid } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
-import { ExpandMore } from '@material-ui/icons';
 import { StaticImageLayer, VivViewerLayer } from '@hms-dbmi/viv';
 
 import { sourceInfoState, layerStateFamily }from '../../state';
 import { createZarrLoader, channelsToVivProps, OMEMetaToVivProps } from '../../utils';
 
-import LayerVisibilityButton from './LayerVisibilityButton';
+import Header from './Header';
 import OpacitySlider from './OpacitySlider';
 import ChannelController from './ChannelController';
 
 
-const StyledAccordion = withStyles({
+const Accordion = withStyles({
   root: {
     border: '1px solid rgba(0, 0, 0, .125)',
     boxShadow: 'none',
@@ -30,30 +24,12 @@ const StyledAccordion = withStyles({
       display: 'none',
     },
     '&$expanded': {
-      margin: 'auto',
+      margin: 0,
+      padding: 0,
     },
   },
   expanded: {},
-})(Accordion);
-
-function LayerControl({ label, children }) {
-  return (
-    <Grid   
-      container
-      direction="row"
-      justify="center"
-      alignItems="space-between"
-      style={{ width: "100%" }}
-    >
-      <Grid item>
-        <Typography>{label}:</Typography>
-      </Grid>
-      <Grid item>
-        {children}
-      </Grid>
-    </Grid>
-  );
-}
+})(MuiAccordion);
 
 function LayerController({ id }) {
   const sourceInfo = useRecoilValue(sourceInfoState);
@@ -95,27 +71,16 @@ function LayerController({ id }) {
 
   const { name } = sourceInfo[id];
   const { loaderSelection } = layerProps;
-  const label = `layer-controoler-${id}`;
   return (
-    <StyledAccordion>
-      <AccordionSummary
-        expandIcon={<ExpandMore />}
-        aria-controls={label}
-        id={label}
-        disableRipple
-      >
-        <LayerVisibilityButton id={id}/>
-        <Typography>{name}</Typography>
-      </AccordionSummary>
+    <Accordion>
+      <Header id={id} name={name} />
       <AccordionDetails>
         <Grid container>
-          <LayerControl label={"opacity"}>
-            <OpacitySlider id={id} /> 
-          </LayerControl>
+          <OpacitySlider id={id} /> 
           {loaderSelection.map((_, i) => <ChannelController id={id} index={i} key={i + id} />)}
         </Grid>
       </AccordionDetails> 
-    </StyledAccordion>
+    </Accordion>
   );
 }
 

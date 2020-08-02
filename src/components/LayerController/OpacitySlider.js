@@ -5,7 +5,7 @@ import { layerStateFamily }from '../../state';
 
 function OpacitySlider({ id }) {
   const [layer, setLayer] = useRecoilState(layerStateFamily(id));
-  const handleChange = opacity => {
+  const handleChange = (e, opacity) => {
     setLayer(([prevLayer, prevProps]) => [prevLayer, {...prevProps, opacity }])
   }
   return (

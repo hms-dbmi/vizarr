@@ -16,8 +16,12 @@ function LayerVisibilityButton({ id }) {
   const { on } = layer[1];
   return (
     <IconButton 
-      aria-label="toggle layer visibility"
+      aria-label={`toggle-layer-visibility-${id}`}
       onClick={toggle}
+      style={{ 
+        backgroundColor: 'transparent',
+        color: `rgb(255, 255, 255, ${on ? 1 : 0.5})`,
+      }}
     >
       {on ? <Visibility /> : <VisibilityOff/>}
     </IconButton>
