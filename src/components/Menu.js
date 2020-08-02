@@ -1,30 +1,22 @@
 import { useReducer } from 'react';
 import { useRecoilValue } from 'recoil';
-import { Grid, Box } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import { Grid } from '@material-ui/core';
 
 import { layerIdsState } from '../state';
 import LayerController from './LayerController';
 
-const useStyles = makeStyles({
-  root: {
-    zIndex: 1,
-    maxWidth: 200,
-  }
-});
-
 function Menu() {
   const layerIds = useRecoilValue(layerIdsState);
   const [hidden, toggle] = useReducer(v => !v, false);
-  const classes = useStyles();
   return (
-    <Box>
-      <Grid container direction="column">
-        <div className={classes.root}>
-          {layerIds.map(id => <LayerController id={id} key={id} />)}
-        </div>
+    <div style={{ zIndex: 2, maxWidth: 200, position: 'absolute'}}>
+      <Grid 
+        container 
+        direction="column" 
+      >
+        {layerIds.map(id => <LayerController id={id} key={id} />)}
       </Grid>
-    </Box>
+    </div>
   ) 
 }
 
