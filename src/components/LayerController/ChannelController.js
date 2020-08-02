@@ -1,26 +1,32 @@
 import { useRecoilState } from 'recoil';
-import { Slider } from '@material-ui/core';
+import { Slider, Typography } from '@material-ui/core';
 
 import { layerStateFamily } from '../../state';
 
-function ChannelController({ id, index, min = 0, max = 60000 }) {
+function ChannelController({ id, index, min = 0, max = 255 }) {
   const [layer, setLayer] = useRecoilState(layerStateFamily(id));
-  const handleChange = value => {
-    console.log(value)
+  const handleChange = (event, value) => {
     setLayer(([prevLayer, prevProps]) => {
-      const sliderValues = [...prevProps.sliderValues];
-      sliderValues[index] = [0, value];
-      return [prevLayer, {...prevProps, sliderValues }];
+      // const sliderValues = prevProps.sliderValues.slice();
+      // console.log(sliderValues[index]);
+      // sliderValues[index] = value;
+      // return [prevLayer, {...prevProps, sliderValues }];
+      console.log(prevLayer, prevProps)
     });
   }
   return (
-    <Slider
-      value={layer[1].sliderValues[index][1]}
-      onChange={handleChange}
-      min={min}
-      max={max}
-      step={1}
-    />
+    <>
+      <Typography gutterBottom>
+        Channel {index}
+      </Typography>
+      <Slider
+        value={layer[1].sliderValues[index]}
+        onChange={handleChange}
+        valueLabelDisplay="auto"
+        min={min}
+        max={max}
+      />
+    </>
   );
 }
 

@@ -20,7 +20,7 @@ function Menu() {
   return (
     <Box>
       <Grid container direction="column">
-        <div class={classes.root}>
+        <div className={classes.root}>
           {layerIds.map(id => <LayerController id={id} key={id} />)}
         </div>
       </Grid>
