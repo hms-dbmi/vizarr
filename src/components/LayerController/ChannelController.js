@@ -1,50 +1,44 @@
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 import { Slider, Typography, Grid, IconButton } from '@material-ui/core';
-import { RadioButtonChecked, RadioButtonUnchecked, MoreHoriz } from '@material-ui/icons';
+import { RadioButtonChecked, RadioButtonUnchecked } from '@material-ui/icons';
 
-import { layerStateFamily, sourceInfoState } from '../../state';
+import ChannelOptions from './ChannelOptions';
+import { layerStateFamily } from '../../state';
 
-function ChannelController({ id, index, min = 0, max = 255 }) {
-  const sourceInfo = useRecoilValue(sourceInfoState);
+function ChannelController({ id, channelIndex }) {
   const [layer, setLayer] = useRecoilState(layerStateFamily(id));
   const handleContrastChange = (e, v) => {
     setLayer(([prevLayer, prevProps]) => {
       const sliderValues = [...prevProps.sliderValues];
-      sliderValues[index] = v;
+      sliderValues[channelIndex] = v;
       return [prevLayer, {...prevProps, sliderValues }];
     });
   }
   const handleVisibilityChange = () => {
     setLayer(([prevLayer, prevProps]) => {
       const channelIsOn = [...prevProps.channelIsOn];
-      channelIsOn[index] = !channelIsOn[index];
+      channelIsOn[channelIndex] = !channelIsOn[channelIndex];
       return [prevLayer, {...prevProps, channelIsOn }];
     });
   }
   // Material slider tries to sort in place. Need to copy.
   const layerProps = layer[1];
-  const value = [...layerProps.sliderValues[index]];
+  const value = [...layerProps.sliderValues[channelIndex]];
   const { colormap } = layerProps;
-  const color = `rgb(${colormap ? [255, 255, 255] : layerProps.colorValues[index]})`;
-  const on = layerProps.channelIsOn[index];
-  const channelName = `channel_${index}`;
+  const color = `rgb(${colormap ? [255, 255, 255] : layerProps.colorValues[channelIndex]})`;
+  const on = layerProps.channelIsOn[channelIndex];
+  const [min, max] = layerProps.contrastLimits[channelIndex];
+  const label = layerProps.labels?.[channelIndex];
   return (
     <>
       <Grid container justify='space-between' wrap="nowrap">
         <Grid item xs={8} zeroMinWidth>
           <Typography variant='caption' noWrap>
-            {channelName}
+            {label}
           </Typography>
         </Grid>
         <Grid item xs={1}>
-          <IconButton
-              style={{ 
-                backgroundColor: 'transparent',
-                padding: 0,
-              }} 
-            >
-            <MoreHoriz />
-          </IconButton> 
+          <ChannelOptions layerId={id} channelIndex={channelIndex} />
         </Grid>
       </Grid>
       <Grid container justify='space-between'>
@@ -54,6 +48,7 @@ function ChannelController({ id, index, min = 0, max = 255 }) {
               color,
               backgroundColor: 'transparent',
               padding: 0,
+              zIndex: 2,
             }} 
             onClick={handleVisibilityChange}
           >
@@ -68,7 +63,7 @@ function ChannelController({ id, index, min = 0, max = 255 }) {
             max={max}
             step={0.01}
             style={{ 
-              padding: '9px 0px 5px 0px',
+              padding: '10px 0px 5px 0px',
               color
             }}
           />

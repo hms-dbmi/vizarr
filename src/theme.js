@@ -32,19 +32,7 @@ export default createMuiTheme({
     MuiInputLabel: {
       margin: 'dense',
     },
-    MuiListItem: {
-      dense: true,
-    },
     MuiOutlinedInput: {
-      margin: 'dense',
-    },
-    MuiFab: {
-      size: 'small',
-    },
-    MuiTable: {
-      size: 'small',
-    },
-    MuiTextField: {
       margin: 'dense',
     },
   },
@@ -62,6 +50,13 @@ export default createMuiTheme({
         height: 11,
         width: 5,
         borderRadius: '15%'
+      }
+    },
+    MuiInput: {
+      underline: {
+        "&&&&:hover:before": {
+          borderBottom: "1px solid #fff"
+        }
       }
     },
     MuiPaper: {

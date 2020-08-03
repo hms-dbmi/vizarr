@@ -1,22 +1,24 @@
-import { AccordionDetails, Grid, Typography } from '@material-ui/core';
+import { AccordionDetails, Grid, Typography, Divider } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 
 import OpacitySlider from './OpacitySlider';
 import ChannelController from './ChannelController';
 
+import { range } from '../../utils';
+
 const Details = withStyles({
   root: {
-    padding: '0px 7px',
+    padding: '2px 5px',
+    borderLeft: '1px solid rgba(150, 150, 150, .2)',
+    borderRight: '1px solid rgba(150, 150, 150, .2)', 
   },
 })(AccordionDetails);
-
-const range = (len) => [...Array(len).keys()];
 
 function Content({ id, nChannels }) {
   return (
     <Details>
       <Grid container direction='column'>
-        <Grid item>
+        <Grid>
           <Grid container justify='space-between'>
             <Grid item xs={3}>
               <Typography variant='caption'>opacity:</Typography>
@@ -26,8 +28,9 @@ function Content({ id, nChannels }) {
             </Grid>
           </Grid>
         </Grid>
-        <Grid item>
-          {range(nChannels).map(i => <ChannelController id={id} index={i} key={i + id} />)}
+        <Divider/>
+        <Grid>
+          {range(nChannels).map(i => <ChannelController id={id} channelIndex={i} key={i + id} />)}
         </Grid>
       </Grid>
     </Details>

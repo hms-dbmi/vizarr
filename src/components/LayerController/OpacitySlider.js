@@ -11,7 +11,7 @@ const DenseSlider = withStyles({
     marginRight: '5px'
   },
   active: {
-    boxShadow: '0px 0px 0px 8px rgba(158, 158, 158, 0.16)'
+    boxshadow: '0px 0px 0px 8px rgba(158, 158, 158, 0.16)'
   }
 })(Slider);
 
@@ -26,7 +26,7 @@ function OpacitySlider({ id }) {
       value={layer[1].opacity}
       onChange={handleChange}
       min={0}
-      max={1} 
+      max={1}
       step={0.01}
     />
   )

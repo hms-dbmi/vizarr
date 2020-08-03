@@ -64,7 +64,7 @@ export async function createZarrLoader(store, dimensions) {
     const reader = await OMEZarrReader.fromStore(store);
     const { loader, metadata } = await reader.loadOMEZarr();
     // Contains rendering information if none provided
-    return { loader, metadata };
+    return loader;
   }
 
   // Get the dimensions from the store and open the array 
@@ -73,40 +73,54 @@ export async function createZarrLoader(store, dimensions) {
   const formatted_dims = dimensions.split('').map(field => ({ field }));
   const loader = new ZarrLoader({ data, dimensions: formatted_dims });
   // No metadata for non OME-Zarr
-  return { loader };
+  return loader;
 }
 
-export function channelsToVivProps(channels) {
+export function layersToVivProps(layers) {
   const sliderValues = [];
   const colorValues = []; 
   const channelIsOn = [];
   const loaderSelection = [];
-  for (let { color = [255, 255, 255], slider, selection, on = true } of channels) {
-    sliderValues.push(slider);
-    colorValues.push(color);
-    channelIsOn.push(on);
-    loaderSelection.push(selection);
-  }
-  return { sliderValues, colorValues, channelIsOn, loaderSelection };
+  const contrastLimits = [];
+  const labels = [];
+
+  layers.forEach((l, i) => {
+    sliderValues.push(l.contrast_limits)
+    contrastLimits.push(l.contrast_limits);
+    colorValues.push(l.color || [255, 255, 255]);
+    channelIsOn.push(l.on || true);
+    labels.push(l.label || `channel_${i}`);
+    loaderSelection.push(l.selection);
+  });
+
+  return { 
+    sliderValues,
+    colorValues,
+    channelIsOn,
+    loaderSelection,
+    contrastLimits,
+    labels,
+  };
 }
 
-export function OMEMetaToVivProps(omeMeta) {
-  const channels = [];
-  for (const [i, c] of omeMeta.channels.entries()) {
+export function OMEMetaToVivProps(imageData) {
+  const layers = [];
+  const { rdefs } = imageData;
+  for (const [i, c] of imageData.channels.entries()) {
     if (c.active) {
-      const channel = {
+      const selection = { c: i };
+      if (rdefs.defaultT) selection.t = rdefs.defaultT;
+      if (rdefs.defaultZ) selection.z = rdefs.defaultZ;
+      const layer = {
         color: hexToRGB(c.color),
-        slider: [c.window.start, c.window.end],
-        selection: {
-          c: i,
-          t: omeMeta.rdefs?.defaultT || 0,
-          z: omeMeta.rdefs?.defaultZ || 0,
-        }
+        contrast_limits: [c.window.start, c.window.end],
+        selection,
+        label: c.label,
       }
-      channels.push(channel);
+      layers.push(layer);
     }
   }
-  return channelsToVivProps(channels);
+  return layersToVivProps(layers);
 }
 
 function hexToRGB(hex) {
@@ -116,66 +130,17 @@ function hexToRGB(hex) {
   return [r, g, b];
 }
 
-async function isOMEZarr(store) {
+export async function isOMEZarr(store) {
   try {
-    const metadata = getJson(store, '.zattrs');
+    const metadata = await getJson(store, '.zattrs');
     if ('omero' in metadata) {
       return true;
     }
-  } finally {
+  } catch (e) {
     return false;
-  }    
+  }
 }
 
-export async function createSourceData({ 
-  source,
-  sourceNumber,
-  name,
-  dimensions,
-  channelDim = 'c',
-  layers = [],
-  colormap = null,
-  opacity = 1,
-}) {
-  let channels;
-  const store = normalizeStore(source);
-  if (await isOMEZarr(store)) {
-    const { imageData }= await OMEZarrReader.fromStore(store);
-    if (!name && 'name' in metadata) {
-      name = imageData.name;
-    }
-    channels = imageData.channels;
-  } else {
-    if (!dimensions) {
-      throw Error('Must supply dimensions if not OME-Zarr');
-    }
-
-    const channelAxis = dimensions.indexOf(channelDim);
-    if (channelAxis < 0) {
-      throw Error(`Channel dimension ${channelDim} not found in dimensions ${dimensions}`);
-    }
-    
-    if (await store.containsItem('.zgroup')) {
-      // Should support multiscale group but for now throw and only handle arrays.
-      throw Error('Source must be a zarr.Array if not OME-Zarr; found zarr.Group.');
-    }
-    const z = await openArray(store);
-    if (!(`<${z.dtype.slice(1)}` in DTYPE_VALUES)) {
-      throw Error('Dtype not supported, must be u1, u2, u4, or f4');
-    }
-
-  }
-
-  if (!name) name = `image_${sourceNumber}`; 
-  return {
-    source,
-    name,
-    channels,
-    dimensions,
-    renderSettings: {
-      layers,
-      colormap, 
-      opacity,
-    }
-  }
+export function range(len) {
+  return [...Array(len).keys()];
 }

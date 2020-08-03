@@ -10,6 +10,8 @@ export const DEFAULT_LAYER_PROPS = {
   channelIsOn: [],
   opacity: 1,
   colormap: '',
+  contrastLimits: [],
+  labels: [],
 };
 
 export const sourceInfoState = atom({

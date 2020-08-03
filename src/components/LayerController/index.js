@@ -5,7 +5,7 @@ import { withStyles } from '@material-ui/styles';
 import { StaticImageLayer, VivViewerLayer } from '@hms-dbmi/viv';
 
 import { sourceInfoState, layerStateFamily }from '../../state';
-import { createZarrLoader, channelsToVivProps, OMEMetaToVivProps } from '../../utils';
+import { createZarrLoader, layersToVivProps, OMEMetaToVivProps } from '../../utils';
 
 import Header from './Header';
 import Content from './Content';
@@ -14,7 +14,7 @@ const Accordion = withStyles({
   root: {
     borderBottom: '1px solid rgba(150, 150, 150, .2)',
     width: 200,
-    boxShadow: 'none',
+    boxshadow: 'none',
     '&:not(:last-child)': {
       borderBottom: 0,
     },
@@ -37,30 +37,30 @@ function LayerController({ id }) {
 
   useEffect(() => {
     async function initLayer({
-      source,
+      store,
+      imageData,
       dimensions,
-      channels,
-      colormap = '',
-      opacity = 1,
+      renderSettings,
       on = true,
     }) {
-      const { loader, metadata = null } = await createZarrLoader(source, dimensions);
+      const { layers = [], opacity, colormap } = renderSettings;
+
+      const loader = await createZarrLoader(store, dimensions);
       // Internal viv issue, this is a hack to get the appropriate WebGL textures.
       // Loader dtypes only have littleendian lookups, but all loaders return little endian
       // regardless of source.
       loader.dtype = '<' + loader.dtype.slice(1);
       // If there is metadata (from OME-Zarr) and no channels, parse the source info. Otherwise override.
-      const vivProps = metadata && !channels ?
-        OMEMetaToVivProps(metadata) :
-        channelsToVivProps(channels);
-
+      const vivProps = layers.length === 0 ? OMEMetaToVivProps(imageData) : layersToVivProps(layers);
       const Layer = loader.numLevels === 1 ? StaticImageLayer : VivViewerLayer;
       return [Layer, { id, on, loader, colormap, opacity, ...vivProps }];
     }
 
     if (id in sourceInfo) {
       const layerInfo = sourceInfo[id];
-      initLayer(layerInfo).then(l => setLayer(l));
+      if (layerInfo.store) {
+        initLayer(layerInfo).then(l => setLayer(l));
+      }
     }
 
   }, [sourceInfo])
