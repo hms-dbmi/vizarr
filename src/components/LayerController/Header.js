@@ -34,7 +34,7 @@ function Header({ id, name }) {
     >
       <div style={{ display: 'flex', flexDirection: 'row' }}>
         <LayerVisibilityButton id={id}/>
-        <Typography style={{ marginTop: '3px', marginLeft: '3px' }}>
+        <Typography style={{ marginTop: '4px', marginLeft: '3px' }}>
           {name}
         </Typography>
       </div>
