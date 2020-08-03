@@ -5,6 +5,7 @@ import LayerVisibilityButton from './LayerVisibilityButton';
 const DenseAccordionSummary = withStyles({
   root: {
     borderBottom: '1px solid rgba(150, 150, 150, .125)',
+    backgroundColor: 'rgba(150, 150, 150, 0.25)',
     display: 'block',
     padding: '0 3px',
     height: 27,

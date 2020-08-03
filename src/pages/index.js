@@ -4,6 +4,7 @@ import { useSetRecoilState } from 'recoil';
 import Viewer from '../components/Viewer'
 import Menu from '../components/Menu';
 import { layerIdsState, sourceInfoState, viewerViewState } from '../state';
+import { createSourceData } from '../utils';
 
 function App() {
   const setViewState = useSetRecoilState(viewerViewState);
@@ -15,20 +16,22 @@ function App() {
       // enable imjoy api when loaded as an iframe
       if (window.self !== window.top) {
         const { setupRPC } = await import('imjoy-rpc');
-        const api = await setupRPC({ name: "vitessce-image-viewer-plugin" });
+        const api = await setupRPC({ name: 'vitessce-image-viewer-plugin' });
 
         async function add_image({ 
-          source,
-          name,
-          channels,
-          dimensions,
-          colormap = null,
-          opacity = 1
+          source, 
+          name, 
+          channels, 
+          dimensions, 
+          colormap,
+          opacity
         }) { 
           const id = Math.random().toString(36).slice(2);
           setLayerIds(prevIds => [...prevIds, id]);
           setSourceInfo(prevSourceInfo => {
-            if (!name) name = `image_${Object.keys(prevSourceInfo).length}`;
+            const sourceNumber = Object.keys(prevSourceInfo).length;
+            // createSourceData({ source, sourceNumber, channels, dimensions, colormap, opacity })
+            name = 'image_0'
             return {
               ...prevSourceInfo,
               [id]: { source, name, channels, dimensions, colormap, opacity }
@@ -48,8 +51,8 @@ function App() {
 
   return (
     <>
-      <Menu/>
-      <Viewer/>
+      <Menu />
+      <Viewer />
     </>
   );
 }

@@ -59,14 +59,14 @@ export default createMuiTheme({
         '&:focus, &:hover':{
           boxShadow: 'none',
         },
-        height: 12,
+        height: 11,
         width: 5,
-        borderRadius: '20%'
+        borderRadius: '15%'
       }
     },
     MuiPaper: {
       root: {
-        backgroundColor: 'rgba(50, 50, 50, 0.8)'
+        backgroundColor: 'rgba(0, 0, 0, 0.8)'
       }
     },
     MuiSvgIcon: {

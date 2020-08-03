@@ -1,5 +1,5 @@
 import { openArray, HTTPStore } from 'zarr';
-import { ZarrLoader } from '@hms-dbmi/viv';
+import { ZarrLoader, DTYPE_VALUES } from '@hms-dbmi/viv';
 
 async function getJson(store, key) {
   const bytes = new Uint8Array(await store.getItem(key));
@@ -51,11 +51,14 @@ export class OMEZarrReader {
   }
 }
 
-export async function createZarrLoader(store, dimensions) {
+export function normalizeStore(store) {
   if (typeof store === 'string') {
-    store = new HTTPStore(store);
+    return new HTTPStore(store);
   }
+  return store
+}
 
+export async function createZarrLoader(store, dimensions) {
   // If group, check if OME-Zarr
   if (await store.containsItem('.zgroup')) {
     const reader = await OMEZarrReader.fromStore(store);
@@ -111,4 +114,68 @@ function hexToRGB(hex) {
   const g = parseInt(hex.slice(2, 4), 16);
   const b = parseInt(hex.slice(4, 6), 16);
   return [r, g, b];
+}
+
+async function isOMEZarr(store) {
+  try {
+    const metadata = getJson(store, '.zattrs');
+    if ('omero' in metadata) {
+      return true;
+    }
+  } finally {
+    return false;
+  }    
+}
+
+export async function createSourceData({ 
+  source,
+  sourceNumber,
+  name,
+  dimensions,
+  channelDim = 'c',
+  layers = [],
+  colormap = null,
+  opacity = 1,
+}) {
+  let channels;
+  const store = normalizeStore(source);
+  if (await isOMEZarr(store)) {
+    const { imageData }= await OMEZarrReader.fromStore(store);
+    if (!name && 'name' in metadata) {
+      name = imageData.name;
+    }
+    channels = imageData.channels;
+  } else {
+    if (!dimensions) {
+      throw Error('Must supply dimensions if not OME-Zarr');
+    }
+
+    const channelAxis = dimensions.indexOf(channelDim);
+    if (channelAxis < 0) {
+      throw Error(`Channel dimension ${channelDim} not found in dimensions ${dimensions}`);
+    }
+    
+    if (await store.containsItem('.zgroup')) {
+      // Should support multiscale group but for now throw and only handle arrays.
+      throw Error('Source must be a zarr.Array if not OME-Zarr; found zarr.Group.');
+    }
+    const z = await openArray(store);
+    if (!(`<${z.dtype.slice(1)}` in DTYPE_VALUES)) {
+      throw Error('Dtype not supported, must be u1, u2, u4, or f4');
+    }
+
+  }
+
+  if (!name) name = `image_${sourceNumber}`; 
+  return {
+    source,
+    name,
+    channels,
+    dimensions,
+    renderSettings: {
+      layers,
+      colormap, 
+      opacity,
+    }
+  }
 }

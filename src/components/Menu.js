@@ -14,17 +14,20 @@ function Menu() {
       style={{ 
         zIndex: 1, 
         position: 'absolute', 
-        backgroundColor: 'rgba(50, 50, 50, 0.7)',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
         borderRadius: '5px',
         padding: `0px 5px ${hidden ? 0 : 5}px 5px`,
-        right: '5px',
+        left: '5px',
         top: '5px',
+        maxHeight: 500,
+        overflowX: 'hidden',
+        overflowY: 'scroll'
       }}
     >
       <Grid 
         container 
         direction="column" 
-        alignItems="flex-end"
+        alignItems="flex-start"
       >
         <IconButton 
           style={{ 
@@ -35,7 +38,13 @@ function Menu() {
         >
           {hidden ? <Add /> : <Remove />}
         </IconButton>
-        <Grid container direction="column" style={{ display: hidden ? 'none' : 'flex' }}>
+        <Grid 
+          container
+          direction="column"
+          style={{ 
+            display: hidden ? 'none' : 'flex', 
+          }}
+        > 
           {layerIds.map(id => <LayerController id={id} key={id} />)}
         </Grid>
       </Grid>
