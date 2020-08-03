@@ -5,6 +5,7 @@ import LayerVisibilityButton from './LayerVisibilityButton';
 const DenseAccordionSummary = withStyles({
   root: {
     borderBottom: '1px solid rgba(0, 0, 0, .125)',
+    display: 'block',
     padding: '0 3px',
     height: 30,
     minHeight: 30,
@@ -31,21 +32,12 @@ function Header({ id, name }) {
       id={label}
       disableRipple
     >
-      <Grid 
-         container
-         direction='row'
-         alignItems='center'
-         alignContent='flex-start'
-      >
-        <Grid item xs={2}>
-          <LayerVisibilityButton id={id}/>
-        </Grid>
-        <Grid item xs={7}>
-          <Typography style={{ marginTop: '1px', marginLeft: '-2px' }}>
-            {name}
-          </Typography>
-        </Grid>
-      </Grid>
+      <div style={{ display: 'flex', flexDirection: 'row' }}>
+        <LayerVisibilityButton id={id}/>
+        <Typography style={{ marginTop: '3px', marginLeft: '3px' }}>
+          {name}
+        </Typography>
+      </div>
     </DenseAccordionSummary>
   );
 }

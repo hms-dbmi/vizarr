@@ -9,10 +9,11 @@ function Menu() {
   const layerIds = useRecoilValue(layerIdsState);
   const [hidden, toggle] = useReducer(v => !v, false);
   return (
-    <div style={{ zIndex: 2, maxWidth: 200, position: 'absolute'}}>
+    <div style={{ zIndex: 1, position: 'absolute'}}>
       <Grid 
         container 
         direction="column" 
+        alignItems="flex-start"
       >
         {layerIds.map(id => <LayerController id={id} key={id} />)}
       </Grid>

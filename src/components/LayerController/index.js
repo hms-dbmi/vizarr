@@ -13,6 +13,7 @@ import Content from './Content';
 const Accordion = withStyles({
   root: {
     border: '1px solid rgba(0, 0, 0, .125)',
+    width: 200,
     boxShadow: 'none',
     '&:not(:last-child)': {
       borderBottom: 0,
