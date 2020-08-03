@@ -12,7 +12,7 @@ import Content from './Content';
 
 const Accordion = withStyles({
   root: {
-    border: '1px solid rgba(0, 0, 0, .125)',
+    borderBottom: '1px solid rgba(150, 150, 150, .2)',
     width: 200,
     boxShadow: 'none',
     '&:not(:last-child)': {
@@ -26,7 +26,9 @@ const Accordion = withStyles({
       padding: 0,
     },
   },
-  expanded: {},
+  expanded: {
+    padding: 1
+  },
 })(MuiAccordion);
 
 function LayerController({ id }) {

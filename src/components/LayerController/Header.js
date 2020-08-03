@@ -4,15 +4,15 @@ import LayerVisibilityButton from './LayerVisibilityButton';
 
 const DenseAccordionSummary = withStyles({
   root: {
-    borderBottom: '1px solid rgba(0, 0, 0, .125)',
+    borderBottom: '1px solid rgba(150, 150, 150, .125)',
     display: 'block',
     padding: '0 3px',
-    height: 30,
-    minHeight: 30,
+    height: 27,
+    minHeight: 27,
     overflow: 'hidden',
     transition: 'none',
     '&$expanded': {
-      minHeight: 30,
+      minHeight: 27,
     },
   },
   content: {
@@ -30,11 +30,16 @@ function Header({ id, name }) {
     <DenseAccordionSummary
       aria-controls={label}
       id={label}
-      disableRipple
     >
       <div style={{ display: 'flex', flexDirection: 'row' }}>
         <LayerVisibilityButton id={id}/>
-        <Typography style={{ marginTop: '4px', marginLeft: '3px' }}>
+        <Typography 
+          style={{ 
+            marginTop: '4px', 
+            marginLeft: '5px'
+          }}
+          variant="body2"
+        >
           {name}
         </Typography>
       </div>

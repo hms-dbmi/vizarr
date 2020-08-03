@@ -7,6 +7,8 @@ import { layerStateFamily }from '../../state';
 const DenseSlider = withStyles({
   root: {
     color: 'white',
+    padding: '10px 0px 5px 0px',
+    marginRight: '5px'
   },
   active: {
     boxShadow: '0px 0px 0px 8px rgba(158, 158, 158, 0.16)'

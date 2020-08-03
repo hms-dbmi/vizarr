@@ -26,12 +26,18 @@ function Menu() {
         direction="column" 
         alignItems="flex-end"
       >
-        <IconButton style={{ backgroundColor: 'transparent' }} onClick={toggle}>
+        <IconButton 
+          style={{ 
+            backgroundColor: 'transparent',
+            padding: 0,
+          }} 
+          onClick={toggle}
+        >
           {hidden ? <Add /> : <Remove />}
         </IconButton>
-        <div style={{ display: hidden ? 'none' : 'flex', direction: 'column'}}>
+        <Grid container direction="column" style={{ display: hidden ? 'none' : 'flex' }}>
           {layerIds.map(id => <LayerController id={id} key={id} />)}
-        </div>
+        </Grid>
       </Grid>
     </div>
   ) 

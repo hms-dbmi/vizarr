@@ -58,13 +58,22 @@ export default createMuiTheme({
       thumb: {
         '&:focus, &:hover':{
           boxShadow: 'none',
-        }
+        },
+        height: 12,
+        width: 5,
+        borderRadius: '20%'
       }
     },
     MuiPaper: {
       root: {
         backgroundColor: 'rgba(50, 50, 50, 0.8)'
       }
-    }
+    },
+    MuiSvgIcon: {
+      root: {
+        width: '0.7em',
+        height: '0.7em',
+      }
+    },
   },
 });
