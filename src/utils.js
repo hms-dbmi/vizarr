@@ -1,5 +1,5 @@
 import { openArray, HTTPStore } from 'zarr';
-import { ZarrLoader, DTYPE_VALUES } from '@hms-dbmi/viv';
+import { ZarrLoader } from '@hms-dbmi/viv';
 
 async function getJson(store, key) {
   const bytes = new Uint8Array(await store.getItem(key));
@@ -87,7 +87,7 @@ export function layersToVivProps(layers) {
   layers.forEach((l, i) => {
     sliderValues.push(l.contrast_limits)
     contrastLimits.push(l.contrast_limits);
-    colorValues.push(l.color || [255, 255, 255]);
+    colorValues.push(hexToRGB(l.color || '#FFFFFF'));
     channelIsOn.push(l.on || true);
     labels.push(l.label || `channel_${i}`);
     loaderSelection.push(l.selection);
@@ -112,7 +112,7 @@ export function OMEMetaToVivProps(imageData) {
       if (rdefs.defaultT) selection.t = rdefs.defaultT;
       if (rdefs.defaultZ) selection.z = rdefs.defaultZ;
       const layer = {
-        color: hexToRGB(c.color),
+        color: c.color,
         contrast_limits: [c.window.start, c.window.end],
         selection,
         label: c.label,
@@ -124,6 +124,8 @@ export function OMEMetaToVivProps(imageData) {
 }
 
 function hexToRGB(hex) {
+  console.log(hex)
+  if (hex.startsWith('#')) hex = hex.slice(1);
   const r = parseInt(hex.slice(0, 2), 16);
   const g = parseInt(hex.slice(2, 4), 16);
   const b = parseInt(hex.slice(4, 6), 16);
@@ -131,14 +133,14 @@ function hexToRGB(hex) {
 }
 
 export async function isOMEZarr(store) {
-  try {
+  if (await store.containsItem('.zattrs')) {
+    console.log(store);
     const metadata = await getJson(store, '.zattrs');
     if ('omero' in metadata) {
       return true;
     }
-  } catch (e) {
-    return false;
   }
+  return false;
 }
 
 export function range(len) {
