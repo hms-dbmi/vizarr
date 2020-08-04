@@ -19,5 +19,11 @@
     "build": "next build",
     "start": "next start",
     "export": "next build && next export"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "printWidth": 120,
+    "semi": true,
+    "singleQuote": true
   }
 }

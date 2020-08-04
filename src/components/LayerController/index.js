@@ -4,7 +4,7 @@ import MuiAccordion from '@material-ui/core/Accordion';
 import { withStyles } from '@material-ui/styles';
 import { StaticImageLayer, VivViewerLayer } from '@hms-dbmi/viv';
 
-import { sourceInfoState, layerStateFamily }from '../../state';
+import { sourceInfoState, layerStateFamily } from '../../state';
 import { createZarrLoader, layersToVivProps, OMEMetaToVivProps } from '../../utils';
 
 import Header from './Header';
@@ -27,7 +27,7 @@ const Accordion = withStyles({
     },
   },
   expanded: {
-    padding: 1
+    padding: 1,
   },
 })(MuiAccordion);
 
@@ -36,13 +36,7 @@ function LayerController({ id }) {
   const [layer, setLayer] = useRecoilState(layerStateFamily(id));
 
   useEffect(() => {
-    async function initLayer({
-      store,
-      imageData,
-      dimensions,
-      renderSettings,
-      on = true,
-    }) {
+    async function initLayer({ store, imageData, dimensions, renderSettings, on = true }) {
       const { layers = [], opacity, colormap } = renderSettings;
 
       const loader = await createZarrLoader(store, dimensions);
@@ -59,11 +53,10 @@ function LayerController({ id }) {
     if (id in sourceInfo) {
       const layerInfo = sourceInfo[id];
       if (layerInfo.store) {
-        initLayer(layerInfo).then(l => setLayer(l));
+        initLayer(layerInfo).then((l) => setLayer(l));
       }
     }
-
-  }, [sourceInfo])
+  }, [sourceInfo]);
 
   // If layer hasn't been initialized, don't render control.
   const layerProps = layer[1];
@@ -73,7 +66,7 @@ function LayerController({ id }) {
   return (
     <Accordion>
       <Header id={id} name={name} />
-      <Content id={id} nChannels={layerProps.loaderSelection.length}/>
+      <Content id={id} nChannels={layerProps.loaderSelection.length} />
     </Accordion>
   );
 }

@@ -15,13 +15,13 @@ const DenseInput = withStyles({
   underline: {
     '&:before': {
       transition: 'none',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.7)'
+      borderBottom: '1px solid rgba(255, 255, 255, 0.7)',
     },
     '&:after': {
       transition: 'none',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.7)'
+      borderBottom: '1px solid rgba(255, 255, 255, 0.7)',
     },
-  }
+  },
 })(Input);
 
 function ChannelOptions({ layerId, channelIndex }) {
@@ -40,14 +40,14 @@ function ChannelOptions({ layerId, channelIndex }) {
     setLayer(([prevLayer, prevProps]) => {
       const colorValues = [...prevProps.colorValues];
       colorValues[channelIndex] = rgb;
-      return [prevLayer, {...prevProps, colorValues }];
+      return [prevLayer, { ...prevProps, colorValues }];
     });
-  }
+  };
 
   const handleContrastLimitChange = (e) => {
     const targetId = e.target.id;
     let value = +e.target.value;
-    
+
     // Only let positive values
     if (value < 0) value = 0;
 
@@ -69,68 +69,56 @@ function ChannelOptions({ layerId, channelIndex }) {
       // Update channel constrast limits
       contrastLimits[channelIndex] = [umin, umax];
 
-      return [prevLayer, {...prevProps, contrastLimits, sliderValues }];
+      return [prevLayer, { ...prevProps, contrastLimits, sliderValues }];
     });
-  }
+  };
 
   const open = Boolean(anchorEl);
   const id = open ? `channel-${channelIndex}-${layerId}-options` : undefined;
   const [min, max] = layer[1].contrastLimits[channelIndex];
   return (
     <>
-    <IconButton
-      onClick={handleClick}
-      aria-describedby={id}
-      style={{ 
-        backgroundColor: 'transparent',
-        padding: 0,
-        zIndex: 2,
-        pointer: 'cursor'
-      }} 
-    >
-      <MoreHoriz />
-    </IconButton> 
-    <Popover
-      id={id}
-      open={open}
-      anchorEl={anchorEl}
-      onClose={handleClose}
-      onMouseLeave={handleClose}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'left',
-      }}
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'left',
-      }}
-    >
-      <Paper style={{ padding: "0px 4px", marginBotton: 4 }}>
-        <Typography variant="caption">color:</Typography>
-        <Divider />
-        <div style={{ display: 'flex', justifyContent: 'center'}}>
-          <ColorPalette handleChange={handleColorChange}/>
-        </div>
-        <Divider />
-        <Typography variant="caption">contrast limits:</Typography>
-        <Divider />
-        <DenseInput
-          value={min}
-          onChange={handleContrastLimitChange}
-          type="number"
-          id="min"
-          fullWidth={false}
-        />
-        <Divider />
-        <DenseInput
-          value={max}
-          onChange={handleContrastLimitChange}
-          type="number"
-          id="max"
-          fullWidth={false}
-        />
-      </Paper>
-    </Popover>
+      <IconButton
+        onClick={handleClick}
+        aria-describedby={id}
+        style={{
+          backgroundColor: 'transparent',
+          padding: 0,
+          zIndex: 2,
+          pointer: 'cursor',
+        }}
+      >
+        <MoreHoriz />
+      </IconButton>
+      <Popover
+        id={id}
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        onMouseLeave={handleClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+      >
+        <Paper style={{ padding: '0px 4px', marginBotton: 4 }}>
+          <Typography variant="caption">color:</Typography>
+          <Divider />
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <ColorPalette handleChange={handleColorChange} />
+          </div>
+          <Divider />
+          <Typography variant="caption">contrast limits:</Typography>
+          <Divider />
+          <DenseInput value={min} onChange={handleContrastLimitChange} type="number" id="min" fullWidth={false} />
+          <Divider />
+          <DenseInput value={max} onChange={handleContrastLimitChange} type="number" id="max" fullWidth={false} />
+        </Paper>
+      </Popover>
     </>
   );
 }

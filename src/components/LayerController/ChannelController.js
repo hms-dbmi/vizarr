@@ -11,16 +11,16 @@ function ChannelController({ id, channelIndex }) {
     setLayer(([prevLayer, prevProps]) => {
       const sliderValues = [...prevProps.sliderValues];
       sliderValues[channelIndex] = v;
-      return [prevLayer, {...prevProps, sliderValues }];
+      return [prevLayer, { ...prevProps, sliderValues }];
     });
-  }
+  };
   const handleVisibilityChange = () => {
     setLayer(([prevLayer, prevProps]) => {
       const channelIsOn = [...prevProps.channelIsOn];
       channelIsOn[channelIndex] = !channelIsOn[channelIndex];
-      return [prevLayer, {...prevProps, channelIsOn }];
+      return [prevLayer, { ...prevProps, channelIsOn }];
     });
-  }
+  };
   // Material slider tries to sort in place. Need to copy.
   const layerProps = layer[1];
   const value = [...layerProps.sliderValues[channelIndex]];
@@ -31,9 +31,9 @@ function ChannelController({ id, channelIndex }) {
   const label = layerProps.labels?.[channelIndex];
   return (
     <>
-      <Grid container justify='space-between' wrap="nowrap">
+      <Grid container justify="space-between" wrap="nowrap">
         <Grid item xs={8} zeroMinWidth>
-          <Typography variant='caption' noWrap>
+          <Typography variant="caption" noWrap>
             {label}
           </Typography>
         </Grid>
@@ -41,19 +41,19 @@ function ChannelController({ id, channelIndex }) {
           <ChannelOptions layerId={id} channelIndex={channelIndex} />
         </Grid>
       </Grid>
-      <Grid container justify='space-between'>
+      <Grid container justify="space-between">
         <Grid item xs={2}>
           <IconButton
-            style={{ 
+            style={{
               color,
               backgroundColor: 'transparent',
               padding: 0,
               zIndex: 2,
-            }} 
+            }}
             onClick={handleVisibilityChange}
           >
-          {on ? <RadioButtonChecked /> : <RadioButtonUnchecked />}
-        </IconButton>
+            {on ? <RadioButtonChecked /> : <RadioButtonUnchecked />}
+          </IconButton>
         </Grid>
         <Grid item xs={10}>
           <Slider
@@ -62,9 +62,9 @@ function ChannelController({ id, channelIndex }) {
             min={min}
             max={max}
             step={0.01}
-            style={{ 
+            style={{
               padding: '10px 0px 5px 0px',
-              color
+              color,
             }}
           />
         </Grid>

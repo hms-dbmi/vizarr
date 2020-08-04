@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSetRecoilState } from 'recoil';
 
-import Viewer from '../components/Viewer'
+import Viewer from '../components/Viewer';
 import Menu from '../components/Menu';
 import { layerIdsState, sourceInfoState, viewerViewState } from '../state';
 
@@ -9,7 +9,7 @@ import { openArray } from 'zarr';
 import { DTYPE_VALUES } from '@hms-dbmi/viv';
 import { normalizeStore, OMEZarrReader, isOMEZarr, range } from '../utils';
 
-async function createSourceData({ 
+async function createSourceData({
   source,
   name,
   dimensions,
@@ -23,15 +23,12 @@ async function createSourceData({
   const store = normalizeStore(source);
 
   if (await isOMEZarr(store)) {
-
     const reader = await OMEZarrReader.fromStore(store);
     if (!name && 'name' in reader.imageData) {
       name = reader.imageData.name;
     }
     imageData = reader.imageData;
-
   } else {
-
     if (!dimensions) {
       throw Error('Must supply dimensions if not OME-Zarr');
     }
@@ -40,14 +37,14 @@ async function createSourceData({
     if (channelAxis < 0) {
       throw Error(`Channel dimension ${channelDim} not found in dimensions ${dimensions}`);
     }
-    
+
     if (await store.containsItem('.zgroup')) {
       // Should support multiscale group but for now throw and only handle arrays.
       throw Error('Source must be a zarr.Array if not OME-Zarr; found zarr.Group.');
     }
 
     const z = await openArray({ store });
-    
+
     // Internal to how viv (doesn't) handle endianness;
     // https://github.com/hubmapconsortium/vitessce-image-viewer/issues/203
     const dtype = `<${z.dtype.slice(1)}`;
@@ -55,22 +52,22 @@ async function createSourceData({
       throw Error('Dtype not supported, must be u1, u2, u4, or f4');
     }
 
-    const channels = range(z.shape[channelAxis]).map(i => {
+    const channels = range(z.shape[channelAxis]).map((i) => {
       return {
         active: true,
         color: 'FFFFFF',
         label: `channel_${i}`,
         window: {
           start: 0,
-          end: dtype === "<f4" ? 1 : DTYPE_VALUES[dtype].max,
-        }
-      }
+          end: dtype === '<f4' ? 1 : DTYPE_VALUES[dtype].max,
+        },
+      };
     });
 
-    imageData = { 
+    imageData = {
       channels,
-      rdefs: { 
-        model: 'color'
+      rdefs: {
+        model: 'color',
       },
     };
   }
@@ -82,10 +79,10 @@ async function createSourceData({
     dimensions,
     renderSettings: {
       layers,
-      colormap, 
+      colormap,
       opacity,
-    }
-  }
+    },
+  };
 }
 
 function App() {
@@ -98,13 +95,15 @@ function App() {
       // enable imjoy api when loaded as an iframe
       if (window.self !== window.top) {
         const { setupRPC } = await import('imjoy-rpc');
-        const api = await setupRPC({ name: 'vitessce-image-viewer-plugin' });
+        const api = await setupRPC({
+          name: 'vitessce-image-viewer-plugin',
+        });
 
-        async function add_image(props) { 
+        async function add_image(props) {
           const id = Math.random().toString(36).slice(2);
           const sourceData = await createSourceData(props);
-          setLayerIds(prevIds => [...prevIds, id]);
-          setSourceInfo(prevSourceInfo => {
+          setLayerIds((prevIds) => [...prevIds, id]);
+          setSourceInfo((prevSourceInfo) => {
             if (!sourceData.name) sourceData.name = `image_${Object.keys(prevSourceInfo).length}`;
             return { ...prevSourceInfo, [id]: sourceData };
           });
@@ -118,7 +117,7 @@ function App() {
       }
     }
     init();
-  }, []); 
+  }, []);
 
   return (
     <>

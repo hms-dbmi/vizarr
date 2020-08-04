@@ -5,7 +5,7 @@ export default createMuiTheme({
   palette: {
     type: 'dark',
     primary: grey,
-    secondary: grey, 
+    secondary: grey,
   },
   props: {
     MuiButton: {
@@ -39,36 +39,36 @@ export default createMuiTheme({
   overrides: {
     MuiAccordianSummary: {
       root: {
-        height: '5px'
+        height: '5px',
       },
     },
-    MuiSlider:{
+    MuiSlider: {
       thumb: {
-        '&:focus, &:hover':{
+        '&:focus, &:hover': {
           boxShadow: 'none',
         },
         height: 11,
         width: 5,
-        borderRadius: '15%'
-      }
+        borderRadius: '15%',
+      },
     },
     MuiInput: {
       underline: {
-        "&&&&:hover:before": {
-          borderBottom: "1px solid #fff"
-        }
-      }
+        '&&&&:hover:before': {
+          borderBottom: '1px solid #fff',
+        },
+      },
     },
     MuiPaper: {
       root: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)'
-      }
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      },
     },
     MuiSvgIcon: {
       root: {
         width: '0.7em',
         height: '0.7em',
-      }
+      },
     },
   },
 });

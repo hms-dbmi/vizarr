@@ -17,7 +17,7 @@ export class OMEZarrReader {
     }
     this.imageData = rootAttrs.omero;
   }
-  
+
   static async fromStore(store) {
     const rootAttrs = await getJson(store, '.zattrs');
     return new OMEZarrReader(store, rootAttrs);
@@ -27,19 +27,19 @@ export class OMEZarrReader {
     let resolutions = ['0']; // TODO: could be first alphanumeric dataset on err
     if ('multiscales' in this.rootAttrs) {
       const { datasets } = this.rootAttrs.multiscales[0];
-      resolutions = datasets.map(d => d.path);
+      resolutions = datasets.map((d) => d.path);
     }
-    const promises = resolutions.map(r =>
-      openArray({ store: this.zarrStore, path: r })
-    );
+    const promises = resolutions.map((r) => openArray({ store: this.zarrStore, path: r }));
     const pyramid = await Promise.all(promises);
-    const dimensions = ['t', 'c', 'z', 'y', 'x'].map(field => ({ field }));
+    const dimensions = ['t', 'c', 'z', 'y', 'x'].map((field) => ({
+      field,
+    }));
 
     // TODO: There should be a much better way to do this.
-    // If base image is small, we don't need to fetch data for the 
+    // If base image is small, we don't need to fetch data for the
     // top levels of the pyramid. For large images, the tile sizes (chunks)
     // will be the same size for x/y. We check the chunksize here for this edge case.
-    
+
     const { chunks } = pyramid[0];
     const shouldUseBase = chunks[4] !== chunks[3];
 
@@ -55,7 +55,7 @@ export function normalizeStore(store) {
   if (typeof store === 'string') {
     return new HTTPStore(store);
   }
-  return store
+  return store;
 }
 
 export async function createZarrLoader(store, dimensions) {
@@ -67,10 +67,10 @@ export async function createZarrLoader(store, dimensions) {
     return loader;
   }
 
-  // Get the dimensions from the store and open the array 
+  // Get the dimensions from the store and open the array
   const data = await openArray({ store });
   // Hack right now, provide dimensions manually for array
-  const formatted_dims = dimensions.split('').map(field => ({ field }));
+  const formatted_dims = dimensions.split('').map((field) => ({ field }));
   const loader = new ZarrLoader({ data, dimensions: formatted_dims });
   // No metadata for non OME-Zarr
   return loader;
@@ -78,14 +78,14 @@ export async function createZarrLoader(store, dimensions) {
 
 export function layersToVivProps(layers) {
   const sliderValues = [];
-  const colorValues = []; 
+  const colorValues = [];
   const channelIsOn = [];
   const loaderSelection = [];
   const contrastLimits = [];
   const labels = [];
 
   layers.forEach((l, i) => {
-    sliderValues.push(l.contrast_limits)
+    sliderValues.push(l.contrast_limits);
     contrastLimits.push(l.contrast_limits);
     colorValues.push(hexToRGB(l.color || '#FFFFFF'));
     channelIsOn.push(l.on || true);
@@ -93,7 +93,7 @@ export function layersToVivProps(layers) {
     loaderSelection.push(l.selection);
   });
 
-  return { 
+  return {
     sliderValues,
     colorValues,
     channelIsOn,
@@ -116,7 +116,7 @@ export function OMEMetaToVivProps(imageData) {
         contrast_limits: [c.window.start, c.window.end],
         selection,
         label: c.label,
-      }
+      };
       layers.push(layer);
     }
   }

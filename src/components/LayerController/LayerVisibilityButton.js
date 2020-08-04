@@ -10,21 +10,21 @@ function LayerVisibilityButton({ id }) {
     e.stopPropagation();
     setLayer(([prevLayer, prevProps]) => {
       const on = !prevProps.on;
-      return [prevLayer, {...prevProps, on }];
+      return [prevLayer, { ...prevProps, on }];
     });
-  }
+  };
   const { on } = layer[1];
   return (
-    <IconButton 
+    <IconButton
       aria-label={`toggle-layer-visibility-${id}`}
       onClick={toggle}
-      style={{ 
+      style={{
         backgroundColor: 'transparent',
         marginTop: '2px',
         color: `rgb(255, 255, 255, ${on ? 1 : 0.5})`,
       }}
     >
-      {on ? <Visibility /> : <VisibilityOff/>}
+      {on ? <Visibility /> : <VisibilityOff />}
     </IconButton>
   );
 }

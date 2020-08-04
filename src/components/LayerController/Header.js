@@ -28,16 +28,13 @@ const DenseAccordionSummary = withStyles({
 function Header({ id, name }) {
   const label = `layer-controller-${id}`;
   return (
-    <DenseAccordionSummary
-      aria-controls={label}
-      id={label}
-    >
+    <DenseAccordionSummary aria-controls={label} id={label}>
       <div style={{ display: 'flex', flexDirection: 'row' }}>
-        <LayerVisibilityButton id={id}/>
-        <Typography 
-          style={{ 
-            marginTop: '4px', 
-            marginLeft: '5px'
+        <LayerVisibilityButton id={id} />
+        <Typography
+          style={{
+            marginTop: '4px',
+            marginLeft: '5px',
           }}
           variant="body2"
         >

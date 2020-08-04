@@ -10,7 +10,7 @@ export const COLOR_PALLETE = [
   [255, 128, 0],
   [0, 255, 255],
   [255, 255, 255],
-  [255, 0, 0]
+  [255, 0, 0],
 ];
 
 const useStyles = makeStyles(() => ({
@@ -20,12 +20,12 @@ const useStyles = makeStyles(() => ({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
   },
   button: {
     padding: '3px',
     width: '16px',
-    height: '16px'
+    height: '16px',
   },
 }));
 
@@ -33,18 +33,10 @@ const ColorPalette = ({ handleChange }) => {
   const classes = useStyles();
   return (
     <div className={classes.container} aria-label="color-swatch">
-      {COLOR_PALLETE.map(color => {
+      {COLOR_PALLETE.map((color) => {
         return (
-          <IconButton
-            className={classes.button}
-            key={color}
-            onClick={() => handleChange(color)}
-          >
-            <Lens
-              fontSize="small"
-              style={{ color: `rgb(${color})` }}
-              className={classes.icon}
-            />
+          <IconButton className={classes.button} key={color} onClick={() => handleChange(color)}>
+            <Lens fontSize="small" style={{ color: `rgb(${color})` }} className={classes.icon} />
           </IconButton>
         );
       })}
