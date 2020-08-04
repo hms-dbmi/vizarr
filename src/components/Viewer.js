@@ -16,12 +16,12 @@ function WrappedViewStateDeck({ layers }) {
     const target = [width / 2, height / 2, 0];
     setViewState({ zoom, target });
   }
-  
+
   return (
     <DeckGL
       layers={layers}
       viewState={viewState}
-      onViewStateChange={e => setViewState(e.viewState)}
+      onViewStateChange={(e) => setViewState(e.viewState)}
       views={new OrthographicView({ id: 'ortho', controller: true })}
     />
   );
@@ -33,9 +33,7 @@ function Viewer() {
     // Optimization: disables data fetching for hidden layers
     return !props.on ? null : new Layer(props);
   });
-  return (
-    <WrappedViewStateDeck layers={layers}/>
-  );
+  return <WrappedViewStateDeck layers={layers} />;
 }
 
 export default Viewer;

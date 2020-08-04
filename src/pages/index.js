@@ -1,55 +1,56 @@
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { useSetRecoilState } from 'recoil';
 
-import Viewer from '../components/Viewer'
-import Menu from '../components/Menu';
 import { layerIdsState, sourceInfoState, viewerViewState } from '../state';
+import { createSourceData } from '../utils';
+
+const Viewer = dynamic(() => import('../components/Viewer'));
+const Menu = dynamic(() => import('../components/Menu'));
 
 function App() {
+  const router = useRouter();
   const setViewState = useSetRecoilState(viewerViewState);
   const setLayerIds = useSetRecoilState(layerIdsState);
   const setSourceInfo = useSetRecoilState(sourceInfoState);
 
-  useEffect(() => {
-    async function init() {
-      // enable imjoy api when loaded as an iframe
-      if (window.self !== window.top) {
-        const { setupRPC } = await import('imjoy-rpc');
-        const api = await setupRPC({ name: "vitessce-image-viewer-plugin" });
-
-        async function add_image({ 
-          source,
-          name,
-          channels,
-          dimensions,
-          colormap = null,
-          opacity = 1
-        }) { 
-          const id = Math.random().toString(36).slice(2);
-          setLayerIds(prevIds => [...prevIds, id]);
-          setSourceInfo(prevSourceInfo => {
-            if (!name) name = `image_${Object.keys(prevSourceInfo).length}`;
-            return {
-              ...prevSourceInfo,
-              [id]: { source, name, channels, dimensions, colormap, opacity }
-            }
-          });
-        }
-
-        async function set_view_state(nextViewState) {
-          setViewState(nextViewState);
-        }
-
-        api.export({ add_image, set_view_state });
+  async function addImage(props) {
+    const id = Math.random().toString(36).slice(2);
+    const sourceData = await createSourceData(props);
+    setLayerIds((prevIds) => [...prevIds, id]);
+    setSourceInfo((prevSourceInfo) => {
+      if (!sourceData.name) {
+        sourceData.name = `image_${Object.keys(prevSourceInfo).length}`;
       }
+      return { ...prevSourceInfo, [id]: sourceData };
+    });
+  }
+
+  useEffect(() => {
+    if ('source' in router.query) {
+      addImage({ source: router.query.source });
     }
-    init();
-  }, []); 
+  }, [router]);
+
+  useEffect(() => {
+    async function initImjoy() {
+      const { setupRPC } = await import('imjoy-rpc');
+      const api = await setupRPC({ name: 'viv-plugin' });
+      const add_image = async (props) => addImage(props);
+      const set_view_state = async (vs) => setViewState(vs);
+      api.export({ add_image, set_view_state });
+    }
+    // enable imjoy api when loaded as an iframe
+    if (window.self !== window.top) {
+      initImjoy();
+    }
+  }, []);
 
   return (
     <>
-      <Menu/>
-      <Viewer/>
+      <Menu />
+      <Viewer />
     </>
   );
 }

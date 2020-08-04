@@ -4,14 +4,14 @@
   "private": true,
   "dependencies": {
     "@hubmap/vitessce-image-viewer": "^0.3.2",
+    "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.9.1",
     "deck.gl": "^8.2.4",
     "imjoy-rpc": "^0.2.19",
     "next": "^9.5.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "recoil": "0.0.10",
-    "styled-components": "^5.1.1",
-    "styled-icons": "^10.13.0",
     "zarr": "^0.3.0"
   },
   "scripts": {
@@ -19,5 +19,11 @@
     "build": "next build",
     "start": "next start",
     "export": "next build && next export"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "printWidth": 120,
+    "semi": true,
+    "singleQuote": true
   }
 }
