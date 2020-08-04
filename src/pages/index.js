@@ -16,8 +16,9 @@ function App() {
   const setSourceInfo = useSetRecoilState(sourceInfoState);
 
   useEffect(() => {
+    console.log(router.query)
     async function load() {
-      const { createSourceData } = await import('../utils');
+      const { createSourceData } = await import ('../utils');
       if ('source' in router.query) {
         const { source } = router.query;
         const id = Math.random().toString(36).slice(2);
@@ -30,13 +31,9 @@ function App() {
           return { ...prevSourceInfo, [id]: sourceData };
         });
       }
-      if ('viewState' in router.query) {
-        setViewState(router.query.viewState);
-      }
-      console.log(router.query);
     }
     load();
-  }, []);
+  }, [router]);
   
   return (
     <>
