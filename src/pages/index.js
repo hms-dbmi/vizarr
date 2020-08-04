@@ -29,7 +29,8 @@ function App() {
 
   useEffect(() => {
     if ('source' in router.query) {
-      addImage({ source: router.query.source });
+      // If a source is provided in the URL, pass all params to load image.
+      addImage(router.query);
     }
   }, [router]);
 
