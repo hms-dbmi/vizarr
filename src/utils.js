@@ -1,5 +1,5 @@
 import { openArray, HTTPStore } from 'zarr';
-import { ZarrLoader } from '@hms-dbmi/viv';
+import { ZarrLoader, DTYPE_VALUES } from '@hms-dbmi/viv';
 
 async function getJson(store, key) {
   const bytes = new Uint8Array(await store.getItem(key));
@@ -143,4 +143,80 @@ export async function isOMEZarr(store) {
 
 export function range(len) {
   return [...Array(len).keys()];
+}
+
+export async function createSourceData({
+  source,
+  name,
+  dimensions,
+  channelDim = 'c',
+  layers = [],
+  colormap = '',
+  opacity = 1,
+}) {
+  let imageData;
+
+  const store = normalizeStore(source);
+
+  if (await isOMEZarr(store)) {
+    const reader = await OMEZarrReader.fromStore(store);
+    if (!name && 'name' in reader.imageData) {
+      name = reader.imageData.name;
+    }
+    imageData = reader.imageData;
+  } else {
+    if (!dimensions) {
+      throw Error('Must supply dimensions if not OME-Zarr');
+    }
+
+    const channelAxis = dimensions.indexOf(channelDim);
+    if (channelAxis < 0) {
+      throw Error(`Channel dimension ${channelDim} not found in dimensions ${dimensions}`);
+    }
+
+    if (await store.containsItem('.zgroup')) {
+      // Should support multiscale group but for now throw and only handle arrays.
+      throw Error('Source must be a zarr.Array if not OME-Zarr; found zarr.Group.');
+    }
+
+    const z = await openArray({ store });
+
+    // Internal to how viv (doesn't) handle endianness;
+    // https://github.com/hubmapconsortium/vitessce-image-viewer/issues/203
+    const dtype = `<${z.dtype.slice(1)}`;
+    if (!(dtype in DTYPE_VALUES)) {
+      throw Error('Dtype not supported, must be u1, u2, u4, or f4');
+    }
+
+    const channels = range(z.shape[channelAxis]).map((i) => {
+      return {
+        active: true,
+        color: 'FFFFFF',
+        label: `channel_${i}`,
+        window: {
+          start: 0,
+          end: dtype === '<f4' ? 1 : DTYPE_VALUES[dtype].max,
+        },
+      };
+    });
+
+    imageData = {
+      channels,
+      rdefs: {
+        model: 'color',
+      },
+    };
+  }
+
+  return {
+    store,
+    name,
+    imageData,
+    dimensions,
+    renderSettings: {
+      layers,
+      colormap,
+      opacity,
+    },
+  };
 }

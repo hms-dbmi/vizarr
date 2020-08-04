@@ -34,7 +34,13 @@ function Menu() {
   const [hidden, toggle] = useReducer((v) => !v, false);
   const classes = useStyles();
   return (
-    <div className={classes.root} style={{ padding: `0px 5px ${hidden ? 0 : 5}px 5px` }}>
+    <div 
+      className={classes.root} 
+      style={{ 
+        padding: `0px 5px ${hidden ? 0 : 5}px 5px`,
+        display: layerIds.length === 0 ? 'none' : 'flex'
+      }}
+    >
       <Grid container direction="column" alignItems="flex-start">
         <IconButton
           style={{
