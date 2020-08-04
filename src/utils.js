@@ -133,7 +133,6 @@ function hexToRGB(hex) {
 
 export async function isOMEZarr(store) {
   if (await store.containsItem('.zattrs')) {
-    console.log(store);
     const metadata = await getJson(store, '.zattrs');
     if ('omero' in metadata) {
       return true;

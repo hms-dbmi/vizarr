@@ -32,10 +32,12 @@ function ChannelController({ id, channelIndex }) {
   return (
     <>
       <Grid container justify="space-between" wrap="nowrap">
-        <Grid item xs={8} zeroMinWidth>
-          <Typography variant="caption" noWrap>
-            {label}
-          </Typography>
+        <Grid item xs={10}>
+          <div style={{ width: 165, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <Typography variant="caption" noWrap>
+              {label}
+            </Typography>
+          </div>
         </Grid>
         <Grid item xs={1}>
           <ChannelOptions layerId={id} channelIndex={channelIndex} />
