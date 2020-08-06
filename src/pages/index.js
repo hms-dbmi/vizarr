@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { useSetRecoilState } from 'recoil';
 
 import { layerIdsState, sourceInfoState, viewerViewState } from '../state';
-import { createSourceData } from '../utils';
 
 const Viewer = dynamic(() => import('../components/Viewer'));
 const Menu = dynamic(() => import('../components/Menu'));
@@ -16,6 +15,7 @@ function App() {
   const setSourceInfo = useSetRecoilState(sourceInfoState);
 
   async function addImage(props) {
+    const { createSourceData } = await import('../utils');
     const id = Math.random().toString(36).slice(2);
     const sourceData = await createSourceData(props);
     setLayerIds((prevIds) => [...prevIds, id]);
