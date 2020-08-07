@@ -76,7 +76,7 @@ export async function createZarrLoader(store, dimensions) {
   return loader;
 }
 
-export function layersToVivProps(layers) {
+export function channelsToVivProps(channels) {
   const sliderValues = [];
   const colorValues = [];
   const channelIsOn = [];
@@ -84,13 +84,13 @@ export function layersToVivProps(layers) {
   const contrastLimits = [];
   const labels = [];
 
-  layers.forEach((l, i) => {
-    sliderValues.push(l.contrast_limits);
-    contrastLimits.push(l.contrast_limits);
-    colorValues.push(hexToRGB(l.color || '#FFFFFF'));
-    channelIsOn.push(l.on || true);
-    labels.push(l.label || `channel_${i}`);
-    loaderSelection.push(l.selection);
+  channels.forEach((c, i) => {
+    sliderValues.push(c.contrast_limits);
+    contrastLimits.push(c.contrast_limits);
+    colorValues.push(hexToRGB(c.color || '#FFFFFF'));
+    channelIsOn.push(c.on || true);
+    labels.push(c.label || `channel_${i}`);
+    loaderSelection.push(c.selection);
   });
 
   return {
@@ -104,23 +104,23 @@ export function layersToVivProps(layers) {
 }
 
 export function OMEMetaToVivProps(imageData) {
-  const layers = [];
+  const channels = [];
   const { rdefs } = imageData;
   for (const [i, c] of imageData.channels.entries()) {
     if (c.active) {
       const selection = { c: i };
       if (rdefs.defaultT) selection.t = rdefs.defaultT;
       if (rdefs.defaultZ) selection.z = rdefs.defaultZ;
-      const layer = {
+      const channel = {
         color: c.color,
         contrast_limits: [c.window.start, c.window.end],
         selection,
         label: c.label,
       };
-      layers.push(layer);
+      channels.push(channel);
     }
   }
-  return layersToVivProps(layers);
+  return channelsToVivProps(channels);
 }
 
 function hexToRGB(hex) {
@@ -150,7 +150,7 @@ export async function createSourceData({
   name,
   dimensions,
   channelDim = 'c',
-  layers = [],
+  channels = [],
   colormap = '',
   opacity = 1,
 }) {
@@ -188,7 +188,7 @@ export async function createSourceData({
       throw Error('Dtype not supported, must be u1, u2, u4, or f4');
     }
 
-    const channels = range(z.shape[channelAxis]).map((i) => {
+    const omeChannels = range(z.shape[channelAxis]).map((i) => {
       return {
         active: true,
         color: 'FFFFFF',
@@ -201,7 +201,7 @@ export async function createSourceData({
     });
 
     imageData = {
-      channels,
+      channels: omeChannels,
       rdefs: {
         model: 'color',
       },
@@ -214,7 +214,7 @@ export async function createSourceData({
     imageData,
     dimensions,
     renderSettings: {
-      layers,
+      channels,
       colormap,
       opacity,
     },

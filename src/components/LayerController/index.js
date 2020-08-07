@@ -5,7 +5,7 @@ import { withStyles } from '@material-ui/styles';
 import { StaticImageLayer, VivViewerLayer } from '@hms-dbmi/viv';
 
 import { sourceInfoState, layerStateFamily } from '../../state';
-import { createZarrLoader, layersToVivProps, OMEMetaToVivProps } from '../../utils';
+import { createZarrLoader, channelsToVivProps, OMEMetaToVivProps } from '../../utils';
 
 import Header from './Header';
 import Content from './Content';
@@ -37,7 +37,7 @@ function LayerController({ id }) {
 
   useEffect(() => {
     async function initLayer({ store, imageData, dimensions, renderSettings, on = true }) {
-      const { layers = [], opacity, colormap } = renderSettings;
+      const { channels = [], opacity, colormap } = renderSettings;
 
       const loader = await createZarrLoader(store, dimensions);
       // Internal viv issue, this is a hack to get the appropriate WebGL textures.
@@ -45,7 +45,7 @@ function LayerController({ id }) {
       // regardless of source.
       loader.dtype = '<' + loader.dtype.slice(1);
       // If there is metadata (from OME-Zarr) and no channels, parse the source info. Otherwise override.
-      const vivProps = layers.length === 0 ? OMEMetaToVivProps(imageData) : layersToVivProps(layers);
+      const vivProps = channels.length === 0 ? OMEMetaToVivProps(imageData) : channelsToVivProps(channels);
       const Layer = loader.numLevels === 1 ? StaticImageLayer : VivViewerLayer;
       return [Layer, { id, on, loader, colormap, opacity, ...vivProps }];
     }
@@ -64,7 +64,7 @@ function LayerController({ id }) {
 
   const { name } = sourceInfo[id];
   return (
-    <Accordion>
+    <Accordion defaultExpanded>
       <Header id={id} name={name} />
       <Content id={id} nChannels={layerProps.loaderSelection.length} />
     </Accordion>
