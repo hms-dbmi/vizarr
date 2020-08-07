@@ -64,7 +64,7 @@ function LayerController({ id }) {
 
   const { name } = sourceInfo[id];
   return (
-    <Accordion>
+    <Accordion defaultExpanded>
       <Header id={id} name={name} />
       <Content id={id} nChannels={layerProps.loaderSelection.length} />
     </Accordion>
