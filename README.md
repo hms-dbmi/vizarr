@@ -26,7 +26,7 @@ for multiscale and multimodal images. Currently [Viv](https://hms-dbmi.github.co
 `u1`, `u2`, `u4`, and `f4` arrays, but contributions are welcome to support more `np.dtypes`!
 
 ### Getting started 
-The easiest way to get started with `vizarr` is to open one of the example Jupyter Notebooks.
+The easiest way to get started with `vizarr` is to open the example [Jupyter Notebook](example/README.md).
 
 ### Limitations
 `vizarr` was built to support the registration use case above where multiple, pyramidal OME-Zarr images
