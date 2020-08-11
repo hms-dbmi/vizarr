@@ -1,0 +1,7 @@
+numpy
+ipywidgets>=7.0.0
+scikit-image
+imjoy>=0.10.0
+fsspec
+imjoy-rpc
+zarr
