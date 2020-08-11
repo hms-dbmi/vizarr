@@ -1,6 +1,6 @@
 # vizarr
 
-`vizarr` is a minimal, purely client-side program for viewing Zarr-based images. It is built with 
+Vizarr is a minimal, purely client-side program for viewing Zarr-based images. It is built with 
 [Viv](https://hms-dbmi.github.com/viv) and exposes a Python API using the 
 [`imjoy-rpc`](https://github.com/imjoy-team/imjoy-rpc), allowing users to programatically view multiplex 
 and multiscale images from within a Jupyter Notebook. The ImJoy plugin registers a codec for Python 
@@ -10,17 +10,18 @@ and multiscale images from within a Jupyter Notebook. The ImJoy plugin registers
 enabling flexible workflows when working with large datasets.
 
 ### Remote image registration workflow
-We created `vizarr` to enhance interactive multimodal image alignment using the 
+We created Vizarr to enhance interactive multimodal image alignment using the 
 [wsireg](https://github.com/NHPatterson/wsireg) library. We describe a rapid workflow were 
 comparison of registration methods as well as visual verification of alignnment can be assessed 
 remotely, leveraging computational resources on remote servers for rapid image processing and 
 Viv for interactive web-based visualization. For more information, please read our pre-print.
 
 ### Data types
-Vizarr supports viewing 2D slices of n-Dimensional Zarr arrays with WebGL-based additive blending. 
-It has special support for the developing [OME-Zarr format](https://github.com/ome/omero-ms-zarr/blob/master/spec.md)
-for multiscale and multimodal images. Currently Viv supports `u1`, `u2`, `u4`, and `f4` arrays.
-If you'd like to add support for more `np.dtypes`, contributations to Viv are welcome!
+Vizarr supports viewing 2D slices of n-Dimensional Zarr arrays, allowing users to choose 
+a single channel or blended composites of multiple channels during analysis. It has special support 
+for the developing [OME-Zarr format](https://github.com/ome/omero-ms-zarr/blob/master/spec.md)
+for multiscale and multimodal images. Currently [Viv](https://hms-dbmi.github.com/viv) supports 
+`u1`, `u2`, `u4`, and `f4` arrays, but contributions are welcome to support more `np.dtypes`!
 
 ### Getting started 
 The easiest way to get started with `vizarr` is to open one of the example Jupyter Notebooks.
