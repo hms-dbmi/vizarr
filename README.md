@@ -1,5 +1,7 @@
 # vizarr
 
+![Multiscale OME-Zarr in Jupyter Notebook with Vizarr](/screenshot.png)
+
 Vizarr is a minimal, purely client-side program for viewing Zarr-based images. It is built with 
 [Viv](https://hms-dbmi.github.com/viv) and exposes a Python API using the 
 [`imjoy-rpc`](https://github.com/imjoy-team/imjoy-rpc), allowing users to programatically view multiplex 
