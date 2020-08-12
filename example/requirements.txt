@@ -5,3 +5,5 @@ imjoy>=0.10.0
 fsspec
 imjoy-rpc
 zarr
+numba
+requests
