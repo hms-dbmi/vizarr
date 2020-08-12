@@ -5,7 +5,6 @@ import { withStyles } from '@material-ui/styles';
 import { StaticImageLayer, VivViewerLayer } from '@hms-dbmi/viv';
 
 import { sourceInfoState, layerStateFamily } from '../../state';
-import { createZarrLoader, channelsToVivProps, OMEMetaToVivProps } from '../../utils';
 
 import Header from './Header';
 import Content from './Content';
@@ -36,25 +35,13 @@ function LayerController({ id }) {
   const [layer, setLayer] = useRecoilState(layerStateFamily(id));
 
   useEffect(() => {
-    async function initLayer({ store, imageData, dimensions, renderSettings, on = true }) {
-      const { channels = [], opacity, colormap } = renderSettings;
-
-      const loader = await createZarrLoader(store, dimensions);
-      // Internal viv issue, this is a hack to get the appropriate WebGL textures.
-      // Loader dtypes only have littleendian lookups, but all loaders return little endian
-      // regardless of source.
-      loader.dtype = '<' + loader.dtype.slice(1);
-      // If there is metadata (from OME-Zarr) and no channels, parse the source info. Otherwise override.
-      const vivProps = channels.length === 0 ? OMEMetaToVivProps(imageData) : channelsToVivProps(channels);
-      const Layer = loader.numLevels === 1 ? StaticImageLayer : VivViewerLayer;
-      return [Layer, { id, on, loader, colormap, opacity, ...vivProps }];
+    async function initLayer(vivProps) {
+      const Layer = vivProps.loader.numLevels === 1 ? StaticImageLayer : VivViewerLayer;
+      return [Layer, { id, ...vivProps, on: true }];
     }
-
     if (id in sourceInfo) {
       const layerInfo = sourceInfo[id];
-      if (layerInfo.store) {
-        initLayer(layerInfo).then((l) => setLayer(l));
-      }
+      initLayer(layerInfo).then(setLayer);
     }
   }, [sourceInfo]);
 

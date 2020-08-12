@@ -2,6 +2,7 @@ import { atom, atomFamily, selector, waitForAll } from 'recoil';
 
 export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
 export const DEFAULT_LAYER_PROPS = {
+  loader: null,
   on: true,
   colorValues: [],
   sliderValues: [],
