@@ -1,6 +1,18 @@
 import { openArray, HTTPStore } from 'zarr';
 import { ZarrLoader, DTYPE_VALUES } from '@hms-dbmi/viv';
 
+const colors = {
+  cyan: [0, 255, 255],
+  yellow: [255, 255, 0],
+  magenta: [255, 0, 255],
+  red: [255, 0, 0],
+  green: [0, 255, 0],
+  blue: [0, 0, 255],
+}
+const MAGENTA_GREEN = [colors.magenta, colors.green];
+const RGB = [colors.red, colors.green, colors.blue];
+const CYMRGB = Object.values(colors);
+
 async function getJson(store, key) {
   const bytes = new Uint8Array(await store.getItem(key));
   const decoder = new TextDecoder('utf-8');
@@ -88,7 +100,7 @@ export async function createSourceData({
     // Try to open as zarr.Array
     data = [await openArray({ store })];
   }
-  const [base] = data;
+  const base = data[0];
   const dtype = `<${base.dtype.slice(1)}`;
   if (!(dtype in DTYPE_VALUES)) {
     throw Error('Dtype not supported, must be u1, u2, u4, or f4');
@@ -96,37 +108,55 @@ export async function createSourceData({
   // IF contrast_limits not provided or are missing from omero metadata
   const max = dtype === '<f4' ? 1 : DTYPE_VALUES[dtype].max;
   // Now that we have data, try to figure out how to render initially.
+
   if (base.shape.length === 2) {
     // 2D case
     meta = {
       loaderSelection: [[0, 0]],
       channel_axis: null,
-      colorValues: [colors ?? [255, 255, 255]],
+      colorValues: [colors ? hexToRGB(colors) : [255, 255, 255]],
       sliderValues: [contrast_limits ?? [0, max]],
       contrastLimits: [contrast_limits ?? [0, max]],
       channelIsOn: [visibilities ?? true],
       labels: [names ?? 'channel_0'],
     };
-  } else if (channel_axis) {
+  } else if (Number.isInteger(channel_axis)) {
+
     // If explicit channel axis is provided, other metadata is necessary.
     const n = base.shape[channel_axis];
     const diffSize = (m) => m?.length !== n;
-    if ([contrast_limits, visibilities, names, colors].some(diffSize)) {
-      throw Error(`Channel axis is of length ${n} and rendering metadata ${meta} is different size.`);
+    if ([contrast_limits, visibilities, names, colors].filter(d => d).some(diffSize)) {
+      throw Error(
+        `Channel axis is of length ${n} and rendering metadata ${meta} is different size.`
+      );
     }
     const loaderSelection = range(n).map((i) => {
       const sel = Array(base.shape.length).fill(0);
       sel[channel_axis] = i;
+      return sel;
     });
+
+    let colorValues;
+    if (colors) {
+      colorValues = colors.map(hexToRGB);
+    } else if (n === 2) {
+      colorValues = MAGENTA_GREEN;
+    } else if (n === 3) {
+      colorValues = RGB;
+    } else {
+      colorValues = CYMRGB.slice(0, n);
+    }
+
     meta = {
       loaderSelection,
       channel_axis,
-      colorValues: colors ?? Array(n).fill([255, 255, 255]),
+      colorValues,
       sliderValues: contrast_limits ?? Array(n).fill([0, max]),
       contrastLimits: contrast_limits ?? Array(n).fill([0, max]),
       channelIsOn: visibilities ?? Array(n).fill(true),
       labels: names ?? range(n).map((i) => `channel_${i}`),
     };
+
   } else {
     // Try to load OME-Zarr
     if (!(`omero` in rootAttrs)) {
