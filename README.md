@@ -13,10 +13,12 @@ enabling flexible workflows when working with large datasets.
 
 ### Remote image registration workflow
 We created Vizarr to enhance interactive multimodal image alignment using the 
-[wsireg](https://github.com/NHPatterson/wsireg) library. We describe a rapid workflow were 
+[wsireg](https://github.com/NHPatterson/wsireg) library. We describe a rapid workflow where
 comparison of registration methods as well as visual verification of alignnment can be assessed 
-remotely, leveraging computational resources on remote servers for rapid image processing and 
-Viv for interactive web-based visualization. For more information, please read our pre-print.
+remotely, leveraging high-performance computational resources for rapid image processing and 
+Viv for interactive web-based visualization in a laptop computer. The Jupyter Notebook containing 
+the workflow described in the manuscript can be found in [`multimodal_registration_vizarr.ipynb`](multimodal_registration_vizarr.ipynb).
+For more information, please read our preprint [doi:10.31219/osf.io/wd2gu](https://doi.org/10.31219/osf.io/wd2gu).
 
 ### Data types
 Vizarr supports viewing 2D slices of n-Dimensional Zarr arrays, allowing users to choose 
@@ -26,7 +28,8 @@ for multiscale and multimodal images. Currently [Viv](https://hms-dbmi.github.co
 `u1`, `u2`, `u4`, and `f4` arrays, but contributions are welcome to support more `np.dtypes`!
 
 ### Getting started 
-The easiest way to get started with `vizarr` is to open the example [Jupyter Notebook](example/README.md).
+The easiest way to get started with `vizarr` is to clone this repoe and open one of 
+the example [Jupyter Notebooks](example/).
 
 ### Limitations
 `vizarr` was built to support the registration use case above where multiple, pyramidal OME-Zarr images
