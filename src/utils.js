@@ -1,5 +1,5 @@
 import { openArray, HTTPStore } from 'zarr';
-import { ZarrLoader, DTYPE_VALUES } from '@hms-dbmi/viv';
+import { ZarrLoader, DTYPE_VALUES } from 'viv';
 
 const colors = {
   cyan: [0, 255, 255],
