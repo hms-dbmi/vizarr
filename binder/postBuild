@@ -1,0 +1,7 @@
+#!/bin/bash
+set -eu
+
+npm install
+npm run export
+
+pip install ./binder/vizarr-server-proxy
