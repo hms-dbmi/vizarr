@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useRecoilValue, useRecoilState } from 'recoil';
 import MuiAccordion from '@material-ui/core/Accordion';
 import { withStyles } from '@material-ui/styles';
-import { StaticImageLayer, VivViewerLayer } from '@hms-dbmi/viv';
+import { ImageLayer, MultiscaleImageLayer } from 'viv';
 
 import { sourceInfoState, layerStateFamily } from '../../state';
 
@@ -36,7 +36,7 @@ function LayerController({ id }) {
 
   useEffect(() => {
     async function initLayer(vivProps) {
-      const Layer = vivProps.loader.numLevels === 1 ? StaticImageLayer : VivViewerLayer;
+      const Layer = vivProps.loader.numLevels === 1 ? ImageLayer : MultiscaleImageLayer;
       return [Layer, { id, ...vivProps, on: true }];
     }
     if (id in sourceInfo) {
