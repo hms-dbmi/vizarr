@@ -1,4 +1,5 @@
 from imjoy import api
+from os import getenv
 import zarr
 
 
@@ -43,8 +44,14 @@ class Plugin:
         pass
 
     async def run(self, ctx):
+        # If we're running on Binder vizarr should be built locally and served
+        # by jupyter-server-proxy under PREFIX/vizarr/
+        if getenv("BINDER_REPO_URL"):
+            vizarr_src = f"{getenv('JUPYTERHUB_SERVICE_PREFIX')}vizarr"
+        else:
+            vizarr_src = "https://hms-dbmi.github.io/vizarr"
         viewer = await api.createWindow(
-            type="viv-plugin", src="https://hms-dbmi.github.io/vizarr"
+            type="viv-plugin", src=vizarr_src
         )
         if self.view_state:
             await viewer.set_view_state(self.view_state)
