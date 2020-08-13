@@ -1,0 +1,17 @@
+name: vizarr
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - fsspec
+  - ipywidgets
+  - jupyter-server-proxy
+  - numba
+  - numpy
+  - requests
+  - scikit-image
+  - zarr
+  - pip:
+    - imjoy>=0.10.0
+    - imjoy-jupyter-extension
+    - imjoy-rpc
