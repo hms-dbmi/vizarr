@@ -1,4 +1,5 @@
 # vizarr
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/hms-dbmi/vizarr/master?filepath=example%2Fgetting_started.ipynb)
 
 ![Multiscale OME-Zarr in Jupyter Notebook with Vizarr](/screenshot.png)
 
