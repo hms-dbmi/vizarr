@@ -74,7 +74,7 @@ class Plugin:
         images = [ { "source": multiscale_astronaut, "name": "astronaut" } ]
 
         viewer = await api.createWindow(
-            type="viv-plugin", src="https://hms-dbmi.github.io/vizarr"
+            type="vizarr", src="https://hms-dbmi.github.io/vizarr"
         )
         for img in images:
             await viewer.add_image(img)
