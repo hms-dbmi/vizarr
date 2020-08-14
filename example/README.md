@@ -2,7 +2,7 @@
 
 ## Install Requirements
 
-The examples require the `imjoy-jupyter-extension`.
+The examples require the `imjoy-jupyter-extension`. If running locally, please install the following:
 
 ```bash
 $ pip install -U imjoy-jupyter-extension
@@ -14,7 +14,7 @@ $ pip install -r requirements.txt
 This example will work in the Jupyter Notebook (not jupyterlab).
 
 ```bash
-$ jupyter notebook imjoy_example.ipynb
+$ jupyter notebook getting_started.ipynb
 ```
 
 ## Viewing an Image from the Imaging Data Resource [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/hms-dbmi/vizarr/master?filepath=example%2FIDR_example.ipynb)
