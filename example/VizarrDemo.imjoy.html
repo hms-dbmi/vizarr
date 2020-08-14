@@ -1,0 +1,83 @@
+﻿<docs lang="markdown">
+[TODO: write documentation for this plugin.]
+</docs>
+
+<config lang="json">
+{
+  "name": "VizarrDemo",
+  "type": "native-python",
+  "version": "0.1.0",
+  "description": "A demo plugin which uses Vizarr to visualize images",
+  "tags": [],
+  "ui": "",
+  "cover": "",
+  "inputs": null,
+  "outputs": null,
+  "flags": [],
+  "icon": "extension",
+  "api_version": "0.1.8",
+  "env": "",
+  "permissions": [],
+  "requirements": ["repo:https://github.com/hms-dbmi/vizarr.git", "conda: zarr scikit-image"],
+  "dependencies": []
+}
+</config>
+
+<script lang="python">
+import os
+os.chdir('vizarr/example')
+
+from imjoy import api
+import zarr
+from create_fixture import create_ome_zarr
+import zarr
+
+def encode_zarr_store(zobj):
+    path_prefix = f"{zobj.path}/" if zobj.path else ""
+
+    def getItem(key):
+        return zobj.store[path_prefix + key]
+
+    def setItem(key, value):
+        zobj.store[path_prefix + key] = value
+
+    def containsItem(key):
+        if path_prefix + key in zobj.store:
+            return True
+
+    return {
+        "_rintf": True,
+        "_rtype": "zarr-array" if isinstance(zobj, zarr.Array) else "zarr-group",
+        "getItem": getItem,
+        "setItem": setItem,
+        "containsItem": containsItem,
+    }
+
+
+api.registerCodec(
+    {"name": "zarr-array", "type": zarr.Array, "encoder": encode_zarr_store}
+)
+api.registerCodec(
+    {"name": "zarr-group", "type": zarr.Group, "encoder": encode_zarr_store}
+)
+
+
+class Plugin:
+    async def setup(self):
+        pass
+
+    async def run(self, ctx):
+        create_ome_zarr("astronaut.zarr") # creates an example OME-Zarr in the current directory
+        multiscale_astronaut = zarr.open("astronaut.zarr", mode="r") # open the zarr created above in jupyter kernel
+        
+        # Create Zarr 
+        images = [ { "source": multiscale_astronaut, "name": "astronaut" } ]
+
+        viewer = await api.createWindow(
+            type="vizarr", src="https://hms-dbmi.github.io/vizarr"
+        )
+        for img in images:
+            await viewer.add_image(img)
+
+api.export(Plugin())
+</script>

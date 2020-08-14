@@ -33,4 +33,8 @@ This notebook a contains a `vizarr` example visualizing a generic multiscale Zar
 $ jupyter notebook mandelbrot.ipynb
 ```
 
+## Display an Image in an ImJoy Plugin [![launch ImJoy](https://imjoy.io/static/badge/launch-imjoy-badge.svg)](https://imjoy.io/#/app?workspace=vizarr&plugin=https://github.com/hms-dbmi/vizarr/blob/master/example/VizarrDemo.imjoy.html)
+
+This [demo plugin](VizarrDemo.imjoy.html) shows how to build an image visualization plugin with `vizarr` in [ImJoy](https://imjoy.io).
+
 

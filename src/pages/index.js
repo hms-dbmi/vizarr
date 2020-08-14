@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { useSetRecoilState } from 'recoil';
 
+import { version as vizarrVersion } from '../../package.json';
 import { layerIdsState, sourceInfoState, viewerViewState } from '../state';
 
 const Viewer = dynamic(() => import('../components/Viewer'));
@@ -37,7 +38,11 @@ function App() {
   useEffect(() => {
     async function initImjoy() {
       const { setupRPC } = await import('imjoy-rpc');
-      const api = await setupRPC({ name: 'viv-plugin' });
+      const api = await setupRPC({ 
+        name: 'vizarr',
+        description: 'A minimal, purely client-side program for viewing Zarr-based images with Viv & ImJoy',
+        version: vizarrVersion,
+      });
       const add_image = async (props) => addImage(props);
       const set_view_state = async (vs) => setViewState(vs);
       api.export({ add_image, set_view_state });

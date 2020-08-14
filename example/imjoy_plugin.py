@@ -44,7 +44,7 @@ class Plugin:
 
     async def run(self, ctx):
         viewer = await api.createWindow(
-            type="viv-plugin", src="https://hms-dbmi.github.io/vizarr"
+            type="vizarr", src="https://hms-dbmi.github.io/vizarr"
         )
         if self.view_state:
             await viewer.set_view_state(self.view_state)
