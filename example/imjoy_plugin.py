@@ -1,3 +1,4 @@
+import asyncio
 from imjoy import api
 import zarr
 
@@ -23,6 +24,7 @@ def encode_zarr_store(zobj):
         "containsItem": containsItem,
     }
 
+api.init()
 
 api.registerCodec(
     {"name": "zarr-array", "type": zarr.Array, "encoder": encode_zarr_store}
@@ -32,25 +34,18 @@ api.registerCodec(
 )
 
 
-class Plugin:
-    def __init__(self, images, view_state=None):
-        if not isinstance(images, list):
-            images = [images]
-        self.images = images
-        self.view_state = view_state
 
-    async def setup(self):
-        pass
-
-    async def run(self, ctx):
-        viewer = await api.createWindow(
-            type="viv-plugin", src="https://hms-dbmi.github.io/vizarr"
-        )
-        if self.view_state:
-            await viewer.set_view_state(self.view_state)
-        for img in self.images:
-            await viewer.add_image(img)
+async def run_vizarr_async(images, view_state=None):
+    if not isinstance(images, list):
+        images = [images]
+    viewer = await api.createWindow(
+        type="vizarr", src="https://hms-dbmi.github.io/vizarr"
+    )
+    if view_state:
+        await viewer.set_view_state(view_state)
+    for img in images:
+        await viewer.add_image(img)
 
 
 def run_vizarr(images, view_state=None):
-    api.export(Plugin(images, view_state))
+    asyncio.ensure_future(run_vizarr_async(images, view_state))
