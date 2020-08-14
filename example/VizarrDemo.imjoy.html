@@ -67,28 +67,15 @@ class Plugin:
         pass
 
     async def run(self, ctx):
-        if ctx.data:
-            data = ctx.data
-        else:
-            # use default astronaut image
-            create_ome_zarr("astronaut.zarr") # creates an example OME-Zarr in the current directory
-            multiscale_astronaut = zarr.open("astronaut.zarr", mode="r") # open the zarr created above in jupyter kernel
-
-            # Create Zarr 
-            data = {"images": [ { "source": multiscale_astronaut, "name": "astronaut" } ]} 
+        create_ome_zarr("astronaut.zarr") # creates an example OME-Zarr in the current directory
+        multiscale_astronaut = zarr.open("astronaut.zarr", mode="r") # open the zarr created above in jupyter kernel
         
-        assert "images" in data
-        images = data["images"]
-        view_state = data.get('view_state')
+        # Create Zarr 
+        images = [ { "source": multiscale_astronaut, "name": "astronaut" } ]
 
-        if not isinstance(images, list):
-            images = [images]
-    
         viewer = await api.createWindow(
             type="viv-plugin", src="https://hms-dbmi.github.io/vizarr"
         )
-        if view_state:
-            await viewer.set_view_state(view_state)
         for img in images:
             await viewer.add_image(img)
 
