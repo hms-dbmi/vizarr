@@ -14,4 +14,4 @@ dependencies:
   - pip:
     - imjoy>=0.10.0
     - imjoy-jupyter-extension
-    - imjoy-rpc>=0.2.11
+    - imjoy-rpc>=0.2.12
