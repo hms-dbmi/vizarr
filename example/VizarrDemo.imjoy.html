@@ -1,5 +1,10 @@
-﻿<docs lang="markdown">
-[TODO: write documentation for this plugin.]
+<docs lang="markdown">
+# VizarrDemo
+
+A demo plugin which uses Vizarr to visualize zarr images
+
+See https://github.com/hms-dbmi/vizarr for details.
+
 </docs>
 
 <config lang="json">
@@ -7,7 +12,7 @@
   "name": "VizarrDemo",
   "type": "native-python",
   "version": "0.1.0",
-  "description": "A demo plugin which uses Vizarr to visualize images",
+  "description": "A demo plugin which uses Vizarr to visualize zarr images",
   "tags": [],
   "ui": "",
   "cover": "",
@@ -18,19 +23,16 @@
   "api_version": "0.1.8",
   "env": "",
   "permissions": [],
-  "requirements": ["repo:https://github.com/hms-dbmi/vizarr.git", "conda: zarr scikit-image"],
+  "requirements": ["conda: zarr scikit-image fsspec"],
   "dependencies": []
 }
 </config>
 
 <script lang="python">
 import os
-os.chdir('vizarr/example')
-
 from imjoy import api
 import zarr
-from create_fixture import create_ome_zarr
-import zarr
+from fsspec.implementations.http import HTTPFileSystem
 
 def encode_zarr_store(zobj):
     path_prefix = f"{zobj.path}/" if zobj.path else ""
@@ -54,6 +56,7 @@ def encode_zarr_store(zobj):
     }
 
 
+# register two codecs for encoding zarr array and group
 api.registerCodec(
     {"name": "zarr-array", "type": zarr.Array, "encoder": encode_zarr_store}
 )
@@ -67,17 +70,30 @@ class Plugin:
         pass
 
     async def run(self, ctx):
-        create_ome_zarr("astronaut.zarr") # creates an example OME-Zarr in the current directory
-        multiscale_astronaut = zarr.open("astronaut.zarr", mode="r") # open the zarr created above in jupyter kernel
-        
-        # Create Zarr 
-        images = [ { "source": multiscale_astronaut, "name": "astronaut" } ]
+        # prepare remote zarr image
+        fs = HTTPFileSystem()
+        uri = await api.prompt("Please paste a url or file path to your zarr image (click ok to use the default image from IDR)", "https://s3.embassy.ebi.ac.uk/idr/zarr/v0.1/6001240.zarr")
 
+        if uri.startswith('http'):
+            # make a zarr group from url
+            store = fs.get_mapper(uri)
+            z_grp = zarr.open(store, mode='r')
+        elif os.path.exists(uri):
+            # make a zarr group from local path
+            z_grp = zarr.open(uri, mode="r")
+        else:
+            api.alert('Failed to load zarr image from {}'.format(uri))
+            return
+
+        image = { "source": z_grp, "name": "Demo Image" }
+
+        # create a vizarr viewer window
         viewer = await api.createWindow(
             type="vizarr", src="https://hms-dbmi.github.io/vizarr"
         )
-        for img in images:
-            await viewer.add_image(img)
+
+        # display the image
+        await viewer.add_image(image)
 
 api.export(Plugin())
 </script>
