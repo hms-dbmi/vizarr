@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { MouseEvent, ChangeEvent } from 'react';
 import { useRecoilState } from 'recoil';
 import { IconButton, Popover, Paper, Typography, Divider, Input } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
@@ -24,37 +25,37 @@ const DenseInput = withStyles({
   },
 })(Input);
 
-function ChannelOptions({ layerId, channelIndex }) {
+function ChannelOptions({ layerId, channelIndex }: { layerId: string; channelIndex: number }) {
   const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState<null | Element>(null);
 
-  const handleClick = (e) => {
-    setAnchorEl(e.currentTarget);
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  const handleColorChange = (rgb) => {
-    setLayer(([prevLayer, prevProps]) => {
-      const colorValues = [...prevProps.colorValues];
+  const handleColorChange = (rgb: number[]) => {
+    setLayer((prev) => {
+      const colorValues = [...prev.layerProps.colorValues];
       colorValues[channelIndex] = rgb;
-      return [prevLayer, { ...prevProps, colorValues }];
+      return { ...prev, layerProps: { ...prev.layerProps, colorValues } };
     });
   };
 
-  const handleContrastLimitChange = (e) => {
-    const targetId = e.target.id;
-    let value = +e.target.value;
+  const handleContrastLimitChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const targetId = event.target.id;
+    let value = +event.target.value;
 
     // Only let positive values
     if (value < 0) value = 0;
 
-    setLayer(([prevLayer, prevProps]) => {
+    setLayer((prev) => {
       // Need to move sliders in if contrast limits are narrower
-      const contrastLimits = [...prevProps.contrastLimits];
-      const sliderValues = [...prevProps.sliderValues];
+      const contrastLimits = [...prev.metadata.contrastLimits];
+      const sliderValues = [...prev.layerProps.sliderValues];
 
       const [cmin, cmax] = contrastLimits[channelIndex];
       const [smin, smax] = sliderValues[channelIndex];
@@ -69,13 +70,17 @@ function ChannelOptions({ layerId, channelIndex }) {
       // Update channel constrast limits
       contrastLimits[channelIndex] = [umin, umax];
 
-      return [prevLayer, { ...prevProps, contrastLimits, sliderValues }];
+      return {
+        ...prev,
+        layerProps: { ...prev.layerProps, sliderValues },
+        metadata: { ...prev.metadata, contrastLimits },
+      };
     });
   };
 
   const open = Boolean(anchorEl);
   const id = open ? `channel-${channelIndex}-${layerId}-options` : undefined;
-  const [min, max] = layer[1].contrastLimits[channelIndex];
+  const [min, max] = layer.metadata.contrastLimits[channelIndex];
   return (
     <>
       <IconButton
@@ -85,7 +90,7 @@ function ChannelOptions({ layerId, channelIndex }) {
           backgroundColor: 'transparent',
           padding: 0,
           zIndex: 2,
-          pointer: 'cursor',
+          cursor: 'pointer',
         }}
       >
         <MoreHoriz />
@@ -105,7 +110,7 @@ function ChannelOptions({ layerId, channelIndex }) {
           horizontal: 'left',
         }}
       >
-        <Paper style={{ padding: '0px 4px', marginBotton: 4 }}>
+        <Paper style={{ padding: '0px 4px', marginBottom: 4 }}>
           <Typography variant="caption">color:</Typography>
           <Divider />
           <div style={{ display: 'flex', justifyContent: 'center' }}>

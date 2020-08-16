@@ -14,7 +14,7 @@ const Details = withStyles({
   },
 })(AccordionDetails);
 
-function Content({ id, nChannels }) {
+function Content({ id, nChannels }: { id: string; nChannels: number }) {
   return (
     <Details>
       <Grid container direction="column">

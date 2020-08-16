@@ -1,34 +1,40 @@
 import { useRecoilState } from 'recoil';
+import type { ChangeEvent } from 'react';
 import { Slider, Typography, Grid, IconButton } from '@material-ui/core';
 import { RadioButtonChecked, RadioButtonUnchecked } from '@material-ui/icons';
 
 import ChannelOptions from './ChannelOptions';
 import { layerStateFamily } from '../../state';
 
-function ChannelController({ id, channelIndex }) {
+interface ChannelConfig {
+  id: string;
+  channelIndex: number;
+}
+
+function ChannelController({ id, channelIndex }: ChannelConfig) {
   const [layer, setLayer] = useRecoilState(layerStateFamily(id));
-  const handleContrastChange = (e, v) => {
-    setLayer(([prevLayer, prevProps]) => {
-      const sliderValues = [...prevProps.sliderValues];
-      sliderValues[channelIndex] = v;
-      return [prevLayer, { ...prevProps, sliderValues }];
+  const handleContrastChange = (_: ChangeEvent<{}>, v: number | number[]) => {
+    setLayer((prev) => {
+      const sliderValues = [...prev.layerProps.sliderValues];
+      sliderValues[channelIndex] = v as number[];
+      return { ...prev, layerProps: { ...prev.layerProps, sliderValues } };
     });
   };
   const handleVisibilityChange = () => {
-    setLayer(([prevLayer, prevProps]) => {
-      const channelIsOn = [...prevProps.channelIsOn];
+    setLayer((prev) => {
+      const channelIsOn = [...prev.layerProps.channelIsOn];
       channelIsOn[channelIndex] = !channelIsOn[channelIndex];
-      return [prevLayer, { ...prevProps, channelIsOn }];
+      return { ...prev, layerProps: { ...prev.layerProps, channelIsOn } };
     });
   };
   // Material slider tries to sort in place. Need to copy.
-  const layerProps = layer[1];
+  const { layerProps, metadata } = layer;
   const value = [...layerProps.sliderValues[channelIndex]];
   const { colormap } = layerProps;
   const color = `rgb(${colormap ? [255, 255, 255] : layerProps.colorValues[channelIndex]})`;
   const on = layerProps.channelIsOn[channelIndex];
-  const [min, max] = layerProps.contrastLimits[channelIndex];
-  const label = layerProps.labels?.[channelIndex];
+  const [min, max] = metadata.contrastLimits[channelIndex];
+  const label = metadata.labels[channelIndex];
   return (
     <>
       <Grid container justify="space-between" wrap="nowrap">

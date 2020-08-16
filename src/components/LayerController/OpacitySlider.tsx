@@ -1,4 +1,5 @@
 import { useRecoilState } from 'recoil';
+import type { ChangeEvent } from 'react';
 import { Slider } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 
@@ -15,12 +16,13 @@ const DenseSlider = withStyles({
   },
 })(Slider);
 
-function OpacitySlider({ id }) {
+function OpacitySlider({ id }: { id: string }) {
   const [layer, setLayer] = useRecoilState(layerStateFamily(id));
-  const handleChange = (e, opacity) => {
-    setLayer(([prevLayer, prevProps]) => [prevLayer, { ...prevProps, opacity }]);
+  const handleChange = (_: ChangeEvent<{}>, value: number | number[]) => {
+    const opacity = value as number;
+    setLayer((prev) => ({ ...prev, layerProps: { ...prev.layerProps, opacity } }));
   };
-  return <DenseSlider boxShadow={0} value={layer[1].opacity} onChange={handleChange} min={0} max={1} step={0.01} />;
+  return <DenseSlider value={layer.layerProps.opacity} onChange={handleChange} min={0} max={1} step={0.01} />;
 }
 
 export default OpacitySlider;

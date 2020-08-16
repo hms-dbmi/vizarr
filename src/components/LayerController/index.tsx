@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 import { useRecoilValue, useRecoilState } from 'recoil';
 import MuiAccordion from '@material-ui/core/Accordion';
 import { withStyles } from '@material-ui/styles';
-import { ImageLayer, MultiscaleImageLayer } from 'viv';
 
 import { sourceInfoState, layerStateFamily } from '../../state';
+import type { ImageLayerConfig } from '../../state';
 
 import Header from './Header';
 import Content from './Content';
@@ -30,26 +30,27 @@ const Accordion = withStyles({
   },
 })(MuiAccordion);
 
-function LayerController({ id }) {
+function LayerController({ id }: { id: string }) {
   const sourceInfo = useRecoilValue(sourceInfoState);
   const [layer, setLayer] = useRecoilState(layerStateFamily(id));
 
   useEffect(() => {
-    async function initLayer(vivProps) {
-      const Layer = vivProps.loader.numLevels === 1 ? ImageLayer : MultiscaleImageLayer;
-      return [Layer, { id, ...vivProps, on: true }];
+    async function initLayer(config: ImageLayerConfig) {
+      const { loadImageConfig } = await import('../../io');
+      const layerState = await loadImageConfig(config, id);
+      setLayer(layerState);
     }
     if (id in sourceInfo) {
-      const layerInfo = sourceInfo[id];
-      initLayer(layerInfo).then(setLayer);
+      const config = sourceInfo[id];
+      initLayer(config);
     }
   }, [sourceInfo]);
 
   // If layer hasn't been initialized, don't render control.
-  const layerProps = layer[1];
+  const { layerProps } = layer;
   if (!layerProps?.loader) return null;
 
-  const { name } = sourceInfo[id];
+  const { name = '' } = layer.metadata;
   return (
     <Accordion defaultExpanded>
       <Header id={id} name={name} />

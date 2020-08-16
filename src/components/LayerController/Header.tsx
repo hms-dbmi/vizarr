@@ -25,7 +25,7 @@ const DenseAccordionSummary = withStyles({
   expanded: {},
 })(AccordionSummary);
 
-function Header({ id, name }) {
+function Header({ id, name }: { id: string; name: string }) {
   const label = `layer-controller-${id}`;
   return (
     <DenseAccordionSummary aria-controls={label} id={label}>

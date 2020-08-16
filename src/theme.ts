@@ -37,11 +37,11 @@ export default createMuiTheme({
     },
   },
   overrides: {
-    MuiAccordianSummary: {
-      root: {
-        height: '5px',
-      },
-    },
+    // MuiAccordianSummary: {
+    //   root: {
+    //     height: '5px',
+    //   },
+    // },
     MuiSlider: {
       thumb: {
         '&:focus, &:hover': {

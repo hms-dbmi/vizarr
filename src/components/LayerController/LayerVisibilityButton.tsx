@@ -1,19 +1,20 @@
 import { useRecoilState } from 'recoil';
+import type { MouseEvent } from 'react';
 import { IconButton } from '@material-ui/core';
 import { Visibility, VisibilityOff } from '@material-ui/icons';
 
 import { layerStateFamily } from '../../state';
 
-function LayerVisibilityButton({ id }) {
+function LayerVisibilityButton({ id }: { id: string }) {
   const [layer, setLayer] = useRecoilState(layerStateFamily(id));
-  const toggle = (e) => {
-    e.stopPropagation();
-    setLayer(([prevLayer, prevProps]) => {
-      const on = !prevProps.on;
-      return [prevLayer, { ...prevProps, on }];
+  const toggle = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    setLayer((prev) => {
+      const on = !prev.metadata.on;
+      return { ...prev, metadata: { ...prev.metadata, on } };
     });
   };
-  const { on } = layer[1];
+  const { on } = layer.metadata;
   return (
     <IconButton
       aria-label={`toggle-layer-visibility-${id}`}
