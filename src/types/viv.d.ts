@@ -5,13 +5,13 @@ declare module 'viv' {
   type TypedArray = Uint8Array | Uint16Array | Uint32Array | Float32Array;
   type SupportedDtype = '<u1' | '<u2' | '<u4' | '<f4';
 
-  interface DtypeLookup {
+  type DtypeLookup = {
     format: number;
     dataFormat: number;
     type: number;
     max: number;
     TypedArray: TypedArray;
-  }
+  };
 
   export const DTYPE_VALUES: {
     '<u1': DtypeLookup;
@@ -20,7 +20,25 @@ declare module 'viv' {
     '<f4': DtypeLookup;
   };
 
-  export class ZarrLoader extends Loader {
+  type TileSelection = {
+    x: number;
+    y: number;
+    z?: number;
+    loaderSelection: number[][];
+  };
+
+  type RasterSelection = {
+    z?: number;
+    loaderSelection: number[][];
+  };
+
+  type SelectionData = {
+    data: TypedArray[];
+    width: number;
+    height: number;
+  };
+
+  export class ZarrLoader {
     constructor(props: { data: ZarrArray | ZarrArray[]; dimensions: { field: string | number }[] });
     readonly isPyramid: boolean;
     readonly isRgb: boolean;
@@ -29,14 +47,14 @@ declare module 'viv' {
     readonly dtype: SupportedDtype;
     readonly base: ZarrArray;
 
-    getTile(tile: unknown): Promise<unknown>;
-    getRaster(tile: unknown): Promise<unknown>;
-    getRasterSize(tile: unknown): unknown;
+    getTile(selection: TileSelection): Promise<SelectionData>;
+    getRaster(selection: RasterSelection): Promise<SelectionData>;
+    getRasterSize(selection: RasterSelection): { width: number; height: number };
 
     onTileError(error: Error): void;
   }
 
-  export interface VivLayerProps {
+  export type VivLayerProps = {
     loader?: ZarrLoader;
     id: string;
     loaderSelection: number[][];
@@ -45,7 +63,7 @@ declare module 'viv' {
     channelIsOn: boolean[];
     colormap: null | string;
     opacity: number;
-  }
+  };
 
   export class ImageLayer extends Layer {
     construtor(

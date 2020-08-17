@@ -16,8 +16,8 @@ const DenseSlider = withStyles({
   },
 })(Slider);
 
-function OpacitySlider({ id }: { id: string }) {
-  const [layer, setLayer] = useRecoilState(layerStateFamily(id));
+function OpacitySlider({ layerId }: { layerId: string }) {
+  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
   const handleChange = (_: ChangeEvent<{}>, value: number | number[]) => {
     const opacity = value as number;
     setLayer((prev) => ({ ...prev, layerProps: { ...prev.layerProps, opacity } }));

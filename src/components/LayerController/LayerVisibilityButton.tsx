@@ -5,19 +5,19 @@ import { Visibility, VisibilityOff } from '@material-ui/icons';
 
 import { layerStateFamily } from '../../state';
 
-function LayerVisibilityButton({ id }: { id: string }) {
-  const [layer, setLayer] = useRecoilState(layerStateFamily(id));
+function LayerVisibilityButton({ layerId }: { layerId: string }) {
+  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
   const toggle = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     setLayer((prev) => {
-      const on = !prev.metadata.on;
-      return { ...prev, metadata: { ...prev.metadata, on } };
+      const on = !prev.on;
+      return { ...prev, on };
     });
   };
-  const { on } = layer.metadata;
+  const { on } = layer;
   return (
     <IconButton
-      aria-label={`toggle-layer-visibility-${id}`}
+      aria-label={`toggle-layer-visibility-${layerId}`}
       onClick={toggle}
       style={{
         backgroundColor: 'transparent',

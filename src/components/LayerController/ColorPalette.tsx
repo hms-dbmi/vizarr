@@ -1,7 +1,7 @@
 import { IconButton } from '@material-ui/core';
 import { Lens } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
-import { COLORS } from '../../utils';
+import { COLORS, hexToRGB } from '../../utils';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -19,14 +19,15 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
+const RGB_COLORS: [string, number[]][] = Object.entries(COLORS).map(([name, hex]) => [name, hexToRGB(hex)]);
 const ColorPalette = ({ handleChange }: { handleChange: (c: number[]) => void }) => {
   const classes = useStyles();
   return (
     <div className={classes.container} aria-label="color-swatch">
-      {Object.entries(COLORS).map(([name, color]) => {
+      {RGB_COLORS.map(([name, rgb]) => {
         return (
-          <IconButton className={classes.button} key={name} onClick={() => handleChange(color)}>
-            <Lens fontSize="small" style={{ color: `rgb(${color})` }} />
+          <IconButton className={classes.button} key={name} onClick={() => handleChange(rgb)}>
+            <Lens fontSize="small" style={{ color: `rgb(${rgb})` }} />
           </IconButton>
         );
       })}

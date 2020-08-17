@@ -30,8 +30,8 @@ function Viewer() {
   const layerConstructors = useRecoilValue(layersSelector);
   const layers = layerConstructors.map((l) => {
     // Something weird with Recoil Loadable here. Need to cast to any.
-    const { Layer, layerProps, metadata } = l as any;
-    return !Layer || !metadata.on ? null : new Layer(layerProps);
+    const { Layer, layerProps, on } = l as any;
+    return !Layer || !on ? null : new Layer(layerProps);
   });
   return <WrappedViewStateDeck layers={layers} />;
 }

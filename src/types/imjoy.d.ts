@@ -1,9 +1,9 @@
 declare module 'imjoy-rpc' {
-  interface ImJoySetupRPCProps {
+  type ImJoySetupRPCProps = {
     name: string;
     description: string;
     version: string;
-  }
+  };
 
   interface ExportedFunctions {
     [name: string]: (props: any) => void;

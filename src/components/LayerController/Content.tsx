@@ -14,7 +14,7 @@ const Details = withStyles({
   },
 })(AccordionDetails);
 
-function Content({ id, nChannels }: { id: string; nChannels: number }) {
+function Content({ layerId, nChannels }: { layerId: string; nChannels: number }) {
   return (
     <Details>
       <Grid container direction="column">
@@ -24,14 +24,14 @@ function Content({ id, nChannels }: { id: string; nChannels: number }) {
               <Typography variant="caption">opacity:</Typography>
             </Grid>
             <Grid xs={8}>
-              <OpacitySlider id={id} />
+              <OpacitySlider layerId={layerId} />
             </Grid>
           </Grid>
         </Grid>
         <Divider />
         <Grid>
           {range(nChannels).map((i) => (
-            <ChannelController id={id} channelIndex={i} key={i + id} />
+            <ChannelController layerId={layerId} channelIndex={i} key={i + layerId} />
           ))}
         </Grid>
       </Grid>

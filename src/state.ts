@@ -1,67 +1,66 @@
 import { atom, atomFamily, selector, waitForAll } from 'recoil';
 import type { HTTPStore } from 'zarr';
-import type { VivLayerProps, ImageLayer, MultiscaleImageLayer } from 'viv';
+import type { VivLayerProps, ImageLayer, MultiscaleImageLayer, ZarrLoader } from 'viv';
 
 export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
 export const DEFAULT_LAYER_PROPS = {
   loader: undefined,
   colorValues: [],
   sliderValues: [],
+  contrastLimits: [],
   loaderSelection: [],
   channelIsOn: [],
   colormap: '',
   opacity: 1,
 };
 
-const DEFAULT_LAYER_METADATA = {
-  name: undefined,
-  on: false,
-  labels: [],
-  channel_axis: null,
-  contrastLimits: [],
-};
-
-export interface BaseConfig {
+export type BaseConfig = {
   source: string | HTTPStore;
+  channel_axis?: number;
   name?: string;
   colormap?: string;
   opacity?: number;
-}
+};
 
-export interface SourceNdConfig {
-  channel_axis: number;
+export type MultichannelConfig = {
   colors?: string[];
   contrast_limits?: number[][];
-  labels?: string[];
+  names?: string[];
   visibilities?: boolean[];
-}
+} & BaseConfig;
 
-export interface Source2DConfig {
+export type SingleChannelConfig = {
   color?: string;
   contrast_limits?: number[];
-  label?: string;
   visibility?: boolean;
-}
+} & BaseConfig;
 
-export type ImageLayerConfig = BaseConfig | (BaseConfig & SourceNdConfig) | (BaseConfig & Source2DConfig);
+export type ImageLayerConfig = BaseConfig | MultichannelConfig | SingleChannelConfig;
 
-export interface LayerMetadata {
+export type SourceData = {
+  loader: ZarrLoader;
   name?: string;
-  on: boolean;
-  labels: string[];
   channel_axis: number | null;
-  contrastLimits: number[][];
-}
+  colors: string[];
+  names: string[];
+  contrast_limits: number[][];
+  visibilities: boolean[];
+  defaults: {
+    selection: number[];
+    colormap: string;
+    opacity: number;
+  };
+};
 
-export interface LayerState {
+export type LayerState = {
   Layer: null | ImageLayer | MultiscaleImageLayer;
-  layerProps: VivLayerProps;
-  metadata: LayerMetadata;
-}
+  layerProps: VivLayerProps & { contrastLimits: number[][] };
+  on: boolean;
+};
 
 export const sourceInfoState = atom({
   key: 'sourceInfo',
-  default: {} as { [id: string]: ImageLayerConfig },
+  default: {} as { [id: string]: SourceData },
 });
 
 export const layerIdsState = atom({
@@ -79,7 +78,7 @@ export const layerStateFamily = atomFamily({
   default: (id: string): LayerState => ({
     Layer: null,
     layerProps: { id, ...DEFAULT_LAYER_PROPS },
-    metadata: DEFAULT_LAYER_METADATA,
+    on: false,
   }),
 });
 

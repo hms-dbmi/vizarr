@@ -1,15 +1,16 @@
 import { HTTPStore } from 'zarr';
-import type { OmeroImageData } from './types/rootAttrs';
+
+export const MAX_CHANNELS = 6;
 
 export const COLORS = {
-  cyan: [0, 255, 255],
-  yellow: [255, 255, 0],
-  magenta: [255, 0, 255],
-  red: [255, 0, 0],
-  green: [0, 255, 0],
-  blue: [0, 0, 255],
-  white: [255, 255, 255],
-  orange: [255, 128, 0],
+  cyan: '#00FFFF',
+  yellow: '#FFFF00',
+  magenta: '#FF00FF',
+  red: '#FF0000',
+  green: '#00FF00',
+  blue: '#0000FF',
+  white: '#FFFFFF',
+  orange: '#FFA500',
 };
 export const MAGENTA_GREEN = [COLORS.magenta, COLORS.green];
 export const RGB = [COLORS.red, COLORS.green, COLORS.blue];
@@ -27,35 +28,6 @@ export function normalizeStore(store: string | HTTPStore) {
     return new HTTPStore(store);
   }
   return store;
-}
-
-export function omeroToVivProps(imageData: OmeroImageData) {
-  const { rdefs, channels } = imageData;
-  const t = rdefs.defaultT ?? 0;
-  const z = rdefs.defaultZ ?? 0;
-  const nChannels = channels.length;
-  const loaderSelection = range(nChannels).map((c) => [t, c, z, 0, 0]);
-
-  const colorValues: number[][] = [];
-  const sliderValues: number[][] = [];
-  const channelIsOn: boolean[] = [];
-  const labels: string[] = [];
-  channels.forEach((c) => {
-    colorValues.push(hexToRGB(c.color));
-    sliderValues.push([c.window.start, c.window.end]);
-    channelIsOn.push(c.active);
-    labels.push(c.label);
-  });
-
-  return {
-    channel_axis: 1,
-    loaderSelection,
-    colorValues,
-    sliderValues,
-    contrastLimits: [...sliderValues],
-    channelIsOn,
-    labels,
-  };
 }
 
 export function hexToRGB(hex: string): number[] {

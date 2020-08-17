@@ -17,14 +17,16 @@ function App() {
   const setSourceInfo = useSetRecoilState(sourceInfoState);
 
   async function addImage(config: ImageLayerConfig) {
+    const { createSourceData } = await import('../io');
     const id = Math.random().toString(36).slice(2);
-    setLayerIds((prevIds) => [...prevIds, id]);
+    const sourceData = await createSourceData(config);
     setSourceInfo((prevSourceInfo) => {
-      if (!config.name) {
-        config.name = `image_${Object.keys(prevSourceInfo).length}`;
+      if (!sourceData.name) {
+        sourceData.name = `image_${Object.keys(prevSourceInfo).length}`;
       }
-      return { ...prevSourceInfo, [id]: config };
+      return { ...prevSourceInfo, [id]: sourceData };
     });
+    setLayerIds((prevIds) => [...prevIds, id]);
   }
 
   useEffect(() => {

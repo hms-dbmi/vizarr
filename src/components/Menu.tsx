@@ -47,7 +47,7 @@ function Menu() {
         </IconButton>
         <div className={classes.scroll} style={{ display: hidden ? 'none' : 'flex' }}>
           {layerIds.map((id) => (
-            <LayerController id={id} key={id} />
+            <LayerController layerId={id} key={id} />
           ))}
         </div>
       </Grid>

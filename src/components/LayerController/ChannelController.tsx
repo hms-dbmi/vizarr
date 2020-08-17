@@ -1,18 +1,20 @@
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import type { ChangeEvent } from 'react';
 import { Slider, Typography, Grid, IconButton } from '@material-ui/core';
 import { RadioButtonChecked, RadioButtonUnchecked } from '@material-ui/icons';
 
 import ChannelOptions from './ChannelOptions';
-import { layerStateFamily } from '../../state';
+import { layerStateFamily, sourceInfoState } from '../../state';
 
 interface ChannelConfig {
-  id: string;
+  layerId: string;
   channelIndex: number;
 }
 
-function ChannelController({ id, channelIndex }: ChannelConfig) {
-  const [layer, setLayer] = useRecoilState(layerStateFamily(id));
+function ChannelController({ layerId, channelIndex }: ChannelConfig) {
+  const sourceInfo = useRecoilValue(sourceInfoState);
+  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
+
   const handleContrastChange = (_: ChangeEvent<{}>, v: number | number[]) => {
     setLayer((prev) => {
       const sliderValues = [...prev.layerProps.sliderValues];
@@ -20,6 +22,7 @@ function ChannelController({ id, channelIndex }: ChannelConfig) {
       return { ...prev, layerProps: { ...prev.layerProps, sliderValues } };
     });
   };
+
   const handleVisibilityChange = () => {
     setLayer((prev) => {
       const channelIsOn = [...prev.layerProps.channelIsOn];
@@ -27,14 +30,19 @@ function ChannelController({ id, channelIndex }: ChannelConfig) {
       return { ...prev, layerProps: { ...prev.layerProps, channelIsOn } };
     });
   };
+
+  const { sliderValues, colorValues, contrastLimits, channelIsOn, colormap, loaderSelection } = layer.layerProps;
+
   // Material slider tries to sort in place. Need to copy.
-  const { layerProps, metadata } = layer;
-  const value = [...layerProps.sliderValues[channelIndex]];
-  const { colormap } = layerProps;
-  const color = `rgb(${colormap ? [255, 255, 255] : layerProps.colorValues[channelIndex]})`;
-  const on = layerProps.channelIsOn[channelIndex];
-  const [min, max] = metadata.contrastLimits[channelIndex];
-  const label = metadata.labels[channelIndex];
+  const value = [...sliderValues[channelIndex]];
+  const color = `rgb(${colormap ? [255, 255, 255] : colorValues[channelIndex]})`;
+  const on = channelIsOn[channelIndex];
+  const [min, max] = contrastLimits[channelIndex];
+
+  const { channel_axis, names } = sourceInfo[layerId];
+  const selection = loaderSelection[channelIndex];
+  const nameIndex = channel_axis ? selection[channel_axis] : 0;
+  const label = names[nameIndex];
   return (
     <>
       <Grid container justify="space-between" wrap="nowrap">
@@ -46,7 +54,7 @@ function ChannelController({ id, channelIndex }: ChannelConfig) {
           </div>
         </Grid>
         <Grid item xs={1}>
-          <ChannelOptions layerId={id} channelIndex={channelIndex} />
+          <ChannelOptions layerId={layerId} channelIndex={channelIndex} />
         </Grid>
       </Grid>
       <Grid container justify="space-between">

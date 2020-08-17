@@ -1,4 +1,4 @@
-export interface OmeroChannel {
+export type OmeroChannel = {
   active: boolean;
   color: string;
   label: string;
@@ -8,9 +8,9 @@ export interface OmeroChannel {
     start: number;
     end: number;
   };
-}
+};
 
-export interface OmeroImageData {
+export type OmeroImageData = {
   channels: OmeroChannel[];
   rdefs: {
     defaultT?: number;
@@ -18,14 +18,14 @@ export interface OmeroImageData {
     model: string;
   };
   name?: string;
-}
+};
 
-export interface Multiscale {
+export type Multiscale = {
   datasets: { path: string }[];
   version?: string;
-}
+};
 
-export interface RootAttrs {
+export type RootAttrs = {
   omero: OmeroImageData;
   multiscales: Multiscale[];
-}
+};

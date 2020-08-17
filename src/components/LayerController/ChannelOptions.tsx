@@ -54,7 +54,7 @@ function ChannelOptions({ layerId, channelIndex }: { layerId: string; channelInd
 
     setLayer((prev) => {
       // Need to move sliders in if contrast limits are narrower
-      const contrastLimits = [...prev.metadata.contrastLimits];
+      const contrastLimits = [...prev.layerProps.contrastLimits];
       const sliderValues = [...prev.layerProps.sliderValues];
 
       const [cmin, cmax] = contrastLimits[channelIndex];
@@ -72,15 +72,14 @@ function ChannelOptions({ layerId, channelIndex }: { layerId: string; channelInd
 
       return {
         ...prev,
-        layerProps: { ...prev.layerProps, sliderValues },
-        metadata: { ...prev.metadata, contrastLimits },
+        layerProps: { ...prev.layerProps, sliderValues, contrastLimits },
       };
     });
   };
 
   const open = Boolean(anchorEl);
   const id = open ? `channel-${channelIndex}-${layerId}-options` : undefined;
-  const [min, max] = layer.metadata.contrastLimits[channelIndex];
+  const [min, max] = layer.layerProps.contrastLimits[channelIndex];
   return (
     <>
       <IconButton
