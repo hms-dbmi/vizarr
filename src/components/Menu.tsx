@@ -29,7 +29,7 @@ const useStyles = makeStyles({
   },
 });
 
-function Menu() {
+function Menu(): JSX.Element {
   const layerIds = useRecoilValue(layerIdsState);
   const [hidden, toggle] = useReducer((v) => !v, false);
   const classes = useStyles();
@@ -47,7 +47,7 @@ function Menu() {
         </IconButton>
         <div className={classes.scroll} style={{ display: hidden ? 'none' : 'flex' }}>
           {layerIds.map((id) => (
-            <LayerController id={id} key={id} />
+            <LayerController layerId={id} key={id} />
           ))}
         </div>
       </Grid>

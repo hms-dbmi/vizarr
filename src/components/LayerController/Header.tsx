@@ -25,12 +25,12 @@ const DenseAccordionSummary = withStyles({
   expanded: {},
 })(AccordionSummary);
 
-function Header({ id, name }) {
-  const label = `layer-controller-${id}`;
+function Header({ layerId, name }: { layerId: string; name: string }): JSX.Element {
+  const label = `layer-controller-${layerId}`;
   return (
     <DenseAccordionSummary aria-controls={label} id={label}>
       <div style={{ display: 'flex', flexDirection: 'row' }}>
-        <LayerVisibilityButton id={id} />
+        <LayerVisibilityButton layerId={layerId} />
         <Typography
           style={{
             marginTop: '4px',

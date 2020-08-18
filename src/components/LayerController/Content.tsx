@@ -1,6 +1,7 @@
 import { AccordionDetails, Grid, Typography, Divider } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 
+import AddChannelButton from './AddChannelButton';
 import OpacitySlider from './OpacitySlider';
 import ChannelController from './ChannelController';
 
@@ -14,7 +15,7 @@ const Details = withStyles({
   },
 })(AccordionDetails);
 
-function Content({ id, nChannels }) {
+function Content({ layerId, nChannels }: { layerId: string; nChannels: number }): JSX.Element {
   return (
     <Details>
       <Grid container direction="column">
@@ -23,15 +24,24 @@ function Content({ id, nChannels }) {
             <Grid item xs={3}>
               <Typography variant="caption">opacity:</Typography>
             </Grid>
-            <Grid xs={8}>
-              <OpacitySlider id={id} />
+            <Grid item xs={8}>
+              <OpacitySlider layerId={layerId} />
             </Grid>
+          </Grid>
+        </Grid>
+        <Divider />
+        <Grid container justify="space-between">
+          <Grid item xs={3}>
+            <Typography variant="caption">channels:</Typography>
+          </Grid>
+          <Grid item xs={1}>
+            <AddChannelButton layerId={layerId} />
           </Grid>
         </Grid>
         <Divider />
         <Grid>
           {range(nChannels).map((i) => (
-            <ChannelController id={id} channelIndex={i} key={i + id} />
+            <ChannelController layerId={layerId} channelIndex={i} key={i + layerId} />
           ))}
         </Grid>
       </Grid>

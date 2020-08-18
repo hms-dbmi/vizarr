@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 import { useRecoilValue, useRecoilState } from 'recoil';
 import MuiAccordion from '@material-ui/core/Accordion';
 import { withStyles } from '@material-ui/styles';
-import { ImageLayer, MultiscaleImageLayer } from 'viv';
 
 import { sourceInfoState, layerStateFamily } from '../../state';
+import type { SourceData } from '../../state';
 
 import Header from './Header';
 import Content from './Content';
@@ -30,30 +30,29 @@ const Accordion = withStyles({
   },
 })(MuiAccordion);
 
-function LayerController({ id }) {
+function LayerController({ layerId }: { layerId: string }): JSX.Element {
   const sourceInfo = useRecoilValue(sourceInfoState);
-  const [layer, setLayer] = useRecoilState(layerStateFamily(id));
+  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
 
   useEffect(() => {
-    async function initLayer(vivProps) {
-      const Layer = vivProps.loader.numLevels === 1 ? ImageLayer : MultiscaleImageLayer;
-      return [Layer, { id, ...vivProps, on: true }];
+    async function initLayer(sourceData: SourceData) {
+      const { initLayerStateFromSource } = await import('../../io');
+      const initialLayerState = await initLayerStateFromSource(sourceData, layerId);
+      setLayer(initialLayerState);
     }
-    if (id in sourceInfo) {
-      const layerInfo = sourceInfo[id];
-      initLayer(layerInfo).then(setLayer);
+    // Loader only defined once layer state is initialized.
+    if (layerId in sourceInfo && !layer.layerProps.loader) {
+      const config = sourceInfo[layerId];
+      initLayer(config);
     }
   }, [sourceInfo]);
 
-  // If layer hasn't been initialized, don't render control.
-  const layerProps = layer[1];
-  if (!layerProps?.loader) return null;
-
-  const { name } = sourceInfo[id];
+  const { name = '' } = sourceInfo[layerId];
+  const nChannels = layer.layerProps.loaderSelection.length;
   return (
     <Accordion defaultExpanded>
-      <Header id={id} name={name} />
-      <Content id={id} nChannels={layerProps.loaderSelection.length} />
+      <Header layerId={layerId} name={name} />
+      <Content layerId={layerId} nChannels={nChannels} />
     </Accordion>
   );
 }
