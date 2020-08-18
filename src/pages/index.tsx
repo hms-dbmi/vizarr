@@ -1,7 +1,9 @@
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
+
+import { Button } from '@material-ui/core';
 
 import { version as vizarrVersion } from '../../package.json';
 import { layerIdsState, sourceInfoState, viewerViewState } from '../state';
@@ -10,11 +12,25 @@ import type { ImageLayerConfig } from '../state';
 const Viewer = dynamic(() => import('../components/Viewer'));
 const Menu = dynamic(() => import('../components/Menu'));
 
+type ImjoyButtonConfig = {
+  label: string;
+  callback: () => void;
+};
+
+function CallbackButton({ config }: { config: ImjoyButtonConfig }): JSX.Element {
+  return (
+    <Button onClick={config.callback} style={{ position: 'absolute', right: 4, zIndex: 3 }}>
+      {config.label}
+    </Button>
+  );
+}
+
 function App() {
   const router = useRouter();
   const setViewState = useSetRecoilState(viewerViewState);
   const setLayerIds = useSetRecoilState(layerIdsState);
   const setSourceInfo = useSetRecoilState(sourceInfoState);
+  const [buttonConfig, setButtonConfig] = useState<null | ImjoyButtonConfig>(null);
 
   async function addImage(config: ImageLayerConfig) {
     const { createSourceData } = await import('../io');
@@ -46,7 +62,9 @@ function App() {
       });
       const add_image = async (props: ImageLayerConfig) => addImage(props);
       const set_view_state = async (vs: { zoom: number; target: number[] }) => setViewState(vs);
-      api.export({ add_image, set_view_state });
+      const clear = async () => setLayerIds([]);
+      const create_button = async (config: ImjoyButtonConfig) => setButtonConfig(config);
+      api.export({ add_image, set_view_state, clear, create_button });
     }
     // enable imjoy api when loaded as an iframe
     if (window.self !== window.top) {
@@ -56,6 +74,7 @@ function App() {
 
   return (
     <>
+      {buttonConfig && <CallbackButton config={buttonConfig} />}
       <Menu />
       <Viewer />
     </>
