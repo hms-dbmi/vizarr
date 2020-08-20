@@ -1,6 +1,7 @@
 # vizarr
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/hms-dbmi/vizarr/master?filepath=example%2Fgetting_started.ipynb)
 [![launch ImJoy](https://imjoy.io/static/badge/launch-imjoy-badge.svg)](https://imjoy.io/#/app?workspace=vizarr&plugin=https://github.com/hms-dbmi/vizarr/blob/master/example/VizarrDemo.imjoy.html)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hms-dbmi/vizarr/blob/master/example/mandelbrot.ipynb)
 
 ![Multiscale OME-Zarr in Jupyter Notebook with Vizarr](/screenshot.png)
 
