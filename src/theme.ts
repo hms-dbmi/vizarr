@@ -45,6 +45,7 @@ export default createMuiTheme({
         height: 11,
         width: 5,
         borderRadius: '15%',
+        marginLeft: -1,
       },
     },
     MuiInput: {
