@@ -1,9 +1,9 @@
 numpy
 ipywidgets>=7.0.0
 scikit-image
-imjoy>=0.10.0
+imjoy>=0.10.10
 fsspec
-imjoy-rpc>=0.2.12
+imjoy-rpc>=0.2.30
 zarr
 numba
 requests
