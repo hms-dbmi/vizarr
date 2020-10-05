@@ -28,3 +28,7 @@ out/*
 example/*.zarr
 example/.ipynb_checkpoints/*
 example/data/**
+
+404.html
+index.html
+_next/
