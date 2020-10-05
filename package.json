@@ -1,6 +1,6 @@
 {
-  "name": "vizarr",
-  "version": "0.0.1",
+  "name": "@hms-dbmi/vizarr",
+  "version": "0.0.3",
   "private": true,
   "dependencies": {
     "@hms-dbmi/viv": "^0.4.2",
@@ -18,8 +18,15 @@
     "dev": "next",
     "build": "next build",
     "start": "next start",
-    "export": "next build && next export"
+    "export": "next build && next export",
+    "prepublishOnly": "NPM_BUILD=true npm run export && cp -r ./out/* .",
+    "postpublish": "git clean -fd"
   },
+  "files": [
+    "index.html",
+    "404.html",
+    "_next/"
+  ],
   "prettier": {
     "trailingComma": "es5",
     "printWidth": 120,
