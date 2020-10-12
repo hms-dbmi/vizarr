@@ -7,7 +7,7 @@
     "@material-ui/icons": "^4.9.1",
     "deck.gl": "^8.2.8",
     "imjoy-rpc": "^0.2.22",
-    "next": "^9.5.3",
+    "next": "^9.5.4",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "recoil": "0.0.13",
