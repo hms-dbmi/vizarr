@@ -20,9 +20,10 @@ const DenseSlider = withStyles({
 
 
 function DimensionSlider({ layerId, dimension, max }: {
-    layerId: string,
-    dimension: string,
-    max: number }): JSX.Element {
+  layerId: string,
+  dimension: string,
+  max: number
+}): JSX.Element {
   const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
   const handleChange = (_: ChangeEvent<unknown>, value: number | number[]) => {
     const index = value as number;
@@ -56,7 +57,7 @@ function DimensionSlider({ layerId, dimension, max }: {
             </div>
           </Grid>
           <Grid item xs={1}>
-            <DimensionOptions layerId={layerId} dimension={dimension} max={max}/>
+            <DimensionOptions layerId={layerId} dimension={dimension} max={max} />
           </Grid>
         </Grid>
         <Grid container justify="space-between">

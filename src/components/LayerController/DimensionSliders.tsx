@@ -1,4 +1,4 @@
-import {Grid, Divider } from '@material-ui/core';
+import { Grid, Divider } from '@material-ui/core';
 import { useRecoilValue } from 'recoil';
 import DimensionSlider from './DimensionSlider';
 import { sourceInfoState } from '../../state';
@@ -25,5 +25,5 @@ function DimensionSliders({ layerId }: { layerId: string }): JSX.Element {
     </>
   )
 }
-  
+
 export default DimensionSliders;

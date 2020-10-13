@@ -16,7 +16,8 @@ const DenseInput = withStyles({
 
 function DimensionOptions({ layerId, dimension, max }: {
     layerId: string, dimension: string,
-    max: number }): JSX.Element {
+    max: number
+}): JSX.Element {
     const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
     const [anchorEl, setAnchorEl] = useState<null | Element>(null);
 
@@ -42,7 +43,7 @@ function DimensionOptions({ layerId, dimension, max }: {
                 layerProps.t_index = value;
             }
 
-            return {...prev, layerProps};
+            return { ...prev, layerProps };
         });
     };
 
