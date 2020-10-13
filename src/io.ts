@@ -226,6 +226,8 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
       contrastLimits,
       channelIsOn,
       opacity,
+      z_index: selection[2],
+      t_index: selection[0],
       colormap,
     },
     on: true,

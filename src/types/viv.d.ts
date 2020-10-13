@@ -63,6 +63,8 @@ declare module 'viv' {
     channelIsOn: boolean[];
     colormap: null | string;
     opacity: number;
+    z_index: number;
+    t_index: number;
   };
 
   export class ImageLayer extends Layer {

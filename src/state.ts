@@ -12,6 +12,8 @@ export const DEFAULT_LAYER_PROPS = {
   channelIsOn: [],
   colormap: '',
   opacity: 1,
+  z_index: 1,
+  t_index: 1,
 };
 
 export type BaseConfig = {
