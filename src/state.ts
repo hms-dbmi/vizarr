@@ -12,8 +12,6 @@ export const DEFAULT_LAYER_PROPS = {
   channelIsOn: [],
   colormap: '',
   opacity: 1,
-  z_index: 1,
-  t_index: 1,
 };
 
 export type BaseConfig = {
@@ -52,6 +50,7 @@ export type SourceData = {
     colormap: string;
     opacity: number;
   };
+  dimensionNames: string[];
 };
 
 export type LayerState = {

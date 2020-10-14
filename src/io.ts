@@ -20,6 +20,8 @@ function loadSingleChannel(config: SingleChannelConfig, loader: ZarrLoader, max:
       colormap,
       opacity,
     },
+    // FIXME: assign dimensionNames?
+    dimensionNames: ['0']
   };
 }
 
@@ -79,6 +81,8 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
       colormap,
       opacity,
     },
+    // FIXME: assign dimensionNames?
+    dimensionNames: ['0']
   };
 }
 
@@ -113,6 +117,7 @@ function loadOME(config: ImageLayerConfig, imageData: OmeroImageData, loader: Za
       colormap,
       opacity,
     },
+    dimensionNames: ["t", "c", "z", "y", "x"],
   };
 }
 
@@ -226,8 +231,6 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
       contrastLimits,
       channelIsOn,
       opacity,
-      z_index: selection[2],
-      t_index: selection[0],
       colormap,
     },
     on: true,

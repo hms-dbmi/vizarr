@@ -1,11 +1,11 @@
 import { Grid, Typography, Divider } from '@material-ui/core';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import type { ChangeEvent } from 'react';
 import { Slider } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import DimensionOptions from './DimensionOptions';
 
-import { layerStateFamily } from '../../state';
+import { layerStateFamily, sourceInfoState } from '../../state';
 
 const DenseSlider = withStyles({
   root: {
@@ -19,31 +19,34 @@ const DenseSlider = withStyles({
 })(Slider);
 
 
-function DimensionSlider({ layerId, dimension, max }: {
+function DimensionSlider({ layerId, dimIndex, max }: {
   layerId: string,
-  dimension: string,
+  dimIndex: number,
   max: number
 }): JSX.Element {
   const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
+  const sourceInfo = useRecoilValue(sourceInfoState);
+  const { dimensionNames } = sourceInfo[layerId];
+  const dimension = dimensionNames[dimIndex];
+
+  console.log('DimensionSlider layer', layer);
+
   const handleChange = (_: ChangeEvent<unknown>, value: number | number[]) => {
     const index = value as number;
     setLayer((prev) => {
-      let layerProps = { ...prev.layerProps }
-      if (dimension === 'z') {
-        layerProps.z_index = index;
-      } else {
-        layerProps.t_index = index;
-      }
+      let layerProps = { ...prev.layerProps }      
+        // for each channel, update index
+        layerProps.loaderSelection = layerProps.loaderSelection.map(ch => {
+          let new_ch = [...ch];
+          new_ch[dimIndex] = value;
+          return new_ch;
+        });
       return { ...prev, layerProps };
     })
   };
 
-  let value;
-  if (dimension === 'z') {
-    value = layer.layerProps.z_index;
-  } else {
-    value = layer.layerProps.t_index;
-  }
+  // Use first channel to get initial value of slider
+  let value = layer.layerProps.loaderSelection[0] ? layer.layerProps.loaderSelection[0][dimIndex] : 1;
 
   return (
     <>
@@ -57,7 +60,7 @@ function DimensionSlider({ layerId, dimension, max }: {
             </div>
           </Grid>
           <Grid item xs={1}>
-            <DimensionOptions layerId={layerId} dimension={dimension} max={max} />
+            <DimensionOptions layerId={layerId} dimIndex={dimIndex} max={max} />
           </Grid>
         </Grid>
         <Grid container justify="space-between">

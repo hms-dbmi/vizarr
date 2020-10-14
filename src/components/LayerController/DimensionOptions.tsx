@@ -14,8 +14,8 @@ const DenseInput = withStyles({
     },
 })(Input);
 
-function DimensionOptions({ layerId, dimension, max }: {
-    layerId: string, dimension: string,
+function DimensionOptions({ layerId, dimIndex, max }: {
+    layerId: string, dimIndex: number,
     max: number
 }): JSX.Element {
     const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
@@ -37,24 +37,20 @@ function DimensionOptions({ layerId, dimension, max }: {
 
         setLayer((prev) => {
             let layerProps = { ...prev.layerProps }
-            if (dimension === 'z') {
-                layerProps.z_index = value;
-            } else {
-                layerProps.t_index = value;
-            }
+            // for each channel, update index
+            layerProps.loaderSelection = layerProps.loaderSelection.map(ch => {
+                let new_ch = [...ch]
+                new_ch[dimIndex] = value;
+                return new_ch;
+            });
 
             return { ...prev, layerProps };
         });
     };
 
     const open = Boolean(anchorEl);
-    const id = open ? `${dimension}-index-${layerId}-options` : undefined;;
-    let value;
-    if (dimension === 'z') {
-        value = layer.layerProps.z_index;
-    } else {
-        value = layer.layerProps.t_index;
-    }
+    const id = open ? `${dimIndex}-index-${layerId}-options` : undefined;;
+    const value = layer.layerProps.loaderSelection[0] ? layer.layerProps.loaderSelection[0][dimIndex] : 1;
 
     return (
         <>
@@ -85,7 +81,7 @@ function DimensionOptions({ layerId, dimension, max }: {
                 }}
             >
                 <Paper style={{ padding: '0px 4px', marginBottom: 4 }}>
-                    <Typography variant="caption">{dimension.toUpperCase()} index:</Typography>
+                    <Typography variant="caption">Index:</Typography>
                     <Divider />
                     <DenseInput value={value} onChange={handleIndexChange} type="number" id="max" fullWidth={false} />
                     <Divider />
