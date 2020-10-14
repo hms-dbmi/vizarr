@@ -6,11 +6,9 @@ import { sourceInfoState } from '../../state';
 
 function DimensionSliders({ layerId }: { layerId: string }): JSX.Element {
   const sourceInfo = useRecoilValue(sourceInfoState);
-  let sizeZ = sourceInfo[layerId].loader._data.meta?.shape[3];
-  let sizeT = sourceInfo[layerId].loader._data.meta?.shape[0];
-  // sometimes 'meta' is not defined - default to size = 1
-  sizeZ = sizeZ || 1;
-  sizeT = sizeT || 1;
+  const { shape } = sourceInfo[layerId].loader.base;
+  let sizeZ = shape[2];
+  let sizeT = shape[0];
   if (sizeZ === 1 && sizeT === 1) {
     return <></>
   }
