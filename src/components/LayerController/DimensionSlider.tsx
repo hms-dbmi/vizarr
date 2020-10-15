@@ -1,6 +1,7 @@
 import { Grid, Typography, Divider } from '@material-ui/core';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import type { ChangeEvent } from 'react';
+import { useState, useEffect } from 'react';
 import { Slider } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import DimensionOptions from './DimensionOptions';
@@ -28,25 +29,32 @@ function DimensionSlider({ layerId, dimIndex, max }: {
   const sourceInfo = useRecoilValue(sourceInfoState);
   const { dimensionNames } = sourceInfo[layerId];
   const dimension = dimensionNames[dimIndex];
+  // state of the slider to update UI while dragging
+  const [value, setValue] = useState(0);
 
-  console.log('DimensionSlider layer', layer);
+  // If dimensions change externally, need to update state
+  useEffect(() => {
+    // Use first channel to get initial value of slider - can be undefined on first render
+    setValue(layer.layerProps.loaderSelection[0] ? layer.layerProps.loaderSelection[0][dimIndex] : 1);
+  }, [layer.layerProps.loaderSelection]);
 
-  const handleChange = (_: ChangeEvent<unknown>, value: number | number[]) => {
-    const index = value as number;
+
+  const handleRelease = () => {
     setLayer((prev) => {
-      let layerProps = { ...prev.layerProps }      
-        // for each channel, update index
-        layerProps.loaderSelection = layerProps.loaderSelection.map(ch => {
-          let new_ch = [...ch];
-          new_ch[dimIndex] = value;
-          return new_ch;
-        });
+      let layerProps = { ...prev.layerProps }
+      // for each channel, update index of this dimension
+      layerProps.loaderSelection = layerProps.loaderSelection.map(ch => {
+        let new_ch = [...ch];
+        new_ch[dimIndex] = value;
+        return new_ch;
+      });
       return { ...prev, layerProps };
     })
-  };
+  }
 
-  // Use first channel to get initial value of slider
-  let value = layer.layerProps.loaderSelection[0] ? layer.layerProps.loaderSelection[0][dimIndex] : 1;
+  const handleDrag = (_: ChangeEvent<unknown>, value: number | number[]) => {
+    setValue(value as number);
+  };
 
   return (
     <>
@@ -65,7 +73,13 @@ function DimensionSlider({ layerId, dimIndex, max }: {
         </Grid>
         <Grid container justify="space-between">
           <Grid item xs={12}>
-            <DenseSlider value={value} onChange={handleChange} min={0} max={max} step={1} />
+            <DenseSlider
+              value={value}
+              onChange={handleDrag}
+              onChangeCommitted={handleRelease}
+              min={0}
+              max={max}
+              step={1} />
           </Grid>
         </Grid>
       </Grid>
