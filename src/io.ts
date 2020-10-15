@@ -7,6 +7,8 @@ import { getJson, MAX_CHANNELS, COLORS, MAGENTA_GREEN, RGB, CYMRGB, normalizeSto
 
 function loadSingleChannel(config: SingleChannelConfig, loader: ZarrLoader, max: number): SourceData {
   const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
+  let nonXYdimNames = loader.base.shape.slice(0, -2).map((d, i) => "" + i);
+  let dimNames = nonXYdimNames.concat(['y', 'x']);
   return {
     loader,
     name,
@@ -20,8 +22,7 @@ function loadSingleChannel(config: SingleChannelConfig, loader: ZarrLoader, max:
       colormap,
       opacity,
     },
-    // FIXME: assign dimensionNames?
-    dimensionNames: ['0']
+    dimensionNames: dimNames
   };
 }
 
@@ -68,6 +69,9 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
       }
     }
   }
+  let nonXYdimNames = base.shape.slice(0, -2).map((d, i) => "" + i);
+  let dimNames = nonXYdimNames.concat(['y', 'x']);
+  dimNames[channel_axis as number] = 'c';
   return {
     loader,
     name,
@@ -81,8 +85,7 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
       colormap,
       opacity,
     },
-    // FIXME: assign dimensionNames?
-    dimensionNames: ['0']
+    dimensionNames: dimNames,
   };
 }
 
