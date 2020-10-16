@@ -5,10 +5,18 @@ import type { SourceData, ImageLayerConfig, LayerState, SingleChannelConfig, Mul
 
 import { getJson, MAX_CHANNELS, COLORS, MAGENTA_GREEN, RGB, CYMRGB, normalizeStore, hexToRGB, range } from './utils';
 
+function getAxisLabels(config: SingleChannelConfig | MultichannelConfig, loader: ZarrLoader): string[] {
+  let { axis_labels } = config;
+  if (!axis_labels || axis_labels.length != loader.base.shape.length) {
+    // default axis_labels are e.g. ['0', '1', 'y', 'x']
+    const nonXYaxisLabels = loader.base.shape.slice(0, -2).map((d, i) => "" + i);
+    axis_labels = nonXYaxisLabels.concat(['y', 'x']);
+  }
+  return axis_labels;
+}
+
 function loadSingleChannel(config: SingleChannelConfig, loader: ZarrLoader, max: number): SourceData {
   const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
-  let nonXYaxis_labels = loader.base.shape.slice(0, -2).map((d, i) => "" + i);
-  let axis_labels = nonXYaxis_labels.concat(['y', 'x']);
   return {
     loader,
     name,
@@ -22,7 +30,7 @@ function loadSingleChannel(config: SingleChannelConfig, loader: ZarrLoader, max:
       colormap,
       opacity,
     },
-    axis_labels: axis_labels
+    axis_labels: getAxisLabels(config, loader)
   };
 }
 
@@ -69,8 +77,7 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
       }
     }
   }
-  let nonXYaxis_labels = base.shape.slice(0, -2).map((d, i) => "" + i);
-  let axis_labels = nonXYaxis_labels.concat(['y', 'x']);
+  let axis_labels = getAxisLabels(config, loader);
   axis_labels[channel_axis as number] = 'c';
   return {
     loader,

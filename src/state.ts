@@ -20,6 +20,7 @@ export type BaseConfig = {
   name?: string;
   colormap?: string;
   opacity?: number;
+  axis_labels: string[];
 };
 
 export type MultichannelConfig = {
