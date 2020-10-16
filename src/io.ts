@@ -7,8 +7,8 @@ import { getJson, MAX_CHANNELS, COLORS, MAGENTA_GREEN, RGB, CYMRGB, normalizeSto
 
 function loadSingleChannel(config: SingleChannelConfig, loader: ZarrLoader, max: number): SourceData {
   const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
-  let nonXYdimNames = loader.base.shape.slice(0, -2).map((d, i) => "" + i);
-  let dimNames = nonXYdimNames.concat(['y', 'x']);
+  let nonXYaxis_labels = loader.base.shape.slice(0, -2).map((d, i) => "" + i);
+  let axis_labels = nonXYaxis_labels.concat(['y', 'x']);
   return {
     loader,
     name,
@@ -22,7 +22,7 @@ function loadSingleChannel(config: SingleChannelConfig, loader: ZarrLoader, max:
       colormap,
       opacity,
     },
-    dimensionNames: dimNames
+    axis_labels: axis_labels
   };
 }
 
@@ -69,9 +69,9 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
       }
     }
   }
-  let nonXYdimNames = base.shape.slice(0, -2).map((d, i) => "" + i);
-  let dimNames = nonXYdimNames.concat(['y', 'x']);
-  dimNames[channel_axis as number] = 'c';
+  let nonXYaxis_labels = base.shape.slice(0, -2).map((d, i) => "" + i);
+  let axis_labels = nonXYaxis_labels.concat(['y', 'x']);
+  axis_labels[channel_axis as number] = 'c';
   return {
     loader,
     name,
@@ -85,7 +85,7 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
       colormap,
       opacity,
     },
-    dimensionNames: dimNames,
+    axis_labels: axis_labels,
   };
 }
 
@@ -120,7 +120,7 @@ function loadOME(config: ImageLayerConfig, imageData: OmeroImageData, loader: Za
       colormap,
       opacity,
     },
-    dimensionNames: ["t", "c", "z", "y", "x"],
+    axis_labels: ["t", "c", "z", "y", "x"],
   };
 }
 

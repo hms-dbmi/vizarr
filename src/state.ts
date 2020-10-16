@@ -50,7 +50,7 @@ export type SourceData = {
     colormap: string;
     opacity: number;
   };
-  dimensionNames: string[];
+  axis_labels: string[];
 };
 
 export type LayerState = {

@@ -4,7 +4,7 @@ import type { ChangeEvent } from 'react';
 import { useState, useEffect } from 'react';
 import { Slider } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
-import DimensionOptions from './DimensionOptions';
+import DimensionOptions from './AxisOptions';
 
 import { layerStateFamily, sourceInfoState } from '../../state';
 
@@ -20,32 +20,32 @@ const DenseSlider = withStyles({
 })(Slider);
 
 
-function DimensionSlider({ layerId, dimIndex, max }: {
+function AxisSlider({ layerId, axisIndex, max }: {
   layerId: string,
-  dimIndex: number,
+  axisIndex: number,
   max: number
 }): JSX.Element {
   const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
   const sourceInfo = useRecoilValue(sourceInfoState);
-  const { dimensionNames } = sourceInfo[layerId];
-  const dimension = dimensionNames[dimIndex];
+  const { axis_labels } = sourceInfo[layerId];
+  const axisLabel = axis_labels[axisIndex];
   // state of the slider to update UI while dragging
   const [value, setValue] = useState(0);
 
-  // If dimensions change externally, need to update state
+  // If axis index change externally, need to update state
   useEffect(() => {
     // Use first channel to get initial value of slider - can be undefined on first render
-    setValue(layer.layerProps.loaderSelection[0] ? layer.layerProps.loaderSelection[0][dimIndex] : 1);
+    setValue(layer.layerProps.loaderSelection[0] ? layer.layerProps.loaderSelection[0][axisIndex] : 1);
   }, [layer.layerProps.loaderSelection]);
 
 
   const handleRelease = () => {
     setLayer((prev) => {
       let layerProps = { ...prev.layerProps }
-      // for each channel, update index of this dimension
+      // for each channel, update index of this axis
       layerProps.loaderSelection = layerProps.loaderSelection.map(ch => {
         let new_ch = [...ch];
-        new_ch[dimIndex] = value;
+        new_ch[axisIndex] = value;
         return new_ch;
       });
       return { ...prev, layerProps };
@@ -63,12 +63,12 @@ function DimensionSlider({ layerId, dimIndex, max }: {
           <Grid item xs={10}>
             <div style={{ width: 165, overflow: 'hidden', textOverflow: 'ellipsis' }}>
               <Typography variant="caption" noWrap>
-                {dimension.toUpperCase()}: {value}/{max}
+                {axisLabel.toUpperCase()}: {value}/{max}
               </Typography>
             </div>
           </Grid>
           <Grid item xs={1}>
-            <DimensionOptions layerId={layerId} dimIndex={dimIndex} max={max} />
+            <DimensionOptions layerId={layerId} axisIndex={axisIndex} max={max} />
           </Grid>
         </Grid>
         <Grid container justify="space-between">
@@ -88,4 +88,4 @@ function DimensionSlider({ layerId, dimIndex, max }: {
   )
 }
 
-export default DimensionSlider;
+export default AxisSlider;

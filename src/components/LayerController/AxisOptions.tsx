@@ -14,8 +14,9 @@ const DenseInput = withStyles({
     },
 })(Input);
 
-function DimensionOptions({ layerId, dimIndex, max }: {
-    layerId: string, dimIndex: number,
+function AxisOptions({ layerId, axisIndex, max }: {
+    layerId: string,
+    axisIndex: number,
     max: number
 }): JSX.Element {
     const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
@@ -40,7 +41,7 @@ function DimensionOptions({ layerId, dimIndex, max }: {
             // for each channel, update index
             layerProps.loaderSelection = layerProps.loaderSelection.map(ch => {
                 let new_ch = [...ch]
-                new_ch[dimIndex] = value;
+                new_ch[axisIndex] = value;
                 return new_ch;
             });
 
@@ -49,8 +50,8 @@ function DimensionOptions({ layerId, dimIndex, max }: {
     };
 
     const open = Boolean(anchorEl);
-    const id = open ? `${dimIndex}-index-${layerId}-options` : undefined;;
-    const value = layer.layerProps.loaderSelection[0] ? layer.layerProps.loaderSelection[0][dimIndex] : 1;
+    const id = open ? `${axisIndex}-index-${layerId}-options` : undefined;
+    const value = layer.layerProps.loaderSelection[0] ? layer.layerProps.loaderSelection[0][axisIndex] : 1;
 
     return (
         <>
@@ -91,4 +92,4 @@ function DimensionOptions({ layerId, dimIndex, max }: {
     );
 }
 
-export default DimensionOptions;
+export default AxisOptions;
