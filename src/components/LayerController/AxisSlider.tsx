@@ -28,7 +28,10 @@ function AxisSlider({ layerId, axisIndex, max }: {
   const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
   const sourceInfo = useRecoilValue(sourceInfoState);
   const { axis_labels } = sourceInfo[layerId];
-  const axisLabel = axis_labels[axisIndex];
+  let axisLabel = axis_labels[axisIndex];
+  if (axisLabel === 't' || axisLabel === 'z') {
+    axisLabel = axisLabel.toUpperCase();
+  }
   // state of the slider to update UI while dragging
   const [value, setValue] = useState(0);
 
@@ -63,7 +66,7 @@ function AxisSlider({ layerId, axisIndex, max }: {
           <Grid item xs={10}>
             <div style={{ width: 165, overflow: 'hidden', textOverflow: 'ellipsis' }}>
               <Typography variant="caption" noWrap>
-                {axisLabel.toUpperCase()}: {value}/{max}
+                {axisLabel}: {value}/{max}
               </Typography>
             </div>
           </Grid>
