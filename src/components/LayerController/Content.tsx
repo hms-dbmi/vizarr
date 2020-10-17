@@ -3,6 +3,7 @@ import { withStyles } from '@material-ui/styles';
 
 import AddChannelButton from './AddChannelButton';
 import OpacitySlider from './OpacitySlider';
+import AxisSliders from './AxisSliders';
 import ChannelController from './ChannelController';
 
 import { range } from '../../utils';
@@ -30,6 +31,7 @@ function Content({ layerId, nChannels }: { layerId: string; nChannels: number })
           </Grid>
         </Grid>
         <Divider />
+        <AxisSliders layerId={layerId} />
         <Grid container justify="space-between">
           <Grid item xs={3}>
             <Typography variant="caption">channels:</Typography>
