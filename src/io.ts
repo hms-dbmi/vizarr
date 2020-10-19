@@ -16,7 +16,7 @@ function getAxisLabels(config: SingleChannelConfig | MultichannelConfig, loader:
 }
 
 function loadSingleChannel(config: SingleChannelConfig, loader: ZarrLoader, max: number): SourceData {
-  const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
+  const { color, contrast_limits, visibility, name, colormap = '', opacity = 1, translate } = config;
   return {
     loader,
     name,
@@ -30,12 +30,13 @@ function loadSingleChannel(config: SingleChannelConfig, loader: ZarrLoader, max:
       colormap,
       opacity,
     },
-    axis_labels: getAxisLabels(config, loader)
+    axis_labels: getAxisLabels(config, loader),
+    translate: translate ?? [0, 0],
   };
 }
 
 function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: number): SourceData {
-  const { names, channel_axis, name, opacity = 1, colormap = '' } = config;
+  const { names, channel_axis, name, opacity = 1, colormap = '', translate } = config;
   let { contrast_limits, visibilities, colors } = config;
   const { base } = loader;
 
@@ -93,11 +94,12 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
       opacity,
     },
     axis_labels: axis_labels,
+    translate: translate ?? [0, 0],
   };
 }
 
 function loadOME(config: ImageLayerConfig, imageData: OmeroImageData, loader: ZarrLoader): SourceData {
-  const { name, opacity = 1, colormap = '' } = config;
+  const { name, opacity = 1, colormap = '', translate } = config;
   const { rdefs, channels } = imageData;
   const t = rdefs.defaultT ?? 0;
   const z = rdefs.defaultZ ?? 0;
@@ -128,6 +130,7 @@ function loadOME(config: ImageLayerConfig, imageData: OmeroImageData, loader: Za
       opacity,
     },
     axis_labels: ["t", "c", "z", "y", "x"],
+    translate: translate ?? [0, 0],
   };
 }
 
@@ -206,7 +209,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 }
 
 export function initLayerStateFromSource(sourceData: SourceData, layerId: string): LayerState {
-  const { loader, channel_axis, colors, visibilities, contrast_limits, defaults } = sourceData;
+  const { loader, channel_axis, colors, visibilities, contrast_limits, defaults, translate } = sourceData;
   const { selection, opacity, colormap } = defaults;
 
   const Layer = loader.numLevels > 1 ? MultiscaleImageLayer : ImageLayer;
@@ -242,6 +245,7 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
       channelIsOn,
       opacity,
       colormap,
+      translate,
     },
     on: true,
   };

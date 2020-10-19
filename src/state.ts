@@ -21,6 +21,7 @@ export type BaseConfig = {
   colormap?: string;
   opacity?: number;
   axis_labels: string[];
+  translate?: number[];
 };
 
 export type MultichannelConfig = {
@@ -52,6 +53,7 @@ export type SourceData = {
     opacity: number;
   };
   axis_labels: string[];
+  translate: number[];
 };
 
 export type LayerState = {
