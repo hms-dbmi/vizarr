@@ -4,6 +4,7 @@ import { OrthographicView } from '@deck.gl/core';
 import type { Layer } from '@deck.gl/core';
 
 import { viewerViewState, layersSelector } from '../state';
+import { range } from '../utils';
 import type { VivLayerProps, ZarrLoader } from 'viv';
 
 function WrappedViewStateDeck({ layers }: { layers: Layer<VivLayerProps>[] }): JSX.Element {
@@ -28,10 +29,25 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<VivLayerProps>[] }): J
 
 function Viewer(): JSX.Element {
   const layerConstructors = useRecoilValue(layersSelector);
-  const layers = layerConstructors.map((l) => {
+  const layers = layerConstructors.flatMap((l) => {
     // Something weird with Recoil Loadable here. Need to cast to any.
     const { Layer, layerProps, on } = l as any;
-    return !Layer || !on ? null : new Layer(layerProps);
+    if (layerProps.rows && layerProps.columns) {
+      const [height, width] = layerProps.loader.base.shape.slice(-2);
+      const spacer = 5;
+      const top = -(layerProps.rows * (height + spacer)) / 2;
+      const left = -(layerProps.columns * (width + spacer)) / 2;
+      return range(layerProps.rows).flatMap((row) => {
+        return range(layerProps.columns).map((col) => {
+          const y = top + (row * (height + spacer));
+          const x = left + (col * (width + spacer));
+          console.log("Add layer:", col + (row * layerProps.columns), {x,y});
+          let wellProps = { ...layerProps, translate: [x, y], loader: layerProps.loaders[col + (row * layerProps.columns)]}
+          return new Layer(wellProps)
+        });
+      })
+    }
+    return !Layer || !on ? [] : [new Layer(layerProps)];
   });
   return <WrappedViewStateDeck layers={layers} />;
 }

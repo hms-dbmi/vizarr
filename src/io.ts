@@ -98,6 +98,52 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
   };
 }
 
+async function loadOMEPlate(store, rootAttrs) {
+  // hard-coded.....
+
+  console.log("OMEPlate", rootAttrs);
+  const plateAttrs = rootAttrs.plate;
+  if (!('columns' in plateAttrs) || !('rows' in plateAttrs)) {
+    throw Error(`Plate .zattrs missing columns or rows`);
+  }
+
+  let rows = plateAttrs.rows;
+  let columns = plateAttrs.columns;
+
+  const promises = range(rows).flatMap(row => {
+    return range(columns).map(col => {
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      let path = `${letters[row]}/${col + 1}/Field_1/`;
+      console.log('path', path);
+      let data = openArray({ store, path });
+      return data;
+    });
+  })
+  const data = await Promise.all(promises);
+  const loaders = data.map(d => createLoader([d]));
+  console.log('loaders', loaders);
+
+  return {
+    name: 'Plate',
+    channel_axis: 1,
+    names: ['red'],
+    rows,
+    columns,
+    loader: loaders[0],
+    loaders,
+    colors: [COLORS.red, COLORS.green],
+    axis_labels: ['t', 'c', 'z', 'y', 'x'],
+    visibilities: [true, true],
+    contrast_limits: [[0, 1000], [0, 3000]],
+    defaults: {
+      selection: [0, 0, 0, 0, 0],
+      colormap: '',
+      opacity: 1,
+    },
+    translate: [0, 0],
+  }
+}
+
 function loadOME(config: ImageLayerConfig, imageData: OmeroImageData, loader: ZarrLoader): SourceData {
   const { name, opacity = 1, colormap = '', translate } = config;
   const { rdefs, channels } = imageData;
@@ -150,16 +196,15 @@ function createLoader(dataArr: ZarrArray[]) {
   return new ZarrLoader({ data, dimensions });
 }
 
-async function openRootGroup(store: HTTPStore): Promise<{ rootAttrs: RootAttrs; data: ZarrArray[] }> {
+async function openMultiResolutionData(store: HTTPStore, rootAttrs: RootAttrs): Promise<ZarrArray[]> {
   let resolutions = ['0'];
-  const rootAttrs = (await getJson(store, '.zattrs')) as RootAttrs;
   if ('multiscales' in rootAttrs) {
     const { datasets } = rootAttrs.multiscales[0];
     resolutions = datasets.map((d) => d.path);
   }
   const promises = resolutions.map((path) => openArray({ store, path }));
   const data = await Promise.all(promises);
-  return { data, rootAttrs };
+  return data;
 }
 
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
@@ -170,9 +215,11 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   const store = normalizeStore(source);
   if (await store.containsItem('.zgroup')) {
     try {
-      const res = await openRootGroup(store);
-      data = res.data;
-      rootAttrs = res.rootAttrs;
+      const rootAttrs = (await getJson(store, '.zattrs'));
+      if ('plate' in rootAttrs) {
+        return loadOMEPlate(store, rootAttrs as RootAttrs);
+      }
+      const data = await openMultiResolutionData(store, rootAttrs);
     } catch (err) {
       throw Error(`Failed to open arrays in zarr.Group. Make sure group implements multiscales extension.`);
     }
@@ -209,7 +256,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 }
 
 export function initLayerStateFromSource(sourceData: SourceData, layerId: string): LayerState {
-  const { loader, channel_axis, colors, visibilities, contrast_limits, defaults, translate } = sourceData;
+  const { loader, channel_axis, colors, visibilities, contrast_limits, defaults, translate, rows, columns, loaders } = sourceData;
   const { selection, opacity, colormap } = defaults;
 
   const Layer = loader.numLevels > 1 ? MultiscaleImageLayer : ImageLayer;
@@ -246,6 +293,9 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
       opacity,
       colormap,
       translate,
+      rows,
+      columns,
+      loaders,
     },
     on: true,
   };
