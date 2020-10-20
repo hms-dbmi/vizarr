@@ -98,7 +98,7 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
   };
 }
 
-async function loadOMEPlate(store, rootAttrs) {
+async function loadOMEPlate(config: ImageLayerConfig, store, rootAttrs) {
   // hard-coded.....
 
   console.log("OMEPlate", rootAttrs);
@@ -110,38 +110,30 @@ async function loadOMEPlate(store, rootAttrs) {
   let rows = plateAttrs.rows;
   let columns = plateAttrs.columns;
 
-  const promises = range(rows).flatMap(row => {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let plateAcquisition = '0';
+  let resolution = '4';
+  let field = '1';
+
+  const imagePaths = range(rows).flatMap(row => {
     return range(columns).map(col => {
-      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      let path = `${letters[row]}/${col + 1}/Field_1/`;
-      console.log('path', path);
-      let data = openArray({ store, path });
-      return data;
+      return `${plateAcquisition}/${letters[row]}/${col + 1}/Field_${field}/`;
     });
   })
+  const promises = imagePaths.map(path => openArray({ store, path: `${path}${resolution}/`}));
   const data = await Promise.all(promises);
   const loaders = data.map(d => createLoader([d]));
   console.log('loaders', loaders);
 
-  return {
-    name: 'Plate',
-    channel_axis: 1,
-    names: ['red'],
-    rows,
-    columns,
-    loader: loaders[0],
-    loaders,
-    colors: [COLORS.red, COLORS.green],
-    axis_labels: ['t', 'c', 'z', 'y', 'x'],
-    visibilities: [true, true],
-    contrast_limits: [[0, 1000], [0, 3000]],
-    defaults: {
-      selection: [0, 0, 0, 0, 0],
-      colormap: '',
-      opacity: 1,
-    },
-    translate: [0, 0],
-  }
+  const imageAttrs = await getJson(store, `${imagePaths[0]}.zattrs`);
+  let sourceData = loadOME(config, imageAttrs.omero, loaders[0]);
+  console.log('sourceData', sourceData);
+
+  sourceData.loaders = loaders;
+  sourceData.name = "Plate";
+  sourceData.rows = rows;
+  sourceData.columns = columns;
+  return sourceData;
 }
 
 function loadOME(config: ImageLayerConfig, imageData: OmeroImageData, loader: ZarrLoader): SourceData {
@@ -217,7 +209,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
     try {
       const rootAttrs = (await getJson(store, '.zattrs'));
       if ('plate' in rootAttrs) {
-        return loadOMEPlate(store, rootAttrs as RootAttrs);
+        return loadOMEPlate(config, store, rootAttrs as RootAttrs);
       }
       const data = await openMultiResolutionData(store, rootAttrs);
     } catch (err) {
