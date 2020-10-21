@@ -41,8 +41,8 @@ function Viewer(): JSX.Element {
         return range(layerProps.columns).map((col) => {
           const y = top + (row * (height + spacer));
           const x = left + (col * (width + spacer));
-          console.log("Add layer:", col + (row * layerProps.columns), {x,y});
-          let wellProps = { ...layerProps, translate: [x, y], loader: layerProps.loaders[col + (row * layerProps.columns)]}
+          const id = `${layerProps.id}-plate-${x}-${y}`;
+          let wellProps = { id, ...layerProps, translate: [x, y], loader: layerProps.loaders[col + (row * layerProps.columns)]}
           return new Layer(wellProps)
         });
       })
