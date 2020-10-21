@@ -207,11 +207,11 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   const store = normalizeStore(source);
   if (await store.containsItem('.zgroup')) {
     try {
-      const rootAttrs = (await getJson(store, '.zattrs'));
+      rootAttrs = (await getJson(store, '.zattrs'));
       if ('plate' in rootAttrs) {
         return loadOMEPlate(config, store, rootAttrs as RootAttrs);
       }
-      const data = await openMultiResolutionData(store, rootAttrs);
+      data = await openMultiResolutionData(store, rootAttrs);
     } catch (err) {
       throw Error(`Failed to open arrays in zarr.Group. Make sure group implements multiscales extension.`);
     }
