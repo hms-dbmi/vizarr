@@ -99,9 +99,6 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
 }
 
 async function loadOMEPlate(config: ImageLayerConfig, store, rootAttrs) {
-  // hard-coded.....
-
-  console.log("OMEPlate", rootAttrs);
   const plateAttrs = rootAttrs.plate;
   if (!('columns' in plateAttrs) || !('rows' in plateAttrs)) {
     throw Error(`Plate .zattrs missing columns or rows`);
@@ -111,6 +108,7 @@ async function loadOMEPlate(config: ImageLayerConfig, store, rootAttrs) {
   let columns = plateAttrs.columns;
 
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  // TODO: Need to read plateAcquisition from plate metadata
   let plateAcquisition = '0';
   let resolution = '4';
   let field = '1';
@@ -123,11 +121,9 @@ async function loadOMEPlate(config: ImageLayerConfig, store, rootAttrs) {
   const promises = imagePaths.map(path => openArray({ store, path: `${path}${resolution}/`}));
   const data = await Promise.all(promises);
   const loaders = data.map(d => createLoader([d]));
-  console.log('loaders', loaders);
 
   const imageAttrs = await getJson(store, `${imagePaths[0]}.zattrs`);
   let sourceData = loadOME(config, imageAttrs.omero, loaders[0]);
-  console.log('sourceData', sourceData);
 
   sourceData.loaders = loaders;
   sourceData.name = "Plate";
@@ -137,7 +133,7 @@ async function loadOMEPlate(config: ImageLayerConfig, store, rootAttrs) {
 }
 
 function loadOME(config: ImageLayerConfig, imageData: OmeroImageData, loader: ZarrLoader): SourceData {
-  const { name, opacity = 1, colormap = '', translate } = config;
+  const { name, opacity = 1, colormap = '', translate, source } = config;
   const { rdefs, channels } = imageData;
   const t = rdefs.defaultT ?? 0;
   const z = rdefs.defaultZ ?? 0;
@@ -156,6 +152,7 @@ function loadOME(config: ImageLayerConfig, imageData: OmeroImageData, loader: Za
 
   return {
     loader,
+    source,
     name: imageData.name ?? name,
     channel_axis: 1,
     colors,
@@ -248,7 +245,8 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 }
 
 export function initLayerStateFromSource(sourceData: SourceData, layerId: string): LayerState {
-  const { loader, channel_axis, colors, visibilities, contrast_limits, defaults, translate, rows, columns, loaders } = sourceData;
+  const { loader, source, channel_axis, colors, visibilities, contrast_limits, defaults,
+          translate, rows, columns, loaders } = sourceData;
   const { selection, opacity, colormap } = defaults;
 
   const Layer = loader.numLevels > 1 ? MultiscaleImageLayer : ImageLayer;
@@ -277,6 +275,7 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
     layerProps: {
       id: layerId,
       loader,
+      source,
       loaderSelection,
       colorValues,
       sliderValues,

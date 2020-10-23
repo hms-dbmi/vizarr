@@ -28,6 +28,22 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<VivLayerProps>[] }): J
 }
 
 function Viewer(): JSX.Element {
+
+  // Click handler for plate layout - opens image in new window
+  const handleClick = (info) => {
+    let layerId = info.layer.id;
+    if (!layerId.includes('plate-')){
+      return;
+    }
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const [row, col] = layerId.split('plate-')[1].split('-').map(x => parseInt(x));
+    let source = info.sourceLayer?.props?.source;
+    if (source && !isNaN(row) && !isNaN(col)) {
+      let imgSource = `${source}/0/${letters[row]}/${col + 1}/Field_1/`;
+      window.open(window.location.origin + '?source=' + imgSource);
+    }
+  }
+
   const layerConstructors = useRecoilValue(layersSelector);
   const layers = layerConstructors.flatMap((l) => {
     // Something weird with Recoil Loadable here. Need to cast to any.
@@ -41,11 +57,16 @@ function Viewer(): JSX.Element {
         return range(layerProps.columns).map((col) => {
           const y = top + (row * (height + spacer));
           const x = left + (col * (width + spacer));
-          const id = `${layerProps.id}-plate-${x}-${y}`;
-          let wellProps = {...layerProps, id, translate: [x, y], loader: layerProps.loaders[col + (row * layerProps.columns)]}
-          // Try to add hover handling - Not working! - NB: Also, onClick not supported by viv/ImageLayer
-          wellProps.pickable = true;
-          wellProps.onClick = (info => {console.log('click', info)});
+          // NB: this ID is used by onClick to get row and col
+          const id = `${layerProps.id}-plate-${row}-${col}`;
+          let wellProps = {
+            ...layerProps,
+            id,
+            translate: [x, y],
+            loader: layerProps.loaders[col + (row * layerProps.columns)],
+            pickable: true,
+            onClick: handleClick
+          }
           return new Layer(wellProps)
         });
       })
