@@ -98,7 +98,7 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
   };
 }
 
-async function loadOMEPlate(config: ImageLayerConfig, store, rootAttrs) {
+async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttrs: RootAttrs): Promise<SourceData> {
   const plateAttrs = rootAttrs.plate;
   if (!('columns' in plateAttrs) || !('rows' in plateAttrs)) {
     throw Error(`Plate .zattrs missing columns or rows`);
@@ -245,8 +245,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 }
 
 export function initLayerStateFromSource(sourceData: SourceData, layerId: string): LayerState {
-  const { loader, source, channel_axis, colors, visibilities, contrast_limits, defaults,
-          translate, rows, columns, loaders } = sourceData;
+  const { loader, source, channel_axis, colors, visibilities, contrast_limits, defaults} = sourceData;
   const { selection, opacity, colormap } = defaults;
 
   const Layer = loader.numLevels > 1 ? MultiscaleImageLayer : ImageLayer;
@@ -283,10 +282,6 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
       channelIsOn,
       opacity,
       colormap,
-      translate,
-      rows,
-      columns,
-      loaders,
     },
     on: true,
   };

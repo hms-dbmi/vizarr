@@ -41,6 +41,10 @@ export type ImageLayerConfig = BaseConfig | MultichannelConfig | SingleChannelCo
 
 export type SourceData = {
   loader: ZarrLoader;
+  source?: string | HTTPStore;
+  loaders?: ZarrLoader[];  // for OME plates
+  rows?: number;
+  columns?: number;
   name?: string;
   channel_axis: number | null;
   colors: string[];
@@ -58,7 +62,10 @@ export type SourceData = {
 
 export type LayerState = {
   Layer: null | ImageLayer | MultiscaleImageLayer;
-  layerProps: VivLayerProps & { contrastLimits: number[][] };
+  layerProps: VivLayerProps & {
+    contrastLimits: number[][],
+    source?: string | HTTPStore,
+  };
   on: boolean;
 };
 
