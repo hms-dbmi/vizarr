@@ -45,7 +45,7 @@ function Viewer(): JSX.Element {
           let wellProps = {...layerProps, id, translate: [x, y], loader: layerProps.loaders[col + (row * layerProps.columns)]}
           // Try to add hover handling - Not working! - NB: Also, onClick not supported by viv/ImageLayer
           wellProps.pickable = true;
-          wellProps.onHover = (info => {console.log('hover', info)});
+          wellProps.onClick = (info => {console.log('click', info)});
           return new Layer(wellProps)
         });
       })
