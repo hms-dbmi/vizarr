@@ -29,23 +29,26 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<VivLayerProps>[] }): J
 
 function Viewer(): JSX.Element {
 
+  const sourceInfo = useRecoilValue(sourceInfoState);
+
   // Click handler for plate layout - opens image in new window
   const handleClick = (info: Object) => {
     let layerId = (info as any).layer.id;
-    if (!layerId.includes('plate-')){
+    if (!layerId.includes('-plate-')){
       return;
     }
+    // Get the info we need from the layerId
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const [row, col] = layerId.split('plate-')[1].split('-').map((x: string) => parseInt(x));
-    let source = (info as any).sourceLayer?.props?.source;
-    if (source && !isNaN(row) && !isNaN(col)) {
-      let imgSource = `${source}/0/${letters[row]}/${col + 1}/Field_1/`;
+    const layerPropsId = layerId.split('-plate-')[0];
+    const [row, col] = layerId.split('-plate-')[1].split('-').map((x: string) => parseInt(x));
+    const source = (info as any).sourceLayer?.props?.source;
+    const plateAcquisitions = sourceInfo[layerPropsId]?.plateAcquisitions;
+    if (source && !isNaN(row) && !isNaN(col) && plateAcquisitions) {
+      let imgSource = `${source}/${plateAcquisitions[0]}/${letters[row]}/${col + 1}/Field_1/`;
       window.open(window.location.origin + '?source=' + imgSource);
     }
   }
 
-
-  const sourceInfo = useRecoilValue(sourceInfoState);
   const layerConstructors = useRecoilValue(layersSelector);
   const layers = layerConstructors.flatMap((l) => {
     // Something weird with Recoil Loadable here. Need to cast to any.

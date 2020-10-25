@@ -42,6 +42,7 @@ export type ImageLayerConfig = BaseConfig | MultichannelConfig | SingleChannelCo
 export type SourceData = {
   loader: ZarrLoader;
   source?: string | HTTPStore;
+  plateAcquisitions?: string[];
   loaders?: ZarrLoader[];  // for OME plates
   rows?: number;
   columns?: number;

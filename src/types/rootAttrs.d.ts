@@ -23,6 +23,7 @@ export type OmeroImageData = {
 export type OmeroPlateData = {
   rows: number;
   columns: number;
+  plateAcquisitions?: { path: string }[]
 }
 
 export type Multiscale = {

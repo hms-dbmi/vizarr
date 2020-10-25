@@ -108,8 +108,12 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
   let columns = plateAttrs.columns;
 
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  // TODO: Need to read plateAcquisition from plate metadata
-  let plateAcquisition = '0';
+  let plateAcquisitions = ['0'];
+  if (plateAttrs?.plateAcquisitions) {
+    plateAcquisitions = plateAttrs.plateAcquisitions.map(pa => pa.path);
+  }
+
+  let plateAcquisition = plateAcquisitions[0];
   let resolution = '4';
   let field = '1';
 
@@ -127,6 +131,7 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
 
   sourceData.loaders = loaders;
   sourceData.name = "Plate";
+  sourceData.plateAcquisitions = plateAcquisitions;
   sourceData.rows = rows;
   sourceData.columns = columns;
   return sourceData;
