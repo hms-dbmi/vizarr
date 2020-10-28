@@ -41,9 +41,12 @@ function Viewer(): JSX.Element {
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const layerPropsId = layerId.split('-plate-')[0];
     const [row, col] = layerId.split('-plate-')[1].split('-').map((x: string) => parseInt(x));
-    const source = (info as any).sourceLayer?.props?.source;
+    let source = (info as any).sourceLayer?.props?.source;
     const plateAcquisitions = sourceInfo[layerPropsId]?.plateAcquisitions;
     if (source && !isNaN(row) && !isNaN(col) && plateAcquisitions) {
+      if (source.endsWith('/')){
+        source = source.slice(0, -1);
+      }
       let imgSource = `${source}/${plateAcquisitions[0]}/${letters[row]}/${col + 1}/Field_1/`;
       window.open(window.location.origin + '?source=' + imgSource);
     }
