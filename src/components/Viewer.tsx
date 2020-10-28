@@ -63,11 +63,15 @@ function Viewer(): JSX.Element {
       const top = -(rows * (height + spacer)) / 2;
       const left = -(columns * (width + spacer)) / 2;
       return range(rows).flatMap((row) => {
-        return range(columns).map((col) => {
+        return range(columns).flatMap((col) => {
           const y = top + (row * (height + spacer));
           const x = left + (col * (width + spacer));
           // NB: this ID is used by onClick to get row and col
           const id = `${layerProps.id}-plate-${row}-${col}`;
+          const loader = layerInfo.loaders ? layerInfo.loaders[col + (row * columns)]: undefined;
+          if (!loader) {
+            return [];
+          }
           let wellProps = {
             ...layerProps,
             id,
@@ -76,7 +80,7 @@ function Viewer(): JSX.Element {
             pickable: true,
             onClick: handleClick
           }
-          return new Layer(wellProps)
+          return [new Layer(wellProps)]
         });
       })
     }

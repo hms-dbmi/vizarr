@@ -114,7 +114,6 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
   }
 
   let plateAcquisition = plateAcquisitions[0];
-  let resolution = '4';
   let field = '1';
 
   const imagePaths = range(rows).flatMap(row => {
@@ -122,12 +121,43 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
       return `${plateAcquisition}/${letters[row]}/${col + 1}/Field_${field}/`;
     });
   })
-  const promises = imagePaths.map(path => openArray({ store, path: `${path}${resolution}/`}));
-  const data = await Promise.all(promises);
-  const loaders = data.map(d => createLoader([d]));
 
-  const imageAttrs = await getJson(store, `${imagePaths[0]}.zattrs`);
-  let sourceData = loadOME(config, imageAttrs.omero, loaders[0]);
+  // Find first valid Image, loading each Well in turn...
+  let imageAttrs = undefined;
+  async function getImageAttrs(path: string): Promise<any> {
+    try {
+      return await getJson(store, `${path}.zattrs`);
+    } catch (err) {
+      console.log(`failed to load ${path}.zattrs`);
+    }
+  }
+  for (let i = 0; i < imagePaths.length; i++) {
+    imageAttrs = await getImageAttrs(imagePaths[i]);
+    if (imageAttrs) {
+      break;
+    }
+  }
+
+  // Lowest resolution is the 'path' of the last 'dataset' from the first multiscales
+  let resolution = imageAttrs.multiscales[0].datasets.slice(-1)[0].path;
+
+  // Create loader for every Well. Some loaders may be undefined if Wells are missing.
+  async function createLoaderFromPath(path: string): Promise<ZarrLoader | undefined> {
+    try {
+      const data = await openArray({ store, path: `${path}${resolution}/` });
+      let l = createLoader([data]);
+      return l;
+    } catch (err) {
+      console.log(`Missing Well at ${path}`);
+    }
+  }
+  const promises = imagePaths.map(createLoaderFromPath);
+  let loaders = await Promise.all(promises);
+
+  const loader = loaders.find(Boolean);
+
+  // Load Image to use for channel names, rendering settings, sizeZ, sizeT etc.
+  const sourceData: SourceData = loadOME(config, imageAttrs.omero, loader as ZarrLoader);
 
   sourceData.loaders = loaders;
   sourceData.name = "Plate";

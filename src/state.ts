@@ -43,7 +43,7 @@ export type SourceData = {
   loader: ZarrLoader;
   source?: string | HTTPStore;
   plateAcquisitions?: string[];
-  loaders?: ZarrLoader[];  // for OME plates
+  loaders?: (ZarrLoader | undefined)[];  // for OME plates
   rows?: number;
   columns?: number;
   name?: string;
