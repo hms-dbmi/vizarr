@@ -2,7 +2,7 @@ import { openArray, ZarrArray, HTTPStore } from 'zarr';
 import { ZarrLoader, ImageLayer, MultiscaleImageLayer, DTYPE_VALUES } from 'viv';
 import pMap from 'p-map';
 
-import type { RootAttrs, OmeroImageData } from './types/rootAttrs';
+import type { RootAttrs, OmeroImageData, OmeWellData, OmePlateData } from './types/rootAttrs';
 import type { SourceData, ImageLayerConfig, LayerState, SingleChannelConfig, MultichannelConfig } from './state';
 
 import { getJson, MAX_CHANNELS, COLORS, MAGENTA_GREEN, RGB, CYMRGB, normalizeStore, hexToRGB, range } from './utils';
@@ -101,8 +101,49 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
   };
 }
 
+// Create loader for every Well. Some loaders may be undefined if Wells are missing.
+async function createLoaderFromPath(store: HTTPStore, path: string): Promise<ZarrLoader | undefined> {
+  try {
+    const data = await openArray({ store, path });
+    let l = createLoader([data]);
+    return l;
+  } catch (err) {
+    console.log(`Missing Well at ${path}`);
+  }
+}
+
+async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, rootAttrs: RootAttrs): Promise<SourceData> {
+  const wellAttrs = rootAttrs.well as OmeWellData;
+  if (!wellAttrs.images) {
+    throw Error(`Well .zattrs missing images`);
+  }
+  const [row, col] = store.url.split('/').filter(Boolean).slice(-2);
+
+  const imagePaths = wellAttrs.images.map(img => img.path + (img.path.endsWith('/') ? '' : '/'));
+  // Use first image for rendering settings, resolutions etc.
+  let imageAttrs = await getJson(store, `${imagePaths[0]}.zattrs`)
+  // Lowest resolution is the 'path' of the first 'dataset' from the first multiscales
+  let resolution = imageAttrs.multiscales[0].datasets[0].path;
+
+  // Create loader for every Image.
+  const promises = imagePaths.map(p => createLoaderFromPath(store, `${p}${resolution}/`));
+  let loaders = await Promise.all(promises);
+  const loader = loaders.find(Boolean);
+
+  // Load Image to use for channel names, rendering settings, sizeZ, sizeT etc.
+  const sourceData: SourceData = loadOME(config, imageAttrs.omero, loader as ZarrLoader);
+  const cols = Math.ceil(Math.sqrt(imagePaths.length));
+
+  sourceData.loaders = loaders;
+  sourceData.name = `Well ${row}${col}`;
+  sourceData.plateAcquisitions = [];
+  sourceData.rows = Math.ceil(imagePaths.length/cols);
+  sourceData.columns = cols;
+  return sourceData;
+}
+
 async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttrs: RootAttrs): Promise<SourceData> {
-  const plateAttrs = rootAttrs.plate;
+  const plateAttrs = rootAttrs.plate as OmePlateData;
   if (!('columns' in plateAttrs) || !('rows' in plateAttrs)) {
     throw Error(`Plate .zattrs missing columns or rows`);
   }
@@ -262,6 +303,8 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
       rootAttrs = (await getJson(store, '.zattrs'));
       if (rootAttrs?.plate) {
         return loadOMEPlate(config, store, rootAttrs as RootAttrs);
+      } else if (rootAttrs?.well) {
+        return loadOMEWell(config, store, rootAttrs as RootAttrs);
       }
       data = await openMultiResolutionData(store, rootAttrs as RootAttrs);
     } catch (err) {
