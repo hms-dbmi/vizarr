@@ -1,9 +1,12 @@
 import { openArray, ZarrArray, HTTPStore } from 'zarr';
 import { ZarrLoader, ImageLayer, MultiscaleImageLayer, DTYPE_VALUES } from 'viv';
+import pMap from 'p-map';
+
 import type { RootAttrs, OmeroImageData } from './types/rootAttrs';
 import type { SourceData, ImageLayerConfig, LayerState, SingleChannelConfig, MultichannelConfig } from './state';
 
 import { getJson, MAX_CHANNELS, COLORS, MAGENTA_GREEN, RGB, CYMRGB, normalizeStore, hexToRGB, range } from './utils';
+import GridLayer from './gridLayer';
 
 function getAxisLabels(config: SingleChannelConfig | MultichannelConfig, loader: ZarrLoader): string[] {
   let { axis_labels } = config;
@@ -151,7 +154,7 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
       console.log(`Missing Well at ${path}`);
     }
   }
-  const promises = imagePaths.map(createLoaderFromPath);
+  const promises = await pMap(imagePaths, createLoaderFromPath, { concurrency: 10 });
   let loaders = await Promise.all(promises);
 
   const loader = loaders.find(Boolean);
@@ -161,9 +164,26 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
 
   sourceData.loaders = loaders;
   sourceData.name = "Plate";
-  sourceData.plateAcquisitions = plateAcquisitions;
   sourceData.rows = rows;
   sourceData.columns = columns;
+  sourceData.onClick = (info: any) => {
+    let layerId = info.sourceLayer.id as string;
+    if (!layerId.includes('-GridLayer-')){
+      return;
+    }
+    // Get the info we need from the layerId
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const [row, col] = layerId.split('-GridLayer-')[1].split('-').map((x: string) => parseInt(x));
+    let { source } = sourceData;
+    console.log(source)
+    if (typeof source === 'string' && !isNaN(row) && !isNaN(col) && plateAcquisitions) {
+      if (source.endsWith('/')){
+        source = source.slice(0, -1);
+      }
+      let imgSource = `${source}/${plateAcquisitions[0]}/${letters[row]}/${col + 1}/Field_1/`;
+      window.open(window.location.origin + '?source=' + imgSource);
+    }
+  }
   return sourceData;
 }
 
@@ -280,10 +300,23 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 }
 
 export function initLayerStateFromSource(sourceData: SourceData, layerId: string): LayerState {
-  const { loader, source, channel_axis, colors, visibilities, contrast_limits, defaults} = sourceData;
+  const {
+    loader,
+    source,
+    channel_axis,
+    colors,
+    visibilities,
+    contrast_limits,
+    defaults,
+    // Grid
+    loaders,
+    rows,
+    columns,
+    onClick,
+  } = sourceData;
   const { selection, opacity, colormap } = defaults;
 
-  const Layer = loader.numLevels > 1 ? MultiscaleImageLayer : ImageLayer;
+  const Layer = loaders ? GridLayer : loader.numLevels > 1 ? MultiscaleImageLayer : ImageLayer;
   const loaderSelection: number[][] = [];
   const colorValues: number[][] = [];
   const contrastLimits: number[][] = [];
@@ -309,6 +342,7 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
     layerProps: {
       id: layerId,
       loader,
+      loaders,
       source,
       loaderSelection,
       colorValues,
@@ -317,6 +351,9 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
       channelIsOn,
       opacity,
       colormap,
+      rows,
+      columns,
+      onClick,
     },
     on: true,
   };
