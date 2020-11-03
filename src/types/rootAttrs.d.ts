@@ -21,8 +21,9 @@ export type OmeroImageData = {
 };
 
 export type OmePlateData = {
-  rows: number;
-  columns: number;
+  rows: { name: string }[];
+  columns: { name: string }[];
+  wells: { path: string } []
   plateAcquisitions?: { path: string }[]
 }
 
