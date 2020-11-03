@@ -42,7 +42,6 @@ export type ImageLayerConfig = BaseConfig | MultichannelConfig | SingleChannelCo
 export type SourceData = {
   loader: ZarrLoader;
   source?: string | HTTPStore;
-  plateAcquisitions?: string[];
   loaders?: (ZarrLoader | undefined)[];  // for OME plates
   rows?: number;
   columns?: number;
@@ -59,6 +58,7 @@ export type SourceData = {
   };
   axis_labels: string[];
   translate: number[];
+  onClick?: (e: any) => void;
 };
 
 export type LayerState = {
@@ -66,6 +66,10 @@ export type LayerState = {
   layerProps: VivLayerProps & {
     contrastLimits: number[][],
     source?: string | HTTPStore,
+    loaders?: (ZarrLoader | undefined)[],
+    rows?: number,
+    columns?: number,
+    onClick?: (e: any) => void,
   };
   on: boolean;
 };
