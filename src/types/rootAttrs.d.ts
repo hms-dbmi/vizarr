@@ -20,6 +20,12 @@ export type OmeroImageData = {
   name?: string;
 };
 
+export type OmeroPlateData = {
+  rows: number;
+  columns: number;
+  plateAcquisitions?: { path: string }[]
+}
+
 export type Multiscale = {
   datasets: { path: string }[];
   version?: string;
@@ -28,4 +34,5 @@ export type Multiscale = {
 export type RootAttrs = {
   omero: OmeroImageData;
   multiscales: Multiscale[];
+  plate: OmeroPlateData;
 };

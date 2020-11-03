@@ -15,4 +15,7 @@ module.exports = {
     );
     return config;
   },
-}; 
+  experimental: {
+    reactMode: 'concurrent'
+  }
+}

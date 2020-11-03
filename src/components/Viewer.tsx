@@ -6,6 +6,7 @@ import type { Layer } from '@deck.gl/core';
 import { viewerViewState, layersSelector } from '../state';
 import type { VivLayerProps, ZarrLoader } from 'viv';
 
+
 function WrappedViewStateDeck({ layers }: { layers: Layer<VivLayerProps>[] }): JSX.Element {
   const [viewState, setViewState] = useRecoilState(viewerViewState);
 
@@ -17,8 +18,8 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<VivLayerProps>[] }): J
     const zoom = -loader.numLevels;
     const target = [width / 2, height / 2, 0];
     setViewState({ zoom, target });
-  }
-
+  };
+  
   const views = [new OrthographicView({ id: 'ortho', controller: true })];
 
   return (
