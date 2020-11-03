@@ -1,6 +1,7 @@
 # vizarr
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/hms-dbmi/vizarr/master?filepath=example%2Fgetting_started.ipynb)
 [![launch ImJoy](https://imjoy.io/static/badge/launch-imjoy-badge.svg)](https://imjoy.io/#/app?workspace=vizarr&plugin=https://github.com/hms-dbmi/vizarr/blob/master/example/VizarrDemo.imjoy.html)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hms-dbmi/vizarr/blob/master/example/mandelbrot.ipynb)
 
 ![Multiscale OME-Zarr in Jupyter Notebook with Vizarr](/screenshot.png)
 
@@ -30,7 +31,7 @@ for multiscale and multimodal images. Currently [Viv](https://hms-dbmi.github.co
 `u1`, `u2`, `u4`, and `f4` arrays, but contributions are welcome to support more `np.dtypes`!
 
 ### Getting started 
-The easiest way to get started with `vizarr` is to clone this repoe and open one of 
+The easiest way to get started with `vizarr` is to clone this repository and open one of 
 the example [Jupyter Notebooks](example/).
 
 ### Limitations
