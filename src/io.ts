@@ -148,27 +148,35 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
     throw Error(`Plate .zattrs missing columns or rows`);
   }
 
-  let rows = plateAttrs.rows;
-  let columns = plateAttrs.columns;
+  let rows: number = plateAttrs.rows.length;
+  let columns: number = plateAttrs.columns.length;
+  let wellPaths = plateAttrs.wells.map(well => well.path);
+  console.log('wellPaths', wellPaths)
 
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let plateAcquisitions = ['0'];
   if (plateAttrs?.plateAcquisitions) {
     plateAcquisitions = plateAttrs.plateAcquisitions.map(pa => pa.path);
   }
 
   let plateAcquisition = plateAcquisitions[0];
-  let field = '1';
+  // Fields are by index and we assume at least 1 per Well
+  let field = '0';
 
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  // imagePaths covers whole plate (not sparse) - but some will be '' if no Well
   const imagePaths = range(rows).flatMap(row => {
     return range(columns).map(col => {
-      return `${plateAcquisition}/${letters[row]}/${col + 1}/Field_${field}/`;
+      let wellPath = `${plateAcquisition}/${letters[row]}/${col + 1}/`;
+      return wellPaths.includes(wellPath) ? `${wellPath}${field}/` : '';
     });
   })
+  console.log('imagePaths', imagePaths)
 
   // Find first valid Image, loading each Well in turn...
   let imageAttrs = undefined;
   async function getImageAttrs(path: string): Promise<any> {
+    console.log('getImageAttrs', path);
+    if (path === '') return
     try {
       return await getJson(store, `${path}.zattrs`);
     } catch (err) {
@@ -182,6 +190,7 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
     }
   }
 
+  console.log('imageAttrs', imageAttrs);
   // Lowest resolution is the 'path' of the last 'dataset' from the first multiscales
   let resolution = imageAttrs.multiscales[0].datasets.slice(-1)[0].path;
 
