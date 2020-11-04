@@ -180,7 +180,7 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
       if (source.endsWith('/')){
         source = source.slice(0, -1);
       }
-      let imgSource = `${source}/${plateAcquisitions[0]}/${letters[row]}/${col + 1}/Field_1/`;
+      let imgSource = `${source}/${plateAcquisitions[0]}/${letters[row]}/${col + 1}/`;
       window.open(window.location.origin + '?source=' + imgSource);
     }
   }
