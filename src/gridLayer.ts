@@ -64,9 +64,9 @@ function validateWidthHeight(gridData: (SelectionData | undefined)[]): { width: 
   // Return early if no grid data. Maybe throw an error?
   if (!first) return { width: 0 , height: 0 }
   const { width, height } = first;
-  // Verify that all grid data is same shape
+  // Verify that all grid data is same shape (ignoring undefined)
   gridData.forEach(d => {
-    if (d?.width !== width || d?.height !== height) {
+    if (d && (d?.width !== width || d?.height !== height)) {
       throw new Error("Grid data is not same shape.");
     }
   });
