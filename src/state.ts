@@ -22,6 +22,7 @@ export type BaseConfig = {
   opacity?: number;
   axis_labels: string[];
   translate?: number[];
+  onClick?: (e: any) => void;
 };
 
 export type MultichannelConfig = {

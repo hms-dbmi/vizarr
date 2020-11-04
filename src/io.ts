@@ -226,7 +226,8 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
   sourceData.name = plateAttrs.name || "Plate";
   sourceData.rows = rows;
   sourceData.columns = columns;
-  sourceData.onClick = (info: any) => {
+  // Us onClick from image config or Open Well in new window
+  sourceData.onClick = config.onClick || ((info: any) => {
     let layerId = info.sourceLayer.id as string;
     // Shouldn't need this check now?
     if (!layerId.includes('-GridLayer-')){
@@ -235,7 +236,6 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
     // Get the info we need from the layerId
     const [row, col] = layerId.split('-GridLayer-')[1].split('-').map((x: string) => parseInt(x));
     let { source } = sourceData;
-    console.log(source)
     if (typeof source === 'string' && !isNaN(row) && !isNaN(col) && plateAcquisitions) {
       if (source.endsWith('/')){
         source = source.slice(0, -1);
@@ -243,7 +243,7 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
       let imgSource = `${source}/${plateAcquisitions[0]}/${rowNames[row]}/${columnNames[col]}/`;
       window.open(window.location.origin + '?source=' + imgSource);
     }
-  }
+  })
   return sourceData;
 }
 
