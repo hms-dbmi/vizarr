@@ -223,7 +223,7 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
   const sourceData: SourceData = loadOME(config, imageAttrs.omero, loader as ZarrLoader);
 
   sourceData.loaders = loaders;
-  sourceData.name = "Plate";
+  sourceData.name = plateAttrs.name || "Plate";
   sourceData.rows = rows;
   sourceData.columns = columns;
   sourceData.onClick = (info: any) => {

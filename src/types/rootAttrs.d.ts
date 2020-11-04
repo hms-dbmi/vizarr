@@ -21,6 +21,7 @@ export type OmeroImageData = {
 };
 
 export type OmePlateData = {
+  name: string;
   rows: { name: string }[];
   columns: { name: string }[];
   wells: { path: string } []
