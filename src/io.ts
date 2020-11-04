@@ -136,9 +136,23 @@ async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, rootAttrs
 
   sourceData.loaders = loaders;
   sourceData.name = `Well ${row}${col}`;
-  sourceData.plateAcquisitions = [];
   sourceData.rows = Math.ceil(imagePaths.length/cols);
   sourceData.columns = cols;
+  sourceData.onClick = (info: any) => {
+    let layerId = info.sourceLayer.id as string;
+    // Get the info we need from the layerId
+    const [row, col] = layerId.split('-GridLayer-')[1].split('-').map((x: string) => parseInt(x));
+    let { source } = sourceData;
+    if (typeof source === 'string' && !isNaN(row) && !isNaN(col)) {
+      const field = (row * cols) + col;
+      if (source.endsWith('/')) {
+        source = source.slice(0, -1);
+      }
+      let imgSource = `${source}/${imagePaths[field]}`;
+      window.open(window.location.origin + '?source=' + imgSource);
+    }
+  }
+
   return sourceData;
 }
 
@@ -150,8 +164,9 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
 
   let rows: number = plateAttrs.rows.length;
   let columns: number = plateAttrs.columns.length;
+  let rowNames: string[] = plateAttrs.rows.map(row => row.name);
+  let columnNames: string[] = plateAttrs.columns.map(col => col.name);
   let wellPaths = plateAttrs.wells.map(well => well.path);
-  console.log('wellPaths', wellPaths)
 
   let plateAcquisitions = ['0'];
   if (plateAttrs?.plateAcquisitions) {
@@ -162,25 +177,21 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
   // Fields are by index and we assume at least 1 per Well
   let field = '0';
 
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   // imagePaths covers whole plate (not sparse) - but some will be '' if no Well
-  const imagePaths = range(rows).flatMap(row => {
-    return range(columns).map(col => {
-      let wellPath = `${plateAcquisition}/${letters[row]}/${col + 1}/`;
+  const imagePaths = rowNames.flatMap(row => {
+    return columnNames.map(col => {
+      let wellPath = `${plateAcquisition}/${row}/${col}/`;
       return wellPaths.includes(wellPath) ? `${wellPath}${field}/` : '';
     });
   })
-  console.log('imagePaths', imagePaths)
 
   // Find first valid Image, loading each Well in turn...
   let imageAttrs = undefined;
   async function getImageAttrs(path: string): Promise<any> {
-    console.log('getImageAttrs', path);
     if (path === '') return
     try {
       return await getJson(store, `${path}.zattrs`);
     } catch (err) {
-      console.log(`failed to load ${path}.zattrs`);
     }
   }
   for (let i = 0; i < imagePaths.length; i++) {
@@ -190,7 +201,6 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
     }
   }
 
-  console.log('imageAttrs', imageAttrs);
   // Lowest resolution is the 'path' of the last 'dataset' from the first multiscales
   let resolution = imageAttrs.multiscales[0].datasets.slice(-1)[0].path;
 
@@ -218,11 +228,11 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
   sourceData.columns = columns;
   sourceData.onClick = (info: any) => {
     let layerId = info.sourceLayer.id as string;
+    // Shouldn't need this check now?
     if (!layerId.includes('-GridLayer-')){
       return;
     }
     // Get the info we need from the layerId
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const [row, col] = layerId.split('-GridLayer-')[1].split('-').map((x: string) => parseInt(x));
     let { source } = sourceData;
     console.log(source)
@@ -230,7 +240,7 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
       if (source.endsWith('/')){
         source = source.slice(0, -1);
       }
-      let imgSource = `${source}/${plateAcquisitions[0]}/${letters[row]}/${col + 1}/`;
+      let imgSource = `${source}/${plateAcquisitions[0]}/${rowNames[row]}/${columnNames[col]}/`;
       window.open(window.location.origin + '?source=' + imgSource);
     }
   }
