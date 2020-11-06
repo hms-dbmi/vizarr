@@ -168,19 +168,19 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
   let columnNames: string[] = plateAttrs.columns.map(col => col.name);
   let wellPaths = plateAttrs.wells.map(well => well.path);
 
-  let plateAcquisitions = ['0'];
-  if (plateAttrs?.plateAcquisitions) {
-    plateAcquisitions = plateAttrs.plateAcquisitions.map(pa => pa.path);
+  let acquisitions = ['0'];
+  if (plateAttrs?.acquisitions) {
+    acquisitions = plateAttrs.acquisitions.map(pa => pa.path);
   }
 
-  let plateAcquisition = plateAcquisitions[0];
+  let acquisition = acquisitions[0];
   // Fields are by index and we assume at least 1 per Well
   let field = '0';
 
   // imagePaths covers whole plate (not sparse) - but some will be '' if no Well
   const imagePaths = rowNames.flatMap(row => {
     return columnNames.map(col => {
-      let wellPath = `${plateAcquisition}/${row}/${col}/`;
+      let wellPath = `${acquisition}/${row}/${col}/`;
       return wellPaths.includes(wellPath) ? `${wellPath}${field}/` : '';
     });
   })
@@ -236,11 +236,11 @@ async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttr
     // Get the info we need from the layerId
     const [row, col] = layerId.split('-GridLayer-')[1].split('-').map((x: string) => parseInt(x));
     let { source } = sourceData;
-    if (typeof source === 'string' && !isNaN(row) && !isNaN(col) && plateAcquisitions) {
+    if (typeof source === 'string' && !isNaN(row) && !isNaN(col) && acquisitions) {
       if (source.endsWith('/')){
         source = source.slice(0, -1);
       }
-      let imgSource = `${source}/${plateAcquisitions[0]}/${rowNames[row]}/${columnNames[col]}/`;
+      let imgSource = `${source}/${acquisitions[0]}/${rowNames[row]}/${columnNames[col]}/`;
       window.open(window.location.origin + '?source=' + imgSource);
     }
   })

@@ -25,7 +25,7 @@ export type OmePlateData = {
   rows: { name: string }[];
   columns: { name: string }[];
   wells: { path: string } []
-  plateAcquisitions?: { path: string }[]
+  acquisitions?: { path: string }[]
 }
 
 export type OmeWellData = {
