@@ -123,6 +123,9 @@ export default class GridLayer<D, P extends GridLayerProps<D> = GridLayerProps<D
 
   getPickingInfo({ info }: { info: any }) {
     // provide Grid row and column info for mouse events (hover & click)
+    if (!info.coordinate) {
+      return info;
+    }
     const { rows, columns } = this.props;
     const spacer = this.props.spacer || 0;
     const { width, height } = this.state;
