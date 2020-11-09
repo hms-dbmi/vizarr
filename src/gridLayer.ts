@@ -121,9 +121,18 @@ export default class GridLayer<D, P extends GridLayerProps<D> = GridLayerProps<D
     }
   }
 
-  getPickingInfo({ info, sourceLayer }: { info: any, sourceLayer: any }) {
-    info.sourceLayer = sourceLayer;
-    info.tile = sourceLayer.props.tile;
+  getPickingInfo({ info }: { info: any }) {
+    // provide Grid row and column info for mouse events (hover & click)
+    const { rows, columns } = this.props;
+    const spacer = this.props.spacer || 0;
+    const { width, height } = this.state;
+    const gridWidth = (columns * width) + ((columns - 1) * spacer);
+    const gridHeight = (rows * height) + ((rows - 1) * spacer);
+    const gridX = info.coordinate[0] + (gridWidth / 2);
+    const gridY = info.coordinate[1] + (gridHeight / 2);
+    const row = Math.floor(gridY / (height + spacer));
+    const column = Math.floor(gridX / (width + spacer));
+    info.gridCoord = { row, column }; // add custom property
     return info;
   }
 
