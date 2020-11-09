@@ -46,6 +46,8 @@ export type SourceData = {
   loaders?: (ZarrLoader | undefined)[];  // for OME plates
   rows?: number;
   columns?: number;
+  acquisitions?: string[];
+  acquisition?: string,
   name?: string;
   channel_axis: number | null;
   colors: string[];

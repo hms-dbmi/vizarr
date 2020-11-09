@@ -138,13 +138,24 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
     try {
       rootAttrs = (await getJson(store, '.zattrs'));
       if (rootAttrs?.plate) {
-        return loadOMEPlate(config, store, rootAttrs as RootAttrs);
+        return loadOMEPlate(config, store, rootAttrs as RootAttrs, undefined);
       } else if (rootAttrs?.well) {
         return loadOMEWell(config, store, rootAttrs as RootAttrs);
       }
       data = await openMultiResolutionData(store, rootAttrs as RootAttrs);
     } catch (err) {
-      throw Error(`Failed to open arrays in zarr.Group. Make sure group implements multiscales extension.`);
+      // No rootAttrs in this group.
+      // if url is to a plate/acquisition/ check parent dir for 'plate' zattrs
+      const url: string = store.url.endsWith('/') ? store.url.slice(0, -1) : store.url;
+      const parentUrl = url.slice(0, url.lastIndexOf('/'));
+      const parentStore = normalizeStore(parentUrl);
+      const parentAttrs = (await getJson(parentStore, '.zattrs'));
+      if (parentAttrs?.plate) {
+        const acquisition = url.slice(url.lastIndexOf('/') + 1);
+        return loadOMEPlate(config, parentStore, parentAttrs as RootAttrs, acquisition);
+      } else {
+        throw Error(`Failed to open arrays in zarr.Group. Make sure group implements multiscales extension.`);
+      }
     }
   } else {
     // Try to open as zarr.Array

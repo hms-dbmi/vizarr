@@ -66,7 +66,12 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
     return sourceData;
 }
 
-export async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, rootAttrs: RootAttrs): Promise<SourceData> {
+export async function loadOMEPlate(
+        config: ImageLayerConfig,
+        store: HTTPStore,
+        rootAttrs: RootAttrs,
+        acquisition: string | undefined
+    ): Promise<SourceData> {
     const plateAttrs = rootAttrs.plate as OmePlateData;
     if (!('columns' in plateAttrs) || !('rows' in plateAttrs)) {
         throw Error(`Plate .zattrs missing columns or rows`);
@@ -82,8 +87,8 @@ export async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, r
     if (plateAttrs?.acquisitions) {
         acquisitions = plateAttrs.acquisitions.map(pa => pa.path);
     }
+    acquisition = acquisitions.includes(acquisition as any) ? acquisition : acquisitions[0];
 
-    let acquisition = acquisitions[0];
     // Fields are by index and we assume at least 1 per Well
     let field = '0';
 
@@ -136,6 +141,8 @@ export async function loadOMEPlate(config: ImageLayerConfig, store: HTTPStore, r
     sourceData.name = plateAttrs.name || "Plate";
     sourceData.rows = rows;
     sourceData.columns = columns;
+    sourceData.acquisitions = acquisitions;
+    sourceData.acquisition = acquisition;
     // Us onClick from image config or Open Well in new window
     sourceData.onClick = config.onClick || ((info: any) => {
         let gridCoord = info.gridCoord;
