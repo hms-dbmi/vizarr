@@ -2,6 +2,11 @@ const path = require('path');
 const pkg = require('./package.json');
 
 function getAssetPrefix() {
+  if (process.env.VIZARR_PREFIX) {
+    if (process.env.VIZARR_PREFIX.endsWith("/")) return process.env.VIZARR_PREFIX;
+    return process.env.VIZARR_PREFIX + "/";
+  }
+  url += url.endsWith("/") ? "" : "/"
   if (process.env.GITHUB_JOB === 'build-and-deploy') return '/vizarr/';
   if (process.env.NPM_BUILD) return `/${pkg.name}@${pkg.version}/`;
   return '';
