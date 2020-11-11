@@ -42,6 +42,22 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
     const sourceData: SourceData = loadOME(config, imageAttrs.omero, loader as ZarrLoader);
     const cols = Math.ceil(Math.sqrt(imagePaths.length));
 
+    // Do we have more than 1 Acquisition?
+    const acqIds = wellAttrs.images.flatMap(img => img.acquisition ? [img.acquisition] : []);
+    console.log('acqIds', acqIds)
+    if (acqIds.length > 1) {
+        // Need to get acquisitions metadata from parent Plate
+        const plateUrl = store.url.replace(`/${row}/${col}`, '');
+        const plateStore = new HTTPStore(plateUrl);
+        const plateAttrs = await getJson(plateStore, `.zattrs`);
+        console.log('plateAttrs', plateAttrs);
+        const acquisitions = plateAttrs?.plate?.acquisitions;
+        if (acquisitions) {
+            sourceData.acquisitions = acquisitions;
+            sourceData.acquisition = '-1';
+        }
+    }
+
     sourceData.loaders = loaders;
     sourceData.name = `Well ${row}${col}`;
     sourceData.rows = Math.ceil(imagePaths.length / cols);
@@ -83,11 +99,12 @@ export async function loadOMEPlate(
     let columnNames: string[] = plateAttrs.columns.map(col => col.name);
     let wellPaths = plateAttrs.wells.map(well => well.path);
 
-    let acquisitions = ['0'];
+    let acquisitions = [];
     if (plateAttrs?.acquisitions) {
-        acquisitions = plateAttrs.acquisitions.map(pa => pa.path);
+        acquisitions = plateAttrs.acquisitions;
     }
-    acquisition = acquisitions.includes(acquisition as any) ? acquisition : acquisitions[0];
+    // ID of current acquisition
+    acquisition = '-1';
 
     // Fields are by index and we assume at least 1 per Well
     let field = '0';
