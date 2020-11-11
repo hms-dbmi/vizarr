@@ -17,11 +17,8 @@ function AcquisitionController({ layerId }: {layerId: string,}): JSX.Element | n
     const handleSelectionChange = (event: ChangeEvent<HTMLSelectElement>) => {
         console.log('event.target.value', event.target.value);
         console.log('source', source);
-        if (source && source.endsWith('/')) {
-            source = source.slice(0, -1);
-        }
-        let imgSource = `${source}/${event.target.value}/`;
-        window.open(window.location.origin + '?source=' + imgSource);
+        let acquisition = event.target.value;
+        window.location.href = window.location.origin + `?source=${source}&acquisition=${acquisition}`;
     };
 
     return (

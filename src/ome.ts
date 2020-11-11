@@ -21,13 +21,38 @@ async function createLoaderFromPath(store: HTTPStore, path: string): Promise<Zar
 }
 
 export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, rootAttrs: RootAttrs): Promise<SourceData> {
+    const { acquisition } = config;
+    let acquisitions = [];
+
+    console.log('acquisition', acquisition);
     const wellAttrs = rootAttrs.well as OmeWellData;
     if (!wellAttrs.images) {
         throw Error(`Well .zattrs missing images`);
     }
     const [row, col] = store.url.split('/').filter(Boolean).slice(-2);
 
-    const imagePaths = wellAttrs.images.map(img => img.path + (img.path.endsWith('/') ? '' : '/'));
+    let images = wellAttrs.images;
+
+    // Do we have more than 1 Acquisition?
+    const acqIds = images.flatMap(img => img.acquisition ? [img.acquisition] : []);
+    console.log('acqIds', acqIds, images);
+    if (acqIds.length > 1) {
+        // Need to get acquisitions metadata from parent Plate
+        const plateUrl = store.url.replace(`/${row}/${col}`, '');
+        const plateStore = new HTTPStore(plateUrl);
+        const plateAttrs = await getJson(plateStore, `.zattrs`);
+        console.log('plateAttrs', plateAttrs);
+        acquisitions = plateAttrs?.plate?.acquisitions;
+
+        // filter imagePaths by acquisition
+        if (acquisition && acquisitions && acquisitions.find(a => a.id == acquisition)) {
+            images = images.filter(img => img.acquisition == acquisition);
+        }
+    }
+    console.log('images', images);
+
+    let imagePaths = images.map(img => img.path + (img.path.endsWith('/') ? '' : '/'));
+
     // Use first image for rendering settings, resolutions etc.
     let imageAttrs = await getJson(store, `${imagePaths[0]}.zattrs`)
     // Lowest resolution is the 'path' of the first 'dataset' from the first multiscales
@@ -42,23 +67,16 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
     const sourceData: SourceData = loadOME(config, imageAttrs.omero, loader as ZarrLoader);
     const cols = Math.ceil(Math.sqrt(imagePaths.length));
 
-    // Do we have more than 1 Acquisition?
-    const acqIds = wellAttrs.images.flatMap(img => img.acquisition ? [img.acquisition] : []);
-    console.log('acqIds', acqIds)
-    if (acqIds.length > 1) {
-        // Need to get acquisitions metadata from parent Plate
-        const plateUrl = store.url.replace(`/${row}/${col}`, '');
-        const plateStore = new HTTPStore(plateUrl);
-        const plateAttrs = await getJson(plateStore, `.zattrs`);
-        console.log('plateAttrs', plateAttrs);
-        const acquisitions = plateAttrs?.plate?.acquisitions;
-        if (acquisitions) {
-            sourceData.acquisitions = acquisitions;
-            sourceData.acquisition = '-1';
-        }
+    if (acquisitions.length > 0) {
+        // To show acquisition chooser in UI
+        sourceData.acquisitions = acquisitions;
+        sourceData.acquisition = acquisition || '-1';
     }
 
-    sourceData.loaders = loaders;
+    if (loaders.length > 1) {
+        // This will use GridLayout
+        sourceData.loaders = loaders;
+    }
     sourceData.name = `Well ${row}${col}`;
     sourceData.rows = Math.ceil(imagePaths.length / cols);
     sourceData.columns = cols;
@@ -97,7 +115,7 @@ export async function loadOMEPlate(
     let columns: number = plateAttrs.columns.length;
     let rowNames: string[] = plateAttrs.rows.map(row => row.name);
     let columnNames: string[] = plateAttrs.columns.map(col => col.name);
-    let wellPaths = plateAttrs.wells.map(well => well.path);
+    let wellPaths = plateAttrs.wells.map(well => well.path + (well.path.endsWith('/') ? '' : '/'));
 
     // Fields are by index and we assume at least 1 per Well
     let field = '0';
