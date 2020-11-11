@@ -120,13 +120,18 @@ export async function loadOMEPlate(
     // Fields are by index and we assume at least 1 per Well
     let field = '0';
 
+    // TEMP: try to support plates with plate/acquisition/row/column hierarchy
+    // Where plate.acquisitions = [{'path': '0'}]
+    let acquisitionPath = plateAttrs?.acquisitions?.[0]?.path;
+    acquisitionPath = acquisitionPath ? acquisitionPath + '/' : '';
+
     // imagePaths covers whole plate (not sparse) - but some will be '' if no Well
     const imagePaths = rowNames.flatMap(row => {
         return columnNames.map(col => {
-            let wellPath = `${row}/${col}/`;
+            let wellPath = `${acquisitionPath}${row}/${col}/`;
             return wellPaths.includes(wellPath) ? `${wellPath}${field}/` : '';
         });
-    })
+    });
 
     // Find first valid Image, loading each Well in turn...
     let imageAttrs = undefined;
@@ -181,7 +186,7 @@ export async function loadOMEPlate(
             if (source.endsWith('/')) {
                 source = source.slice(0, -1);
             }
-            let imgSource = `${source}/${rowNames[row]}/${columnNames[column]}/`;
+            let imgSource = `${source}/${acquisitionPath}${rowNames[row]}/${columnNames[column]}/`;
             window.open(window.location.origin + '?source=' + imgSource);
         }
     })
