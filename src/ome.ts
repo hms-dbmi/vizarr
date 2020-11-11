@@ -24,7 +24,6 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
     const { acquisition } = config;
     let acquisitions = [];
 
-    console.log('acquisition', acquisition);
     const wellAttrs = rootAttrs.well as OmeWellData;
     if (!wellAttrs.images) {
         throw Error(`Well .zattrs missing images`);
@@ -35,21 +34,18 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
 
     // Do we have more than 1 Acquisition?
     const acqIds = images.flatMap(img => img.acquisition ? [img.acquisition] : []);
-    console.log('acqIds', acqIds, images);
     if (acqIds.length > 1) {
         // Need to get acquisitions metadata from parent Plate
         const plateUrl = store.url.replace(`/${row}/${col}`, '');
         const plateStore = new HTTPStore(plateUrl);
         const plateAttrs = await getJson(plateStore, `.zattrs`);
-        console.log('plateAttrs', plateAttrs);
         acquisitions = plateAttrs?.plate?.acquisitions;
 
         // filter imagePaths by acquisition
-        if (acquisition && acquisitions && acquisitions.find(a => a.id == acquisition)) {
-            images = images.filter(img => img.acquisition == acquisition);
+        if (acquisition) {
+            images = images.filter(img => img.acquisition == parseInt(acquisition));
         }
     }
-    console.log('images', images);
 
     let imagePaths = images.map(img => img.path + (img.path.endsWith('/') ? '' : '/'));
 
@@ -73,10 +69,7 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
         sourceData.acquisition = acquisition || '-1';
     }
 
-    if (loaders.length > 1) {
-        // This will use GridLayout
-        sourceData.loaders = loaders;
-    }
+    sourceData.loaders = loaders;
     sourceData.name = `Well ${row}${col}`;
     sourceData.rows = Math.ceil(imagePaths.length / cols);
     sourceData.columns = cols;

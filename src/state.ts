@@ -22,6 +22,7 @@ export type BaseConfig = {
   opacity?: number;
   axis_labels: string[];
   translate?: number[];
+  acquisition?: string;
   onClick?: (e: any) => void;
 };
 
@@ -40,13 +41,18 @@ export type SingleChannelConfig = {
 
 export type ImageLayerConfig = BaseConfig | MultichannelConfig | SingleChannelConfig;
 
+export type Acquisition = {
+  id: number;
+  name: string;
+}
+
 export type SourceData = {
   loader: ZarrLoader;
   source?: string | HTTPStore;
   loaders?: (ZarrLoader | undefined)[];  // for OME plates
   rows?: number;
   columns?: number;
-  acquisitions?: string[];
+  acquisitions?: (string | Acquisition)[];
   acquisition?: string,
   name?: string;
   channel_axis: number | null;

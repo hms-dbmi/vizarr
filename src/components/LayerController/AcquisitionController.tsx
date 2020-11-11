@@ -1,6 +1,7 @@
 import { Grid, NativeSelect } from '@material-ui/core';
 import { useRecoilValue } from 'recoil';
 import type { ChangeEvent } from 'react';
+import type { Acquisition } from '../../state';
 
 import { sourceInfoState } from '../../state';
 
@@ -15,8 +16,6 @@ function AcquisitionController({ layerId }: {layerId: string,}): JSX.Element | n
     }
 
     const handleSelectionChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        console.log('event.target.value', event.target.value);
-        console.log('source', source);
         let acquisition = event.target.value;
         window.location.href = window.location.origin + `?source=${source}&acquisition=${acquisition}`;
     };
@@ -27,18 +26,20 @@ function AcquisitionController({ layerId }: {layerId: string,}): JSX.Element | n
                 <NativeSelect
                     fullWidth
                     style={{ fontSize: '0.7em' }}
-                    // id={`layer-${layerId}-channel-select`}
                     onChange={handleSelectionChange}
                     value={acquisition}
                 >
                     <option value="-1" key="-1">
                         Filter by Acquisition
                     </option>
-                    {acquisitions.map((acq) => (
-                        <option value={acq.id} key={acq.id}>
-                            Acquisition: {acq.name}
-                        </option>
-                    ))}
+                    {acquisitions.map(acq => {
+                        acq = acq as Acquisition;
+                        return(
+                            <option value={acq.id} key={acq.id}>
+                                Acquisition: {acq.name}
+                            </option>
+                        )
+                    })}
                 </NativeSelect>
             </Grid>
         </>

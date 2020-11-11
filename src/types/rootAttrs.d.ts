@@ -29,7 +29,7 @@ export type OmePlateData = {
 }
 
 export type OmeWellData = {
-  images?: { path: string }[]
+  images?: { path: string, acquisition?: number }[]
 }
 
 export type Multiscale = {
