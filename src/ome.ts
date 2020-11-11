@@ -99,13 +99,6 @@ export async function loadOMEPlate(
     let columnNames: string[] = plateAttrs.columns.map(col => col.name);
     let wellPaths = plateAttrs.wells.map(well => well.path);
 
-    let acquisitions = [];
-    if (plateAttrs?.acquisitions) {
-        acquisitions = plateAttrs.acquisitions;
-    }
-    // ID of current acquisition
-    acquisition = '-1';
-
     // Fields are by index and we assume at least 1 per Well
     let field = '0';
 
@@ -158,8 +151,6 @@ export async function loadOMEPlate(
     sourceData.name = plateAttrs.name || "Plate";
     sourceData.rows = rows;
     sourceData.columns = columns;
-    sourceData.acquisitions = acquisitions;
-    sourceData.acquisition = acquisition;
     // Us onClick from image config or Open Well in new window
     sourceData.onClick = config.onClick || ((info: any) => {
         let gridCoord = info.gridCoord;
