@@ -95,7 +95,7 @@ export async function loadOMEPlate(
     // imagePaths covers whole plate (not sparse) - but some will be '' if no Well
     const imagePaths = rowNames.flatMap(row => {
         return columnNames.map(col => {
-            let wellPath = `${acquisition}/${row}/${col}/`;
+            let wellPath = `${row}/${col}/`;
             return wellPaths.includes(wellPath) ? `${wellPath}${field}/` : '';
         });
     })
@@ -151,11 +151,11 @@ export async function loadOMEPlate(
         }
         const { row, column } = gridCoord;
         let { source } = sourceData;
-        if (typeof source === 'string' && !isNaN(row) && !isNaN(column) && acquisitions) {
+        if (typeof source === 'string' && !isNaN(row) && !isNaN(column)) {
             if (source.endsWith('/')) {
                 source = source.slice(0, -1);
             }
-            let imgSource = `${source}/${acquisitions[0]}/${rowNames[row]}/${columnNames[column]}/`;
+            let imgSource = `${source}/${rowNames[row]}/${columnNames[column]}/`;
             window.open(window.location.origin + '?source=' + imgSource);
         }
     })
