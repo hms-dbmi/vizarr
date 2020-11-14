@@ -1,4 +1,5 @@
 import { CompositeLayer, COORDINATE_SYSTEM } from '@deck.gl/core';
+import { SolidPolygonLayer } from '@deck.gl/layers';
 import type { CompositeLayerProps } from '@deck.gl/core/lib/composite-layer';
 import pMap from 'p-map';
 
@@ -146,7 +147,7 @@ export default class GridLayer<D, P extends GridLayerProps<D> = GridLayerProps<D
     const { loaders, rows, columns, spacer, id = '' } = this.props;
     const top = -(rows * (height + spacer)) / 2;
     const left = -(columns * (width + spacer)) / 2;
-    return range(rows).flatMap((row) => {
+    const gridLayers = range(rows).flatMap((row) => {
       return range(columns).map((col) => {
         const y = top + (row * (height + spacer));
         const x = left + (col * (width + spacer));
@@ -160,6 +161,24 @@ export default class GridLayer<D, P extends GridLayerProps<D> = GridLayerProps<D
         return new XRLayer({ ...this.props, ...layerProps });
       });
     });
+
+    if (this.props.pickable) {
+      const bottom = top + (rows * (height + spacer));
+      const right = left + (columns * (height + spacer));
+      const polygon = [[left, top], [right, top], [right, bottom], [left, bottom]];
+      const layerProps = {
+        data: [{ polygon }],
+        getPolygon: (d: any) => d.polygon,
+        getFillColor: [0, 0, 0, 0], // transparent
+        getLineColor: [0, 0, 0, 0],
+        pickable: true, // enable picking
+        id: `${id}-GridLayer-picking`,
+      } as any; // I was having an issue with typescript here....
+      const pickableLayer = new SolidPolygonLayer({ ...this.props, ...layerProps });
+      return [pickableLayer, ...gridLayers];
+    }
+
+    return gridLayers;
   }
 }
   
