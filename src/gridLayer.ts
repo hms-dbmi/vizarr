@@ -164,7 +164,7 @@ export default class GridLayer<D, P extends GridLayerProps<D> = GridLayerProps<D
 
     if (this.props.pickable) {
       const bottom = top + (rows * (height + spacer));
-      const right = left + (columns * (height + spacer));
+      const right = left + (columns * (width + spacer));
       const polygon = [[left, top], [right, top], [right, bottom], [left, bottom]];
       const layerProps = {
         data: [{ polygon }],
