@@ -3,26 +3,31 @@ import { ZarrLoader } from 'viv';
 import pMap from 'p-map';
 
 import type { RootAttrs, OmeroImageData, OmeWellData, OmePlateData } from './types/rootAttrs';
-import type { SourceData, ImageLayerConfig } from './state';
+import type { SourceData, ImageLayerConfig, Acquisition } from './state';
 
-import { getJson } from './utils';
+import { getJson, rstrip, join } from './utils';
 import { createLoader } from './io';
 
 
 // Create loader for every Well. Some loaders may be undefined if Wells are missing.
-async function createLoaderFromPath(store: HTTPStore, path: string): Promise<ZarrLoader | undefined> {
+async function createLoaderFromPath(store: HTTPStore, path: string | undefined): Promise<ZarrLoader | undefined> {
+    if (path === undefined) {
+        // Don't even try to load if we know that Well is missing
+        return;
+    }
     try {
         const data = await openArray({ store, path });
         let l = createLoader([data]);
         return l;
     } catch (err) {
-        console.log(`Missing Well at ${path}`);
+        console.log(`Failed to create loader: ${path}`);
     }
 }
 
 export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, rootAttrs: RootAttrs): Promise<SourceData> {
-    const { acquisition } = config;
-    let acquisitions = [];
+    // Can filter Well fields by URL query ?acquisition=ID
+    const acquisitionId: number | undefined = config.acquisition ? parseInt(config.acquisition) : undefined;
+    let acquisitions: Acquisition[] = [];
 
     const wellAttrs = rootAttrs.well as OmeWellData;
     if (!wellAttrs.images) {
@@ -42,20 +47,20 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
         acquisitions = plateAttrs?.plate?.acquisitions;
 
         // filter imagePaths by acquisition
-        if (acquisition) {
-            images = images.filter(img => img.acquisition == parseInt(acquisition));
+        if (acquisitionId) {
+            images = images.filter(img => img.acquisition === acquisitionId);
         }
     }
 
-    let imagePaths = images.map(img => img.path + (img.path.endsWith('/') ? '' : '/'));
+    let imagePaths = images.map(img => rstrip(img.path, '/'));
 
     // Use first image for rendering settings, resolutions etc.
-    let imageAttrs = await getJson(store, `${imagePaths[0]}.zattrs`)
+    let imageAttrs = await getJson(store, `${imagePaths[0]}/.zattrs`)
     // Lowest resolution is the 'path' of the first 'dataset' from the first multiscales
     let resolution = imageAttrs.multiscales[0].datasets[0].path;
 
     // Create loader for every Image.
-    const promises = imagePaths.map(p => createLoaderFromPath(store, `${p}${resolution}/`));
+    const promises = imagePaths.map(p => createLoaderFromPath(store, join(p, resolution)));
     let loaders = await Promise.all(promises);
     const loader = loaders.find(Boolean);
 
@@ -66,7 +71,7 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
     if (acquisitions.length > 0) {
         // To show acquisition chooser in UI
         sourceData.acquisitions = acquisitions;
-        sourceData.acquisition = acquisition || '-1';
+        sourceData.acquisitionId = acquisitionId || -1;
     }
 
     sourceData.loaders = loaders;
@@ -79,13 +84,10 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
             return;
         }
         const { row, column } = gridCoord;
-        let { source } = sourceData;
+        const { source } = sourceData;
         if (typeof source === 'string' && !isNaN(row) && !isNaN(column)) {
             const field = (row * cols) + column;
-            if (source.endsWith('/')) {
-                source = source.slice(0, -1);
-            }
-            let imgSource = `${source}/${imagePaths[field]}`;
+            let imgSource = join(source, imagePaths[field]);
             window.open(window.location.origin + '?source=' + imgSource);
         }
     }
@@ -96,8 +98,7 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
 export async function loadOMEPlate(
         config: ImageLayerConfig,
         store: HTTPStore,
-        rootAttrs: RootAttrs,
-        acquisition: string | undefined
+        rootAttrs: RootAttrs
     ): Promise<SourceData> {
     const plateAttrs = rootAttrs.plate as OmePlateData;
     if (!('columns' in plateAttrs) || !('rows' in plateAttrs)) {
@@ -108,21 +109,20 @@ export async function loadOMEPlate(
     let columns: number = plateAttrs.columns.length;
     let rowNames: string[] = plateAttrs.rows.map(row => row.name);
     let columnNames: string[] = plateAttrs.columns.map(col => col.name);
-    let wellPaths = plateAttrs.wells.map(well => well.path + (well.path.endsWith('/') ? '' : '/'));
+    let wellPaths = plateAttrs.wells.map(well => rstrip(well.path, '/'));
 
     // Fields are by index and we assume at least 1 per Well
     let field = '0';
 
     // TEMP: try to support plates with plate/acquisition/row/column hierarchy
     // Where plate.acquisitions = [{'path': '0'}]
-    let acquisitionPath = plateAttrs?.acquisitions?.[0]?.path;
-    acquisitionPath = acquisitionPath ? acquisitionPath + '/' : '';
+    let acquisitionPath = plateAttrs?.acquisitions?.[0]?.path || '';
 
     // imagePaths covers whole plate (not sparse) - but some will be '' if no Well
     const imagePaths = rowNames.flatMap(row => {
         return columnNames.map(col => {
-            let wellPath = `${acquisitionPath}${row}/${col}/`;
-            return wellPaths.includes(wellPath) ? `${wellPath}${field}/` : '';
+            const wellPath = join(acquisitionPath, row, col);
+            return wellPaths.includes(wellPath) ? join(wellPath, field) : '';
         });
     });
 
@@ -131,7 +131,7 @@ export async function loadOMEPlate(
     async function getImageAttrs(path: string): Promise<any> {
         if (path === '') return
         try {
-            return await getJson(store, `${path}.zattrs`);
+            return await getJson(store, join(path, '.zattrs'));
         } catch (err) {
         }
     }
@@ -146,16 +146,8 @@ export async function loadOMEPlate(
     let resolution = imageAttrs.multiscales[0].datasets.slice(-1)[0].path;
 
     // Create loader for every Well. Some loaders may be undefined if Wells are missing.
-    async function createLoaderFromPath(path: string): Promise<ZarrLoader | undefined> {
-        try {
-            const data = await openArray({ store, path: `${path}${resolution}/` });
-            let l = createLoader([data]);
-            return l;
-        } catch (err) {
-            console.log(`Missing Well at ${path}`);
-        }
-    }
-    const promises = await pMap(imagePaths, createLoaderFromPath, { concurrency: 10 });
+    const mapper = (path:string) => createLoaderFromPath(store, path ? join(path, resolution): undefined);
+    const promises = await pMap(imagePaths, mapper, { concurrency: 10 });
     let loaders = await Promise.all(promises);
 
     const loader = loaders.find(Boolean);
@@ -176,10 +168,7 @@ export async function loadOMEPlate(
         const { row, column } = gridCoord;
         let { source } = sourceData;
         if (typeof source === 'string' && !isNaN(row) && !isNaN(column)) {
-            if (source.endsWith('/')) {
-                source = source.slice(0, -1);
-            }
-            let imgSource = `${source}/${acquisitionPath}${rowNames[row]}/${columnNames[column]}/`;
+            const imgSource = join(source, acquisitionPath, rowNames[row], columnNames[column]);
             window.open(window.location.origin + '?source=' + imgSource);
         }
     })

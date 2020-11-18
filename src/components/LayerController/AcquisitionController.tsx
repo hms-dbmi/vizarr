@@ -9,7 +9,7 @@ import { sourceInfoState } from '../../state';
 function AcquisitionController({ layerId }: {layerId: string,}): JSX.Element | null {
 
     const sourceInfo = useRecoilValue(sourceInfoState);
-    const { acquisition, acquisitions, source } = sourceInfo[layerId];
+    const { acquisitionId, acquisitions, source } = sourceInfo[layerId];
 
     if (!acquisitions) {
         return null;
@@ -27,7 +27,7 @@ function AcquisitionController({ layerId }: {layerId: string,}): JSX.Element | n
                     fullWidth
                     style={{ fontSize: '0.7em' }}
                     onChange={handleSelectionChange}
-                    value={acquisition}
+                    value={acquisitionId}
                 >
                     <option value="-1" key="-1">
                         Filter by Acquisition

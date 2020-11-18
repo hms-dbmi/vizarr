@@ -40,3 +40,16 @@ export function hexToRGB(hex: string): number[] {
 export function range(length: number): number[] {
   return Array.from({ length }, (_, i) => i);
 }
+
+// similar to Python's rstrip
+export function rstrip(str: string, remove: string = " "): string {
+  // if the last character is in 'remove', truncate
+  while (str.length > 0 && remove.includes(str.charAt(str.length - 1))) {
+    str = str.substr(0, str.length - 1);
+  }
+  return str;
+}
+
+export function join(...args:(string|undefined)[]) {
+  return args.filter(Boolean).map((s:any) => rstrip(s as string, '/')).join('/')
+}

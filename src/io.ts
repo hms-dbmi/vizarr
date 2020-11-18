@@ -5,7 +5,7 @@ import type { RootAttrs } from './types/rootAttrs';
 import { loadOME, loadOMEPlate, loadOMEWell } from './ome';
 import type { SourceData, ImageLayerConfig, LayerState, SingleChannelConfig, MultichannelConfig } from './state';
 
-import { getJson, MAX_CHANNELS, COLORS, MAGENTA_GREEN, RGB, CYMRGB, normalizeStore, hexToRGB, range } from './utils';
+import { getJson, MAX_CHANNELS, COLORS, MAGENTA_GREEN, RGB, CYMRGB, normalizeStore, hexToRGB, range, rstrip } from './utils';
 import GridLayer from './gridLayer';
 
 function getAxisLabels(config: SingleChannelConfig | MultichannelConfig, loader: ZarrLoader): string[] {
@@ -138,7 +138,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
     try {
       rootAttrs = (await getJson(store, '.zattrs'));
       if (rootAttrs?.plate) {
-        return loadOMEPlate(config, store, rootAttrs as RootAttrs, undefined);
+        return loadOMEPlate(config, store, rootAttrs as RootAttrs);
       } else if (rootAttrs?.well) {
         return loadOMEWell(config, store, rootAttrs as RootAttrs);
       }
@@ -146,13 +146,12 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
     } catch (err) {
       // No rootAttrs in this group.
       // if url is to a plate/acquisition/ check parent dir for 'plate' zattrs
-      const url: string = store.url.endsWith('/') ? store.url.slice(0, -1) : store.url;
+      const url: string = rstrip(store.url, '/');
       const parentUrl = url.slice(0, url.lastIndexOf('/'));
       const parentStore = normalizeStore(parentUrl);
-      const parentAttrs = (await getJson(parentStore, '.zattrs'));
+      const parentAttrs = await getJson(parentStore, '.zattrs');
       if (parentAttrs?.plate) {
-        const acquisition = url.slice(url.lastIndexOf('/') + 1);
-        return loadOMEPlate(config, parentStore, parentAttrs as RootAttrs, acquisition);
+        return loadOMEPlate(config, parentStore, parentAttrs as RootAttrs);
       } else {
         throw Error(`Failed to open arrays in zarr.Group. Make sure group implements multiscales extension.`);
       }
@@ -206,7 +205,7 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
   } = sourceData;
   const { selection, opacity, colormap } = defaults;
 
-  const Layer = loaders ? GridLayer : loader.numLevels > 1 ? MultiscaleImageLayer : ImageLayer;
+  const Layer = getLayer(sourceData);
   const loaderSelection: number[][] = [];
   const colorValues: number[][] = [];
   const contrastLimits: number[][] = [];
@@ -233,7 +232,6 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
       id: layerId,
       loader,
       loaders,
-      source,
       loaderSelection,
       colorValues,
       sliderValues,
@@ -247,4 +245,8 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
     },
     on: true,
   };
+}
+
+function getLayer(sourceData: SourceData): ImageLayer | MultiscaleImageLayer {
+  return sourceData.loaders ? GridLayer : sourceData.loader.numLevels > 1 ? MultiscaleImageLayer : ImageLayer;
 }

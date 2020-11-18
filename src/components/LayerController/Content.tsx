@@ -17,8 +17,6 @@ const Details = withStyles({
   },
 })(AccordionDetails);
 
-const acquisitions = ['0', '1']
-
 function Content({ layerId, nChannels }: { layerId: string; nChannels: number }): JSX.Element {
   return (
     <Details>
