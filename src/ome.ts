@@ -78,7 +78,7 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
     sourceData.name = `Well ${row}${col}`;
     sourceData.rows = Math.ceil(imagePaths.length / cols);
     sourceData.columns = cols;
-    sourceData.onClick = (info: any) => {
+    sourceData.onClick = config.onClick || ((info: any) => {
         let gridCoord = info.gridCoord;
         if (!gridCoord) {
             return;
@@ -90,7 +90,7 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
             let imgSource = join(source, imagePaths[field]);
             window.open(window.location.origin + '?source=' + imgSource);
         }
-    }
+    });
 
     return sourceData;
 }
