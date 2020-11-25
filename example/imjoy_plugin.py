@@ -5,13 +5,13 @@ import zarr
 def encode_zarr_store(zobj):
     path_prefix = f"{zobj.path}/" if zobj.path else ""
 
-    def getItem(key):
+    def getItem(key, options = None):
         return zobj.store[path_prefix + key]
 
     def setItem(key, value):
         zobj.store[path_prefix + key] = value
 
-    def containsItem(key):
+    def containsItem(key, options = None):
         if path_prefix + key in zobj.store:
             return True
 

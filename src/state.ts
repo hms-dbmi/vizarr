@@ -21,6 +21,9 @@ export type BaseConfig = {
   colormap?: string;
   opacity?: number;
   axis_labels: string[];
+  translate?: number[];
+  acquisition?: string;
+  onClick?: (e: any) => void;
 };
 
 export type MultichannelConfig = {
@@ -38,8 +41,19 @@ export type SingleChannelConfig = {
 
 export type ImageLayerConfig = BaseConfig | MultichannelConfig | SingleChannelConfig;
 
+export type Acquisition = {
+  id: number;
+  name: string;
+}
+
 export type SourceData = {
   loader: ZarrLoader;
+  source?: string | HTTPStore;
+  loaders?: (ZarrLoader | undefined)[];  // for OME plates
+  rows?: number;
+  columns?: number;
+  acquisitions?: Acquisition[];
+  acquisitionId?: number,
   name?: string;
   channel_axis: number | null;
   colors: string[];
@@ -52,11 +66,20 @@ export type SourceData = {
     opacity: number;
   };
   axis_labels: string[];
+  translate: number[];
+  onClick?: (e: any) => void;
 };
 
 export type LayerState = {
   Layer: null | ImageLayer | MultiscaleImageLayer;
-  layerProps: VivLayerProps & { contrastLimits: number[][] };
+  layerProps: VivLayerProps & {
+    contrastLimits: number[][],
+    source?: string | HTTPStore,
+    loaders?: (ZarrLoader | undefined)[],
+    rows?: number,
+    columns?: number,
+    onClick?: (e: any) => void,
+  };
   on: boolean;
 };
 

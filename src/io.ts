@@ -1,9 +1,12 @@
 import { openArray, ZarrArray, HTTPStore } from 'zarr';
 import { ZarrLoader, ImageLayer, MultiscaleImageLayer, DTYPE_VALUES } from 'viv';
-import type { RootAttrs, OmeroImageData } from './types/rootAttrs';
+
+import type { RootAttrs } from './types/rootAttrs';
+import { loadOME, loadOMEPlate, loadOMEWell } from './ome';
 import type { SourceData, ImageLayerConfig, LayerState, SingleChannelConfig, MultichannelConfig } from './state';
 
-import { getJson, MAX_CHANNELS, COLORS, MAGENTA_GREEN, RGB, CYMRGB, normalizeStore, hexToRGB, range } from './utils';
+import { getJson, MAX_CHANNELS, COLORS, MAGENTA_GREEN, RGB, CYMRGB, normalizeStore, hexToRGB, range, rstrip } from './utils';
+import GridLayer from './gridLayer';
 
 function getAxisLabels(config: SingleChannelConfig | MultichannelConfig, loader: ZarrLoader): string[] {
   let { axis_labels } = config;
@@ -16,7 +19,7 @@ function getAxisLabels(config: SingleChannelConfig | MultichannelConfig, loader:
 }
 
 function loadSingleChannel(config: SingleChannelConfig, loader: ZarrLoader, max: number): SourceData {
-  const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
+  const { color, contrast_limits, visibility, name, colormap = '', opacity = 1, translate } = config;
   return {
     loader,
     name,
@@ -30,12 +33,13 @@ function loadSingleChannel(config: SingleChannelConfig, loader: ZarrLoader, max:
       colormap,
       opacity,
     },
-    axis_labels: getAxisLabels(config, loader)
+    axis_labels: getAxisLabels(config, loader),
+    translate: translate ?? [0, 0],
   };
 }
 
 function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: number): SourceData {
-  const { names, channel_axis, name, opacity = 1, colormap = '' } = config;
+  const { names, channel_axis, name, opacity = 1, colormap = '', translate } = config;
   let { contrast_limits, visibilities, colors } = config;
   const { base } = loader;
 
@@ -93,45 +97,11 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
       opacity,
     },
     axis_labels: axis_labels,
+    translate: translate ?? [0, 0],
   };
 }
 
-function loadOME(config: ImageLayerConfig, imageData: OmeroImageData, loader: ZarrLoader): SourceData {
-  const { name, opacity = 1, colormap = '' } = config;
-  const { rdefs, channels } = imageData;
-  const t = rdefs.defaultT ?? 0;
-  const z = rdefs.defaultZ ?? 0;
-
-  const colors: string[] = [];
-  const contrast_limits: number[][] = [];
-  const visibilities: boolean[] = [];
-  const names: string[] = [];
-
-  channels.forEach((c) => {
-    colors.push(c.color);
-    contrast_limits.push([c.window.start, c.window.end]);
-    visibilities.push(c.active);
-    names.push(c.label);
-  });
-
-  return {
-    loader,
-    name: imageData.name ?? name,
-    channel_axis: 1,
-    colors,
-    names,
-    contrast_limits,
-    visibilities,
-    defaults: {
-      selection: [t, 0, z, 0, 0],
-      colormap,
-      opacity,
-    },
-    axis_labels: ["t", "c", "z", "y", "x"],
-  };
-}
-
-function createLoader(dataArr: ZarrArray[]) {
+export function createLoader(dataArr: ZarrArray[]) {
   // TODO: There should be a much better way to do this.
   // If base image is small, we don't need to fetch data for the
   // top levels of the pyramid. For large images, the tile sizes (chunks)
@@ -147,16 +117,15 @@ function createLoader(dataArr: ZarrArray[]) {
   return new ZarrLoader({ data, dimensions });
 }
 
-async function openRootGroup(store: HTTPStore): Promise<{ rootAttrs: RootAttrs; data: ZarrArray[] }> {
+async function openMultiResolutionData(store: HTTPStore, rootAttrs: RootAttrs): Promise<ZarrArray[]> {
   let resolutions = ['0'];
-  const rootAttrs = (await getJson(store, '.zattrs')) as RootAttrs;
   if ('multiscales' in rootAttrs) {
     const { datasets } = rootAttrs.multiscales[0];
     resolutions = datasets.map((d) => d.path);
   }
   const promises = resolutions.map((path) => openArray({ store, path }));
   const data = await Promise.all(promises);
-  return { data, rootAttrs };
+  return data;
 }
 
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
@@ -167,11 +136,25 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   const store = normalizeStore(source);
   if (await store.containsItem('.zgroup')) {
     try {
-      const res = await openRootGroup(store);
-      data = res.data;
-      rootAttrs = res.rootAttrs;
+      rootAttrs = (await getJson(store, '.zattrs'));
+      if (rootAttrs?.plate) {
+        return loadOMEPlate(config, store, rootAttrs as RootAttrs);
+      } else if (rootAttrs?.well) {
+        return loadOMEWell(config, store, rootAttrs as RootAttrs);
+      }
+      data = await openMultiResolutionData(store, rootAttrs as RootAttrs);
     } catch (err) {
-      throw Error(`Failed to open arrays in zarr.Group. Make sure group implements multiscales extension.`);
+      // No rootAttrs in this group.
+      // if url is to a plate/acquisition/ check parent dir for 'plate' zattrs
+      const url: string = rstrip(store.url, '/');
+      const parentUrl = url.slice(0, url.lastIndexOf('/'));
+      const parentStore = normalizeStore(parentUrl);
+      const parentAttrs = await getJson(parentStore, '.zattrs');
+      if (parentAttrs?.plate) {
+        return loadOMEPlate(config, parentStore, parentAttrs as RootAttrs);
+      } else {
+        throw Error(`Failed to open arrays in zarr.Group. Make sure group implements multiscales extension.`);
+      }
     }
   } else {
     // Try to open as zarr.Array
@@ -206,10 +189,23 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 }
 
 export function initLayerStateFromSource(sourceData: SourceData, layerId: string): LayerState {
-  const { loader, channel_axis, colors, visibilities, contrast_limits, defaults } = sourceData;
+  const {
+    loader,
+    source,
+    channel_axis,
+    colors,
+    visibilities,
+    contrast_limits,
+    defaults,
+    // Grid
+    loaders,
+    rows,
+    columns,
+    onClick,
+  } = sourceData;
   const { selection, opacity, colormap } = defaults;
 
-  const Layer = loader.numLevels > 1 ? MultiscaleImageLayer : ImageLayer;
+  const Layer = getLayer(sourceData);
   const loaderSelection: number[][] = [];
   const colorValues: number[][] = [];
   const contrastLimits: number[][] = [];
@@ -235,6 +231,7 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
     layerProps: {
       id: layerId,
       loader,
+      loaders,
       loaderSelection,
       colorValues,
       sliderValues,
@@ -242,7 +239,14 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
       channelIsOn,
       opacity,
       colormap,
+      rows,
+      columns,
+      onClick,
     },
     on: true,
   };
+}
+
+function getLayer(sourceData: SourceData): ImageLayer | MultiscaleImageLayer {
+  return sourceData.loaders ? GridLayer : sourceData.loader.numLevels > 1 ? MultiscaleImageLayer : ImageLayer;
 }

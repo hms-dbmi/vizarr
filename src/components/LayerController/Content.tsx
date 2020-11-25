@@ -1,6 +1,7 @@
-import { AccordionDetails, Grid, Typography, Divider } from '@material-ui/core';
+import { AccordionDetails, Grid, Typography, Divider, NativeSelect } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 
+import AcquisitionController from './AcquisitionController';
 import AddChannelButton from './AddChannelButton';
 import OpacitySlider from './OpacitySlider';
 import AxisSliders from './AxisSliders';
@@ -20,6 +21,7 @@ function Content({ layerId, nChannels }: { layerId: string; nChannels: number })
   return (
     <Details>
       <Grid container direction="column">
+        <AcquisitionController layerId={layerId} />
         <Grid>
           <Grid container justify="space-between">
             <Grid item xs={3}>

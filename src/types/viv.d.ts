@@ -1,6 +1,6 @@
 declare module 'viv' {
-  import { Layer } from '@deck.gl/core';
-  import { ZarrArray } from 'zarr';
+  import type { Layer } from '@deck.gl/core';
+  import type { ZarrArray } from 'zarr';
 
   type TypedArray = Uint8Array | Uint16Array | Uint32Array | Float32Array;
   type SupportedDtype = '<u1' | '<u2' | '<u4' | '<f4';
@@ -32,7 +32,7 @@ declare module 'viv' {
     loaderSelection: number[][];
   };
 
-  type SelectionData = {
+  export type SelectionData = {
     data: TypedArray[];
     width: number;
     height: number;
@@ -77,5 +77,13 @@ declare module 'viv' {
 
   export class MultiscaleImageLayer extends Layer {
     constructor(props: VivLayerProps);
+  }
+
+  export class XRLayer<D, P extends VivLayerProps<D>> extends Layer<D, P> {
+    getShaders(): any;
+    initializeState(params: any): void;
+    updateState({ props, oldProps, changeFlags }: { props: P, oldProps: P, changeFlags: any }): void;
+    draw({ uniforms }: { uniforms: any }): void;
+    _getModel(gl: any): any;
   }
 }
