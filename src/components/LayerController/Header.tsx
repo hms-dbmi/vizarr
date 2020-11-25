@@ -1,4 +1,5 @@
-import { AccordionSummary, Grid, Typography } from '@material-ui/core';
+import React from 'react';
+import { AccordionSummary, Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import LayerVisibilityButton from './LayerVisibilityButton';
 

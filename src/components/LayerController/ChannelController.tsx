@@ -1,3 +1,4 @@
+import React from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import type { ChangeEvent } from 'react';
 import { Slider, Typography, Grid, IconButton } from '@material-ui/core';

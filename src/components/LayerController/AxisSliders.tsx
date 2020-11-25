@@ -1,3 +1,4 @@
+import React from 'react'
 import { Grid, Divider } from '@material-ui/core';
 import { useRecoilValue } from 'recoil';
 import AxisSlider from './AxisSlider';

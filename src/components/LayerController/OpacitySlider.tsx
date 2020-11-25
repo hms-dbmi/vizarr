@@ -1,3 +1,4 @@
+import React from 'react';
 import { useRecoilState } from 'recoil';
 import type { ChangeEvent } from 'react';
 import { Slider } from '@material-ui/core';

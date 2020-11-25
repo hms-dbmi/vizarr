@@ -1,10 +1,11 @@
+import React from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import DeckGL from 'deck.gl';
 import { OrthographicView } from '@deck.gl/core';
 import type { Layer } from '@deck.gl/core';
 
 import { viewerViewState, layersSelector } from '../state';
-import type { VivLayerProps, ZarrLoader } from 'viv';
+import type { VivLayerProps, ZarrLoader } from '@hms-dbmi/viv';
 
 
 function WrappedViewStateDeck({ layers }: { layers: Layer<VivLayerProps>[] }): JSX.Element {

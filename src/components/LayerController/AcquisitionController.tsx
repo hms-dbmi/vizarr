@@ -1,3 +1,4 @@
+import React from 'react';
 import { Grid, NativeSelect } from '@material-ui/core';
 import { useRecoilValue } from 'recoil';
 import type { ChangeEvent } from 'react';
@@ -16,9 +17,8 @@ function AcquisitionController({ layerId }: {layerId: string,}): JSX.Element | n
     }
 
     const handleSelectionChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        let value = event.target.value;
-        let acquisition = value === '-1' ? '' : `&acquisition=${value}`
-        window.location.href = window.location.origin + `?source=${source}${acquisition}`;
+        let acquisition = event.target.value;
+        window.location.href = window.location.origin + `?source=${source}&acquisition=${acquisition}`;
     };
 
     return (
