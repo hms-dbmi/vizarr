@@ -1,4 +1,4 @@
-declare module 'viv' {
+declare module '@hms-dbmi/viv' {
   import type { Layer } from '@deck.gl/core';
   import type { ZarrArray } from 'zarr';
 

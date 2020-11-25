@@ -3,8 +3,8 @@ import { SolidPolygonLayer } from '@deck.gl/layers';
 import type { CompositeLayerProps } from '@deck.gl/core/lib/composite-layer';
 import pMap from 'p-map';
 
-import { TypedArray, XRLayer } from 'viv';
-import type { ZarrLoader, SelectionData, RasterSelection } from 'viv';
+import { TypedArray, XRLayer } from '@hms-dbmi/viv';
+import type { ZarrLoader, SelectionData, RasterSelection } from '@hms-dbmi/viv';
 import { range } from './utils';
 
 // @ts-ignore

@@ -1,6 +1,6 @@
 import { atom, atomFamily, selector, waitForAll } from 'recoil';
 import type { HTTPStore } from 'zarr';
-import type { VivLayerProps, ImageLayer, MultiscaleImageLayer, ZarrLoader } from 'viv';
+import type { VivLayerProps, ImageLayer, MultiscaleImageLayer, ZarrLoader } from '@hms-dbmi/viv';
 
 export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
 export const DEFAULT_LAYER_PROPS = {

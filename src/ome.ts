@@ -1,8 +1,8 @@
 import { openArray, HTTPStore } from 'zarr';
-import { ZarrLoader } from 'viv';
 import pMap from 'p-map';
 
-import type { RootAttrs, OmeroImageData, OmeWellData, OmePlateData } from './types/rootAttrs';
+import type { ZarrLoader } from '@hms-dbmi/viv';
+import type { RootAttrs, OmeroImageData, OmeWellData, OmePlateData } from '../types/rootAttrs';
 import type { SourceData, ImageLayerConfig, Acquisition } from './state';
 
 import { getJson, rstrip, join } from './utils';
@@ -47,7 +47,7 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
         acquisitions = plateAttrs?.plate?.acquisitions;
 
         // filter imagePaths by acquisition
-        if (acquisitionId && acqIds.includes(acquisitionId)) {
+        if (acquisitionId) {
             images = images.filter(img => img.acquisition === acquisitionId);
         }
     }

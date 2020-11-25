@@ -1,7 +1,7 @@
 import { openArray, ZarrArray, HTTPStore } from 'zarr';
-import { ZarrLoader, ImageLayer, MultiscaleImageLayer, DTYPE_VALUES } from 'viv';
+import { ZarrLoader, ImageLayer, MultiscaleImageLayer, DTYPE_VALUES } from '@hms-dbmi/viv';
 
-import type { RootAttrs } from './types/rootAttrs';
+import type { RootAttrs } from '../types/rootAttrs';
 import { loadOME, loadOMEPlate, loadOMEWell } from './ome';
 import type { SourceData, ImageLayerConfig, LayerState, SingleChannelConfig, MultichannelConfig } from './state';
 
