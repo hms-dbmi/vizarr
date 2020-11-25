@@ -47,7 +47,7 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
         acquisitions = plateAttrs?.plate?.acquisitions;
 
         // filter imagePaths by acquisition
-        if (acquisitionId) {
+        if (acquisitionId && acqIds.includes(acquisitionId)) {
             images = images.filter(img => img.acquisition === acquisitionId);
         }
     }

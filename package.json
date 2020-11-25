@@ -19,7 +19,7 @@
     "export": "npm run build",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
     "lint": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\"",
-    "prepublishOnly": "npm run export && cp -r ./out/* .",
+    "prepublishOnly": "npm run build && cp -r ./out/* .",
     "postpublish": "git clean -fd"
   },
   "files": [
@@ -27,7 +27,9 @@
     "_dist_",
     "web_modules",
     "robots.txt,",
-    "index.html"
+    "index.html",
+    "favicon.ico",
+    "favicon.png"
   ],
   "prettier": {
     "trailingComma": "es5",
