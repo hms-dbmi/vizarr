@@ -38,10 +38,11 @@ module.exports = {
     },
   },
   devOptions: {
-    out: 'out'
+    /* ... */
   },
   buildOptions: {
-    /* ... */
+    // change build dir to out/ (next.js compat)
+    out: 'out'
   },
   proxy: {
     /* ... */
