@@ -18,7 +18,7 @@ function AcquisitionController({ layerId }: {layerId: string,}): JSX.Element | n
     const handleSelectionChange = (event: ChangeEvent<HTMLSelectElement>) => {
         let value = event.target.value;
         let acquisition = value === '-1' ? '' : `&acquisition=${value}`
-        window.location.href = window.location.origin + `?source=${source}${acquisition}`;
+        window.location.href = window.location.origin + window.location.pathname + `?source=${source}${acquisition}`;
     };
 
     return (

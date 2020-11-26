@@ -88,7 +88,7 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
         if (typeof source === 'string' && !isNaN(row) && !isNaN(column)) {
             const field = (row * cols) + column;
             let imgSource = join(source, imagePaths[field]);
-            window.open(window.location.origin + '?source=' + imgSource);
+            window.open(window.location.origin + window.location.pathname + '?source=' + imgSource);
         }
     });
 
@@ -169,7 +169,7 @@ export async function loadOMEPlate(
         let { source } = sourceData;
         if (typeof source === 'string' && !isNaN(row) && !isNaN(column)) {
             const imgSource = join(source, acquisitionPath, rowNames[row], columnNames[column]);
-            window.open(window.location.origin + '?source=' + imgSource);
+            window.open(window.location.origin + window.location.pathname + '?source=' + imgSource);
         }
     })
     return sourceData;
