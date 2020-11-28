@@ -27,13 +27,25 @@ function App() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    // If a source is provided in the URL, cast params to config object and load image.
     if (params.has('source')) {
-      // If a source is provided in the URL, cast params to config object and load image.
       const config = {} as any;
       for (const [key, value] of params) {
         config[key] = value;
       }
+      // Make sure the source URL is decoded.
+      config.source = decodeURIComponent(config.source);
       addImage(config as ImageLayerConfig);
+
+      // Update URL in history with correctly encoded source url.
+      const href = new URL(window.location.href);
+      href.searchParams.set('source', config.source);
+      const newLocation = decodeURIComponent(href.toString());
+
+      // Only update history if the new loacation is different from the current
+      if (window.location.href !== newLocation) {
+        window.history.pushState(null, '', newLocation);
+      }
     }
   }, []);
 
