@@ -30,9 +30,16 @@ function App() {
   }
 
   useEffect(() => {
+    // If a source is provided in the URL, pass all params to load image.
     if ('source' in router.query) {
-      // If a source is provided in the URL, pass all params to load image.
+      // Make sure the source URL is decoded.
+      router.query.source = decodeURIComponent(router.query.source as string);
       addImage((router.query as unknown) as ImageLayerConfig);
+
+      // Update URL in history with correctly encoded source url.
+      const href = new URL(window.location.href);
+      href.searchParams.set('source', router.query.source);
+      window.history.pushState(null, "", decodeURIComponent(href.toString()));
     }
   }, [router]);
 
