@@ -78,7 +78,12 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
     sourceData.name = `Well ${row}${col}`;
     sourceData.rows = Math.ceil(imagePaths.length / cols);
     sourceData.columns = cols;
-    sourceData.onClick = config.onClick || ((info: any) => {
+    sourceData.onClick = ((info: any) => {
+        if(config.onClick) {
+            delete info.layer;
+            config.onClick(info);
+            return;
+        }
         let gridCoord = info.gridCoord;
         if (!gridCoord) {
             return;
@@ -160,7 +165,12 @@ export async function loadOMEPlate(
     sourceData.rows = rows;
     sourceData.columns = columns;
     // Us onClick from image config or Open Well in new window
-    sourceData.onClick = config.onClick || ((info: any) => {
+    sourceData.onClick = ((info: any) => {
+        if(config.onClick) {
+            delete info.layer;
+            config.onClick(info);
+            return;
+        }
         let gridCoord = info.gridCoord;
         if (!gridCoord) {
             return;
