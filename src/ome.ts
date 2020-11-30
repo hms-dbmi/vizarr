@@ -78,19 +78,27 @@ export async function loadOMEWell(config: ImageLayerConfig, store: HTTPStore, ro
     sourceData.name = `Well ${row}${col}`;
     sourceData.rows = Math.ceil(imagePaths.length / cols);
     sourceData.columns = cols;
-    sourceData.onClick = config.onClick || ((info: any) => {
+    sourceData.onClick = (info: any) => {
         let gridCoord = info.gridCoord;
         if (!gridCoord) {
             return;
         }
         const { row, column } = gridCoord;
         const { source } = sourceData;
+        let imgSource = undefined;
         if (typeof source === 'string' && !isNaN(row) && !isNaN(column)) {
             const field = (row * cols) + column;
-            let imgSource = join(source, imagePaths[field]);
+            imgSource = join(source, imagePaths[field]);
+        }
+        if (config.onClick) {
+            delete info.layer;
+            info.imageSource = imgSource;
+            config.onClick(info);
+        }
+        else if (imgSource){
             window.open(window.location.origin + window.location.pathname + '?source=' + imgSource);
         }
-    });
+    }
 
     return sourceData;
 }
@@ -160,18 +168,27 @@ export async function loadOMEPlate(
     sourceData.rows = rows;
     sourceData.columns = columns;
     // Us onClick from image config or Open Well in new window
-    sourceData.onClick = config.onClick || ((info: any) => {
+    sourceData.onClick = (info: any) => {
         let gridCoord = info.gridCoord;
         if (!gridCoord) {
             return;
         }
         const { row, column } = gridCoord;
         let { source } = sourceData;
+        let imgSource = undefined;
         if (typeof source === 'string' && !isNaN(row) && !isNaN(column)) {
-            const imgSource = join(source, acquisitionPath, rowNames[row], columnNames[column]);
+            imgSource = join(source, acquisitionPath, rowNames[row], columnNames[column]);
+        }
+        if (config.onClick) {
+            delete info.layer;
+            info.imageSource = imgSource;
+            config.onClick(info);
+        }
+        else if (imgSource){
             window.open(window.location.origin + window.location.pathname + '?source=' + imgSource);
         }
-    })
+
+    }
     return sourceData;
 }
 
