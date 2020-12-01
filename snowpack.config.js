@@ -42,7 +42,8 @@ module.exports = {
   },
   buildOptions: {
     // change build dir to out/ (next.js compat)
-    out: 'out'
+    out: 'out',
+    baseUrl: './',
   },
   proxy: {
     /* ... */
