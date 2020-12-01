@@ -27,7 +27,7 @@ module.exports = {
   buildOptions: {
     // change build dir to out/ (next.js compat)
     out: 'out',
-    baseUrl: './',
+    baseUrl: process.env.VIZARR_PREFIX || './',
   },
   proxy: {
     /* ... */
