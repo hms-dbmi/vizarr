@@ -12,7 +12,6 @@ function WrappedViewStateDeck({layers}) {
     const target = [width / 2, height / 2, 0];
     setViewState({zoom, target});
   }
-  ;
   const views = [new OrthographicView({id: "ortho", controller: true})];
   return /* @__PURE__ */ React.createElement(DeckGL, {
     layers,

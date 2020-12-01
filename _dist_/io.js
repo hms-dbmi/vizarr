@@ -1,7 +1,18 @@
 import {openArray} from "../web_modules/zarr.js";
 import {ZarrLoader, ImageLayer, MultiscaleImageLayer, DTYPE_VALUES} from "../web_modules/@hms-dbmi/viv.js";
 import {loadOME, loadOMEPlate, loadOMEWell} from "./ome.js";
-import {getJson, MAX_CHANNELS, COLORS, MAGENTA_GREEN, RGB, CYMRGB, normalizeStore, hexToRGB, range, rstrip} from "./utils.js";
+import {
+  getJson,
+  MAX_CHANNELS,
+  COLORS,
+  MAGENTA_GREEN,
+  RGB,
+  CYMRGB,
+  normalizeStore,
+  hexToRGB,
+  range,
+  rstrip
+} from "./utils.js";
 import GridLayer from "./gridLayer.js";
 function getAxisLabels(config, loader) {
   let {axis_labels} = config;

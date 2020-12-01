@@ -77,7 +77,11 @@ export default class GridLayer extends CompositeLayer {
       this.setState({gridData, width, height});
     });
   }
-  updateState({props, oldProps, changeFlags}) {
+  updateState({
+    props,
+    oldProps,
+    changeFlags
+  }) {
     const {propsChanged} = changeFlags;
     const loaderChanged = typeof propsChanged === "string" && propsChanged.includes("props.loaders");
     const loaderSelectionChanged = props.loaderSelection !== oldProps.loaderSelection;
@@ -127,7 +131,12 @@ export default class GridLayer extends CompositeLayer {
     if (this.props.pickable) {
       const bottom = top + rows * (height + spacer);
       const right = left + columns * (width + spacer);
-      const polygon = [[left, top], [right, top], [right, bottom], [left, bottom]];
+      const polygon = [
+        [left, top],
+        [right, top],
+        [right, bottom],
+        [left, bottom]
+      ];
       const layerProps = {
         data: [{polygon}],
         getPolygon: (d) => d.polygon,
