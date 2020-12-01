@@ -12,7 +12,7 @@ ReactDOM.render(
       <Vizarr />
     </RecoilRoot>
   </ThemeProvider>,
-  document.getElementById('root'),
+  document.getElementById('root')
 );
 
 // Hot Module Replacement (HMR) - Remove this snippet to remove HMR.

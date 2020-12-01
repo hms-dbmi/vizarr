@@ -44,16 +44,16 @@ export type ImageLayerConfig = BaseConfig | MultichannelConfig | SingleChannelCo
 export type Acquisition = {
   id: number;
   name: string;
-}
+};
 
 export type SourceData = {
   loader: ZarrLoader;
   source?: string | HTTPStore;
-  loaders?: (ZarrLoader | undefined)[];  // for OME plates
+  loaders?: (ZarrLoader | undefined)[]; // for OME plates
   rows?: number;
   columns?: number;
   acquisitions?: Acquisition[];
-  acquisitionId?: number,
+  acquisitionId?: number;
   name?: string;
   channel_axis: number | null;
   colors: string[];
@@ -73,12 +73,12 @@ export type SourceData = {
 export type LayerState = {
   Layer: null | ImageLayer | MultiscaleImageLayer;
   layerProps: VivLayerProps & {
-    contrastLimits: number[][],
-    source?: string | HTTPStore,
-    loaders?: (ZarrLoader | undefined)[],
-    rows?: number,
-    columns?: number,
-    onClick?: (e: any) => void,
+    contrastLimits: number[][];
+    source?: string | HTTPStore;
+    loaders?: (ZarrLoader | undefined)[];
+    rows?: number;
+    columns?: number;
+    onClick?: (e: any) => void;
   };
   on: boolean;
 };

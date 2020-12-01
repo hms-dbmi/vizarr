@@ -42,7 +42,7 @@ export function range(length: number): number[] {
 }
 
 // similar to Python's rstrip
-export function rstrip(str: string, remove: string = " "): string {
+export function rstrip(str: string, remove: string = ' '): string {
   // if the last character is in 'remove', truncate
   while (str.length > 0 && remove.includes(str.charAt(str.length - 1))) {
     str = str.substr(0, str.length - 1);
@@ -50,6 +50,9 @@ export function rstrip(str: string, remove: string = " "): string {
   return str;
 }
 
-export function join(...args:(string|undefined)[]) {
-  return args.filter(Boolean).map((s:any) => rstrip(s as string, '/')).join('/')
+export function join(...args: (string | undefined)[]) {
+  return args
+    .filter(Boolean)
+    .map((s: any) => rstrip(s as string, '/'))
+    .join('/');
 }
