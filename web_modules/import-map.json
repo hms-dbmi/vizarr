@@ -1,0 +1,21 @@
+{
+  "imports": {
+    "@deck.gl/core": "./@deck.gl/core.js",
+    "@deck.gl/layers": "./@deck.gl/layers.js",
+    "@hms-dbmi/viv": "./@hms-dbmi/viv.js",
+    "@hms-dbmi/viv/src/loaders/utils": "./@hms-dbmi/viv/src/loaders/utils.js",
+    "@material-ui/core": "./@material-ui/core.js",
+    "@material-ui/core/Accordion": "./@material-ui/core/Accordion.js",
+    "@material-ui/core/colors/grey": "./@material-ui/core/colors/grey.js",
+    "@material-ui/core/styles": "./@material-ui/core/styles.js",
+    "@material-ui/icons": "./@material-ui/icons.js",
+    "@material-ui/styles": "./@material-ui/styles.js",
+    "deck.gl": "./deck.gl.js",
+    "imjoy-rpc": "./imjoy-rpc.js",
+    "p-map": "./p-map.js",
+    "react": "./react.js",
+    "react-dom": "./react-dom.js",
+    "recoil": "./recoil.js",
+    "zarr": "./zarr.js"
+  }
+}
