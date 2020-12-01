@@ -5,14 +5,25 @@ import type { RootAttrs } from '../types/rootAttrs';
 import { loadOME, loadOMEPlate, loadOMEWell } from './ome';
 import type { SourceData, ImageLayerConfig, LayerState, SingleChannelConfig, MultichannelConfig } from './state';
 
-import { getJson, MAX_CHANNELS, COLORS, MAGENTA_GREEN, RGB, CYMRGB, normalizeStore, hexToRGB, range, rstrip } from './utils';
+import {
+  getJson,
+  MAX_CHANNELS,
+  COLORS,
+  MAGENTA_GREEN,
+  RGB,
+  CYMRGB,
+  normalizeStore,
+  hexToRGB,
+  range,
+  rstrip,
+} from './utils';
 import GridLayer from './gridLayer';
 
 function getAxisLabels(config: SingleChannelConfig | MultichannelConfig, loader: ZarrLoader): string[] {
   let { axis_labels } = config;
   if (!axis_labels || axis_labels.length != loader.base.shape.length) {
     // default axis_labels are e.g. ['0', '1', 'y', 'x']
-    const nonXYaxisLabels = loader.base.shape.slice(0, -2).map((d, i) => "" + i);
+    const nonXYaxisLabels = loader.base.shape.slice(0, -2).map((d, i) => '' + i);
     axis_labels = nonXYaxisLabels.concat(['y', 'x']);
   }
   return axis_labels;
@@ -136,7 +147,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   const store = normalizeStore(source);
   if (await store.containsItem('.zgroup')) {
     try {
-      rootAttrs = (await getJson(store, '.zattrs'));
+      rootAttrs = await getJson(store, '.zattrs');
       if (rootAttrs?.plate) {
         return loadOMEPlate(config, store, rootAttrs as RootAttrs);
       } else if (rootAttrs?.well) {

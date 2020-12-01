@@ -19,12 +19,7 @@ const DenseSlider = withStyles({
   },
 })(Slider);
 
-
-function AxisSlider({ layerId, axisIndex, max }: {
-  layerId: string,
-  axisIndex: number,
-  max: number
-}): JSX.Element {
+function AxisSlider({ layerId, axisIndex, max }: { layerId: string; axisIndex: number; max: number }): JSX.Element {
   const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
   const sourceInfo = useRecoilValue(sourceInfoState);
   const { axis_labels } = sourceInfo[layerId];
@@ -41,19 +36,18 @@ function AxisSlider({ layerId, axisIndex, max }: {
     setValue(layer.layerProps.loaderSelection[0] ? layer.layerProps.loaderSelection[0][axisIndex] : 1);
   }, [layer.layerProps.loaderSelection]);
 
-
   const handleRelease = () => {
     setLayer((prev) => {
-      let layerProps = { ...prev.layerProps }
+      let layerProps = { ...prev.layerProps };
       // for each channel, update index of this axis
-      layerProps.loaderSelection = layerProps.loaderSelection.map(ch => {
+      layerProps.loaderSelection = layerProps.loaderSelection.map((ch) => {
         let new_ch = [...ch];
         new_ch[axisIndex] = value;
         return new_ch;
       });
       return { ...prev, layerProps };
-    })
-  }
+    });
+  };
 
   const handleDrag = (_: ChangeEvent<unknown>, value: number | number[]) => {
     setValue(value as number);
@@ -82,13 +76,14 @@ function AxisSlider({ layerId, axisIndex, max }: {
               onChangeCommitted={handleRelease}
               min={0}
               max={max}
-              step={1} />
+              step={1}
+            />
           </Grid>
         </Grid>
       </Grid>
       <Divider />
     </>
-  )
+  );
 }
 
 export default AxisSlider;
