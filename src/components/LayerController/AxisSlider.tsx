@@ -1,7 +1,7 @@
 import { Grid, Typography, Divider } from '@material-ui/core';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import type { ChangeEvent } from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Slider } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import DimensionOptions from './AxisOptions';

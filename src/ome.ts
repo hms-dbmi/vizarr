@@ -1,8 +1,8 @@
 import { openArray, HTTPStore } from 'zarr';
-import { ZarrLoader } from 'viv';
 import pMap from 'p-map';
 
-import type { RootAttrs, OmeroImageData, OmeWellData, OmePlateData } from './types/rootAttrs';
+import type { ZarrLoader } from '@hms-dbmi/viv';
+import type { RootAttrs, OmeroImageData, OmeWellData, OmePlateData } from '../types/rootAttrs';
 import type { SourceData, ImageLayerConfig, Acquisition } from './state';
 
 import { getJson, rstrip, join } from './utils';

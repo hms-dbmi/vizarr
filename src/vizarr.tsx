@@ -1,23 +1,19 @@
-import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useSetRecoilState } from 'recoil';
 
-import { version as vizarrVersion } from '../../package.json';
-import { layerIdsState, sourceInfoState, viewerViewState } from '../state';
-import type { ImageLayerConfig } from '../state';
+import { layerIdsState, sourceInfoState, viewerViewState } from './state';
+import type { ImageLayerConfig } from './state';
 
-const Viewer = dynamic(() => import('../components/Viewer'));
-const Menu = dynamic(() => import('../components/Menu'));
+import Viewer from './components/Viewer';
+import Menu from './components/Menu';
 
 function App() {
-  const router = useRouter();
   const setViewState = useSetRecoilState(viewerViewState);
   const setLayerIds = useSetRecoilState(layerIdsState);
   const setSourceInfo = useSetRecoilState(sourceInfoState);
 
   async function addImage(config: ImageLayerConfig) {
-    const { createSourceData } = await import('../io');
+    const { createSourceData } = await import('./io');
     const id = Math.random().toString(36).slice(2);
     const sourceData = await createSourceData(config);
     setSourceInfo((prevSourceInfo) => {
@@ -30,26 +26,36 @@ function App() {
   }
 
   useEffect(() => {
-    // If a source is provided in the URL, pass all params to load image.
-    if ('source' in router.query) {
+    const params = new URLSearchParams(window.location.search);
+    // If a source is provided in the URL, cast params to config object and load image.
+    if (params.has('source')) {
+      const config = {} as any;
+      for (const [key, value] of params) {
+        config[key] = value;
+      }
       // Make sure the source URL is decoded.
-      router.query.source = decodeURIComponent(router.query.source as string);
-      addImage((router.query as unknown) as ImageLayerConfig);
+      config.source = decodeURIComponent(config.source);
+      addImage(config as ImageLayerConfig);
 
       // Update URL in history with correctly encoded source url.
       const href = new URL(window.location.href);
-      href.searchParams.set('source', router.query.source);
-      window.history.pushState(null, "", decodeURIComponent(href.toString()));
+      href.searchParams.set('source', config.source);
+      const newLocation = decodeURIComponent(href.toString());
+
+      // Only update history if the new loacation is different from the current
+      if (window.location.href !== newLocation) {
+        window.history.pushState(null, '', newLocation);
+      }
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     async function initImjoy() {
-      const { setupRPC } = await import('imjoy-rpc');
-      const api = await setupRPC({
+      const { default: imjoy } = await import('imjoy-rpc');
+      const api = await imjoy.setupRPC({
         name: 'vizarr',
-        description: 'A minimal, purely client-side program for viewing Zarr-based images with Viv & ImJoy',
-        version: vizarrVersion,
+        description: 'A minimal, purely client-side program for viewing Zarr-based images with Viv & ImJoy.',
+        version: import.meta.env.SNOWPACK_PUBLIC_PACKAGE_VERSION as string,
       });
       const add_image = async (props: ImageLayerConfig) => addImage(props);
       const set_view_state = async (vs: { zoom: number; target: number[] }) => setViewState(vs);

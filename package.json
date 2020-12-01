@@ -2,12 +2,11 @@
   "name": "@hms-dbmi/vizarr",
   "version": "0.1.2",
   "dependencies": {
-    "@hms-dbmi/viv": "^0.5.0",
+    "@hms-dbmi/viv": "^0.6.0",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
-    "deck.gl": "^8.3.4",
-    "imjoy-rpc": "^0.2.22",
-    "next": "^10.0.0",
+    "deck.gl": "^8.3.8",
+    "imjoy-rpc": "^0.2.23",
     "p-map": "^4.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -15,17 +14,22 @@
     "zarr": "^0.3.0"
   },
   "scripts": {
-    "dev": "next",
-    "build": "next build",
-    "start": "next start",
-    "export": "next build && next export",
-    "prepublishOnly": "NPM_BUILD=true npm run export && cp -r ./out/* .",
+    "start": "snowpack dev",
+    "build": "snowpack build",
+    "export": "npm run build",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
+    "lint": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\"",
+    "prepublishOnly": "npm run build && cp -r ./out/* .",
     "postpublish": "git clean -fd"
   },
   "files": [
+    "__snowpack__",
+    "_dist_",
+    "web_modules",
+    "robots.txt",
     "index.html",
-    "404.html",
-    "_next/"
+    "favicon.ico",
+    "favicon.png"
   ],
   "prettier": {
     "trailingComma": "es5",
@@ -35,7 +39,13 @@
   },
   "devDependencies": {
     "@danmarshall/deckgl-typings": "^4.3.10",
+    "@snowpack/plugin-react-refresh": "^2.3.7",
+    "@snowpack/plugin-typescript": "^1.1.0",
     "@types/node": "^14.14.5",
-    "typescript": "^4.0.5"
+    "@types/react-dom": "^17.0.0",
+    "@types/snowpack-env": "^2.3.2",
+    "prettier": "^2.2.0",
+    "snowpack": "^2.17.1",
+    "typescript": "^4.1.2"
   }
 }

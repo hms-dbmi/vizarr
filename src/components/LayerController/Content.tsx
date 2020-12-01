@@ -1,4 +1,5 @@
-import { AccordionDetails, Grid, Typography, Divider, NativeSelect } from '@material-ui/core';
+import React from 'react';
+import { AccordionDetails, Grid, Typography, Divider } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 
 import AcquisitionController from './AcquisitionController';
