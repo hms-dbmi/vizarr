@@ -23,3 +23,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
           FOLDER: out
+          CLEAN: true
+          CLEAN_EXCLUDE: '["v0.1"]' # Manually add endpoints to keep
