@@ -13,5 +13,5 @@ dependencies:
   - zarr
   - pip:
     - imjoy>=0.10.0
-    - imjoy-jupyter-extension
+    - imjoy-jupyter-extension>=0.2.14
     - imjoy-rpc>=0.2.12
