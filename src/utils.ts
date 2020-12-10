@@ -1,4 +1,5 @@
-import { HTTPStore } from 'zarr';
+import { HTTPStore } from './zarr';
+import type { Store } from './zarr';
 
 export const MAX_CHANNELS = 6;
 
@@ -15,14 +16,14 @@ export const MAGENTA_GREEN = [COLORS.magenta, COLORS.green];
 export const RGB = [COLORS.red, COLORS.green, COLORS.blue];
 export const CYMRGB = Object.values(COLORS).slice(0, -2);
 
-export async function getJson(store: HTTPStore, key: string) {
+export async function getJson(store: Store, key: string) {
   const bytes = new Uint8Array(await store.getItem(key));
   const decoder = new TextDecoder('utf-8');
   const json = JSON.parse(decoder.decode(bytes));
   return json;
 }
 
-export function normalizeStore(store: string | HTTPStore): HTTPStore {
+export function normalizeStore(store: string | Store): Store {
   if (typeof store === 'string') {
     return new HTTPStore(store);
   }

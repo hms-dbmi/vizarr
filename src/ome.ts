@@ -1,7 +1,8 @@
-import { openArray, HTTPStore } from 'zarr';
+import { openArray, HTTPStore } from './zarr';
 import pMap from 'p-map';
 
 import type { ZarrLoader } from '@hms-dbmi/viv';
+import type { Store } from './zarr';
 import type { RootAttrs, OmeroImageData, OmeWellData, OmePlateData } from '../types/rootAttrs';
 import type { SourceData, ImageLayerConfig, Acquisition } from './state';
 
@@ -9,7 +10,7 @@ import { getJson, rstrip, join } from './utils';
 import { createLoader } from './io';
 
 // Create loader for every Well. Some loaders may be undefined if Wells are missing.
-async function createLoaderFromPath(store: HTTPStore, path: string | undefined): Promise<ZarrLoader | undefined> {
+async function createLoaderFromPath(store: Store, path: string | undefined): Promise<ZarrLoader | undefined> {
   if (path === undefined) {
     // Don't even try to load if we know that Well is missing
     return;

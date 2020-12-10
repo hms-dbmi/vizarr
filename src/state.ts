@@ -1,5 +1,5 @@
 import { atom, atomFamily, selector, waitForAll } from 'recoil';
-import type { HTTPStore } from 'zarr';
+import type { Store } from './zarr';
 import type { VivLayerProps, ImageLayer, MultiscaleImageLayer, ZarrLoader } from '@hms-dbmi/viv';
 
 export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
@@ -15,7 +15,7 @@ export const DEFAULT_LAYER_PROPS = {
 };
 
 export type BaseConfig = {
-  source: string | HTTPStore;
+  source: string | Store;
   channel_axis?: number;
   name?: string;
   colormap?: string;
@@ -48,7 +48,7 @@ export type Acquisition = {
 
 export type SourceData = {
   loader: ZarrLoader;
-  source?: string | HTTPStore;
+  source?: string | Store;
   loaders?: (ZarrLoader | undefined)[]; // for OME plates
   rows?: number;
   columns?: number;
@@ -74,7 +74,7 @@ export type LayerState = {
   Layer: null | ImageLayer | MultiscaleImageLayer;
   layerProps: VivLayerProps & {
     contrastLimits: number[][];
-    source?: string | HTTPStore;
+    source?: string | Store;
     loaders?: (ZarrLoader | undefined)[];
     rows?: number;
     columns?: number;

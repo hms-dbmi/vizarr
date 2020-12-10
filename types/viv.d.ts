@@ -1,6 +1,6 @@
 declare module '@hms-dbmi/viv' {
   import type { Layer } from '@deck.gl/core';
-  import type { ZarrArray } from 'zarr';
+  import type { ZarrArray } from '@manzt/zarr-lite';
 
   type TypedArray = Uint8Array | Uint16Array | Uint32Array | Float32Array;
   type SupportedDtype = '<u1' | '<u2' | '<u4' | '<f4';

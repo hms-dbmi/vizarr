@@ -1,6 +1,7 @@
-import { openArray, ZarrArray, HTTPStore } from 'zarr';
 import { ZarrLoader, ImageLayer, MultiscaleImageLayer, DTYPE_VALUES } from '@hms-dbmi/viv';
+import { openArray } from './zarr';
 
+import type { HTTPStore, ZarrArray } from './zarr';
 import type { RootAttrs } from '../types/rootAttrs';
 import { loadOME, loadOMEPlate, loadOMEWell } from './ome';
 import type { SourceData, ImageLayerConfig, LayerState, SingleChannelConfig, MultichannelConfig } from './state';
@@ -23,7 +24,7 @@ function getAxisLabels(config: SingleChannelConfig | MultichannelConfig, loader:
   let { axis_labels } = config;
   if (!axis_labels || axis_labels.length != loader.base.shape.length) {
     // default axis_labels are e.g. ['0', '1', 'y', 'x']
-    const nonXYaxisLabels = loader.base.shape.slice(0, -2).map((d, i) => '' + i);
+    const nonXYaxisLabels = loader.base.shape.slice(0, -2).map((_, i) => '' + i);
     axis_labels = nonXYaxisLabels.concat(['y', 'x']);
   }
   return axis_labels;
@@ -144,7 +145,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   let data: ZarrArray[];
   let rootAttrs: RootAttrs | undefined;
 
-  const store = normalizeStore(source);
+  const store = normalizeStore(source) as HTTPStore;
   if (await store.containsItem('.zgroup')) {
     try {
       rootAttrs = await getJson(store, '.zattrs');
@@ -162,7 +163,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
       const parentStore = normalizeStore(parentUrl);
       const parentAttrs = await getJson(parentStore, '.zattrs');
       if (parentAttrs?.plate) {
-        return loadOMEPlate(config, parentStore, parentAttrs as RootAttrs);
+        return loadOMEPlate(config, parentStore as HTTPStore, parentAttrs as RootAttrs);
       } else {
         throw Error(`Failed to open arrays in zarr.Group. Make sure group implements multiscales extension.`);
       }
