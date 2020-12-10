@@ -27,7 +27,7 @@ For more information, please read our preprint [doi:10.31219/osf.io/wd2gu](https
 Vizarr supports viewing 2D slices of n-Dimensional Zarr arrays, allowing users to choose 
 a single channel or blended composites of multiple channels during analysis. It has special support 
 for the developing [OME-Zarr format](https://github.com/ome/omero-ms-zarr/blob/master/spec.md)
-for multiscale and multimodal images. Currently [Viv](https://hms-dbmi.github.com/viv) supports 
+for multiscale and multimodal images. Currently [Viv](https://github.com/hms-dbmi/viv) supports 
 `u1`, `u2`, `u4`, and `f4` arrays, but contributions are welcome to support more `np.dtypes`!
 
 ### Getting started 
