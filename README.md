@@ -39,3 +39,8 @@ the example [Jupyter Notebooks](example/).
 are viewed within a Jupyter Notebook. Support for other Zarr arrays is supported but not as well tested. 
 More information regarding thew viewing of generic Zarr arrays can be found in in the example notebooks.
 
+### Citation
+If you are using Vizarr in your work please cite our preprint:
+
+> Trevor Manz, Ilan Gold, Nathan Heath Patterson, Chuck McCallum, Mark S Keller, Bruce W Herr II, Katy Börner, Jeffrey M Spraggins, Nils Gehlenborg, "[Viv: Multiscale Visualization of High-resolution Multiplexed Bioimaging Data on the Web](https://osf.io/wd2gu/)." **OSF Preprints** (2020), [doi:10.31219/osf.io/wd2gu](https://doi.org/10.31219/osf.io/wd2gu)
+
