@@ -1,14 +1,11 @@
-import { CompositeLayer, COORDINATE_SYSTEM } from '@deck.gl/core';
+import { CompositeLayer } from '@deck.gl/core';
 import { SolidPolygonLayer } from '@deck.gl/layers';
 import type { CompositeLayerProps } from '@deck.gl/core/lib/composite-layer';
 import pMap from 'p-map';
 
-import { TypedArray, XRLayer } from '@hms-dbmi/viv';
+import { XRLayer } from '@hms-dbmi/viv';
 import type { ZarrLoader, SelectionData, RasterSelection } from '@hms-dbmi/viv';
 import { range } from './utils';
-
-// @ts-ignore
-import { padTileWithZeros } from '@hms-dbmi/viv/src/loaders/utils';
 
 export interface GridLayerProps<D> extends CompositeLayerProps<D> {
   loaders: ZarrLoader[];
@@ -25,32 +22,16 @@ export interface GridLayerProps<D> extends CompositeLayerProps<D> {
 }
 
 const defaultProps = {
-  // VivProps
-  sliderValues: { type: 'array', value: [], compare: true },
-  channelIsOn: { type: 'array', value: [], compare: true },
-  colorValues: { type: 'array', value: [], compare: true },
-  loaderSelection: { type: 'array', value: [], compare: true },
-  colormap: { type: 'string', value: '', compare: true },
-  domain: { type: 'array', value: [], compare: true },
-  viewportId: { type: 'string', value: '', compare: true },
-  z: { type: 'number', value: 0, compare: true },
+  ...XRLayer.defaultProps,
   // Special grid props
   loaders: { type: 'array', value: [], compare: true },
   spacer: { type: 'number', value: 5, compare: true },
   rows: { type: 'number', value: 0, compare: true },
   columns: { type: 'number', value: 0, compare: true },
   concurrency: { type: 'number', value: 10, compare: false }, // set concurrency for queue
-  // Defaults XRL expects for "lens" (not used in vizarr)
-  isLensOn: { type: 'boolean', value: false, compare: true },
-  lensSelection: { type: 'number', value: 0, compare: true },
-  lensRadius: { type: 'number', value: 100, compare: true },
-  lensBorderColor: { type: 'array', value: [255, 255, 255], compare: true },
-  lensBorderRadius: { type: 'number', value: 0.02, compare: true },
   // Deck.gl
-  pickable: true,
   onClick: { type: 'function', value: null, compare: true },
   onHover: { type: 'function', value: null, compare: true },
-  coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
 };
 
 function scaleBounds(width: number, height: number, translate = [0, 0], scale = 1) {
@@ -87,17 +68,6 @@ function refreshGridData(
   const mapper = async (loader: ZarrLoader | undefined) => {
     if (!loader) return; // No data
     const tile = await loader.getRaster({ loaderSelection, z });
-    if (tile.width % 4 !== 0) {
-      // If width if not a multiple of 4, there are issues with textures
-      // https://stackoverflow.com/questions/42789896/webgl-error-arraybuffer-not-big-enough-for-request-in-case-of-gl-luminance
-      const { width, height } = tile;
-      const newWidth = 4 * Math.ceil(width / 4);
-      return {
-        data: tile.data.map((data) => padTileWithZeros({ data, width, height }, newWidth, height) as TypedArray),
-        height,
-        width: newWidth,
-      };
-    }
     return tile;
   };
   return pMap(loaders, mapper, { concurrency });
