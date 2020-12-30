@@ -1,14 +1,16 @@
 import { c as createCommonjsModule } from './common/_commonjsHelpers-37fa8da4.js';
-import { a8 as _asyncToGenerator, a9 as regenerator, af as env, a7 as log, ag as register, ah as registerLoaders, _ as _inherits, ad as isWebGL2, z as hasFeatures, F as FEATURES, s as assert$1, b as _possibleConstructorReturn, a as _getPrototypeOf, ai as Resource$1, aj as log$1, ak as instrumentGLContext, al as isWebGL, am as resetParameters, an as resizeGLContext, ao as Framebuffer, ap as lumaStats, aq as createGLContext, ar as mod, as as WebMercatorViewport, aa as Vector3, C as COORDINATE_SYSTEM, P as PROJECTION_MODE, at as memoize, M as Matrix4, au as pixelsToWorld, av as ProgramManager, aw as setParameters, ax as withParameters, ay as clear, az as cssToDeviceRatio, ae as Texture2D, aA as Renderbuffer, k as _get, ac as load, n as debug, l as flatten, L as Layer, aB as LIFECYCLE, S as Stats, j as Viewport, o as assert$2, h as clamp, aC as WebMercatorViewport$1, aD as cssToDevicePixels, aE as readPixelsToArray, aF as EVENTS, y as defaultTypedArrayManager } from './common/layer-6e52c28c.js';
+import { V as _asyncToGenerator, W as regenerator, am as env, an as registerLoaders, _ as _inherits, al as isWebGL2, a0 as hasFeatures, Q as FEATURES, a3 as assert$1, b as _possibleConstructorReturn, a as _getPrototypeOf, ao as Resource$1, ap as log$1, aq as instrumentGLContext, ar as isWebGL, as as resetParameters, at as resizeGLContext, U as Framebuffer, au as lumaStats, av as createGLContext, aw as ProgramManager, Y as setParameters, Z as withParameters, ax as clear, ay as cssToDeviceRatio, S as Texture2D, az as Renderbuffer, f as _get, $ as load, a5 as Stats, aA as cssToDevicePixels, R as readPixelsToArray } from './common/transform-35a4c5f8.js';
 import { p as process } from './common/process-2545f00a.js';
 import { _ as _typeof } from './common/typeof-c65245d2.js';
 import { _ as _defineProperty } from './common/defineProperty-1b0b77a2.js';
 import { _ as _classCallCheck } from './common/classCallCheck-4eda545c.js';
 import { _ as _createClass, b as _assertThisInitialized, a as _toConsumableArray } from './common/assertThisInitialized-87ceda02.js';
 import './common/_node-resolve:empty-0f7f843d.js';
+import { p as log, r as register, q as mod, W as WebMercatorViewport, s as Vector3, C as COORDINATE_SYSTEM, P as PROJECTION_MODE, t as memoize, M as Matrix4, u as pixelsToWorld, d as debug, f as flatten, L as Layer, w as LIFECYCLE, e as Viewport, g as assert$2, b as clamp, x as WebMercatorViewport$1, E as EVENTS, n as defaultTypedArrayManager } from './common/layer-4d223d3d.js';
 import { _ as _slicedToArray } from './common/slicedToArray-14e71088.js';
-import { p as project } from './common/project-9e8cb528.js';
-import { d as deepEqual, L as LinearInterpolator, T as TRANSITION_EVENTS, V as ViewState, C as Controller, a as View } from './common/view-state-54332ffc.js';
+import './common/fp32-cb4e18c9.js';
+import { p as project } from './common/project-b311f9be.js';
+import { d as deepEqual, L as LinearInterpolator, T as TRANSITION_EVENTS, V as ViewState, C as Controller, a as View } from './common/view-state-eb76c72f.js';
 import { r as react } from './common/index-aae33e1a.js';
 import { p as propTypes$1 } from './common/index-c103191b.js';
 
@@ -586,7 +588,7 @@ var jsonLoader = {
   parseTextSync: JSON.parse
 };
 
-var version =  "8.3.10" ;
+var version =  "8.4.0-alpha.4" ;
 var existingVersion = env.global.deck && env.global.deck.VERSION;
 
 if (existingVersion && existingVersion !== version) {
@@ -3634,16 +3636,14 @@ var LINEAR_TRANSITION_PROPS = {
 var NO_TRANSITION_PROPS = {
   transitionDuration: 0
 };
-var MAPBOX_LIMITS = {
+var DEFAULT_STATE = {
+  pitch: 0,
+  bearing: 0,
+  altitude: 1.5,
   minZoom: 0,
   maxZoom: 20,
   minPitch: 0,
   maxPitch: 60
-};
-var DEFAULT_STATE = {
-  pitch: 0,
-  bearing: 0,
-  altitude: 1.5
 };
 var MapState = function (_ViewState) {
   _inherits(MapState, _ViewState);
@@ -3667,13 +3667,13 @@ var MapState = function (_ViewState) {
         _ref$altitude = _ref.altitude,
         altitude = _ref$altitude === void 0 ? DEFAULT_STATE.altitude : _ref$altitude,
         _ref$maxZoom = _ref.maxZoom,
-        maxZoom = _ref$maxZoom === void 0 ? MAPBOX_LIMITS.maxZoom : _ref$maxZoom,
+        maxZoom = _ref$maxZoom === void 0 ? DEFAULT_STATE.maxZoom : _ref$maxZoom,
         _ref$minZoom = _ref.minZoom,
-        minZoom = _ref$minZoom === void 0 ? MAPBOX_LIMITS.minZoom : _ref$minZoom,
+        minZoom = _ref$minZoom === void 0 ? DEFAULT_STATE.minZoom : _ref$minZoom,
         _ref$maxPitch = _ref.maxPitch,
-        maxPitch = _ref$maxPitch === void 0 ? MAPBOX_LIMITS.maxPitch : _ref$maxPitch,
+        maxPitch = _ref$maxPitch === void 0 ? DEFAULT_STATE.maxPitch : _ref$maxPitch,
         _ref$minPitch = _ref.minPitch,
-        minPitch = _ref$minPitch === void 0 ? MAPBOX_LIMITS.minPitch : _ref$minPitch,
+        minPitch = _ref$minPitch === void 0 ? DEFAULT_STATE.minPitch : _ref$minPitch,
         startPanLngLat = _ref.startPanLngLat,
         startZoomLngLat = _ref.startZoomLngLat,
         startBearing = _ref.startBearing,
@@ -3864,59 +3864,69 @@ var MapState = function (_ViewState) {
   }, {
     key: "zoomIn",
     value: function zoomIn() {
-      return this._zoomFromCenter(2);
+      var speed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
+      return this._zoomFromCenter(speed);
     }
   }, {
     key: "zoomOut",
     value: function zoomOut() {
-      return this._zoomFromCenter(0.5);
+      var speed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
+      return this._zoomFromCenter(1 / speed);
     }
   }, {
     key: "moveLeft",
     value: function moveLeft() {
-      return this._panFromCenter([100, 0]);
+      var speed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 100;
+      return this._panFromCenter([speed, 0]);
     }
   }, {
     key: "moveRight",
     value: function moveRight() {
-      return this._panFromCenter([-100, 0]);
+      var speed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 100;
+      return this._panFromCenter([-speed, 0]);
     }
   }, {
     key: "moveUp",
     value: function moveUp() {
-      return this._panFromCenter([0, 100]);
+      var speed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 100;
+      return this._panFromCenter([0, speed]);
     }
   }, {
     key: "moveDown",
     value: function moveDown() {
-      return this._panFromCenter([0, -100]);
+      var speed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 100;
+      return this._panFromCenter([0, -speed]);
     }
   }, {
     key: "rotateLeft",
     value: function rotateLeft() {
+      var speed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 15;
       return this._getUpdatedState({
-        bearing: this._viewportProps.bearing - 15
+        bearing: this._viewportProps.bearing - speed
       });
     }
   }, {
     key: "rotateRight",
     value: function rotateRight() {
+      var speed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 15;
       return this._getUpdatedState({
-        bearing: this._viewportProps.bearing + 15
+        bearing: this._viewportProps.bearing + speed
       });
     }
   }, {
     key: "rotateUp",
     value: function rotateUp() {
+      var speed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10;
       return this._getUpdatedState({
-        pitch: this._viewportProps.pitch + 10
+        pitch: this._viewportProps.pitch + speed
       });
     }
   }, {
     key: "rotateDown",
     value: function rotateDown() {
+      var speed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10;
       return this._getUpdatedState({
-        pitch: this._viewportProps.pitch - 10
+        pitch: this._viewportProps.pitch - speed
       });
     }
   }, {
@@ -4044,13 +4054,10 @@ var MapController = function (_Controller) {
   var _super2 = _createSuper$3(MapController);
 
   function MapController(props) {
-    var _this2;
-
     _classCallCheck(this, MapController);
 
-    _this2 = _super2.call(this, MapState, props);
-    _this2.invertPan = true;
-    return _this2;
+    props.dragMode = props.dragMode || 'pan';
+    return _super2.call(this, MapState, props);
   }
 
   _createClass(MapController, [{
@@ -5094,6 +5101,8 @@ var DeckPicker = function () {
           height = _ref3$height === void 0 ? 1 : _ref3$height,
           _ref3$mode = _ref3.mode,
           mode = _ref3$mode === void 0 ? 'query' : _ref3$mode,
+          _ref3$maxObjects = _ref3.maxObjects,
+          maxObjects = _ref3$maxObjects === void 0 ? null : _ref3$maxObjects,
           onViewportActive = _ref3.onViewportActive;
       layers = this._getPickable(layers);
 
@@ -5132,7 +5141,14 @@ var DeckPicker = function () {
         layers: layers
       });
       var uniqueInfos = new Map();
-      pickInfos.forEach(function (pickInfo) {
+      var isMaxObjects = Number.isFinite(maxObjects);
+
+      for (var i = 0; i < pickInfos.length; i++) {
+        if (isMaxObjects && uniqueInfos.size >= maxObjects) {
+          break;
+        }
+
+        var pickInfo = pickInfos[i];
         var info = {
           color: pickInfo.pickedColor,
           layer: null,
@@ -5153,7 +5169,8 @@ var DeckPicker = function () {
         if (!uniqueInfos.has(info.object)) {
           uniqueInfos.set(info.object, info);
         }
-      });
+      }
+
       return Array.from(uniqueInfos.values());
     }
   }, {
@@ -9504,7 +9521,8 @@ var Deck = function () {
         onInitialize: this._onRendererInitialized,
         onRender: this._onRenderFrame,
         onBeforeRender: props.onBeforeRender,
-        onAfterRender: props.onAfterRender
+        onAfterRender: props.onAfterRender,
+        onError: props.onError
       });
     }
   }, {

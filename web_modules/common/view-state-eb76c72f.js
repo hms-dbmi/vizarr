@@ -1,8 +1,9 @@
-import { o as assert, j as Viewport, p as equals, _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, q as lerp, T as Transition } from './layer-6e52c28c.js';
+import { _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn } from './transform-35a4c5f8.js';
 import { _ as _typeof } from './typeof-c65245d2.js';
 import { _ as _defineProperty } from './defineProperty-1b0b77a2.js';
 import { _ as _classCallCheck } from './classCallCheck-4eda545c.js';
 import { _ as _createClass } from './assertThisInitialized-87ceda02.js';
+import { g as assert, e as Viewport, h as equals, l as lerp, T as Transition } from './layer-4d223d3d.js';
 
 function deepEqual(a, b) {
   if (a === b) {
@@ -600,7 +601,6 @@ var Controller = function () {
     this._customEvents = [];
     this.onViewStateChange = null;
     this.onStateChange = null;
-    this.invertPan = false;
     this.handleEvent = this.handleEvent.bind(this);
     this.setProps(options);
   }
@@ -710,6 +710,10 @@ var Controller = function () {
         this.makeViewport = props.makeViewport;
       }
 
+      if ('dragMode' in props) {
+        this.dragMode = props.dragMode;
+      }
+
       this.controllerStateProps = props;
 
       if ('eventManager' in props && this.eventManager !== props.eventManager) {
@@ -806,11 +810,16 @@ var Controller = function () {
         return false;
       }
 
-      var newControllerState = this.controllerState.panStart({
-        pos: pos
-      }).rotateStart({
+      var alternateMode = this.isFunctionKeyPressed(event) || event.rightButton;
+
+      if (this.invertPan || this.dragMode === 'pan') {
+        alternateMode = !alternateMode;
+      }
+
+      var newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
         pos: pos
       });
+      this._panMove = alternateMode;
       this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
         isDragging: true
       });
@@ -823,14 +832,12 @@ var Controller = function () {
         return false;
       }
 
-      var alternateMode = this.isFunctionKeyPressed(event) || event.rightButton;
-      alternateMode = this.invertPan ? !alternateMode : alternateMode;
-      return alternateMode ? this._onPanMove(event) : this._onPanRotate(event);
+      return this._panMove ? this._onPanMove(event) : this._onPanRotate(event);
     }
   }, {
     key: "_onPanEnd",
     value: function _onPanEnd(event) {
-      var newControllerState = this.controllerState.panEnd().rotateEnd();
+      var newControllerState = this.controllerState[this._panMove ? 'panEnd' : 'rotateEnd']();
       this.updateViewport(newControllerState, null, {
         isDragging: false,
         isPanning: false,
@@ -1015,27 +1022,32 @@ var Controller = function () {
       }
 
       var funcKey = this.isFunctionKeyPressed(event);
+      var _this$keyboard = this.keyboard,
+          zoomSpeed = _this$keyboard.zoomSpeed,
+          moveSpeed = _this$keyboard.moveSpeed,
+          rotateSpeedX = _this$keyboard.rotateSpeedX,
+          rotateSpeedY = _this$keyboard.rotateSpeedY;
       var controllerState = this.controllerState;
       var newControllerState;
       var interactionState = {};
 
       switch (event.srcEvent.code) {
         case 'Minus':
-          newControllerState = funcKey ? controllerState.zoomOut().zoomOut() : controllerState.zoomOut();
+          newControllerState = funcKey ? controllerState.zoomOut(zoomSpeed).zoomOut(zoomSpeed) : controllerState.zoomOut(zoomSpeed);
           interactionState.isZooming = true;
           break;
 
         case 'Equal':
-          newControllerState = funcKey ? controllerState.zoomIn().zoomIn() : controllerState.zoomIn();
+          newControllerState = funcKey ? controllerState.zoomIn(zoomSpeed).zoomIn(zoomSpeed) : controllerState.zoomIn(zoomSpeed);
           interactionState.isZooming = true;
           break;
 
         case 'ArrowLeft':
           if (funcKey) {
-            newControllerState = controllerState.rotateLeft();
+            newControllerState = controllerState.rotateLeft(rotateSpeedX);
             interactionState.isRotating = true;
           } else {
-            newControllerState = controllerState.moveLeft();
+            newControllerState = controllerState.moveLeft(moveSpeed);
             interactionState.isPanning = true;
           }
 
@@ -1043,10 +1055,10 @@ var Controller = function () {
 
         case 'ArrowRight':
           if (funcKey) {
-            newControllerState = controllerState.rotateRight();
+            newControllerState = controllerState.rotateRight(rotateSpeedX);
             interactionState.isRotating = true;
           } else {
-            newControllerState = controllerState.moveRight();
+            newControllerState = controllerState.moveRight(moveSpeed);
             interactionState.isPanning = true;
           }
 
@@ -1054,10 +1066,10 @@ var Controller = function () {
 
         case 'ArrowUp':
           if (funcKey) {
-            newControllerState = controllerState.rotateUp();
+            newControllerState = controllerState.rotateUp(rotateSpeedY);
             interactionState.isRotating = true;
           } else {
-            newControllerState = controllerState.moveUp();
+            newControllerState = controllerState.moveUp(moveSpeed);
             interactionState.isPanning = true;
           }
 
@@ -1065,10 +1077,10 @@ var Controller = function () {
 
         case 'ArrowDown':
           if (funcKey) {
-            newControllerState = controllerState.rotateDown();
+            newControllerState = controllerState.rotateDown(rotateSpeedY);
             interactionState.isRotating = true;
           } else {
-            newControllerState = controllerState.moveDown();
+            newControllerState = controllerState.moveDown(moveSpeed);
             interactionState.isPanning = true;
           }
 
