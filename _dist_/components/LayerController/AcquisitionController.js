@@ -1,6 +1,6 @@
-import React from "../../../web_modules/react.js";
-import {Grid, NativeSelect} from "../../../web_modules/@material-ui/core.js";
-import {useRecoilValue} from "../../../web_modules/recoil.js";
+import React from "../../../_snowpack/pkg/react.js";
+import {Grid, NativeSelect} from "../../../_snowpack/pkg/@material-ui/core.js";
+import {useRecoilValue} from "../../../_snowpack/pkg/recoil.js";
 import {sourceInfoState} from "../../state.js";
 function AcquisitionController({layerId}) {
   const sourceInfo = useRecoilValue(sourceInfoState);

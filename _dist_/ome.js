@@ -1,5 +1,5 @@
-import {openArray, HTTPStore} from "../web_modules/zarr.js";
-import pMap from "../web_modules/p-map.js";
+import {openArray, HTTPStore} from "../_snowpack/pkg/zarr.js";
+import pMap from "../_snowpack/pkg/p-map.js";
 import {getJson, rstrip, join} from "./utils.js";
 import {createLoader} from "./io.js";
 async function createLoaderFromPath(store, path) {

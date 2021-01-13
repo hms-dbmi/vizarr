@@ -1,8 +1,8 @@
-import React from "../../../web_modules/react.js";
-import {useRecoilState, useRecoilValue} from "../../../web_modules/recoil.js";
-import {Slider, Typography, Grid, IconButton} from "../../../web_modules/@material-ui/core.js";
-import {RadioButtonChecked, RadioButtonUnchecked} from "../../../web_modules/@material-ui/icons.js";
-import ChannelOptions2 from "./ChannelOptions.js";
+import React from "../../../_snowpack/pkg/react.js";
+import {useRecoilState, useRecoilValue} from "../../../_snowpack/pkg/recoil.js";
+import {Slider, Typography, Grid, IconButton} from "../../../_snowpack/pkg/@material-ui/core.js";
+import {RadioButtonChecked, RadioButtonUnchecked} from "../../../_snowpack/pkg/@material-ui/icons.js";
+import ChannelOptions from "./ChannelOptions.js";
 import {layerStateFamily, sourceInfoState} from "../../state.js";
 function ChannelController({layerId, channelIndex}) {
   const sourceInfo = useRecoilValue(sourceInfoState);
@@ -45,7 +45,7 @@ function ChannelController({layerId, channelIndex}) {
   }, label))), /* @__PURE__ */ React.createElement(Grid, {
     item: true,
     xs: 1
-  }, /* @__PURE__ */ React.createElement(ChannelOptions2, {
+  }, /* @__PURE__ */ React.createElement(ChannelOptions, {
     layerId,
     channelIndex
   }))), /* @__PURE__ */ React.createElement(Grid, {

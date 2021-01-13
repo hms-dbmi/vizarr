@@ -1,11 +1,11 @@
-import React, {useEffect} from "../../../web_modules/react.js";
-import {useRecoilValue, useRecoilState} from "../../../web_modules/recoil.js";
-import MuiAccordion from "../../../web_modules/@material-ui/core/Accordion.js";
-import {withStyles} from "../../../web_modules/@material-ui/styles.js";
+import React, {useEffect} from "../../../_snowpack/pkg/react.js";
+import {useRecoilValue, useRecoilState} from "../../../_snowpack/pkg/recoil.js";
+import MuiAccordion from "../../../_snowpack/pkg/@material-ui/core/Accordion.js";
+import {withStyles} from "../../../_snowpack/pkg/@material-ui/styles.js";
 import {sourceInfoState, layerStateFamily} from "../../state.js";
-import Header2 from "./Header.js";
-import Content2 from "./Content.js";
-const Accordion2 = withStyles({
+import Header from "./Header.js";
+import Content from "./Content.js";
+const Accordion = withStyles({
   root: {
     borderBottom: "1px solid rgba(150, 150, 150, .2)",
     width: 200,
@@ -41,12 +41,12 @@ function LayerController({layerId}) {
   }, [sourceInfo]);
   const {name = ""} = sourceInfo[layerId];
   const nChannels = layer.layerProps.loaderSelection.length;
-  return /* @__PURE__ */ React.createElement(Accordion2, {
+  return /* @__PURE__ */ React.createElement(Accordion, {
     defaultExpanded: true
-  }, /* @__PURE__ */ React.createElement(Header2, {
+  }, /* @__PURE__ */ React.createElement(Header, {
     layerId,
     name
-  }), /* @__PURE__ */ React.createElement(Content2, {
+  }), /* @__PURE__ */ React.createElement(Content, {
     layerId,
     nChannels
   }));

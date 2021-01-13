@@ -1,7 +1,7 @@
-import React from "../../../web_modules/react.js";
-import {Grid, Divider} from "../../../web_modules/@material-ui/core.js";
-import {useRecoilValue} from "../../../web_modules/recoil.js";
-import AxisSlider2 from "./AxisSlider.js";
+import React from "../../../_snowpack/pkg/react.js";
+import {Grid, Divider} from "../../../_snowpack/pkg/@material-ui/core.js";
+import {useRecoilValue} from "../../../_snowpack/pkg/recoil.js";
+import AxisSlider from "./AxisSlider.js";
 import {sourceInfoState} from "../../state.js";
 function AxisSliders({layerId}) {
   const sourceInfo = useRecoilValue(sourceInfoState);
@@ -12,7 +12,7 @@ function AxisSliders({layerId}) {
     if (d[2] > 1)
       return true;
     return false;
-  }).map(([name, i, size]) => /* @__PURE__ */ React.createElement(AxisSlider2, {
+  }).map(([name, i, size]) => /* @__PURE__ */ React.createElement(AxisSlider, {
     key: name,
     layerId,
     axisIndex: i,

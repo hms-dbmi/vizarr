@@ -1,11 +1,10 @@
-import __SNOWPACK_ENV__ from '../__snowpack__/env.js';
-import.meta.env = __SNOWPACK_ENV__;
+import * as __SNOWPACK_ENV__ from '../_snowpack/env.js';
 
-import React, {useEffect} from "../web_modules/react.js";
-import {useSetRecoilState} from "../web_modules/recoil.js";
+import React, {useEffect} from "../_snowpack/pkg/react.js";
+import {useSetRecoilState} from "../_snowpack/pkg/recoil.js";
 import {layerIdsState, sourceInfoState, viewerViewState} from "./state.js";
-import Viewer2 from "./components/Viewer.js";
-import Menu2 from "./components/Menu.js";
+import Viewer from "./components/Viewer.js";
+import Menu from "./components/Menu.js";
 function App() {
   const setViewState = useSetRecoilState(viewerViewState);
   const setLayerIds = useSetRecoilState(layerIdsState);
@@ -41,11 +40,11 @@ function App() {
   }, []);
   useEffect(() => {
     async function initImjoy() {
-      const {default: imjoy} = await import("../web_modules/imjoy-rpc.js");
+      const {default: imjoy} = await import("../_snowpack/pkg/imjoy-rpc.js");
       const api = await imjoy.setupRPC({
         name: "vizarr",
         description: "A minimal, purely client-side program for viewing Zarr-based images with Viv & ImJoy.",
-        version: import.meta.env.SNOWPACK_PUBLIC_PACKAGE_VERSION
+        version: __SNOWPACK_ENV__.SNOWPACK_PUBLIC_PACKAGE_VERSION
       });
       const add_image = async (props) => addImage(props);
       const set_view_state = async (vs) => setViewState(vs);
@@ -55,6 +54,6 @@ function App() {
       initImjoy();
     }
   }, []);
-  return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(Menu2, null), /* @__PURE__ */ React.createElement(Viewer2, null));
+  return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(Menu, null), /* @__PURE__ */ React.createElement(Viewer, null));
 }
 export default App;

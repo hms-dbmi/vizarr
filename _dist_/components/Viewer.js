@@ -1,7 +1,7 @@
-import React from "../../web_modules/react.js";
-import {useRecoilState, useRecoilValue} from "../../web_modules/recoil.js";
-import DeckGL from "../../web_modules/deck.gl.js";
-import {OrthographicView} from "../../web_modules/@deck.gl/core.js";
+import React from "../../_snowpack/pkg/react.js";
+import {useRecoilState, useRecoilValue} from "../../_snowpack/pkg/recoil.js";
+import DeckGL from "../../_snowpack/pkg/deck.gl.js";
+import {OrthographicView} from "../../_snowpack/pkg/@deck.gl/core.js";
 import {viewerViewState, layersSelector} from "../state.js";
 function WrappedViewStateDeck({layers}) {
   const [viewState, setViewState] = useRecoilState(viewerViewState);

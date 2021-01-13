@@ -1,7 +1,7 @@
-import React from "../../../web_modules/react.js";
-import {IconButton} from "../../../web_modules/@material-ui/core.js";
-import {Lens} from "../../../web_modules/@material-ui/icons.js";
-import {makeStyles} from "../../../web_modules/@material-ui/styles.js";
+import React from "../../../_snowpack/pkg/react.js";
+import {IconButton} from "../../../_snowpack/pkg/@material-ui/core.js";
+import {Lens} from "../../../_snowpack/pkg/@material-ui/icons.js";
+import {makeStyles} from "../../../_snowpack/pkg/@material-ui/styles.js";
 import {COLORS, hexToRGB} from "../../utils.js";
 const useStyles = makeStyles(() => ({
   container: {

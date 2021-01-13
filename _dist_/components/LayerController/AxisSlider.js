@@ -1,8 +1,8 @@
-import {Grid, Typography, Divider} from "../../../web_modules/@material-ui/core.js";
-import {useRecoilState, useRecoilValue} from "../../../web_modules/recoil.js";
-import React, {useState, useEffect} from "../../../web_modules/react.js";
-import {Slider} from "../../../web_modules/@material-ui/core.js";
-import {withStyles} from "../../../web_modules/@material-ui/styles.js";
+import {Grid, Typography, Divider} from "../../../_snowpack/pkg/@material-ui/core.js";
+import {useRecoilState, useRecoilValue} from "../../../_snowpack/pkg/recoil.js";
+import React, {useState, useEffect} from "../../../_snowpack/pkg/react.js";
+import {Slider} from "../../../_snowpack/pkg/@material-ui/core.js";
+import {withStyles} from "../../../_snowpack/pkg/@material-ui/styles.js";
 import DimensionOptions from "./AxisOptions.js";
 import {layerStateFamily, sourceInfoState} from "../../state.js";
 const DenseSlider = withStyles({

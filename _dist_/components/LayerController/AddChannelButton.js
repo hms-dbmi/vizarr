@@ -1,7 +1,7 @@
-import React, {useState} from "../../../web_modules/react.js";
-import {useRecoilState, useRecoilValue} from "../../../web_modules/recoil.js";
-import {IconButton, Popover, Paper, Typography, Divider, NativeSelect} from "../../../web_modules/@material-ui/core.js";
-import {Add} from "../../../web_modules/@material-ui/icons.js";
+import React, {useState} from "../../../_snowpack/pkg/react.js";
+import {useRecoilState, useRecoilValue} from "../../../_snowpack/pkg/recoil.js";
+import {IconButton, Popover, Paper, Typography, Divider, NativeSelect} from "../../../_snowpack/pkg/@material-ui/core.js";
+import {Add} from "../../../_snowpack/pkg/@material-ui/icons.js";
 import {layerStateFamily, sourceInfoState} from "../../state.js";
 import {hexToRGB, MAX_CHANNELS} from "../../utils.js";
 function AddChannelButton({layerId}) {

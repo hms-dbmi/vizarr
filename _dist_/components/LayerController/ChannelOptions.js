@@ -1,10 +1,10 @@
-import React, {useState} from "../../../web_modules/react.js";
-import {useRecoilState, useRecoilValue} from "../../../web_modules/recoil.js";
-import {IconButton, Popover, Paper, Typography, Divider, Input, NativeSelect} from "../../../web_modules/@material-ui/core.js";
-import {withStyles} from "../../../web_modules/@material-ui/styles.js";
-import {MoreHoriz, Remove} from "../../../web_modules/@material-ui/icons.js";
+import React, {useState} from "../../../_snowpack/pkg/react.js";
+import {useRecoilState, useRecoilValue} from "../../../_snowpack/pkg/recoil.js";
+import {IconButton, Popover, Paper, Typography, Divider, Input, NativeSelect} from "../../../_snowpack/pkg/@material-ui/core.js";
+import {withStyles} from "../../../_snowpack/pkg/@material-ui/styles.js";
+import {MoreHoriz, Remove} from "../../../_snowpack/pkg/@material-ui/icons.js";
 import {layerStateFamily, sourceInfoState} from "../../state.js";
-import ColorPalette2 from "./ColorPalette.js";
+import ColorPalette from "./ColorPalette.js";
 const DenseInput = withStyles({
   root: {
     width: "5.5em",
@@ -150,7 +150,7 @@ function ChannelOptions({layerId, channelIndex}) {
     variant: "caption"
   }, "color:"), /* @__PURE__ */ React.createElement(Divider, null), /* @__PURE__ */ React.createElement("div", {
     style: {display: "flex", justifyContent: "center"}
-  }, /* @__PURE__ */ React.createElement(ColorPalette2, {
+  }, /* @__PURE__ */ React.createElement(ColorPalette, {
     handleChange: handleColorChange
   })))));
 }

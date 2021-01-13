@@ -1,8 +1,8 @@
-import React, {useState} from "../../../web_modules/react.js";
-import {useRecoilState} from "../../../web_modules/recoil.js";
-import {IconButton, Popover, Paper, Typography, Divider, Input} from "../../../web_modules/@material-ui/core.js";
-import {withStyles} from "../../../web_modules/@material-ui/styles.js";
-import {MoreHoriz} from "../../../web_modules/@material-ui/icons.js";
+import React, {useState} from "../../../_snowpack/pkg/react.js";
+import {useRecoilState} from "../../../_snowpack/pkg/recoil.js";
+import {IconButton, Popover, Paper, Typography, Divider, Input} from "../../../_snowpack/pkg/@material-ui/core.js";
+import {withStyles} from "../../../_snowpack/pkg/@material-ui/styles.js";
+import {MoreHoriz} from "../../../_snowpack/pkg/@material-ui/icons.js";
 import {layerStateFamily} from "../../state.js";
 const DenseInput = withStyles({
   root: {

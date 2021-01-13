@@ -1,5 +1,5 @@
-import {openArray} from "../web_modules/zarr.js";
-import {ZarrLoader, ImageLayer, MultiscaleImageLayer, DTYPE_VALUES} from "../web_modules/@hms-dbmi/viv.js";
+import {openArray} from "../_snowpack/pkg/zarr.js";
+import {ZarrLoader, ImageLayer, MultiscaleImageLayer, DTYPE_VALUES} from "../_snowpack/pkg/@hms-dbmi/viv.js";
 import {loadOME, loadOMEPlate, loadOMEWell} from "./ome.js";
 import {
   getJson,

@@ -1,10 +1,10 @@
-import React, {useReducer} from "../../web_modules/react.js";
-import {useRecoilValue} from "../../web_modules/recoil.js";
-import {Grid, IconButton} from "../../web_modules/@material-ui/core.js";
-import {Add, Remove} from "../../web_modules/@material-ui/icons.js";
-import {makeStyles} from "../../web_modules/@material-ui/styles.js";
+import React, {useReducer} from "../../_snowpack/pkg/react.js";
+import {useRecoilValue} from "../../_snowpack/pkg/recoil.js";
+import {Grid, IconButton} from "../../_snowpack/pkg/@material-ui/core.js";
+import {Add, Remove} from "../../_snowpack/pkg/@material-ui/icons.js";
+import {makeStyles} from "../../_snowpack/pkg/@material-ui/styles.js";
 import {layerIdsState} from "../state.js";
-import LayerController2 from "./LayerController/index.js";
+import LayerController from "./LayerController/index.js";
 const useStyles = makeStyles({
   root: {
     zIndex: 1,
@@ -46,7 +46,7 @@ function Menu() {
   }, hidden ? /* @__PURE__ */ React.createElement(Add, null) : /* @__PURE__ */ React.createElement(Remove, null)), /* @__PURE__ */ React.createElement("div", {
     className: classes.scroll,
     style: {display: hidden ? "none" : "flex"}
-  }, layerIds.map((id) => /* @__PURE__ */ React.createElement(LayerController2, {
+  }, layerIds.map((id) => /* @__PURE__ */ React.createElement(LayerController, {
     layerId: id,
     key: id
   })))));

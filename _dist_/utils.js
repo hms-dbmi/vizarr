@@ -1,4 +1,4 @@
-import {HTTPStore} from "../web_modules/zarr.js";
+import {HTTPStore} from "../_snowpack/pkg/zarr.js";
 export const MAX_CHANNELS = 6;
 export const COLORS = {
   cyan: "#00FFFF",

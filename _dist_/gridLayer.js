@@ -1,7 +1,7 @@
-import {CompositeLayer} from "../web_modules/@deck.gl/core.js";
-import {SolidPolygonLayer} from "../web_modules/@deck.gl/layers.js";
-import pMap from "../web_modules/p-map.js";
-import {XRLayer} from "../web_modules/@hms-dbmi/viv.js";
+import {CompositeLayer} from "../_snowpack/pkg/@deck.gl/core.js";
+import {SolidPolygonLayer} from "../_snowpack/pkg/@deck.gl/layers.js";
+import pMap from "../_snowpack/pkg/p-map.js";
+import {XRLayer} from "../_snowpack/pkg/@hms-dbmi/viv.js";
 import {range} from "./utils.js";
 const defaultProps = {
   ...XRLayer.defaultProps,

@@ -1,7 +1,7 @@
-import React from "../../../web_modules/react.js";
-import {useRecoilState} from "../../../web_modules/recoil.js";
-import {Slider} from "../../../web_modules/@material-ui/core.js";
-import {withStyles} from "../../../web_modules/@material-ui/styles.js";
+import React from "../../../_snowpack/pkg/react.js";
+import {useRecoilState} from "../../../_snowpack/pkg/recoil.js";
+import {Slider} from "../../../_snowpack/pkg/@material-ui/core.js";
+import {withStyles} from "../../../_snowpack/pkg/@material-ui/styles.js";
 import {layerStateFamily} from "../../state.js";
 const DenseSlider = withStyles({
   root: {

@@ -1,10 +1,10 @@
-import {createMuiTheme} from "../web_modules/@material-ui/core/styles.js";
-import grey2 from "../web_modules/@material-ui/core/colors/grey.js";
+import {createMuiTheme} from "../_snowpack/pkg/@material-ui/core/styles.js";
+import grey from "../_snowpack/pkg/@material-ui/core/colors/grey.js";
 export default createMuiTheme({
   palette: {
     type: "dark",
-    primary: grey2,
-    secondary: grey2
+    primary: grey,
+    secondary: grey
   },
   props: {
     MuiButton: {

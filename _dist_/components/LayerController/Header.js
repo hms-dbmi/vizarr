@@ -1,7 +1,7 @@
-import React from "../../../web_modules/react.js";
-import {AccordionSummary, Typography} from "../../../web_modules/@material-ui/core.js";
-import {withStyles} from "../../../web_modules/@material-ui/styles.js";
-import LayerVisibilityButton2 from "./LayerVisibilityButton.js";
+import React from "../../../_snowpack/pkg/react.js";
+import {AccordionSummary, Typography} from "../../../_snowpack/pkg/@material-ui/core.js";
+import {withStyles} from "../../../_snowpack/pkg/@material-ui/styles.js";
+import LayerVisibilityButton from "./LayerVisibilityButton.js";
 const DenseAccordionSummary = withStyles({
   root: {
     borderBottom: "1px solid rgba(150, 150, 150, .125)",
@@ -31,7 +31,7 @@ function Header({layerId, name}) {
     id: label
   }, /* @__PURE__ */ React.createElement("div", {
     style: {display: "flex", flexDirection: "row"}
-  }, /* @__PURE__ */ React.createElement(LayerVisibilityButton2, {
+  }, /* @__PURE__ */ React.createElement(LayerVisibilityButton, {
     layerId
   }), /* @__PURE__ */ React.createElement(Typography, {
     style: {
