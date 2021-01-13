@@ -1,5 +1,5 @@
-import { openArray, ZarrArray, HTTPStore } from 'zarr';
-import { ZarrLoader, ImageLayer, MultiscaleImageLayer, DTYPE_VALUES } from '@hms-dbmi/viv';
+import { openArray, ZarrArray, HTTPStore, slice } from 'zarr';
+import { ZarrLoader as _ZarrLoader, ImageLayer, MultiscaleImageLayer, DTYPE_VALUES } from '@hms-dbmi/viv';
 
 import type { RootAttrs } from '../types/rootAttrs';
 import { loadOME, loadOMEPlate, loadOMEWell } from './ome';
@@ -18,6 +18,73 @@ import {
   rstrip,
 } from './utils';
 import GridLayer from './gridLayer';
+
+class ZarrLoader extends _ZarrLoader {
+
+  /**
+   * Returns full image panes (at level z if pyramid)
+   * @param {number} args
+   * @param {number} args.z positive integer (0 === highest zoom level)
+   * @param {Array} args.loaderSelection, Array of valid dimension selections
+   * @returns {Object} data: TypedArray[], width: number, height: number
+   */
+  async getRaster({ z, loaderSelection }) {
+    const source = this._getSource(z);
+    const [xIndex, yIndex] = ['x', 'y'].map(k => this._dimIndices.get(k));
+    const zIndex = 2;
+
+    const baseSizeZ = this.base.shape[zIndex];
+    const currentSizeZ = source.shape[zIndex];
+
+    const dataRequests = loaderSelection.map(async sel => {
+      const chunkKey = this._serializeSelection(sel);
+      chunkKey[zIndex] = Math.floor((chunkKey[zIndex] / baseSizeZ) * currentSizeZ);
+      chunkKey[yIndex] = null;
+      chunkKey[xIndex] = null;
+      if (this.isRgb) {
+        chunkKey[chunkKey.length - 1] = null;
+      }
+      const { data } = await source.getRaw(chunkKey);
+      return data;
+    });
+
+    const data = await Promise.all(dataRequests);
+    const { shape } = source;
+    const width = shape[xIndex];
+    const height = shape[yIndex];
+    return { data, width, height };
+  }
+
+  async getTile({ x, y, z, loaderSelection }) {
+    const source = this._getSource(z); // returns ZarrArray (z is pyramidal level)
+    const [xIndex, yIndex] = ['x', 'y'].map(k => this._dimIndices.get(k)); // returns axis index for x and y
+    const zIndex = 2;
+
+    const baseSizeZ = this.base.shape[zIndex];
+    const currentSizeZ = source.shape[zIndex];
+
+    const dataRequests = loaderSelection.map(async sel => {
+      const selection = this._serializeSelection(sel); // ensures number[]
+      selection[zIndex] = Math.floor((selection[zIndex] / baseSizeZ) * currentSizeZ);
+      selection[yIndex] = slice(y * this.tileSize, (y + 1) * this.tileSize); // contiguous y slice
+      selection[xIndex] = slice(x * this.tileSize, (x + 1) * this.tileSize); // contiguous x slice
+      // NOTE: Zarr will throw if you index larger than shape. We used chunks before
+      // because they were consistent in size (even edges). You'll need to adjust the
+      // size of slices above if they are edge tiles.
+
+      // selection is now ~ [number, number, number, slice(), slice()];
+      return source.getRaw(selection);
+    });
+    const data = await Promise.all(dataRequests);
+    const { shape: [height, width] } = data[0]; // get dims from first image
+    return {
+      data: data.map(d => d.data), // extract TypedArray data
+      width,
+      height
+    };
+  }
+}
+
 
 function getAxisLabels(config: SingleChannelConfig | MultichannelConfig, loader: ZarrLoader): string[] {
   let { axis_labels } = config;
