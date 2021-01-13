@@ -13,10 +13,7 @@ module.exports = {
     '@snowpack/plugin-react-refresh',
     '@snowpack/plugin-typescript',
   ],
-  install: [
-    /* ... */
-  ],
-  installOptions: {
+  packageOptions: {
     rollup: {
       plugins: [ resolveGeotiff() ],
     },
@@ -28,9 +25,6 @@ module.exports = {
     // change build dir to out/ (next.js compat)
     out: 'out',
     baseUrl: process.env.VIZARR_PREFIX || './',
-  },
-  proxy: {
-    /* ... */
   },
   alias: {
     /* ... */
