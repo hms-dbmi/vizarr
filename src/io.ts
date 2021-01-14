@@ -58,7 +58,7 @@ export class ZarrLoader extends _ZarrLoader {
     return { data, width, height };
   }
 
-  async getTile(selection: TileSelection) {
+  async getTile(selection: TileSelection): Promise<SelectionData> {
     const { x, y, z, loaderSelection } = selection;
     const source = this._getSource(z); // returns ZarrArray (z is pyramidal level)
     const [xIndex, yIndex] = ['x', 'y'].map(k => this._dimIndices.get(k) as number); // returns axis index for x and y
@@ -79,10 +79,10 @@ export class ZarrLoader extends _ZarrLoader {
       // selection is now ~ [number, number, number, slice(), slice()];
       return source.getRaw(selection);
     });
-    const data = (await Promise.all(dataRequests)) as RawArray[];
+    const data = await Promise.all(dataRequests);
     const { shape: [height, width] } = data[0] as any; // get dims from first image
     return {
-      data: data.map(d => d.data), // extract TypedArray data
+      data: data.map(d => (d as any).data as TypedArray), // extract TypedArray data
       width,
       height
     };
