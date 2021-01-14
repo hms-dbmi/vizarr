@@ -1,8 +1,9 @@
 declare module '@hms-dbmi/viv' {
   import type { Layer } from '@deck.gl/core';
   import type { ZarrArray } from 'zarr';
+  import type { Slice } from 'zarr/dist/types/core/types';
 
-  type TypedArray = Uint8Array | Uint16Array | Uint32Array | Float32Array;
+  export type TypedArray = Uint8Array | Uint16Array | Uint32Array | Float32Array;
   type SupportedDtype = '<u1' | '<u2' | '<u4' | '<f4';
 
   type DtypeLookup = {
@@ -46,12 +47,16 @@ declare module '@hms-dbmi/viv' {
     readonly tileSize: number;
     readonly dtype: SupportedDtype;
     readonly base: ZarrArray;
+    readonly _dimIndices: Map<string, number>;
 
     getTile(selection: TileSelection): Promise<SelectionData>;
     getRaster(selection: RasterSelection): Promise<SelectionData>;
     getRasterSize(selection: RasterSelection): { width: number; height: number };
 
     onTileError(error: Error): void;
+
+    _getSource(z: any): ZarrArray;
+    _serializeSelection(sel: number[]): (number | null | Slice)[];
   }
 
   export type VivLayerProps = {
