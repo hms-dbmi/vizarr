@@ -1,6 +1,8 @@
 import { atom, atomFamily, selector, waitForAll } from 'recoil';
-import type { HTTPStore } from 'zarr';
-import type { VivLayerProps, ImageLayer, MultiscaleImageLayer, ZarrLoader } from '@hms-dbmi/viv';
+import type { ZarrArray } from 'zarr';
+import type { ImageLayer, MultiscaleImageLayer } from '@hms-dbmi/viv';
+import type { PixelSource, Labels } from '@hms-dbmi/viv/dist/types';
+import type { VivLayerProps } from 'viv-layers';
 
 export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
 export const DEFAULT_LAYER_PROPS = {
@@ -15,8 +17,7 @@ export const DEFAULT_LAYER_PROPS = {
 };
 
 export type BaseConfig = {
-  source: string | HTTPStore;
-  channel_axis?: number;
+  source: string | ZarrArray['store'];
   name?: string;
   colormap?: string;
   opacity?: number;
@@ -28,6 +29,7 @@ export type BaseConfig = {
 
 export type MultichannelConfig = {
   colors?: string[];
+  channel_axis?: number;
   contrast_limits?: number[][];
   names?: string[];
   visibilities?: boolean[];
@@ -46,10 +48,10 @@ export type Acquisition = {
   name: string;
 };
 
-export type SourceData = {
-  loader: ZarrLoader;
-  source?: string | HTTPStore;
-  loaders?: (ZarrLoader | undefined)[]; // for OME plates
+export type SourceData<T extends string[]> = {
+  loader: PixelSource<T> | PixelSource<T>[];
+  source?: string | ZarrArray['store'];
+  loaders?: (PixelSource<T> | undefined)[]; // for OME plates
   rows?: number;
   columns?: number;
   acquisitions?: Acquisition[];
@@ -65,17 +67,17 @@ export type SourceData = {
     colormap: string;
     opacity: number;
   };
-  axis_labels: string[];
+  axis_labels: Labels<T>;
   translate: number[];
   onClick?: (e: any) => void;
 };
 
-export type LayerState = {
+export type LayerState<S extends string[]> = {
   Layer: null | ImageLayer | MultiscaleImageLayer;
   layerProps: VivLayerProps & {
     contrastLimits: number[][];
-    source?: string | HTTPStore;
-    loaders?: (ZarrLoader | undefined)[];
+    source?: string | ZarrArray['store'];
+    loaders?: (PixelSource<S> | undefined)[];
     rows?: number;
     columns?: number;
     onClick?: (e: any) => void;
@@ -85,7 +87,7 @@ export type LayerState = {
 
 export const sourceInfoState = atom({
   key: 'sourceInfo',
-  default: {} as { [id: string]: SourceData },
+  default: {} as { [id: string]: SourceData<any> },
 });
 
 export const layerIdsState = atom({
@@ -100,7 +102,7 @@ export const viewerViewState = atom({
 
 export const layerStateFamily = atomFamily({
   key: 'layerStateFamily',
-  default: (id: string): LayerState => ({
+  default: (id: string): LayerState<any> => ({
     Layer: null,
     layerProps: { id, ...DEFAULT_LAYER_PROPS },
     on: false,

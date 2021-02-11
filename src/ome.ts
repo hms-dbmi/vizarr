@@ -1,50 +1,53 @@
-import { openArray, HTTPStore } from 'zarr';
+import { openArray, HTTPStore, ZarrArray, Group as ZarrGroup } from 'zarr';
 import pMap from 'p-map';
 
-import type { ZarrLoader } from '@hms-dbmi/viv';
-import type { RootAttrs, OmeroImageData, OmeWellData, OmePlateData } from '../types/rootAttrs';
 import type { SourceData, ImageLayerConfig, Acquisition } from './state';
 
-import { getJson, rstrip, join } from './utils';
-import { createLoader } from './io';
+import { rstrip, join, loadMultiscales } from './utils';
+import { ZarrPixelSource } from '@hms-dbmi/viv';
+
+
+type OmeSourceData = SourceData<['t', 'c', 'z']>;
 
 // Create loader for every Well. Some loaders may be undefined if Wells are missing.
-async function createLoaderFromPath(store: HTTPStore, path: string | undefined): Promise<ZarrLoader | undefined> {
+async function createLoaderFromPath(store: HTTPStore, path: string | undefined): Promise<ZarrArray | undefined> {
   if (path === undefined) {
     // Don't even try to load if we know that Well is missing
     return;
   }
   try {
-    const data = await openArray({ store, path });
-    let l = createLoader([data]);
-    return l;
+    return await openArray({ store, path });
   } catch (err) {
     console.log(`Failed to create loader: ${path}`);
   }
 }
 
-export async function loadOMEWell(
+export async function loadWell(
   config: ImageLayerConfig,
-  store: HTTPStore,
-  rootAttrs: RootAttrs
-): Promise<SourceData> {
+  grp: ZarrGroup,
+  wellAttrs: Ome.Well
+): Promise<OmeSourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
   const acquisitionId: number | undefined = config.acquisition ? parseInt(config.acquisition) : undefined;
   let acquisitions: Acquisition[] = [];
 
-  const wellAttrs = rootAttrs.well as OmeWellData;
-  if (!wellAttrs.images) {
+  if (!wellAttrs?.images) {
     throw Error(`Well .zattrs missing images`);
   }
-  const [row, col] = store.url.split('/').filter(Boolean).slice(-2);
 
-  let images = wellAttrs.images;
+  if (!(grp.store instanceof HTTPStore)) {
+    throw Error('Store must be an HTTPStore to open well.');
+  }
+
+  const [row, col] = grp.store.url.split('/').filter(Boolean).slice(-2);
+
+  const { images } = wellAttrs;
 
   // Do we have more than 1 Acquisition?
   const acqIds = images.flatMap((img) => (img.acquisition ? [img.acquisition] : []));
   if (acqIds.length > 1) {
     // Need to get acquisitions metadata from parent Plate
-    const plateUrl = store.url.replace(`/${row}/${col}`, '');
+    const plateUrl = grp.store.url.replace(`/${row}/${col}`, '');
     const plateStore = new HTTPStore(plateUrl);
     const plateAttrs = await getJson(plateStore, `.zattrs`);
     acquisitions = plateAttrs?.plate?.acquisitions;
@@ -107,10 +110,9 @@ export async function loadOMEWell(
 
 export async function loadOMEPlate(
   config: ImageLayerConfig,
-  store: HTTPStore,
-  rootAttrs: RootAttrs
-): Promise<SourceData> {
-  const plateAttrs = rootAttrs.plate as OmePlateData;
+  grp: ZarrGroup,
+  plateAttrs: Ome.Plate
+): Promise<OmeSourceData> {
   if (!('columns' in plateAttrs) || !('rows' in plateAttrs)) {
     throw Error(`Plate .zattrs missing columns or rows`);
   }
@@ -162,7 +164,7 @@ export async function loadOMEPlate(
   const loader = loaders.find(Boolean);
 
   // Load Image to use for channel names, rendering settings, sizeZ, sizeT etc.
-  const sourceData: SourceData = loadOME(config, imageAttrs.omero, loader as ZarrLoader);
+  const sourceData: OmeSourceData = loadOmero(config, imageAttrs.omero, loader as ZarrLoader);
 
   sourceData.loaders = loaders;
   sourceData.name = plateAttrs.name || 'Plate';
@@ -191,9 +193,13 @@ export async function loadOMEPlate(
   return sourceData;
 }
 
-export function loadOME(config: ImageLayerConfig, imageData: OmeroImageData, loader: ZarrLoader): SourceData {
+export async function loadOmero(
+  config: ImageLayerConfig,
+  grp: ZarrGroup,
+  attrs: { multiscales: Ome.Multiscale[]; omero: Ome.Omero }
+): Promise<OmeSourceData> {
   const { name, opacity = 1, colormap = '', translate, source } = config;
-  const { rdefs, channels } = imageData;
+  const { rdefs, channels } = attrs.omero;
   const t = rdefs.defaultT ?? 0;
   const z = rdefs.defaultZ ?? 0;
 
@@ -209,10 +215,14 @@ export function loadOME(config: ImageLayerConfig, imageData: OmeroImageData, loa
     names.push(c.label);
   });
 
+  const axis_labels = ['t', 'c', 'z', 'y', 'x'] as const;
+  const data = await loadMultiscales(grp, attrs.multiscales)
+  const loader = data.map(arr => new ZarrPixelSource(arr, axis_labels));
+
   return {
     loader,
     source,
-    name: imageData.name ?? name,
+    name: attrs.omero.name ?? name,
     channel_axis: 1,
     colors,
     names,

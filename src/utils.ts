@@ -1,4 +1,5 @@
-import { HTTPStore } from 'zarr';
+import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray } from 'zarr';
+import type { Group as ZarrGroup } from 'zarr';
 
 export const MAX_CHANNELS = 6;
 
@@ -15,18 +16,34 @@ export const MAGENTA_GREEN = [COLORS.magenta, COLORS.green];
 export const RGB = [COLORS.red, COLORS.green, COLORS.blue];
 export const CYMRGB = Object.values(COLORS).slice(0, -2);
 
-export async function getJson(store: HTTPStore, key: string) {
-  const bytes = new Uint8Array(await store.getItem(key));
-  const decoder = new TextDecoder('utf-8');
-  const json = JSON.parse(decoder.decode(bytes));
-  return json;
+function normalizeStore(source: string | ZarrArray['store']) {
+  if (typeof source === 'string') {
+    const [root, path] = source.split('.zarr');
+    return {
+      store: new HTTPStore(root + '.zarr'),
+      path,
+    };
+  }
+  return { store: source, path: '' };
 }
 
-export function normalizeStore(store: string | HTTPStore): HTTPStore {
-  if (typeof store === 'string') {
-    return new HTTPStore(store);
+export async function open(source: string | ZarrArray['store']) {
+  const { store, path } = normalizeStore(source);
+  return openGroup(store, path).catch((err) => {
+    if (err instanceof ContainsArrayError) {
+      return openArray({ store: store as ZarrArray['store'], path });
+    }
+    throw err;
+  });
+}
+
+export async function loadMultiscales(grp: ZarrGroup, multiscales: Ome.Multiscale[]) {
+  const { datasets } = multiscales[0] || [{ path: '0' }];
+  const nodes = await Promise.all(datasets.map(({ path }) => grp.getItem(path)));
+  if (nodes.every((node): node is ZarrArray => node instanceof ZarrArray)) {
+    return nodes;
   }
-  return store;
+  throw Error('Multiscales metadata included a path to a group.');
 }
 
 export function hexToRGB(hex: string): number[] {

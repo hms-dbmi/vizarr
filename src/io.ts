@@ -1,22 +1,10 @@
-import { openArray, ZarrArray, HTTPStore } from 'zarr';
-import { ZarrLoader, ImageLayer, MultiscaleImageLayer, DTYPE_VALUES } from '@hms-dbmi/viv';
+import { ZarrArray, Group as ZarrGroup, openGroup } from 'zarr';
+import { ImageLayer, MultiscaleImageLayer, DTYPE_VALUES } from '@hms-dbmi/viv';
 
-import type { RootAttrs } from '../types/rootAttrs';
 import { loadOME, loadOMEPlate, loadOMEWell } from './ome';
 import type { SourceData, ImageLayerConfig, LayerState, SingleChannelConfig, MultichannelConfig } from './state';
 
-import {
-  getJson,
-  MAX_CHANNELS,
-  COLORS,
-  MAGENTA_GREEN,
-  RGB,
-  CYMRGB,
-  normalizeStore,
-  hexToRGB,
-  range,
-  rstrip,
-} from './utils';
+import { MAX_CHANNELS, COLORS, MAGENTA_GREEN, RGB, CYMRGB, hexToRGB, range, open, loadMultiscales } from './utils';
 import GridLayer from './gridLayer';
 
 function getAxisLabels(config: SingleChannelConfig | MultichannelConfig, loader: ZarrLoader): string[] {
@@ -112,68 +100,46 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
   };
 }
 
-export function createLoader(dataArr: ZarrArray[]) {
-  // TODO: There should be a much better way to do this.
-  // If base image is small, we don't need to fetch data for the
-  // top levels of the pyramid. For large images, the tile sizes (chunks)
-  // will be the same size for x/y. We check the chunksize here for this edge case.
-  const base = dataArr[0];
-  const { chunks, shape } = base;
-  const [tileHeight, tileWidth] = chunks.slice(-2);
-  // TODO: Need function to trim pyramidal levels that aren't chunked w/ even tile sizes.
-  // Lowest resolution doesn't need to have square chunks, but all others do.
-  const data = dataArr.length === 1 || tileHeight !== tileWidth ? base : dataArr;
-  // need to make dimensions to use ZarrLoader, but not necessary
-  const dimensions = [...range(shape.length - 2), 'y', 'x'].map((field) => ({ field }));
-  return new ZarrLoader({ data, dimensions });
-}
-
-async function openMultiResolutionData(store: HTTPStore, rootAttrs: RootAttrs): Promise<ZarrArray[]> {
-  let resolutions = ['0'];
-  if ('multiscales' in rootAttrs) {
-    const { datasets } = rootAttrs.multiscales[0];
-    resolutions = datasets.map((d) => d.path);
-  }
-  const promises = resolutions.map((path) => openArray({ store, path }));
-  const data = await Promise.all(promises);
-  return data;
-}
-
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
-  const { source } = config;
+  const node = await open(config.source);
   let data: ZarrArray[];
-  let rootAttrs: RootAttrs | undefined;
 
-  const store = normalizeStore(source);
-  if (await store.containsItem('.zgroup')) {
-    try {
-      rootAttrs = await getJson(store, '.zattrs');
-      if (rootAttrs?.plate) {
-        return loadOMEPlate(config, store, rootAttrs as RootAttrs);
-      } else if (rootAttrs?.well) {
-        return loadOMEWell(config, store, rootAttrs as RootAttrs);
-      }
-      data = await openMultiResolutionData(store, rootAttrs as RootAttrs);
-    } catch (err) {
+  if (node instanceof ZarrGroup) {
+    const attrs = (await node.attrs.asObject()) as Ome.Attrs;
+
+    if ('plate' in attrs) {
+      return loadPlate(config, node, attrs);
+    }
+
+    if ('well' in attrs) {
+      return loadWell(config, node, attrs);
+    }
+
+    if ('omero' in attrs) {
+      return loadOmero(config, node, attrs);
+    }
+
+    if (Object.keys(attrs).length === 0 && node.path !== '') {
       // No rootAttrs in this group.
       // if url is to a plate/acquisition/ check parent dir for 'plate' zattrs
-      const url: string = rstrip(store.url, '/');
-      const parentUrl = url.slice(0, url.lastIndexOf('/'));
-      const parentStore = normalizeStore(parentUrl);
-      const parentAttrs = await getJson(parentStore, '.zattrs');
-      if (parentAttrs?.plate) {
-        return loadOMEPlate(config, parentStore, parentAttrs as RootAttrs);
-      } else {
-        throw Error(`Failed to open arrays in zarr.Group. Make sure group implements multiscales extension.`);
+      const parentPath = node.path.slice(0, node.path.lastIndexOf('/'));
+      const parent = await openGroup(node.store, parentPath);
+      const parentAttrs = (await parent.attrs.asObject()) as Ome.Attrs;
+      if ('plate' in parentAttrs) {
+        return loadPlate(config, parent, parentAttrs);
       }
     }
-  } else {
-    // Try to open as zarr.Array
-    data = [await openArray({ store })];
-  }
 
-  const loader = createLoader(data);
-  const { base, dtype } = loader;
+    if (!('multiscales' in attrs)) {
+      throw Error('Group is missing multiscales specification.');
+    }
+
+    data = await loadMultiscales(node, attrs.multiscales);
+  } else {
+    data = [node];
+  }
+  const labels = getAxisLabels(config, data);
+
   if (!(dtype in DTYPE_VALUES)) {
     throw Error('Dtype not supported, must be u1, u2, u4, or f4');
   }
@@ -183,17 +149,13 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   // Now that we have data, try to figure out how to render initially.
 
   const nDims = base.shape.length;
-  if (nDims === 2 || (config.channel_axis === undefined && !rootAttrs?.omero)) {
+  if (nDims === 2 || config.channel_axis === undefined) {
     return loadSingleChannel(config as SingleChannelConfig, loader, max);
   }
 
   // If explicit channel axis is provided, try to load as multichannel.
   if (Number.isInteger(config.channel_axis)) {
     return loadMultiChannel(config as MultichannelConfig, loader, max);
-  }
-
-  if (rootAttrs?.omero) {
-    return loadOME(config, rootAttrs.omero, loader);
   }
 
   throw Error('Failed to load image.');
