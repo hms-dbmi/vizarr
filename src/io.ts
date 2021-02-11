@@ -11,7 +11,8 @@ import type {
   SourceData,
   LayerCtr,
 } from './state';
-import { COLORS, CYMRGB, hexToRGB, loadMultiscales, MAGENTA_GREEN, MAX_CHANNELS, open, range, RGB } from './utils';
+import { COLORS, CYMRGB, hexToRGB, loadMultiscales, MAGENTA_GREEN, MAX_CHANNELS, open, range, RGB, trimPyramid } from './utils';
+
 
 function getAxisLabels(arr: ZarrArray, axis_labels?: string[], channel_axis?: number): string[] {
   if (!axis_labels || axis_labels.length != arr.shape.length) {
@@ -143,7 +144,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   }
 
   const labels = getAxisLabels(data[0], config.axis_labels);
-  const loader = data.map((d) => new ZarrPixelSource.default(d, labels));
+  const loader = trimPyramid(data.map((d) => new ZarrPixelSource.default(d, labels)));
   const [base] = loader;
 
   if (!(base.dtype in DTYPE_VALUES)) {
@@ -208,7 +209,7 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
     Layer,
     layerProps: {
       id: layerId,
-      loader,
+      loader: loader.length === 1 ? loader[0] : loader,
       loaders,
       loaderSelection,
       colorValues,

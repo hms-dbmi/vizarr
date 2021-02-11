@@ -2,7 +2,7 @@ import { ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
 import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
-import { join, loadMultiscales } from './utils';
+import { join, loadMultiscales, trimPyramid } from './utils';
 
 export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAttrs: Ome.Well): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
@@ -181,7 +181,7 @@ export async function loadOmeroMultiscales(
   const meta = parseOmeroMeta(attrs.omero);
   const loader = data.map((arr) => new ZarrPixelSource.default(arr, meta.axis_labels));
   return {
-    loader,
+    loader: trimPyramid(loader),
     name: meta.name ?? name,
     defaults: {
       selection: meta.defaultSelection,

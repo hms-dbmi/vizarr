@@ -38,7 +38,6 @@ function LayerController({ layerId }: { layerId: string }): JSX.Element {
     async function initLayer(sourceData: SourceData) {
       const { initLayerStateFromSource } = await import('../../io');
       const initialLayerState = await initLayerStateFromSource(sourceData, layerId);
-      console.log(initialLayerState);
       setLayer(initialLayerState);
     }
     // Loader only defined once layer state is initialized.

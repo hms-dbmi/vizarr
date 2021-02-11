@@ -69,7 +69,7 @@ export type LayerCtr<T> = new (...args: any[]) => T;
 export type LayerState = {
   Layer: null | LayerCtr<ImageLayer | MultiscaleImageLayer | GridLayer>;
   layerProps: VivLayerProps & {
-    loader: PixelSource<string[]>[];
+    loader: PixelSource<string[]> | PixelSource<string[]>[];
     contrastLimits: number[][];
     loaders?: PixelSource<string[]>[];
     rows?: number;
