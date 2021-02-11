@@ -4,11 +4,11 @@ import type { CompositeLayerProps } from '@deck.gl/core/lib/composite-layer';
 import pMap from 'p-map';
 
 import { XRLayer } from '@hms-dbmi/viv';
-import type { ZarrLoader, SelectionData, RasterSelection } from '@hms-dbmi/viv';
 import { range } from './utils';
+import type ZarrPixelSource from '@hms-dbmi/viv/dist/loaders/zarr/pixel-source';
 
-export interface GridLayerProps<D> extends CompositeLayerProps<D> {
-  loaders: ZarrLoader[];
+export interface GridLayerProps extends CompositeLayerProps<any> {
+  loaders: ZarrPixelSource<string[]>[];
   spacer?: number;
   rows: number;
   columns: number;
@@ -41,7 +41,9 @@ function scaleBounds(width: number, height: number, translate = [0, 0], scale = 
   return [left, bottom, right, top];
 }
 
-function validateWidthHeight(gridData: (SelectionData | undefined)[]): { width: number; height: number } {
+function validateWidthHeight<T>(
+  gridData: { data: ArrayLike<T>[]; width: number; height: number }[]
+): { width: number; height: number } {
   const first = gridData.find(Boolean);
   // Return early if no grid data. Maybe throw an error?
   if (!first) return { width: 0, height: 0 };
@@ -55,25 +57,31 @@ function validateWidthHeight(gridData: (SelectionData | undefined)[]): { width: 
   return { width, height };
 }
 
-function refreshGridData(
-  props: { loaders: (ZarrLoader | undefined)[]; concurrency?: number } & RasterSelection
-): Promise<(SelectionData | undefined)[]> {
-  const { loaders = [], loaderSelection = [], z = 0 } = props;
+function refreshGridData(props: {
+  loaders: ZarrPixelSource<string[]>[];
+  concurrency?: number;
+  loaderSelection: number[][];
+}) {
+  const { loaders = [], loaderSelection = [] } = props;
   let { concurrency } = props;
   if (concurrency && loaderSelection.length > 0) {
     // There are `loaderSelection.length` requests per loader. This block scales
     // the provided concurrency to map to the number of actual requests.
     concurrency = Math.ceil(concurrency / loaderSelection.length);
   }
-  const mapper = async (loader: ZarrLoader | undefined) => {
-    if (!loader) return; // No data
-    const tile = await loader.getRaster({ loaderSelection, z });
-    return tile;
+  const mapper = async (loader: ZarrPixelSource<string[]>) => {
+    const promises = loaderSelection.map((selection) => loader.getRaster({ selection }));
+    const tiles = await Promise.all(promises);
+    return {
+      data: tiles.map((d) => d.data),
+      width: tiles[0].width,
+      height: tiles[0].height,
+    };
   };
   return pMap(loaders, mapper, { concurrency });
 }
 
-export default class GridLayer<D, P extends GridLayerProps<D> = GridLayerProps<D>> extends CompositeLayer<D, P> {
+export default class GridLayer<P extends GridLayerProps = GridLayerProps> extends CompositeLayer<any, P> {
   initializeState() {
     this.state = { gridData: [], width: 0, height: 0 };
     refreshGridData(this.props).then((gridData) => {
@@ -82,15 +90,7 @@ export default class GridLayer<D, P extends GridLayerProps<D> = GridLayerProps<D
     });
   }
 
-  updateState({
-    props,
-    oldProps,
-    changeFlags,
-  }: {
-    props: GridLayerProps<D>;
-    oldProps: GridLayerProps<D>;
-    changeFlags: any;
-  }) {
+  updateState({ props, oldProps, changeFlags }: { props: GridLayerProps; oldProps: GridLayerProps; changeFlags: any }) {
     const { propsChanged } = changeFlags;
     const loaderChanged = typeof propsChanged === 'string' && propsChanged.includes('props.loaders');
     const loaderSelectionChanged = props.loaderSelection !== oldProps.loaderSelection;
@@ -136,9 +136,9 @@ export default class GridLayer<D, P extends GridLayerProps<D> = GridLayerProps<D
           channelData: gridData[offset] || null, // coerce to null if no data
           bounds: scaleBounds(width, height, [x, y]),
           id: `${id}-GridLayer-${row}-${col}`,
-          dtype: loaders[offset]?.dtype || '<u2', // fallback if missing,
+          dtype: loaders[offset]?.dtype || 'Uint16', // fallback if missing,
         };
-        return new XRLayer({ ...this.props, ...layerProps });
+        return new (XRLayer as any)({ ...this.props, ...layerProps });
       });
     });
 

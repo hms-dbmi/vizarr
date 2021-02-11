@@ -1,12 +1,13 @@
 import { atom, atomFamily, selector, waitForAll } from 'recoil';
 import type { ZarrArray } from 'zarr';
 import type { ImageLayer, MultiscaleImageLayer } from '@hms-dbmi/viv';
-import type { PixelSource, Labels } from '@hms-dbmi/viv/dist/types';
+import type { PixelSource } from '@hms-dbmi/viv/dist/types';
 import type { VivLayerProps } from 'viv-layers';
+import type GridLayer from './gridLayer';
 
 export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
 export const DEFAULT_LAYER_PROPS = {
-  loader: undefined,
+  loader: [],
   colorValues: [],
   sliderValues: [],
   contrastLimits: [],
@@ -16,45 +17,38 @@ export const DEFAULT_LAYER_PROPS = {
   opacity: 1,
 };
 
-export type BaseConfig = {
+interface BaseConfig {
   source: string | ZarrArray['store'];
+  axis_labels?: string[];
   name?: string;
   colormap?: string;
   opacity?: number;
-  axis_labels: string[];
-  translate?: number[];
   acquisition?: string;
   onClick?: (e: any) => void;
-};
+}
 
-export type MultichannelConfig = {
+export interface MultichannelConfig extends BaseConfig {
   colors?: string[];
   channel_axis?: number;
   contrast_limits?: number[][];
   names?: string[];
   visibilities?: boolean[];
-} & BaseConfig;
+}
 
-export type SingleChannelConfig = {
+export interface SingleChannelConfig extends BaseConfig {
   color?: string;
   contrast_limits?: number[];
   visibility?: boolean;
-} & BaseConfig;
+}
 
-export type ImageLayerConfig = BaseConfig | MultichannelConfig | SingleChannelConfig;
+export type ImageLayerConfig = MultichannelConfig | SingleChannelConfig;
 
-export type Acquisition = {
-  id: number;
-  name: string;
-};
-
-export type SourceData<T extends string[]> = {
-  loader: PixelSource<T> | PixelSource<T>[];
-  source?: string | ZarrArray['store'];
-  loaders?: (PixelSource<T> | undefined)[]; // for OME plates
+export type SourceData = {
+  loader: PixelSource<string[]>[];
+  loaders?: PixelSource<string[]>[]; // for OME plates
   rows?: number;
   columns?: number;
-  acquisitions?: Acquisition[];
+  acquisitions?: Ome.Acquisition[];
   acquisitionId?: number;
   name?: string;
   channel_axis: number | null;
@@ -67,17 +61,17 @@ export type SourceData<T extends string[]> = {
     colormap: string;
     opacity: number;
   };
-  axis_labels: Labels<T>;
-  translate: number[];
+  axis_labels: string[];
   onClick?: (e: any) => void;
 };
 
-export type LayerState<S extends string[]> = {
-  Layer: null | ImageLayer | MultiscaleImageLayer;
+export type LayerCtr<T> = new (...args: any[]) => T;
+export type LayerState = {
+  Layer: null | LayerCtr<ImageLayer | MultiscaleImageLayer | GridLayer>;
   layerProps: VivLayerProps & {
+    loader: PixelSource<string[]>[];
     contrastLimits: number[][];
-    source?: string | ZarrArray['store'];
-    loaders?: (PixelSource<S> | undefined)[];
+    loaders?: PixelSource<string[]>[];
     rows?: number;
     columns?: number;
     onClick?: (e: any) => void;
@@ -87,7 +81,7 @@ export type LayerState<S extends string[]> = {
 
 export const sourceInfoState = atom({
   key: 'sourceInfo',
-  default: {} as { [id: string]: SourceData<any> },
+  default: {} as { [id: string]: SourceData },
 });
 
 export const layerIdsState = atom({
@@ -102,7 +96,7 @@ export const viewerViewState = atom({
 
 export const layerStateFamily = atomFamily({
   key: 'layerStateFamily',
-  default: (id: string): LayerState<any> => ({
+  default: (id: string): LayerState => ({
     Layer: null,
     layerProps: { id, ...DEFAULT_LAYER_PROPS },
     on: false,

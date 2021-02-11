@@ -19,10 +19,7 @@ export const CYMRGB = Object.values(COLORS).slice(0, -2);
 function normalizeStore(source: string | ZarrArray['store']) {
   if (typeof source === 'string') {
     const [root, path] = source.split('.zarr');
-    return {
-      store: new HTTPStore(root + '.zarr'),
-      path,
-    };
+    return { store: new HTTPStore(root + '.zarr'), path };
   }
   return { store: source, path: '' };
 }
@@ -72,4 +69,13 @@ export function join(...args: (string | undefined)[]) {
     .filter(Boolean)
     .map((s: any) => rstrip(s as string, '/'))
     .join('/');
+}
+
+export function getAxisLabels(arr: ZarrArray, axis_labels?: string[]): string[] {
+  if (!axis_labels || axis_labels.length != arr.shape.length) {
+    // default axis_labels are e.g. ['0', '1', 'y', 'x']
+    const nonXYaxisLabels = arr.shape.slice(0, -2).map((_, i) => '' + i);
+    axis_labels = nonXYaxisLabels.concat(['y', 'x']);
+  }
+  return axis_labels;
 }

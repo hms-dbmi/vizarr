@@ -39,6 +39,10 @@ declare module Ome {
     maximumfieldcount?: number;
     description?: string;
     starttime?: number;
+    /**
+     * @deprecated
+     */
+    path?: string;
   }
 
   interface Plate {

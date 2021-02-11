@@ -5,17 +5,16 @@ import { OrthographicView } from '@deck.gl/core';
 import type { Layer } from '@deck.gl/core';
 
 import { viewerViewState, layersSelector } from '../state';
-import type { VivLayerProps, ZarrLoader } from '@hms-dbmi/viv';
 
-function WrappedViewStateDeck({ layers }: { layers: Layer<VivLayerProps>[] }): JSX.Element {
+function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }): JSX.Element {
   const [viewState, setViewState] = useRecoilState(viewerViewState);
 
   // If viewState hasn't been updated, use the first loader to guess viewState
   // TODO: There is probably a better place / way to set the intital view and this is a hack.
-  if (viewState?.default && (layers[0]?.props as VivLayerProps)?.loader?.base) {
-    const loader = (layers[0].props as VivLayerProps).loader as ZarrLoader;
-    const [height, width] = loader.base.shape.slice(-2);
-    const zoom = -loader.numLevels;
+  if (viewState?.default && layers[0]?.props?.loader?.[0]) {
+    const loader = layers[0].props.loader;
+    const [height, width] = loader[0].shape.slice(-2);
+    const zoom = -loader.length;
     const target = [width / 2, height / 2, 0];
     setViewState({ zoom, target });
   }

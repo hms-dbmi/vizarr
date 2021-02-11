@@ -10,8 +10,4 @@ declare module 'viv-layers' {
     channelIsOn: boolean[];
     colormap: null | string;
   };
-
-  export class ImageLayer extends Layer<any, { loader: PixelSource } & VivLayerProps> {}
-  export class MultiscaleImageLayer extends Layer<any, { loader: PixelSource[] } & VivLayerProps>{}
-  export class XRLayer<D, P extends VivLayerProps<D>> extends Layer<D, P> {}
 }

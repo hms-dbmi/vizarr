@@ -2,13 +2,12 @@ import React from 'react';
 import { Grid, NativeSelect } from '@material-ui/core';
 import { useRecoilValue } from 'recoil';
 import type { ChangeEvent } from 'react';
-import type { Acquisition } from '../../state';
 
 import { sourceInfoState } from '../../state';
 
 function AcquisitionController({ layerId }: { layerId: string }): JSX.Element | null {
   const sourceInfo = useRecoilValue(sourceInfoState);
-  const { acquisitionId, acquisitions, source } = sourceInfo[layerId];
+  const { acquisitionId, acquisitions } = sourceInfo[layerId];
 
   if (!acquisitions) {
     return null;
@@ -17,7 +16,8 @@ function AcquisitionController({ layerId }: { layerId: string }): JSX.Element | 
   const handleSelectionChange = (event: ChangeEvent<HTMLSelectElement>) => {
     let value = event.target.value;
     let acquisition = value === '-1' ? '' : `&acquisition=${value}`;
-    window.location.href = window.location.origin + window.location.pathname + `?source=${source}${acquisition}`;
+    // TODO: Isolate in callback
+    // window.location.href = window.location.origin + window.location.pathname + `?source=${source}${acquisition}`;
   };
 
   return (
@@ -28,7 +28,7 @@ function AcquisitionController({ layerId }: { layerId: string }): JSX.Element | 
             Filter by Acquisition
           </option>
           {acquisitions.map((acq) => {
-            acq = acq as Acquisition;
+            acq = acq as Ome.Acquisition;
             return (
               <option value={acq.id} key={acq.id}>
                 Acquisition: {acq.name}

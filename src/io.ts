@@ -1,26 +1,34 @@
-import { ZarrArray, Group as ZarrGroup, openGroup } from 'zarr';
-import { ImageLayer, MultiscaleImageLayer, DTYPE_VALUES } from '@hms-dbmi/viv';
-
-import { loadOME, loadOMEPlate, loadOMEWell } from './ome';
-import type { SourceData, ImageLayerConfig, LayerState, SingleChannelConfig, MultichannelConfig } from './state';
-
-import { MAX_CHANNELS, COLORS, MAGENTA_GREEN, RGB, CYMRGB, hexToRGB, range, open, loadMultiscales } from './utils';
+import { DTYPE_VALUES, ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
+import type { PixelSource } from '@hms-dbmi/viv/dist/types';
+import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
 import GridLayer from './gridLayer';
+import { loadOmeroMultiscales, loadPlate, loadWell } from './ome';
+import type {
+  ImageLayerConfig,
+  LayerState,
+  MultichannelConfig,
+  SingleChannelConfig,
+  SourceData,
+  LayerCtr,
+} from './state';
+import { COLORS, CYMRGB, hexToRGB, loadMultiscales, MAGENTA_GREEN, MAX_CHANNELS, open, range, RGB } from './utils';
 
-function getAxisLabels(config: SingleChannelConfig | MultichannelConfig, loader: ZarrLoader): string[] {
-  let { axis_labels } = config;
-  if (!axis_labels || axis_labels.length != loader.base.shape.length) {
+function getAxisLabels(arr: ZarrArray, axis_labels?: string[], channel_axis?: number): string[] {
+  if (!axis_labels || axis_labels.length != arr.shape.length) {
     // default axis_labels are e.g. ['0', '1', 'y', 'x']
-    const nonXYaxisLabels = loader.base.shape.slice(0, -2).map((d, i) => '' + i);
+    const nonXYaxisLabels = arr.shape.slice(0, -2).map((d, i) => '' + i);
     axis_labels = nonXYaxisLabels.concat(['y', 'x']);
+  }
+  if (channel_axis) {
+    axis_labels[channel_axis] = 'c';
   }
   return axis_labels;
 }
 
-function loadSingleChannel(config: SingleChannelConfig, loader: ZarrLoader, max: number): SourceData {
-  const { color, contrast_limits, visibility, name, colormap = '', opacity = 1, translate } = config;
+function loadSingleChannel(config: SingleChannelConfig, data: PixelSource<string[]>[], max: number): SourceData {
+  const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
   return {
-    loader,
+    loader: data,
     name,
     channel_axis: null,
     colors: [color ?? COLORS.white],
@@ -28,21 +36,19 @@ function loadSingleChannel(config: SingleChannelConfig, loader: ZarrLoader, max:
     contrast_limits: [contrast_limits ?? [0, max]],
     visibilities: [visibility ?? true],
     defaults: {
-      selection: Array(loader.base.shape.length).fill(0),
+      selection: Array(data[0].shape.length).fill(0),
       colormap,
       opacity,
     },
-    axis_labels: getAxisLabels(config, loader),
-    translate: translate ?? [0, 0],
+    axis_labels: data[0].labels,
   };
 }
 
-function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: number): SourceData {
-  const { names, channel_axis, name, opacity = 1, colormap = '', translate } = config;
+function loadMultiChannel(config: MultichannelConfig, data: PixelSource<string[]>[], max: number): SourceData {
+  const { names, channel_axis, name, opacity = 1, colormap = '' } = config;
   let { contrast_limits, visibilities, colors } = config;
-  const { base } = loader;
 
-  const n = base.shape[channel_axis as number];
+  const n = data[0].shape[channel_axis as number];
   for (const channelProp of [contrast_limits, visibilities, names, colors]) {
     if (channelProp && channelProp.length !== n) {
       const propertyName = Object.keys({ channelProp })[0];
@@ -80,10 +86,8 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
       }
     }
   }
-  let axis_labels = getAxisLabels(config, loader);
-  axis_labels[channel_axis as number] = 'c';
   return {
-    loader,
+    loader: data,
     name,
     channel_axis: channel_axis as number,
     colors,
@@ -91,12 +95,11 @@ function loadMultiChannel(config: MultichannelConfig, loader: ZarrLoader, max: n
     contrast_limits: contrast_limits ?? Array(n).fill([0, max]),
     visibilities,
     defaults: {
-      selection: Array(loader.base.shape.length).fill(0),
+      selection: Array(data[0].shape.length).fill(0),
       colormap,
       opacity,
     },
-    axis_labels: axis_labels,
-    translate: translate ?? [0, 0],
+    axis_labels: data[0].labels,
   };
 }
 
@@ -108,15 +111,15 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
     const attrs = (await node.attrs.asObject()) as Ome.Attrs;
 
     if ('plate' in attrs) {
-      return loadPlate(config, node, attrs);
+      return loadPlate(config, node, attrs.plate);
     }
 
     if ('well' in attrs) {
-      return loadWell(config, node, attrs);
+      return loadWell(config, node, attrs.well);
     }
 
     if ('omero' in attrs) {
-      return loadOmero(config, node, attrs);
+      return loadOmeroMultiscales(config, node, attrs);
     }
 
     if (Object.keys(attrs).length === 0 && node.path !== '') {
@@ -126,7 +129,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
       const parent = await openGroup(node.store, parentPath);
       const parentAttrs = (await parent.attrs.asObject()) as Ome.Attrs;
       if ('plate' in parentAttrs) {
-        return loadPlate(config, parent, parentAttrs);
+        return loadPlate(config, parent, parentAttrs.plate);
       }
     }
 
@@ -138,24 +141,27 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   } else {
     data = [node];
   }
-  const labels = getAxisLabels(config, data);
 
-  if (!(dtype in DTYPE_VALUES)) {
+  const labels = getAxisLabels(data[0], config.axis_labels);
+  const loader = data.map((d) => new ZarrPixelSource.default(d, labels));
+  const [base] = loader;
+
+  if (!(base.dtype in DTYPE_VALUES)) {
     throw Error('Dtype not supported, must be u1, u2, u4, or f4');
   }
 
   // If contrast_limits not provided or are missing from omero metadata.
-  const max = dtype === '<f4' ? 1 : DTYPE_VALUES[dtype].max;
+  const max = base.dtype === 'Float32' ? 1 : DTYPE_VALUES[base.dtype].max;
   // Now that we have data, try to figure out how to render initially.
 
-  const nDims = base.shape.length;
-  if (nDims === 2 || config.channel_axis === undefined) {
-    return loadSingleChannel(config as SingleChannelConfig, loader, max);
+  // If explicit channel axis is provided, try to load as multichannel.
+  if ('channel_axis' in config) {
+    return loadMultiChannel(config, loader, max);
   }
 
-  // If explicit channel axis is provided, try to load as multichannel.
-  if (Number.isInteger(config.channel_axis)) {
-    return loadMultiChannel(config as MultichannelConfig, loader, max);
+  const nDims = base.shape.length;
+  if (nDims === 2 || !('channel_axis' in config)) {
+    return loadSingleChannel(config as SingleChannelConfig, loader, max);
   }
 
   throw Error('Failed to load image.');
@@ -164,7 +170,6 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 export function initLayerStateFromSource(sourceData: SourceData, layerId: string): LayerState {
   const {
     loader,
-    source,
     channel_axis,
     colors,
     visibilities,
@@ -220,6 +225,6 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
   };
 }
 
-function getLayer(sourceData: SourceData): ImageLayer | MultiscaleImageLayer {
-  return sourceData.loaders ? GridLayer : sourceData.loader.numLevels > 1 ? MultiscaleImageLayer : ImageLayer;
+function getLayer(sourceData: SourceData): LayerCtr<ImageLayer | MultiscaleImageLayer | GridLayer> {
+  return sourceData.loaders ? GridLayer : sourceData.loader.length > 1 ? MultiscaleImageLayer : ImageLayer;
 }
