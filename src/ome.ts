@@ -51,7 +51,7 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   const meta = parseOmeroMeta(imgAttrs.omero);
 
   const loaders = (await Promise.all(promises)).map(
-    (d) => new ZarrPixelSource.default(d as ZarrArray, meta.axis_labels)
+    (d) => new ZarrPixelSource(d as ZarrArray, meta.axis_labels)
   );
   const [loader] = loaders;
 
@@ -111,14 +111,19 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   let columnNames: string[] = plateAttrs.columns.map((col) => col.name);
 
   // Fields are by index and we assume at least 1 per Well
-  const imgPaths = plateAttrs.wells.map((well) => well.path);
+  const wellPaths = plateAttrs.wells.map((well) => well.path);
 
   // Use first image as proxy for others.
-  const imgAttrs = (await grp.getItem(imgPaths[0]).then((g) => g.attrs.asObject())) as Ome.Attrs;
-  if (!('omero' in imgAttrs)) {
-    throw Error('Path for image is not valid.');
+  const wellAttrs = (await grp.getItem(wellPaths[0]).then((g) => g.attrs.asObject())) as Ome.Attrs;
+  if (!('well' in wellAttrs)) {
+    throw Error('Path for image is not valid, not a well.');
   }
 
+  const imgPath = wellAttrs.well.images[0].path;
+  const imgAttrs = await grp.getItem(join(wellPaths[0], imgPath)).then(g => g.attrs.asObject()) as Ome.Attrs;
+  if (!('omero' in imgAttrs)) {
+    throw Error("Path for image is not valid.");
+  }
   // Lowest resolution is the 'path' of the last 'dataset' from the first multiscales
   const { datasets } = imgAttrs.multiscales[0];
   const resolution = datasets[datasets.length - 1].path;
@@ -126,12 +131,12 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   // Create loader for every Well. Some loaders may be undefined if Wells are missing.
   const mapper = (path: string) => grp.getItem(path) as Promise<ZarrArray>;
   const promises = await pMap(
-    imgPaths.map((p) => join(p, resolution)),
+    wellPaths.map((p) => join(p, imgPath, resolution)),
     mapper,
     { concurrency: 10 }
   );
   const meta = parseOmeroMeta(imgAttrs.omero);
-  const loaders = (await Promise.all(promises)).map((d) => new ZarrPixelSource.default(d, meta.axis_labels));
+  const loaders = (await Promise.all(promises)).map((d) => new ZarrPixelSource(d, meta.axis_labels));
   const [loader] = loaders;
 
   // Load Image to use for channel names, rendering settings, sizeZ, sizeT etc.
@@ -179,7 +184,7 @@ export async function loadOmeroMultiscales(
   const { name, opacity = 1, colormap = '' } = config;
   const data = await loadMultiscales(grp, attrs.multiscales);
   const meta = parseOmeroMeta(attrs.omero);
-  const loader = data.map((arr) => new ZarrPixelSource.default(arr, meta.axis_labels));
+  const loader = data.map((arr) => new ZarrPixelSource(arr, meta.axis_labels));
   return {
     loader: trimPyramid(loader),
     name: meta.name ?? name,

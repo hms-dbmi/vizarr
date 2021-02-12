@@ -11,10 +11,11 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }): JSX.El
 
   // If viewState hasn't been updated, use the first loader to guess viewState
   // TODO: There is probably a better place / way to set the intital view and this is a hack.
-  if (viewState?.default && layers[0]?.props?.loader?.[0]) {
-    const loader = layers[0].props.loader;
-    const [height, width] = loader[0].shape.slice(-2);
-    const zoom = -loader.length;
+  if (viewState?.default && layers[0]?.props?.loader) {
+    const { loader } = layers[0].props;
+    const base = Array.isArray(loader) ? loader[0] : loader;
+    const [height, width] = base.shape.slice(-2);
+    const zoom = -(loader?.length ?? 1);
     const target = [width / 2, height / 2, 0];
     setViewState({ zoom, target });
   }

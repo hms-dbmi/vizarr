@@ -144,7 +144,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   }
 
   const labels = getAxisLabels(data[0], config.axis_labels);
-  const loader = trimPyramid(data.map((d) => new ZarrPixelSource.default(d, labels)));
+  const loader = trimPyramid(data.map((d) => new ZarrPixelSource(d, labels)));
   const [base] = loader;
 
   if (!(base.dtype in DTYPE_VALUES)) {
