@@ -86,9 +86,13 @@ export function getAxisLabels(arr: ZarrArray, axis_labels?: string[]): string[] 
  * Downsampled resolutions in zarr-based image pyramids might have different
  * chunk sizes which aren't supported by our image layers.
  *
- * This function trims the pyramid to just levels with the same tilesize.
+ * This function trims the pyramid to just levels with the same tilesize. It allows
+ * for the lowest resolution to no have the same tile size (since this level is rendered
+ * with the Viv ImageLayer).
  *
  */
 export function trimPyramid<S extends string[]>(pyramid: PixelSource<S>[]) {
-  return pyramid.filter(level => pyramid[0].tileSize === level.tileSize);
+  let index = pyramid.findIndex(level => pyramid[0].tileSize !== level.tileSize);
+  index = index === -1 ? pyramid.length : index + 1;
+  return pyramid.filter((_, i) => i < index);
 }
