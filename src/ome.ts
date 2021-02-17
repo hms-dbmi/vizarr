@@ -50,9 +50,7 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   const promises = imgPaths.map((p) => grp.getItem(join(p, resolution)));
   const meta = parseOmeroMeta(imgAttrs.omero);
 
-  const loaders = (await Promise.all(promises)).map(
-    (d) => new ZarrPixelSource(d as ZarrArray, meta.axis_labels)
-  );
+  const loaders = (await Promise.all(promises)).map((d) => new ZarrPixelSource(d as ZarrArray, meta.axis_labels));
   const [loader] = loaders;
 
   const sourceData: SourceData = {
@@ -120,9 +118,9 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   }
 
   const imgPath = wellAttrs.well.images[0].path;
-  const imgAttrs = await grp.getItem(join(wellPaths[0], imgPath)).then(g => g.attrs.asObject()) as Ome.Attrs;
+  const imgAttrs = (await grp.getItem(join(wellPaths[0], imgPath)).then((g) => g.attrs.asObject())) as Ome.Attrs;
   if (!('omero' in imgAttrs)) {
-    throw Error("Path for image is not valid.");
+    throw Error('Path for image is not valid.');
   }
   // Lowest resolution is the 'path' of the last 'dataset' from the first multiscales
   const { datasets } = imgAttrs.multiscales[0];

@@ -11,8 +11,18 @@ import type {
   SourceData,
   LayerCtr,
 } from './state';
-import { COLORS, CYMRGB, hexToRGB, loadMultiscales, MAGENTA_GREEN, MAX_CHANNELS, open, range, RGB, trimPyramid } from './utils';
-
+import {
+  COLORS,
+  CYMRGB,
+  hexToRGB,
+  loadMultiscales,
+  MAGENTA_GREEN,
+  MAX_CHANNELS,
+  open,
+  range,
+  RGB,
+  trimPyramid,
+} from './utils';
 
 function getAxisLabels(arr: ZarrArray, axis_labels?: string[], channel_axis?: number): string[] {
   if (!axis_labels || axis_labels.length != arr.shape.length) {

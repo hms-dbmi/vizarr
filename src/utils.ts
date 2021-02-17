@@ -1,6 +1,6 @@
 import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray } from 'zarr';
 import type { Group as ZarrGroup } from 'zarr';
-import type {PixelSource} from '@hms-dbmi/viv/dist/types';
+import type { PixelSource } from '@hms-dbmi/viv/dist/types';
 
 export const MAX_CHANNELS = 6;
 
@@ -81,7 +81,6 @@ export function getAxisLabels(arr: ZarrArray, axis_labels?: string[]): string[] 
   return axis_labels;
 }
 
-
 /*
  * Downsampled resolutions in zarr-based image pyramids might have different
  * chunk sizes which aren't supported by our image layers.
@@ -92,7 +91,7 @@ export function getAxisLabels(arr: ZarrArray, axis_labels?: string[]): string[] 
  *
  */
 export function trimPyramid<S extends string[]>(pyramid: PixelSource<S>[]) {
-  let index = pyramid.findIndex(level => pyramid[0].tileSize !== level.tileSize);
+  let index = pyramid.findIndex((level) => pyramid[0].tileSize !== level.tileSize);
   index = index === -1 ? pyramid.length : index + 1;
   return pyramid.filter((_, i) => i < index);
 }
