@@ -160,8 +160,8 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
     const { row, column } = gridCoord;
     let imgSource = undefined;
     // TODO: use a regex for the path??
-    if (grp.store instanceof HTTPStore && grp.path !== '' && !isNaN(row) && !isNaN(column)) {
-      imgSource = join(grp.store.url, rowNames[row], columnNames[column]);
+    if (grp.store instanceof HTTPStore && !isNaN(row) && !isNaN(column)) {
+      imgSource = join(grp.store.url, grp.path, rowNames[row], columnNames[column]);
     }
     if (config.onClick) {
       delete info.layer;
