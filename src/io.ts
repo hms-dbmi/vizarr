@@ -158,7 +158,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   const [base] = loader;
 
   if (!(base.dtype in DTYPE_VALUES)) {
-    throw Error('Dtype not supported, must be u1, u2, u4, or f4');
+    throw Error(`Dtype not supported, must be ${JSON.stringify(Object.keys(DTYPE_VALUES))}`);
   }
 
   // If contrast_limits not provided or are missing from omero metadata.
