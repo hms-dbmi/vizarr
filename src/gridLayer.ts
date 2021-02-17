@@ -137,6 +137,7 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
           bounds: scaleBounds(width, height, [x, y]),
           id: `${id}-GridLayer-${row}-${col}`,
           dtype: loaders[offset]?.dtype || 'Uint16', // fallback if missing,
+          pickable: false,
         };
         return new (XRLayer as any)({ ...this.props, ...layerProps });
       });
