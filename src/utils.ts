@@ -93,5 +93,6 @@ export function getAxisLabels(arr: ZarrArray, axis_labels?: string[]): string[] 
 export function trimPyramid<S extends string[]>(pyramid: PixelSource<S>[]) {
   let index = pyramid.findIndex((level) => pyramid[0].tileSize !== level.tileSize);
   index = index === -1 ? pyramid.length : index + 1;
-  return pyramid.filter((_, i) => i < index);
+  // return pyramid.filter((_, i) => i < index);
+  return pyramid;
 }
