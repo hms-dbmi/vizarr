@@ -1,6 +1,5 @@
 import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray } from 'zarr';
 import type { Group as ZarrGroup } from 'zarr';
-import type { PixelSource } from '@hms-dbmi/viv/dist/types';
 
 export const MAX_CHANNELS = 6;
 
@@ -29,7 +28,7 @@ export async function open(source: string | ZarrArray['store']) {
   const { store, path } = normalizeStore(source);
   return openGroup(store, path).catch((err) => {
     if (err instanceof ContainsArrayError) {
-      return openArray({ store: store as ZarrArray['store'], path });
+      return openArray({ store, path });
     }
     throw err;
   });
@@ -81,18 +80,16 @@ export function getAxisLabels(arr: ZarrArray, axis_labels?: string[]): string[] 
   return axis_labels;
 }
 
-/*
- * Downsampled resolutions in zarr-based image pyramids might have different
- * chunk sizes which aren't supported by our image layers.
- *
- * This function trims the pyramid to just levels with the same tilesize. It allows
- * for the lowest resolution to no have the same tile size (since this level is rendered
- * with the Viv ImageLayer).
- *
- */
-export function trimPyramid<S extends string[]>(pyramid: PixelSource<S>[]) {
-  let index = pyramid.findIndex((level) => pyramid[0].tileSize !== level.tileSize);
-  index = index === -1 ? pyramid.length : index + 1;
-  // return pyramid.filter((_, i) => i < index);
-  return pyramid;
+function isInterleaved(shape: number[]) {
+  const lastDimSize = shape[shape.length - 1];
+  return lastDimSize === 3 || lastDimSize === 4;
+}
+
+export function guessTileSize(arr: ZarrArray) {
+  const interleaved = isInterleaved(arr.shape);
+  const [ySize, xSize] = arr.chunks.slice(interleaved ? -3 : -2);
+  const size = Math.min(ySize, xSize);
+  // Needs to be a power of 2
+  // return 2 ** Math.floor(Math.log2(size));
+  return size;
 }

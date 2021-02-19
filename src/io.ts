@@ -14,6 +14,7 @@ import type {
 import {
   COLORS,
   CYMRGB,
+  guessTileSize,
   hexToRGB,
   loadMultiscales,
   MAGENTA_GREEN,
@@ -21,7 +22,6 @@ import {
   open,
   range,
   RGB,
-  trimPyramid,
 } from './utils';
 
 function getAxisLabels(arr: ZarrArray, axis_labels?: string[], channel_axis?: number): string[] {
@@ -154,7 +154,8 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   }
 
   const labels = getAxisLabels(data[0], config.axis_labels);
-  const loader = trimPyramid(data.map((d) => new ZarrPixelSource(d, labels)));
+  const tileSize = guessTileSize(data[0]);
+  const loader = data.map((d) => new ZarrPixelSource(d, labels, tileSize));
   const [base] = loader;
 
   if (!(base.dtype in DTYPE_VALUES)) {

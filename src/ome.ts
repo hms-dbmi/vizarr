@@ -2,7 +2,7 @@ import { ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
 import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
-import { join, loadMultiscales, trimPyramid } from './utils';
+import { join, loadMultiscales, guessTileSize } from './utils';
 
 export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAttrs: Ome.Well): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
@@ -49,8 +49,9 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   // Create loader for every Image.
   const promises = imgPaths.map((p) => grp.getItem(join(p, resolution)));
   const meta = parseOmeroMeta(imgAttrs.omero);
-
-  const loaders = (await Promise.all(promises)).map((d) => new ZarrPixelSource(d as ZarrArray, meta.axis_labels));
+  const data = (await Promise.all(promises)) as ZarrArray[];
+  const tileSize = guessTileSize(data[0]);
+  const loaders = data.map((d) => new ZarrPixelSource(d, meta.axis_labels, tileSize));
   const [loader] = loaders;
 
   const sourceData: SourceData = {
@@ -134,7 +135,9 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
     { concurrency: 10 }
   );
   const meta = parseOmeroMeta(imgAttrs.omero);
-  const loaders = (await Promise.all(promises)).map((d) => new ZarrPixelSource(d, meta.axis_labels));
+  const data = await Promise.all(promises);
+  const tileSize = guessTileSize(data[0]);
+  const loaders = data.map((d) => new ZarrPixelSource(d, meta.axis_labels, tileSize));
   const [loader] = loaders;
 
   // Load Image to use for channel names, rendering settings, sizeZ, sizeT etc.
@@ -182,9 +185,14 @@ export async function loadOmeroMultiscales(
   const { name, opacity = 1, colormap = '' } = config;
   const data = await loadMultiscales(grp, attrs.multiscales);
   const meta = parseOmeroMeta(attrs.omero);
-  const loader = data.map((arr) => new ZarrPixelSource(arr, meta.axis_labels));
+  const tileSize = guessTileSize(data[0]);
+  console.log(`tileSize=${tileSize}`)
+  data.forEach((level, i) => {
+    console.log(`level=${i} chunks=${JSON.stringify(level.chunks)} shape=${JSON.stringify(level.shape)}`)
+  })
+  const loader = data.map((arr) => new ZarrPixelSource(arr, meta.axis_labels, tileSize));
   return {
-    loader: trimPyramid(loader),
+    loader: loader,
     name: meta.name ?? name,
     defaults: {
       selection: meta.defaultSelection,
