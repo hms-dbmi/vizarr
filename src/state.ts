@@ -15,6 +15,7 @@ export const DEFAULT_LAYER_PROPS = {
   channelIsOn: [],
   colormap: '',
   opacity: 1,
+  excludeBackground: true,
 };
 
 interface BaseConfig {

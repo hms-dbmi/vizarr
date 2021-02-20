@@ -186,10 +186,6 @@ export async function loadOmeroMultiscales(
   const data = await loadMultiscales(grp, attrs.multiscales);
   const meta = parseOmeroMeta(attrs.omero);
   const tileSize = guessTileSize(data[0]);
-  console.log(`tileSize=${tileSize}`)
-  data.forEach((level, i) => {
-    console.log(`level=${i} chunks=${JSON.stringify(level.chunks)} shape=${JSON.stringify(level.shape)}`)
-  })
   const loader = data.map((arr) => new ZarrPixelSource(arr, meta.axis_labels, tileSize));
   return {
     loader: loader,
