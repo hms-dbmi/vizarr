@@ -158,10 +158,6 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   const loader = data.map((d) => new ZarrPixelSource(d, labels, tileSize));
   const [base] = loader;
 
-  if (!(base.dtype in DTYPE_VALUES)) {
-    throw Error(`Dtype not supported, must be ${JSON.stringify(Object.keys(DTYPE_VALUES))}`);
-  }
-
   // If contrast_limits not provided or are missing from omero metadata.
   const max = base.dtype === 'Float32' ? 1 : DTYPE_VALUES[base.dtype].max;
   // Now that we have data, try to figure out how to render initially.
@@ -216,6 +212,11 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
   }
   // set initial slider values to contrast_limits
   const sliderValues = [...contrastLimits];
+
+  if (!(loader[0].dtype in DTYPE_VALUES)) {
+    throw Error(`Dtype not supported, must be ${JSON.stringify(Object.keys(DTYPE_VALUES))}`);
+  }
+
   return {
     Layer,
     layerProps: {
