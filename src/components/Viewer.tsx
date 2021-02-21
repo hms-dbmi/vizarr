@@ -31,9 +31,9 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }): JSX.El
   // TODO: There is probably a better place / way to set the intital view and this is a hack.
   if (deckRef.current && viewState?.default && layers[0]?.props?.loader) {
     const { deck } = deckRef.current;
-    console.log(layers[0]);
     const { width, height, maxZoom } = getLayerSize(layers[0].props);
-    const { zoom, target } = fitBounds([width, height], [deck.width, deck.height], maxZoom);
+    const padding = deck.width < 400 ? 10 : 50; // Use little padding if small screen.
+    const { zoom, target } = fitBounds([width, height], [deck.width, deck.height], maxZoom, padding);
     setViewState({ zoom, target });
   }
 

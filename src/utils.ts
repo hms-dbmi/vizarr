@@ -80,7 +80,7 @@ export function getAxisLabels(arr: ZarrArray, axis_labels?: string[]): string[] 
   return axis_labels;
 }
 
-function isInterleaved(shape: number[]) {
+export function isInterleaved(shape: number[]) {
   const lastDimSize = shape[shape.length - 1];
   return lastDimSize === 3 || lastDimSize === 4;
 }
@@ -91,4 +91,17 @@ export function guessTileSize(arr: ZarrArray) {
   const size = Math.min(ySize, xSize);
   // Needs to be a power of 2 for deck.gl
   return 2 ** Math.floor(Math.log2(size));
+}
+
+// Scales the real image size to the target viewport.
+export function fitBounds(
+  [width, height]: [width: number, height: number],
+  [targetWidth, targetHeight]: [targetWidth: number, targetHeight: number],
+  maxZoom: number,
+  padding: number,
+) {
+  const scaleX = (targetWidth - padding * 2) / width;
+  const scaleY = (targetHeight - padding * 2) / height;
+  const zoom = Math.min(maxZoom, Math.log2(Math.min(scaleX, scaleY)));
+  return { zoom, target: [width / 2, height / 2, 0] };
 }

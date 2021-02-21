@@ -107,15 +107,11 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
     if (!info.coordinate) {
       return info;
     }
-    const { rows, columns } = this.props;
     const spacer = this.props.spacer || 0;
     const { width, height } = this.state;
-    const gridWidth = columns * width + (columns - 1) * spacer;
-    const gridHeight = rows * height + (rows - 1) * spacer;
-    const gridX = info.coordinate[0] + gridWidth / 2;
-    const gridY = info.coordinate[1] + gridHeight / 2;
-    const row = Math.floor(gridY / (height + spacer));
-    const column = Math.floor(gridX / (width + spacer));
+    const [x, y] = info.coordinate;
+    const row = Math.floor(y / (height + spacer));
+    const column = Math.floor(x / (width + spacer));
     info.gridCoord = { row, column }; // add custom property
     return info;
   }
@@ -125,12 +121,10 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
     if (width === 0 || height === 0) return null; // early return if no data
 
     const { loaders, rows, columns, spacer, id = '' } = this.props;
-    const top = -(rows * (height + spacer)) / 2;
-    const left = -(columns * (width + spacer)) / 2;
     const gridLayers = range(rows).flatMap((row) => {
       return range(columns).map((col) => {
-        const y = top + row * (height + spacer);
-        const x = left + col * (width + spacer);
+        const y = row * (height + spacer);
+        const x = col * (width + spacer);
         const offset = col + row * columns;
         const layerProps = {
           channelData: gridData[offset] || null, // coerce to null if no data
@@ -144,8 +138,9 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
     });
 
     if (this.props.pickable) {
-      const bottom = top + rows * (height + spacer);
-      const right = left + columns * (width + spacer);
+      const [top, left] = [0, 0];
+      const bottom = rows * (height + spacer);
+      const right = columns * (width + spacer);
       const polygon = [
         [left, top],
         [right, top],
