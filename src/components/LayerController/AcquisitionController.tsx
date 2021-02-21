@@ -15,9 +15,13 @@ function AcquisitionController({ layerId }: { layerId: string }): JSX.Element | 
 
   const handleSelectionChange = (event: ChangeEvent<HTMLSelectElement>) => {
     let value = event.target.value;
-    let acquisition = value === '-1' ? '' : `&acquisition=${value}`;
-    // TODO: Isolate in callback
-    // window.location.href = window.location.origin + window.location.pathname + `?source=${source}${acquisition}`;
+    const url = new URL(window.location.href);
+    if (value === '-1') {
+      url.searchParams.delete('acquisition');
+    } else {
+      url.searchParams.set('acquisition', value);
+    }
+    window.location.href = decodeURIComponent(url.href);
   };
 
   return (
