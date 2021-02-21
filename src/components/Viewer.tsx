@@ -32,7 +32,7 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }): JSX.El
   if (deckRef.current && viewState?.default && layers[0]?.props?.loader) {
     const { deck } = deckRef.current;
     const { width, height, maxZoom } = getLayerSize(layers[0].props);
-    const padding = deck.width < 400 ? 10 : 50; // Use little padding if small screen.
+    const padding = deck.width < 400 ? 10 : deck.width < 600 ? 30 : 50; // Use little padding if small screen.
     const { zoom, target } = fitBounds([width, height], [deck.width, deck.height], maxZoom, padding);
     setViewState({ zoom, target });
   }
