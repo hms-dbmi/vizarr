@@ -2,7 +2,7 @@ import { ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
 import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
-import { join, loadMultiscales, guessTileSize } from './utils';
+import { join, loadMultiscales, guessTileSize, range } from './utils';
 
 export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAttrs: Ome.Well): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
@@ -38,6 +38,8 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   }
 
   const imgPaths = images.map((img) => img.path);
+  const cols = Math.ceil(Math.sqrt(imgPaths.length));
+  const rows = Math.ceil(imgPaths.length / cols);
 
   // Use first image for rendering settings, resolutions etc.
   const imgAttrs = (await grp.getItem(imgPaths[0]).then((g) => g.attrs.asObject())) as Ome.Attrs;
@@ -51,13 +53,17 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   const meta = parseOmeroMeta(imgAttrs.omero);
   const data = (await Promise.all(promises)) as ZarrArray[];
   const tileSize = guessTileSize(data[0]);
-  const loaders = data.map((d) => new ZarrPixelSource(d, meta.axis_labels, tileSize));
-  const [loader] = loaders;
+  const loaders = range(rows).flatMap((row) => {
+    return range(cols).map((col) => {
+      const offset = col + row * cols;
+      return { name: String(offset), row, col, loader: new ZarrPixelSource(data[offset], meta.axis_labels, tileSize) };
+    });
+  });
 
   const sourceData: SourceData = {
     loaders,
     ...meta,
-    loader: [loader],
+    loader: [loaders[0].loader],
     defaults: {
       selection: meta.defaultSelection,
       colormap: config.colormap ?? '',
@@ -65,8 +71,6 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
     },
     name: `Well ${row}${col}`,
   };
-  const cols = Math.ceil(Math.sqrt(imgPaths.length));
-  const rows = Math.ceil(imgPaths.length / cols);
 
   if (acquisitions.length > 0) {
     // To show acquisition chooser in UI
@@ -74,8 +78,8 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
     sourceData.acquisitionId = acquisitionId || -1;
   }
 
-  sourceData.columns = cols;
   sourceData.rows = rows;
+  sourceData.columns = cols;
   sourceData.onClick = (info: any) => {
     let gridCoord = info.gridCoord;
     if (!gridCoord) {
@@ -104,10 +108,8 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
     throw Error(`Plate .zattrs missing columns or rows`);
   }
 
-  let rows: number = plateAttrs.rows.length;
-  let columns: number = plateAttrs.columns.length;
-  let rowNames: string[] = plateAttrs.rows.map((row) => row.name);
-  let columnNames: string[] = plateAttrs.columns.map((col) => col.name);
+  const rows = plateAttrs.rows.map((row) => row.name);
+  const columns = plateAttrs.columns.map((row) => row.name);
 
   // Fields are by index and we assume at least 1 per Well
   const wellPaths = plateAttrs.wells.map((well) => well.path);
@@ -128,31 +130,38 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   const resolution = datasets[datasets.length - 1].path;
 
   // Create loader for every Well. Some loaders may be undefined if Wells are missing.
-  const mapper = (path: string) => grp.getItem(path) as Promise<ZarrArray>;
+  const mapper = ([key, path]: string[]) => grp.getItem(path).then((arr) => [key, arr]) as Promise<[string, ZarrArray]>;
   const promises = await pMap(
-    wellPaths.map((p) => join(p, imgPath, resolution)),
+    wellPaths.map((p) => [p, join(p, imgPath, resolution)]),
     mapper,
     { concurrency: 10 }
   );
   const meta = parseOmeroMeta(imgAttrs.omero);
   const data = await Promise.all(promises);
-  const tileSize = guessTileSize(data[0]);
-  const loaders = data.map((d) => new ZarrPixelSource(d, meta.axis_labels, tileSize));
-  const [loader] = loaders;
+  const tileSize = guessTileSize(data[0][1]);
+  const loaders = data.map((d) => {
+    const [row, col] = d[0].split('/');
+    return {
+      name: `${row}${col}`,
+      row: rows.indexOf(row),
+      col: columns.indexOf(col),
+      loader: new ZarrPixelSource(d[1], meta.axis_labels, tileSize),
+    };
+  });
 
   // Load Image to use for channel names, rendering settings, sizeZ, sizeT etc.
   const sourceData: SourceData = {
     loaders,
     ...meta,
-    loader: [loader],
+    loader: [loaders[0].loader],
     defaults: {
       selection: meta.defaultSelection,
       colormap: config.colormap ?? '',
       opacity: config.opacity ?? 1,
     },
     name: plateAttrs.name || 'Plate',
-    rows,
-    columns,
+    rows: rows.length,
+    columns: columns.length,
   };
   // Us onClick from image config or Open Well in new window
   sourceData.onClick = (info: any) => {
@@ -164,7 +173,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
     let imgSource = undefined;
     // TODO: use a regex for the path??
     if (grp.store instanceof HTTPStore && !isNaN(row) && !isNaN(column)) {
-      imgSource = join(grp.store.url, grp.path, rowNames[row], columnNames[column]);
+      imgSource = join(grp.store.url, grp.path, rows[row], columns[column]);
     }
     if (config.onClick) {
       delete info.layer;

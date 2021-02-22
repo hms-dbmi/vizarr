@@ -1,7 +1,6 @@
 import { atom, atomFamily, selector, waitForAll } from 'recoil';
 import type { ZarrArray } from 'zarr';
-import type { ImageLayer, MultiscaleImageLayer } from '@hms-dbmi/viv';
-import type { PixelSource } from '@hms-dbmi/viv/dist/types';
+import type { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
 import type { VivLayerProps } from 'viv-layers';
 import type GridLayer from './gridLayer';
 
@@ -44,9 +43,16 @@ export interface SingleChannelConfig extends BaseConfig {
 
 export type ImageLayerConfig = MultichannelConfig | SingleChannelConfig;
 
+export interface GridLoader {
+  loader: ZarrPixelSource<string[]>;
+  row: number;
+  col: number;
+  name: string;
+}
+
 export type SourceData = {
-  loader: PixelSource<string[]>[];
-  loaders?: PixelSource<string[]>[]; // for OME plates
+  loader: ZarrPixelSource<string[]>[];
+  loaders?: GridLoader[]; // for OME plates
   rows?: number;
   columns?: number;
   acquisitions?: Ome.Acquisition[];
@@ -70,9 +76,9 @@ export type LayerCtr<T> = new (...args: any[]) => T;
 export type LayerState = {
   Layer: null | LayerCtr<ImageLayer | MultiscaleImageLayer | GridLayer>;
   layerProps: VivLayerProps & {
-    loader: PixelSource<string[]> | PixelSource<string[]>[];
+    loader: ZarrPixelSource<string[]> | ZarrPixelSource<string[]>[];
     contrastLimits: number[][];
-    loaders?: PixelSource<string[]>[];
+    loaders?: GridLoader[];
     rows?: number;
     columns?: number;
     onClick?: (e: any) => void;

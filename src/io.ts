@@ -1,5 +1,4 @@
 import { DTYPE_VALUES, ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
-import type { PixelSource } from '@hms-dbmi/viv/dist/types';
 import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
 import GridLayer from './gridLayer';
 import { loadOmeroMultiscales, loadPlate, loadWell } from './ome';
@@ -36,7 +35,7 @@ function getAxisLabels(arr: ZarrArray, axis_labels?: string[], channel_axis?: nu
   return axis_labels;
 }
 
-function loadSingleChannel(config: SingleChannelConfig, data: PixelSource<string[]>[], max: number): SourceData {
+function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<string[]>[], max: number): SourceData {
   const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
   return {
     loader: data,
@@ -55,7 +54,7 @@ function loadSingleChannel(config: SingleChannelConfig, data: PixelSource<string
   };
 }
 
-function loadMultiChannel(config: MultichannelConfig, data: PixelSource<string[]>[], max: number): SourceData {
+function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<string[]>[], max: number): SourceData {
   const { names, channel_axis, name, opacity = 1, colormap = '' } = config;
   let { contrast_limits, visibilities, colors } = config;
 
@@ -223,6 +222,8 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
       id: layerId,
       loader: loader.length === 1 ? loader[0] : loader,
       loaders,
+      rows,
+      columns,
       loaderSelection,
       colorValues,
       sliderValues,
@@ -230,8 +231,6 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
       channelIsOn,
       opacity,
       colormap,
-      rows,
-      columns,
       onClick,
     },
     on: true,
