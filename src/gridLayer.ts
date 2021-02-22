@@ -11,6 +11,7 @@ export interface GridLayerProps extends CompositeLayerProps<any> {
   rows: number;
   columns: number;
   spacer?: number;
+  text?: boolean;
   sliderValues: number[][];
   channelIsOn: boolean[];
   colorValues: number[][];
@@ -27,6 +28,7 @@ const defaultProps = {
   rows: { type: 'number', value: 0, compare: true },
   columns: { type: 'number', value: 0, compare: true },
   concurrency: { type: 'number', value: 10, compare: false }, // set concurrency for queue
+  text: { type: 'boolean', value: false, compare: true },
   // Deck.gl
   onClick: { type: 'function', value: null, compare: true },
   onHover: { type: 'function', value: null, compare: true },
@@ -115,7 +117,7 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
     if (width === 0 || height === 0) return null; // early return if no data
 
     const { rows, columns, spacer = 0, id = '' } = this.props;
-    const gridLayers = gridData.map((d: any) => {
+    const layers = gridData.map((d: any) => {
       const y = d.row * (height + spacer);
       const x = d.col * (width + spacer);
       const layerProps = {
@@ -125,19 +127,7 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
         dtype: d.loader.dtype || 'Uint16', // fallback if missing,
         pickable: false,
       };
-      return new (XRLayer as any)({ ...this.props, ...layerProps });
-    });
-
-    const text = new TextLayer({
-      id: `${id}-Grid-text-layer`,
-      data: gridData,
-      getPosition: (d: any) => [d.col * (width + spacer), d.row * (height + spacer)],
-      getText: (d: any) => d.name,
-      getColor: [255, 255, 255, 255],
-      getSize: 16,
-      getAngle: 0,
-      getTextAnchor: 'start',
-      getAlignmentBaseline: 'top',
+      return new XRLayer({ ...this.props, ...layerProps });
     });
 
     if (this.props.pickable) {
@@ -159,10 +149,25 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
         id: `${id}-GridLayer-picking`,
       } as any; // I was having an issue with typescript here....
       const pickableLayer = new SolidPolygonLayer({ ...this.props, ...layerProps });
-      return [pickableLayer, ...gridLayers, text];
+      layers.push(pickableLayer);
     }
 
-    return [...gridLayers, text];
+    if (this.props.text) {
+      const textLayer = new TextLayer({
+        id: `${id}-GridLayer-text`,
+        data: gridData,
+        getPosition: (d: any) => [d.col * (width + spacer), d.row * (height + spacer)],
+        getText: (d: any) => d.name,
+        getColor: [255, 255, 255, 255],
+        getSize: 16,
+        getAngle: 0,
+        getTextAnchor: 'start',
+        getAlignmentBaseline: 'top',
+      });
+      layers.push(textLayer);
+    }
+
+    return layers;
   }
 }
 
