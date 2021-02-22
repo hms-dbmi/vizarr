@@ -28,7 +28,7 @@ const defaultProps = {
   rows: { type: 'number', value: 0, compare: true },
   columns: { type: 'number', value: 0, compare: true },
   concurrency: { type: 'number', value: 10, compare: false }, // set concurrency for queue
-  text: { type: 'boolean', value: false, compare: true },
+  text: { type: 'boolean', value: true, compare: true },
   // Deck.gl
   onClick: { type: 'function', value: null, compare: true },
   onHover: { type: 'function', value: null, compare: true },
@@ -127,7 +127,7 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
         dtype: d.loader.dtype || 'Uint16', // fallback if missing,
         pickable: false,
       };
-      return new XRLayer({ ...this.props, ...layerProps });
+      return new (XRLayer as any)({ ...this.props, ...layerProps });
     });
 
     if (this.props.pickable) {
