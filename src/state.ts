@@ -1,10 +1,12 @@
 import { atom, atomFamily, selector, waitForAll } from 'recoil';
-import type { HTTPStore } from 'zarr';
-import type { VivLayerProps, ImageLayer, MultiscaleImageLayer, ZarrLoader } from '@hms-dbmi/viv';
+import type { ZarrArray } from 'zarr';
+import type { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
+import type { VivLayerProps } from 'viv-layers';
+import type GridLayer from './gridLayer';
 
 export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
 export const DEFAULT_LAYER_PROPS = {
-  loader: undefined,
+  loader: [],
   colorValues: [],
   sliderValues: [],
   contrastLimits: [],
@@ -12,47 +14,48 @@ export const DEFAULT_LAYER_PROPS = {
   channelIsOn: [],
   colormap: '',
   opacity: 1,
+  excludeBackground: true,
 };
 
-export type BaseConfig = {
-  source: string | HTTPStore;
-  channel_axis?: number;
+interface BaseConfig {
+  source: string | ZarrArray['store'];
+  axis_labels?: string[];
   name?: string;
   colormap?: string;
   opacity?: number;
-  axis_labels: string[];
-  translate?: number[];
   acquisition?: string;
   onClick?: (e: any) => void;
-};
+}
 
-export type MultichannelConfig = {
+export interface MultichannelConfig extends BaseConfig {
   colors?: string[];
+  channel_axis?: number;
   contrast_limits?: number[][];
   names?: string[];
   visibilities?: boolean[];
-} & BaseConfig;
+}
 
-export type SingleChannelConfig = {
+export interface SingleChannelConfig extends BaseConfig {
   color?: string;
   contrast_limits?: number[];
   visibility?: boolean;
-} & BaseConfig;
+}
 
-export type ImageLayerConfig = BaseConfig | MultichannelConfig | SingleChannelConfig;
+export type ImageLayerConfig = MultichannelConfig | SingleChannelConfig;
 
-export type Acquisition = {
-  id: number;
+export interface GridLoader {
+  loader: ZarrPixelSource<string[]>;
+  row: number;
+  col: number;
   name: string;
-};
+}
 
 export type SourceData = {
-  loader: ZarrLoader;
-  source?: string | HTTPStore;
-  loaders?: (ZarrLoader | undefined)[]; // for OME plates
+  loader: ZarrPixelSource<string[]>[];
+  loaders?: GridLoader[]; // for OME plates
   rows?: number;
   columns?: number;
-  acquisitions?: Acquisition[];
+  acquisitions?: Ome.Acquisition[];
   acquisitionId?: number;
   name?: string;
   channel_axis: number | null;
@@ -66,16 +69,16 @@ export type SourceData = {
     opacity: number;
   };
   axis_labels: string[];
-  translate: number[];
   onClick?: (e: any) => void;
 };
 
+export type LayerCtr<T> = new (...args: any[]) => T;
 export type LayerState = {
-  Layer: null | ImageLayer | MultiscaleImageLayer;
+  Layer: null | LayerCtr<ImageLayer | MultiscaleImageLayer | GridLayer>;
   layerProps: VivLayerProps & {
+    loader: ZarrPixelSource<string[]> | ZarrPixelSource<string[]>[];
     contrastLimits: number[][];
-    source?: string | HTTPStore;
-    loaders?: (ZarrLoader | undefined)[];
+    loaders?: GridLoader[];
     rows?: number;
     columns?: number;
     onClick?: (e: any) => void;

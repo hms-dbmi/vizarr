@@ -41,7 +41,7 @@ function LayerController({ layerId }: { layerId: string }): JSX.Element {
       setLayer(initialLayerState);
     }
     // Loader only defined once layer state is initialized.
-    if (layerId in sourceInfo && !layer.layerProps.loader) {
+    if (layerId in sourceInfo) {
       const config = sourceInfo[layerId];
       initLayer(config);
     }

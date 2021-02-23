@@ -37,7 +37,7 @@ from fsspec.implementations.http import HTTPFileSystem
 def encode_zarr_store(zobj):
     path_prefix = f"{zobj.path}/" if zobj.path else ""
 
-    def getItem(key):
+    def getItem(key, options = None):
         return zobj.store[path_prefix + key]
 
     def setItem(key, value):

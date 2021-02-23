@@ -5,13 +5,13 @@ import numpy as np
 import os
 import json
 from skimage import data
-from skimage.transform import pyramid_gaussian, pyramid_laplacian
+from skimage.transform import pyramid_gaussian
 
 # Modified from https://github.com/ome/ome-zarr-py/blob/master/tests/create_test_data.py
 def create_ome_zarr(zarr_directory, dtype="f4"):
 
-    base = np.tile(data.astronaut(), (2, 2, 1))
-    gaussian = list(pyramid_gaussian(base, downscale=2, max_layer=4, multichannel=True))
+    base = np.tile(data.astronaut(), (4, 4, 1))
+    gaussian = list(pyramid_gaussian(base, downscale=2, max_layer=3, multichannel=True))
 
     pyramid = []
     # convert each level of pyramid into 5D image (t, c, z, y, x)
@@ -21,14 +21,14 @@ def create_ome_zarr(zarr_directory, dtype="f4"):
         blue = pixels[:, :, 2]
         # wrap to make 5D: (t, c, z, y, x)
         pixels = np.array([np.array([red]), np.array([green]), np.array([blue])])
-        pixels = np.array([pixels])
+        pixels = np.array([pixels]).astype(dtype)
         pyramid.append(pixels)
 
     store = zarr.DirectoryStore(zarr_directory)
     grp = zarr.group(store, overwrite=True)
     paths = []
     for path, dataset in enumerate(pyramid):
-        grp.create_dataset(str(path), data=pyramid[path].astype(dtype))
+        grp.create_dataset(str(path), data=pyramid[path])
         paths.append({"path": str(path)})
 
     image_data = {
@@ -53,10 +53,17 @@ def create_ome_zarr(zarr_directory, dtype="f4"):
                 "active": True,
             },
         ],
-        "rdefs": {"model": "color",},
+        "rdefs": {
+            "model": "color",
+        },
     }
 
-    multiscales = [{"version": "0.1", "datasets": paths,}]
+    multiscales = [
+        {
+            "version": "0.1",
+            "datasets": paths,
+        }
+    ]
     grp.attrs["multiscales"] = multiscales
     grp.attrs["omero"] = image_data
 
