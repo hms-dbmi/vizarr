@@ -1,578 +1,17 @@
-import { c as createCommonjsModule } from './common/_commonjsHelpers-37fa8da4.js';
-import { V as _asyncToGenerator, W as regenerator, am as env, an as registerLoaders, _ as _inherits, al as isWebGL2, a0 as hasFeatures, Q as FEATURES, a3 as assert$1, b as _possibleConstructorReturn, a as _getPrototypeOf, ao as Resource$1, ap as log$1, aq as instrumentGLContext, ar as isWebGL, as as resetParameters, at as resizeGLContext, U as Framebuffer, au as lumaStats, av as createGLContext, aw as ProgramManager, Y as setParameters, Z as withParameters, ax as clear, ay as cssToDeviceRatio, S as Texture2D, az as Renderbuffer, f as _get, $ as load, a5 as Stats, aA as cssToDevicePixels, R as readPixelsToArray } from './common/transform-35a4c5f8.js';
-import { p as process } from './common/process-2545f00a.js';
-import { _ as _typeof } from './common/typeof-c65245d2.js';
-import { _ as _defineProperty } from './common/defineProperty-1b0b77a2.js';
 import { _ as _classCallCheck } from './common/classCallCheck-4eda545c.js';
-import { _ as _createClass, b as _assertThisInitialized, a as _toConsumableArray } from './common/assertThisInitialized-87ceda02.js';
-import './common/_node-resolve:empty-0f7f843d.js';
-import { p as log, r as register, q as mod, W as WebMercatorViewport, s as Vector3, C as COORDINATE_SYSTEM, P as PROJECTION_MODE, t as memoize, M as Matrix4, u as pixelsToWorld, d as debug, f as flatten, L as Layer, w as LIFECYCLE, e as Viewport, g as assert$2, b as clamp, x as WebMercatorViewport$1, E as EVENTS, n as defaultTypedArrayManager } from './common/layer-4d223d3d.js';
-import { _ as _slicedToArray } from './common/slicedToArray-14e71088.js';
-import './common/fp32-cb4e18c9.js';
-import { p as project } from './common/project-b311f9be.js';
-import { d as deepEqual, L as LinearInterpolator, T as TRANSITION_EVENTS, V as ViewState, C as Controller, a as View } from './common/view-state-eb76c72f.js';
+import { _ as _createClass, c as _assertThisInitialized, a as _toConsumableArray } from './common/setPrototypeOf-6a943dce.js';
+import { ah as env, z as log, ai as register, aj as registerLoaders, _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, ag as isWebGL2, G as hasFeatures, H as FEATURES, A as assert, ak as Resource$1, J as _asyncToGenerator, K as regenerator, al as log$1, am as instrumentGLContext, an as isWebGL, ao as resetParameters, ap as resizeGLContext, aq as Framebuffer, ar as lumaStats, as as createGLContext, at as WebMercatorViewport, au as mod, ae as Vector3, F as COORDINATE_SYSTEM, P as PROJECTION_MODE, av as memoize, M as Matrix4, aw as pixelsToWorld, ax as ProgramManager, ay as setParameters, az as withParameters, aA as clear, aB as cssToDeviceRatio, r as Texture2D, aC as Renderbuffer, k as _get, s as load, n as debug, l as flatten, L as Layer, aD as LIFECYCLE, S as Stats, j as Viewport, o as assert$1, h as clamp, aE as WebMercatorViewport$1, aF as cssToDevicePixels, aG as readPixelsToArray, aH as EVENTS, E as defaultTypedArrayManager } from './common/layer-29b250de.js';
 import { r as react } from './common/index-aae33e1a.js';
 import { p as propTypes$1 } from './common/index-c103191b.js';
-
-function assert(condition, message) {
-  if (!condition) {
-    throw new Error(message);
-  }
-}
-
-var globals = {
-  self: typeof self !== 'undefined' && self,
-  window: typeof window !== 'undefined' && window,
-  global: typeof global !== 'undefined' && global,
-  document: typeof document !== 'undefined' && document
-};
-var global_ = globals.global || globals.self || globals.window;
-var isBrowser = (typeof process === "undefined" ? "undefined" : _typeof(process)) !== 'object' || String(process) !== '[object process]' || process.browser;
-var matches = typeof process !== 'undefined' && process.version && process.version.match(/v([0-9]*)/);
-var nodeVersion = matches && parseFloat(matches[1]) || 0;
-
-var _parseImageNode = global_._parseImageNode;
-var IMAGE_SUPPORTED = typeof Image !== 'undefined';
-var IMAGE_BITMAP_SUPPORTED = typeof ImageBitmap !== 'undefined';
-var NODE_IMAGE_SUPPORTED = Boolean(_parseImageNode);
-var DATA_SUPPORTED = isBrowser ? true : NODE_IMAGE_SUPPORTED;
-function isImageTypeSupported(type) {
-  switch (type) {
-    case 'auto':
-      return IMAGE_BITMAP_SUPPORTED || IMAGE_SUPPORTED || DATA_SUPPORTED;
-
-    case 'imagebitmap':
-      return IMAGE_BITMAP_SUPPORTED;
-
-    case 'image':
-      return IMAGE_SUPPORTED;
-
-    case 'data':
-      return DATA_SUPPORTED;
-
-    case 'html':
-      return IMAGE_SUPPORTED;
-
-    case 'ndarray':
-      return DATA_SUPPORTED;
-
-    default:
-      throw new Error("@loaders.gl/images: image ".concat(type, " not supported in this environment"));
-  }
-}
-function getDefaultImageType() {
-  if (IMAGE_BITMAP_SUPPORTED) {
-    return 'imagebitmap';
-  }
-
-  if (IMAGE_SUPPORTED) {
-    return 'image';
-  }
-
-  if (DATA_SUPPORTED) {
-    return 'data';
-  }
-
-  throw new Error("Install '@loaders.gl/polyfills' to parse images under Node.js");
-}
-
-function getImageType(image) {
-  var format = getImageTypeOrNull(image);
-
-  if (!format) {
-    throw new Error('Not an image');
-  }
-
-  return format;
-}
-function getImageData(image) {
-  switch (getImageType(image)) {
-    case 'data':
-      return image;
-
-    case 'image':
-    case 'imagebitmap':
-      var canvas = document.createElement('canvas');
-      var context = canvas.getContext('2d');
-
-      if (context) {
-        canvas.width = image.width;
-        canvas.height = image.height;
-        context.drawImage(image, 0, 0);
-        return context.getImageData(0, 0, image.width, image.height);
-      }
-
-    default:
-      return assert(false);
-  }
-}
-
-function getImageTypeOrNull(image) {
-  if (typeof ImageBitmap !== 'undefined' && image instanceof ImageBitmap) {
-    return 'imagebitmap';
-  }
-
-  if (typeof Image !== 'undefined' && image instanceof Image) {
-    return 'image';
-  }
-
-  if (image && _typeof(image) === 'object' && image.data && image.width && image.height) {
-    return 'data';
-  }
-
-  return null;
-}
-
-var SVG_DATA_URL_PATTERN = /^data:image\/svg\+xml/;
-var SVG_URL_PATTERN = /\.svg((\?|#).*)?$/;
-function isSVG(url) {
-  return url && (SVG_DATA_URL_PATTERN.test(url) || SVG_URL_PATTERN.test(url));
-}
-function getBlobOrSVGDataUrl(arrayBuffer, url) {
-  if (isSVG(url)) {
-    var textDecoder = new TextDecoder();
-    var xmlText = textDecoder.decode(arrayBuffer);
-    var src = "data:image/svg+xml;base64,".concat(btoa(xmlText));
-    return src;
-  }
-
-  return getBlob(arrayBuffer, url);
-}
-function getBlob(arrayBuffer, url) {
-  if (isSVG(url)) {
-    throw new Error('SVG cannot be parsed directly to imagebitmap');
-  }
-
-  return new Blob([new Uint8Array(arrayBuffer)]);
-}
-
-function parseToImage(_x, _x2, _x3) {
-  return _parseToImage.apply(this, arguments);
-}
-
-function _parseToImage() {
-  _parseToImage = _asyncToGenerator(regenerator.mark(function _callee(arrayBuffer, options, url) {
-    var blobOrDataUrl, URL, objectUrl;
-    return regenerator.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            blobOrDataUrl = getBlobOrSVGDataUrl(arrayBuffer, url);
-            URL = self.URL || self.webkitURL;
-            objectUrl = typeof blobOrDataUrl !== 'string' && URL.createObjectURL(blobOrDataUrl);
-            _context.prev = 3;
-            _context.next = 6;
-            return loadToImage(objectUrl || blobOrDataUrl, options);
-
-          case 6:
-            return _context.abrupt("return", _context.sent);
-
-          case 7:
-            _context.prev = 7;
-
-            if (objectUrl) {
-              URL.revokeObjectURL(objectUrl);
-            }
-
-            return _context.finish(7);
-
-          case 10:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee, null, [[3,, 7, 10]]);
-  }));
-  return _parseToImage.apply(this, arguments);
-}
-
-function loadToImage(_x4, _x5) {
-  return _loadToImage.apply(this, arguments);
-}
-
-function _loadToImage() {
-  _loadToImage = _asyncToGenerator(regenerator.mark(function _callee2(url, options) {
-    var image;
-    return regenerator.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            image = new Image();
-            image.src = url;
-
-            if (!(options.image && options.image.decode && image.decode)) {
-              _context2.next = 6;
-              break;
-            }
-
-            _context2.next = 5;
-            return image.decode();
-
-          case 5:
-            return _context2.abrupt("return", image);
-
-          case 6:
-            _context2.next = 8;
-            return new Promise(function (resolve, reject) {
-              try {
-                image.onload = function () {
-                  return resolve(image);
-                };
-
-                image.onerror = function (err) {
-                  return reject(new Error("Could not load image ".concat(url, ": ").concat(err)));
-                };
-              } catch (error) {
-                reject(error);
-              }
-            });
-
-          case 8:
-            return _context2.abrupt("return", _context2.sent);
-
-          case 9:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2);
-  }));
-  return _loadToImage.apply(this, arguments);
-}
-
-var EMPTY_OBJECT = {};
-var imagebitmapOptionsSupported = true;
-function parseToImageBitmap(_x, _x2, _x3) {
-  return _parseToImageBitmap.apply(this, arguments);
-}
-
-function _parseToImageBitmap() {
-  _parseToImageBitmap = _asyncToGenerator(regenerator.mark(function _callee(arrayBuffer, options, url) {
-    var blob, image, imagebitmapOptions;
-    return regenerator.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            if (!isSVG(url)) {
-              _context.next = 7;
-              break;
-            }
-
-            _context.next = 3;
-            return parseToImage(arrayBuffer, options, url);
-
-          case 3:
-            image = _context.sent;
-            blob = image;
-            _context.next = 8;
-            break;
-
-          case 7:
-            blob = getBlob(arrayBuffer, url);
-
-          case 8:
-            imagebitmapOptions = options && options.imagebitmap;
-            _context.next = 11;
-            return safeCreateImageBitmap(blob, imagebitmapOptions);
-
-          case 11:
-            return _context.abrupt("return", _context.sent);
-
-          case 12:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee);
-  }));
-  return _parseToImageBitmap.apply(this, arguments);
-}
-
-function safeCreateImageBitmap(_x4) {
-  return _safeCreateImageBitmap.apply(this, arguments);
-}
-
-function _safeCreateImageBitmap() {
-  _safeCreateImageBitmap = _asyncToGenerator(regenerator.mark(function _callee2(blob) {
-    var imagebitmapOptions,
-        _args2 = arguments;
-    return regenerator.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            imagebitmapOptions = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : null;
-
-            if (isEmptyObject(imagebitmapOptions) || !imagebitmapOptionsSupported) {
-              imagebitmapOptions = null;
-            }
-
-            if (!imagebitmapOptions) {
-              _context2.next = 13;
-              break;
-            }
-
-            _context2.prev = 3;
-            _context2.next = 6;
-            return createImageBitmap(blob, imagebitmapOptions);
-
-          case 6:
-            return _context2.abrupt("return", _context2.sent);
-
-          case 9:
-            _context2.prev = 9;
-            _context2.t0 = _context2["catch"](3);
-            console.warn(_context2.t0);
-            imagebitmapOptionsSupported = false;
-
-          case 13:
-            _context2.next = 15;
-            return createImageBitmap(blob);
-
-          case 15:
-            return _context2.abrupt("return", _context2.sent);
-
-          case 16:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2, null, [[3, 9]]);
-  }));
-  return _safeCreateImageBitmap.apply(this, arguments);
-}
-
-function isEmptyObject(object) {
-  for (var key in object || EMPTY_OBJECT) {
-    return false;
-  }
-
-  return true;
-}
-
-var BIG_ENDIAN = false;
-var LITTLE_ENDIAN = true;
-function getBinaryImageMetadata(binaryData) {
-  var dataView = toDataView(binaryData);
-  return getPngMetadata(dataView) || getJpegMetadata(dataView) || getGifMetadata(dataView) || getBmpMetadata(dataView);
-}
-
-function getPngMetadata(binaryData) {
-  var dataView = toDataView(binaryData);
-  var isPng = dataView.byteLength >= 24 && dataView.getUint32(0, BIG_ENDIAN) === 0x89504e47;
-
-  if (!isPng) {
-    return null;
-  }
-
-  return {
-    mimeType: 'image/png',
-    width: dataView.getUint32(16, BIG_ENDIAN),
-    height: dataView.getUint32(20, BIG_ENDIAN)
-  };
-}
-
-function getGifMetadata(binaryData) {
-  var dataView = toDataView(binaryData);
-  var isGif = dataView.byteLength >= 10 && dataView.getUint32(0, BIG_ENDIAN) === 0x47494638;
-
-  if (!isGif) {
-    return null;
-  }
-
-  return {
-    mimeType: 'image/gif',
-    width: dataView.getUint16(6, LITTLE_ENDIAN),
-    height: dataView.getUint16(8, LITTLE_ENDIAN)
-  };
-}
-
-function getBmpMetadata(binaryData) {
-  var dataView = toDataView(binaryData);
-  var isBmp = dataView.byteLength >= 14 && dataView.getUint16(0, BIG_ENDIAN) === 0x424d && dataView.getUint32(2, LITTLE_ENDIAN) === dataView.byteLength;
-
-  if (!isBmp) {
-    return null;
-  }
-
-  return {
-    mimeType: 'image/bmp',
-    width: dataView.getUint32(18, LITTLE_ENDIAN),
-    height: dataView.getUint32(22, LITTLE_ENDIAN)
-  };
-}
-
-function getJpegMetadata(binaryData) {
-  var dataView = toDataView(binaryData);
-  var isJpeg = dataView.byteLength >= 3 && dataView.getUint16(0, BIG_ENDIAN) === 0xffd8 && dataView.getUint8(2) === 0xff;
-
-  if (!isJpeg) {
-    return null;
-  }
-
-  var _getJpegMarkers = getJpegMarkers(),
-      tableMarkers = _getJpegMarkers.tableMarkers,
-      sofMarkers = _getJpegMarkers.sofMarkers;
-
-  var i = 2;
-
-  while (i + 9 < dataView.byteLength) {
-    var marker = dataView.getUint16(i, BIG_ENDIAN);
-
-    if (sofMarkers.has(marker)) {
-      return {
-        mimeType: 'image/jpeg',
-        height: dataView.getUint16(i + 5, BIG_ENDIAN),
-        width: dataView.getUint16(i + 7, BIG_ENDIAN)
-      };
-    }
-
-    if (!tableMarkers.has(marker)) {
-      return null;
-    }
-
-    i += 2;
-    i += dataView.getUint16(i, BIG_ENDIAN);
-  }
-
-  return null;
-}
-
-function getJpegMarkers() {
-  var tableMarkers = new Set([0xffdb, 0xffc4, 0xffcc, 0xffdd, 0xfffe]);
-
-  for (var i = 0xffe0; i < 0xfff0; ++i) {
-    tableMarkers.add(i);
-  }
-
-  var sofMarkers = new Set([0xffc0, 0xffc1, 0xffc2, 0xffc3, 0xffc5, 0xffc6, 0xffc7, 0xffc9, 0xffca, 0xffcb, 0xffcd, 0xffce, 0xffcf, 0xffde]);
-  return {
-    tableMarkers: tableMarkers,
-    sofMarkers: sofMarkers
-  };
-}
-
-function toDataView(data) {
-  if (data instanceof DataView) {
-    return data;
-  }
-
-  if (ArrayBuffer.isView(data)) {
-    return new DataView(data.buffer);
-  }
-
-  if (data instanceof ArrayBuffer) {
-    return new DataView(data);
-  }
-
-  throw new Error('toDataView');
-}
-
-function parseToNodeImage(arrayBuffer, options) {
-  var _ref = getBinaryImageMetadata(arrayBuffer) || {},
-      mimeType = _ref.mimeType;
-
-  var _parseImageNode = global_._parseImageNode;
-  assert(_parseImageNode);
-  return _parseImageNode(arrayBuffer, mimeType, options);
-}
-
-function parseImage(_x, _x2, _x3) {
-  return _parseImage.apply(this, arguments);
-}
-
-function _parseImage() {
-  _parseImage = _asyncToGenerator(regenerator.mark(function _callee(arrayBuffer, options, context) {
-    var imageOptions, imageType, _ref, url, loadType, image;
-
-    return regenerator.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            options = options || {};
-            imageOptions = options.image || {};
-            imageType = imageOptions.type || 'auto';
-            _ref = context || {}, url = _ref.url;
-            loadType = getLoadableImageType(imageType);
-            _context.t0 = loadType;
-            _context.next = _context.t0 === 'imagebitmap' ? 8 : _context.t0 === 'image' ? 12 : _context.t0 === 'data' ? 16 : 20;
-            break;
-
-          case 8:
-            _context.next = 10;
-            return parseToImageBitmap(arrayBuffer, options, url);
-
-          case 10:
-            image = _context.sent;
-            return _context.abrupt("break", 21);
-
-          case 12:
-            _context.next = 14;
-            return parseToImage(arrayBuffer, options, url);
-
-          case 14:
-            image = _context.sent;
-            return _context.abrupt("break", 21);
-
-          case 16:
-            _context.next = 18;
-            return parseToNodeImage(arrayBuffer, options);
-
-          case 18:
-            image = _context.sent;
-            return _context.abrupt("break", 21);
-
-          case 20:
-            assert(false);
-
-          case 21:
-            if (imageType === 'data') {
-              image = getImageData(image);
-            }
-
-            return _context.abrupt("return", image);
-
-          case 23:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee);
-  }));
-  return _parseImage.apply(this, arguments);
-}
-
-function getLoadableImageType(type) {
-  switch (type) {
-    case 'auto':
-    case 'data':
-      return getDefaultImageType();
-
-    default:
-      isImageTypeSupported(type);
-      return type;
-  }
-}
-
-var VERSION =  "2.3.6" ;
-var EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'ico', 'svg'];
-var MIME_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/bmp', 'image/vnd.microsoft.icon', 'image/svg+xml'];
-var ImageLoader = {
-  id: 'image',
-  name: 'Images',
-  version: VERSION,
-  mimeTypes: MIME_TYPES,
-  extensions: EXTENSIONS,
-  parse: parseImage,
-  tests: [function (arrayBuffer) {
-    return Boolean(getBinaryImageMetadata(new DataView(arrayBuffer)));
-  }],
-  options: {
-    image: {
-      type: 'auto',
-      decode: true
-    }
-  }
-};
+import { d as deepEqual, L as LinearInterpolator, T as TRANSITION_EVENTS, V as ViewState, C as Controller, a as View } from './common/linear-interpolator-8791ab04.js';
+import { _ as _defineProperty } from './common/defineProperty-1b0b77a2.js';
+import { p as project } from './common/project-ddaf7c66.js';
+import { _ as _slicedToArray } from './common/slicedToArray-09da29a7.js';
+import { I as ImageLoader } from './common/image-loader-8084ad56.js';
+import { c as createCommonjsModule } from './common/_commonjsHelpers-37fa8da4.js';
+import { _ as _typeof } from './common/typeof-c65245d2.js';
+import './common/process-2545f00a.js';
+import './common/_node-resolve:empty-0f7f843d.js';
 
 function isJSON(text) {
   var firstChar = text[0];
@@ -588,7 +27,7 @@ var jsonLoader = {
   parseTextSync: JSON.parse
 };
 
-var version =  "8.4.0-alpha.4" ;
+var version = "8.4.6" ;
 var existingVersion = env.global.deck && env.global.deck.VERSION;
 
 if (existingVersion && existingVersion !== version) {
@@ -619,6 +58,15 @@ function cancelAnimationFrame(timerId) {
   return typeof window !== 'undefined' && window.cancelAnimationFrame ? window.cancelAnimationFrame(timerId) : clearTimeout(timerId);
 }
 
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 var GL_QUERY_RESULT = 0x8866;
 var GL_QUERY_RESULT_AVAILABLE = 0x8867;
 var GL_TIME_ELAPSED_EXT = 0x88bf;
@@ -630,6 +78,8 @@ var GL_ANY_SAMPLES_PASSED_CONSERVATIVE = 0x8d6a;
 var Query = function (_Resource) {
   _inherits(Query, _Resource);
 
+  var _super = _createSuper(Query);
+
   _createClass(Query, null, [{
     key: "isSupported",
     value: function isSupported(gl) {
@@ -637,12 +87,12 @@ var Query = function (_Resource) {
       var webgl2 = isWebGL2(gl);
       var hasTimerQuery = hasFeatures(gl, FEATURES.TIMER_QUERY);
       var supported = webgl2 || hasTimerQuery;
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
+
+      var _iterator = _createForOfIteratorHelper(opts),
+          _step;
 
       try {
-        for (var _iterator = opts[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
           var key = _step.value;
 
           switch (key) {
@@ -655,22 +105,13 @@ var Query = function (_Resource) {
               break;
 
             default:
-              assert$1(false);
+              assert(false);
           }
         }
       } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
+        _iterator.e(err);
       } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-            _iterator["return"]();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
+        _iterator.f();
       }
 
       return supported;
@@ -684,7 +125,7 @@ var Query = function (_Resource) {
 
     _classCallCheck(this, Query);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Query).call(this, gl, opts));
+    _this = _super.call(this, gl, opts);
     _this.target = null;
     _this._queryPending = false;
     _this._pollingPromise = null;
@@ -719,7 +160,7 @@ var Query = function (_Resource) {
       }
 
       this.target = target;
-      this.gl.beginQuery(this.target, this.handle);
+      this.gl2.beginQuery(this.target, this.handle);
       return this;
     }
   }, {
@@ -730,7 +171,7 @@ var Query = function (_Resource) {
       }
 
       if (this.target) {
-        this.gl.endQuery(this.target);
+        this.gl2.endQuery(this.target);
         this.target = null;
         this._queryPending = true;
       }
@@ -744,7 +185,7 @@ var Query = function (_Resource) {
         return false;
       }
 
-      var resultAvailable = this.gl.getQueryParameter(this.handle, GL_QUERY_RESULT_AVAILABLE);
+      var resultAvailable = this.gl2.getQueryParameter(this.handle, GL_QUERY_RESULT_AVAILABLE);
 
       if (resultAvailable) {
         this._queryPending = false;
@@ -755,12 +196,12 @@ var Query = function (_Resource) {
   }, {
     key: "isTimerDisjoint",
     value: function isTimerDisjoint() {
-      return this.gl.getParameter(GL_GPU_DISJOINT_EXT);
+      return this.gl2.getParameter(GL_GPU_DISJOINT_EXT);
     }
   }, {
     key: "getResult",
     value: function getResult() {
-      return this.gl.getQueryParameter(this.handle, GL_QUERY_RESULT);
+      return this.gl2.getQueryParameter(this.handle, GL_QUERY_RESULT);
     }
   }, {
     key: "getTimerMilliseconds",
@@ -799,12 +240,12 @@ var Query = function (_Resource) {
   }, {
     key: "_createHandle",
     value: function _createHandle() {
-      return Query.isSupported(this.gl) ? this.gl.createQuery() : null;
+      return Query.isSupported(this.gl) ? this.gl2.createQuery() : null;
     }
   }, {
     key: "_deleteHandle",
     value: function _deleteHandle() {
-      this.gl.deleteQuery(this.handle);
+      this.gl2.deleteQuery(this.handle);
     }
   }]);
 
@@ -902,7 +343,7 @@ var AnimationLoop = function () {
   }, {
     key: "setNeedsRedraw",
     value: function setNeedsRedraw(reason) {
-      assert$1(typeof reason === 'string');
+      assert(typeof reason === 'string');
       this.needsRedraw = this.needsRedraw || reason;
       return this;
     }
@@ -977,6 +418,10 @@ var AnimationLoop = function () {
   }, {
     key: "redraw",
     value: function redraw() {
+      if (this.isContextLost()) {
+        return this;
+      }
+
       this._beginTimers();
 
       this._setupFrame();
@@ -1072,6 +517,11 @@ var AnimationLoop = function () {
 
       return toDataURL;
     }()
+  }, {
+    key: "isContextLost",
+    value: function isContextLost() {
+      return this.gl.isContextLost();
+    }
   }, {
     key: "onCreateContext",
     value: function onCreateContext() {
@@ -1193,15 +643,11 @@ var AnimationLoop = function () {
   }, {
     key: "_setupFrame",
     value: function _setupFrame() {
-      if (this._onSetupFrame) {
-        this._onSetupFrame(this.animationProps);
-      } else {
-        this._resizeCanvasDrawingBuffer();
+      this._resizeCanvasDrawingBuffer();
 
-        this._resizeViewport();
+      this._resizeViewport();
 
-        this._resizeFramebuffer();
-      }
+      this._resizeFramebuffer();
     }
   }, {
     key: "_initializeCallbackData",
@@ -1407,6 +853,12 @@ var AnimationLoop = function () {
   return AnimationLoop;
 }();
 
+function _createForOfIteratorHelper$1(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$1(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray$1(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$1(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$1(o, minLen); }
+
+function _arrayLikeToArray$1(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 var channelHandles = 1;
 var animationHandles = 1;
 var Timeline = function () {
@@ -1449,12 +901,12 @@ var Timeline = function () {
     key: "removeChannel",
     value: function removeChannel(handle) {
       this.channels["delete"](handle);
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
+
+      var _iterator = _createForOfIteratorHelper$1(this.animations),
+          _step;
 
       try {
-        for (var _iterator = this.animations[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
           var _step$value = _slicedToArray(_step.value, 2),
               animationHandle = _step$value[0],
               animation = _step$value[1];
@@ -1464,18 +916,9 @@ var Timeline = function () {
           }
         }
       } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
+        _iterator.e(err);
       } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-            _iterator["return"]();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
+        _iterator.f();
       }
     }
   }, {
@@ -1509,56 +952,38 @@ var Timeline = function () {
     value: function setTime(time) {
       this.time = Math.max(0, time);
       var channels = this.channels.values();
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
+
+      var _iterator2 = _createForOfIteratorHelper$1(channels),
+          _step2;
 
       try {
-        for (var _iterator2 = channels[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
           var channel = _step2.value;
 
           this._setChannelTime(channel, this.time);
         }
       } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
+        _iterator2.e(err);
       } finally {
-        try {
-          if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-            _iterator2["return"]();
-          }
-        } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
-          }
-        }
+        _iterator2.f();
       }
 
       var animations = this.animations.values();
-      var _iteratorNormalCompletion3 = true;
-      var _didIteratorError3 = false;
-      var _iteratorError3 = undefined;
+
+      var _iterator3 = _createForOfIteratorHelper$1(animations),
+          _step3;
 
       try {
-        for (var _iterator3 = animations[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
           var animationData = _step3.value;
           var animation = animationData.animation,
               _channel = animationData.channel;
           animation.setTime(this.getTime(_channel));
         }
       } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
+        _iterator3.e(err);
       } finally {
-        try {
-          if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
-            _iterator3["return"]();
-          }
-        } finally {
-          if (_didIteratorError3) {
-            throw _iteratorError3;
-          }
-        }
+        _iterator3.f();
       }
     }
   }, {
@@ -1697,11 +1122,11 @@ function normalizeViewportProps(_ref) {
   };
 }
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper$2(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$2(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _unsupportedIterableToArray$2(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$2(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$2(o, minLen); }
 
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function _arrayLikeToArray$2(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 var vs$1 = "\nconst int max_lights = 2;\nuniform mat4 shadow_uViewProjectionMatrices[max_lights];\nuniform vec4 shadow_uProjectCenters[max_lights];\nuniform bool shadow_uDrawShadowMap;\nuniform bool shadow_uUseShadowMap;\nuniform int shadow_uLightId;\nuniform float shadow_uLightCount;\n\nvarying vec3 shadow_vPosition[max_lights];\n\nvec4 shadow_setVertexPosition(vec4 position_commonspace) {\n  if (shadow_uDrawShadowMap) {\n    return project_common_position_to_clipspace(position_commonspace, shadow_uViewProjectionMatrices[shadow_uLightId], shadow_uProjectCenters[shadow_uLightId]);\n  }\n  if (shadow_uUseShadowMap) {\n    for (int i = 0; i < max_lights; i++) {\n      if(i < int(shadow_uLightCount)) {\n        vec4 shadowMap_position = project_common_position_to_clipspace(position_commonspace, shadow_uViewProjectionMatrices[i], shadow_uProjectCenters[i]);\n        shadow_vPosition[i] = (shadowMap_position.xyz / shadowMap_position.w + 1.0) / 2.0;\n      }\n    }\n  }\n  return gl_Position;\n}\n";
 var fs$1 = "\nconst int max_lights = 2;\nuniform bool shadow_uDrawShadowMap;\nuniform bool shadow_uUseShadowMap;\nuniform sampler2D shadow_uShadowMap0;\nuniform sampler2D shadow_uShadowMap1;\nuniform vec4 shadow_uColor;\nuniform float shadow_uLightCount;\n\nvarying vec3 shadow_vPosition[max_lights];\n\nconst vec4 bitPackShift = vec4(1.0, 255.0, 65025.0, 16581375.0);\nconst vec4 bitUnpackShift = 1.0 / bitPackShift;\nconst vec4 bitMask = vec4(1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0,  0.0);\n\nfloat shadow_getShadowWeight(vec3 position, sampler2D shadowMap) {\n  vec4 rgbaDepth = texture2D(shadowMap, position.xy);\n\n  float z = dot(rgbaDepth, bitUnpackShift);\n  return smoothstep(0.001, 0.01, position.z - z);\n}\n\nvec4 shadow_filterShadowColor(vec4 color) {\n  if (shadow_uDrawShadowMap) {\n    vec4 rgbaDepth = fract(gl_FragCoord.z * bitPackShift);\n    rgbaDepth -= rgbaDepth.gbaa * bitMask;\n    return rgbaDepth;\n  }\n  if (shadow_uUseShadowMap) {\n    float shadowAlpha = 0.0;\n    shadowAlpha += shadow_getShadowWeight(shadow_vPosition[0], shadow_uShadowMap0);\n    if(shadow_uLightCount > 1.0) {\n      shadowAlpha += shadow_getShadowWeight(shadow_vPosition[1], shadow_uShadowMap1);\n    }\n    shadowAlpha *= shadow_uColor.a / shadow_uLightCount;\n    float blendedAlpha = shadowAlpha + color.a * (1.0 - shadowAlpha);\n\n    return vec4(\n      mix(color.rgb, shadow_uColor.rgb, shadowAlpha / blendedAlpha),\n      blendedAlpha\n    );\n  }\n  return color;\n}\n";
 var getMemoizedViewportCenterPosition = memoize(getViewportCenterPosition);
@@ -1740,7 +1165,7 @@ function getViewProjectionMatrices(_ref2) {
     return screenToCommonSpace(pixel, pixelUnprojectionMatrix);
   });
 
-  var _iterator = _createForOfIteratorHelper(shadowMatrices),
+  var _iterator = _createForOfIteratorHelper$2(shadowMatrices),
       _step;
 
   try {
@@ -1866,17 +1291,17 @@ var shadow = {
   }
 };
 
-function _createForOfIteratorHelper$1(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$1(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper$3(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$3(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray$1(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$1(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$1(o, minLen); }
+function _unsupportedIterableToArray$3(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$3(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$3(o, minLen); }
 
-function _arrayLikeToArray$1(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function _arrayLikeToArray$3(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 var DEFAULT_MODULES = [geometry, project];
 var SHADER_HOOKS = ['vs:DECKGL_FILTER_SIZE(inout vec3 size, VertexGeometry geometry)', 'vs:DECKGL_FILTER_GL_POSITION(inout vec4 position, VertexGeometry geometry)', 'vs:DECKGL_FILTER_COLOR(inout vec4 color, VertexGeometry geometry)', 'fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)'];
 function createProgramManager(gl) {
   var programManager = ProgramManager.getDefaultProgramManager(gl);
 
-  var _iterator = _createForOfIteratorHelper$1(DEFAULT_MODULES),
+  var _iterator = _createForOfIteratorHelper$3(DEFAULT_MODULES),
       _step;
 
   try {
@@ -1890,7 +1315,7 @@ function createProgramManager(gl) {
     _iterator.f();
   }
 
-  var _iterator2 = _createForOfIteratorHelper$1(SHADER_HOOKS),
+  var _iterator2 = _createForOfIteratorHelper$3(SHADER_HOOKS),
       _step2;
 
   try {
@@ -2020,20 +1445,20 @@ var Pass = function () {
   return Pass;
 }();
 
-function _createForOfIteratorHelper$2(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$2(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper$4(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$4(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray$2(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$2(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$2(o, minLen); }
+function _unsupportedIterableToArray$4(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$4(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$4(o, minLen); }
 
-function _arrayLikeToArray$2(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function _arrayLikeToArray$4(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+function _createSuper$1(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$1(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+function _isNativeReflectConstruct$1() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
 var LayersPass = function (_Pass) {
   _inherits(LayersPass, _Pass);
 
-  var _super = _createSuper(LayersPass);
+  var _super = _createSuper$1(LayersPass);
 
   function LayersPass() {
     _classCallCheck(this, LayersPass);
@@ -2066,7 +1491,7 @@ var LayersPass = function (_Pass) {
 
       var renderStats = [];
 
-      var _iterator = _createForOfIteratorHelper$2(viewports),
+      var _iterator = _createForOfIteratorHelper$4(viewports),
           _step;
 
       try {
@@ -2081,7 +1506,7 @@ var LayersPass = function (_Pass) {
           props.view = view;
           var subViewports = viewport.subViewports || [viewport];
 
-          var _iterator2 = _createForOfIteratorHelper$2(subViewports),
+          var _iterator2 = _createForOfIteratorHelper$4(subViewports),
               _step2;
 
           try {
@@ -2259,7 +1684,7 @@ var LayersPass = function (_Pass) {
       });
 
       if (effects) {
-        var _iterator3 = _createForOfIteratorHelper$2(effects),
+        var _iterator3 = _createForOfIteratorHelper$4(effects),
             _step3;
 
         try {
@@ -2338,14 +1763,14 @@ function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (O
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-function _createSuper$1(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$1(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+function _createSuper$2(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$2(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
-function _isNativeReflectConstruct$1() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+function _isNativeReflectConstruct$2() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
 var ShadowPass = function (_LayersPass) {
   _inherits(ShadowPass, _LayersPass);
 
-  var _super = _createSuper$1(ShadowPass);
+  var _super = _createSuper$2(ShadowPass);
 
   function ShadowPass(gl, props) {
     var _parameters, _attachments;
@@ -2439,15 +1864,15 @@ var ShadowPass = function (_LayersPass) {
   return ShadowPass;
 }(LayersPass);
 
-function _createForOfIteratorHelper$3(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$3(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper$5(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$5(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray$3(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$3(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$3(o, minLen); }
+function _unsupportedIterableToArray$5(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$5(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$5(o, minLen); }
 
-function _arrayLikeToArray$3(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function _arrayLikeToArray$5(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _createSuper$2(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$2(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+function _createSuper$3(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$3(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
-function _isNativeReflectConstruct$2() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+function _isNativeReflectConstruct$3() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 var DEFAULT_AMBIENT_LIGHT_PROPS = {
   color: [255, 255, 255],
   intensity: 1.0
@@ -2466,7 +1891,7 @@ var DEFAULT_SHADOW_COLOR$1 = [0, 0, 0, 200 / 255];
 var LightingEffect = function (_Effect) {
   _inherits(LightingEffect, _Effect);
 
-  var _super = _createSuper$2(LightingEffect);
+  var _super = _createSuper$3(LightingEffect);
 
   function LightingEffect(props) {
     var _this;
@@ -2585,7 +2010,7 @@ var LightingEffect = function (_Effect) {
   }, {
     key: "cleanup",
     value: function cleanup() {
-      var _iterator = _createForOfIteratorHelper$3(this.shadowPasses),
+      var _iterator = _createForOfIteratorHelper$5(this.shadowPasses),
           _step;
 
       try {
@@ -2617,7 +2042,7 @@ var LightingEffect = function (_Effect) {
     value: function _createLightMatrix() {
       var lightMatrices = [];
 
-      var _iterator2 = _createForOfIteratorHelper$3(this.directionalLights),
+      var _iterator2 = _createForOfIteratorHelper$5(this.directionalLights),
           _step2;
 
       try {
@@ -2662,11 +2087,11 @@ var LightingEffect = function (_Effect) {
   return LightingEffect;
 }(Effect);
 
-function _createForOfIteratorHelper$4(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$4(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper$6(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$6(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray$4(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$4(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$4(o, minLen); }
+function _unsupportedIterableToArray$6(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$6(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$6(o, minLen); }
 
-function _arrayLikeToArray$4(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function _arrayLikeToArray$6(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 var Resource = function () {
   function Resource(id, data, context) {
@@ -2743,7 +2168,7 @@ var Resource = function () {
         this._content = data;
       }
 
-      var _iterator = _createForOfIteratorHelper$4(this._subscribers),
+      var _iterator = _createForOfIteratorHelper$6(this._subscribers),
           _step;
 
       try {
@@ -2928,11 +2353,11 @@ var ResourceManager = function () {
   return ResourceManager;
 }();
 
-function _createForOfIteratorHelper$5(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$5(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper$7(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$7(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray$5(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$5(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$5(o, minLen); }
+function _unsupportedIterableToArray$7(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$7(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$7(o, minLen); }
 
-function _arrayLikeToArray$5(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function _arrayLikeToArray$7(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 var TRACE_SET_LAYERS = 'layerManager.setLayers';
 var TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
 var INITIAL_CONTEXT = Object.seal({
@@ -2994,7 +2419,7 @@ var LayerManager = function () {
     value: function finalize() {
       this.resourceManager.finalize();
 
-      var _iterator = _createForOfIteratorHelper$5(this.layers),
+      var _iterator = _createForOfIteratorHelper$7(this.layers),
           _step;
 
       try {
@@ -3021,7 +2446,7 @@ var LayerManager = function () {
         this._needsRedraw = false;
       }
 
-      var _iterator2 = _createForOfIteratorHelper$5(this.layers),
+      var _iterator2 = _createForOfIteratorHelper$7(this.layers),
           _step2;
 
       try {
@@ -3099,7 +2524,7 @@ var LayerManager = function () {
       this.lastRenderedLayers = newLayers;
       newLayers = flatten(newLayers, Boolean);
 
-      var _iterator3 = _createForOfIteratorHelper$5(newLayers),
+      var _iterator3 = _createForOfIteratorHelper$7(newLayers),
           _step3;
 
       try {
@@ -3153,7 +2578,7 @@ var LayerManager = function () {
     value: function _updateLayers(oldLayers, newLayers) {
       var oldLayerMap = {};
 
-      var _iterator4 = _createForOfIteratorHelper$5(oldLayers),
+      var _iterator4 = _createForOfIteratorHelper$7(oldLayers),
           _step4;
 
       try {
@@ -3195,7 +2620,7 @@ var LayerManager = function () {
   }, {
     key: "_updateSublayersRecursively",
     value: function _updateSublayersRecursively(newLayers, oldLayerMap, generatedLayers) {
-      var _iterator5 = _createForOfIteratorHelper$5(newLayers),
+      var _iterator5 = _createForOfIteratorHelper$7(newLayers),
           _step5;
 
       try {
@@ -3325,7 +2750,7 @@ var ViewManager = function () {
     this._eventManager = props.eventManager;
     this._eventCallbacks = {
       onViewStateChange: props.onViewStateChange,
-      onInteractiveStateChange: props.onInteractiveStateChange
+      onInteractionStateChange: props.onInteractionStateChange
     };
     Object.seal(this);
     this.setProps(props);
@@ -3475,7 +2900,7 @@ var ViewManager = function () {
   }, {
     key: "_setSize",
     value: function _setSize(width, height) {
-      assert$2(Number.isFinite(width) && Number.isFinite(height));
+      assert$1(Number.isFinite(width) && Number.isFinite(height));
 
       if (width !== this.width || height !== this.height) {
         this.width = width;
@@ -3526,8 +2951,13 @@ var ViewManager = function () {
         timeline: this.timeline,
         eventManager: this._eventManager,
         onViewStateChange: this._onViewStateChange.bind(this, props.id),
-        onStateChange: this._eventCallbacks.onInteractiveStateChange,
-        makeViewport: view._getViewport.bind(view)
+        onStateChange: this._eventCallbacks.onInteractionStateChange,
+        makeViewport: function makeViewport(viewState) {
+          return view._getViewport(viewState, {
+            width: viewState.width,
+            height: viewState.height
+          });
+        }
       }, props));
       return controller;
     }
@@ -3620,9 +3050,9 @@ function ownKeys$2(object, enumerableOnly) { var keys = Object.keys(object); if 
 
 function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$2(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$2(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-function _createSuper$3(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$3(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+function _createSuper$4(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$4(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
-function _isNativeReflectConstruct$3() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+function _isNativeReflectConstruct$4() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 var PITCH_MOUSE_THRESHOLD = 5;
 var PITCH_ACCEL = 1.2;
 var LINEAR_TRANSITION_PROPS = {
@@ -3632,9 +3062,6 @@ var LINEAR_TRANSITION_PROPS = {
   },
   transitionInterpolator: new LinearInterpolator(),
   transitionInterruption: TRANSITION_EVENTS.BREAK
-};
-var NO_TRANSITION_PROPS = {
-  transitionDuration: 0
 };
 var DEFAULT_STATE = {
   pitch: 0,
@@ -3648,7 +3075,7 @@ var DEFAULT_STATE = {
 var MapState = function (_ViewState) {
   _inherits(MapState, _ViewState);
 
-  var _super = _createSuper$3(MapState);
+  var _super = _createSuper$4(MapState);
 
   function MapState() {
     var _this;
@@ -3676,15 +3103,16 @@ var MapState = function (_ViewState) {
         minPitch = _ref$minPitch === void 0 ? DEFAULT_STATE.minPitch : _ref$minPitch,
         startPanLngLat = _ref.startPanLngLat,
         startZoomLngLat = _ref.startZoomLngLat,
+        startRotatePos = _ref.startRotatePos,
         startBearing = _ref.startBearing,
         startPitch = _ref.startPitch,
         startZoom = _ref.startZoom;
 
     _classCallCheck(this, MapState);
 
-    assert$2(Number.isFinite(longitude), '`longitude` must be supplied');
-    assert$2(Number.isFinite(latitude), '`latitude` must be supplied');
-    assert$2(Number.isFinite(zoom), '`zoom` must be supplied');
+    assert$1(Number.isFinite(longitude), '`longitude` must be supplied');
+    assert$1(Number.isFinite(latitude), '`latitude` must be supplied');
+    assert$1(Number.isFinite(zoom), '`zoom` must be supplied');
     _this = _super.call(this, {
       width: width,
       height: height,
@@ -3699,9 +3127,10 @@ var MapState = function (_ViewState) {
       maxPitch: maxPitch,
       minPitch: minPitch
     });
-    _this._interactiveState = {
+    _this._state = {
       startPanLngLat: startPanLngLat,
       startZoomLngLat: startZoomLngLat,
+      startRotatePos: startRotatePos,
       startBearing: startBearing,
       startPitch: startPitch,
       startZoom: startZoom
@@ -3711,16 +3140,6 @@ var MapState = function (_ViewState) {
   }
 
   _createClass(MapState, [{
-    key: "getViewportProps",
-    value: function getViewportProps() {
-      return this._viewportProps;
-    }
-  }, {
-    key: "getInteractiveState",
-    value: function getInteractiveState() {
-      return this._interactiveState;
-    }
-  }, {
     key: "panStart",
     value: function panStart(_ref2) {
       var pos = _ref2.pos;
@@ -3734,7 +3153,7 @@ var MapState = function (_ViewState) {
       var pos = _ref3.pos,
           startPos = _ref3.startPos;
 
-      var startPanLngLat = this._interactiveState.startPanLngLat || this._unproject(startPos);
+      var startPanLngLat = this._state.startPanLngLat || this._unproject(startPos);
 
       if (!startPanLngLat) {
         return this;
@@ -3765,6 +3184,7 @@ var MapState = function (_ViewState) {
     value: function rotateStart(_ref4) {
       var pos = _ref4.pos;
       return this._getUpdatedState({
+        startRotatePos: pos,
         startBearing: this._viewportProps.bearing,
         startPitch: this._viewportProps.pitch
       });
@@ -3772,31 +3192,35 @@ var MapState = function (_ViewState) {
   }, {
     key: "rotate",
     value: function rotate(_ref5) {
-      var _ref5$deltaScaleX = _ref5.deltaScaleX,
-          deltaScaleX = _ref5$deltaScaleX === void 0 ? 0 : _ref5$deltaScaleX,
-          _ref5$deltaScaleY = _ref5.deltaScaleY,
-          deltaScaleY = _ref5$deltaScaleY === void 0 ? 0 : _ref5$deltaScaleY;
-      var _this$_interactiveSta = this._interactiveState,
-          startBearing = _this$_interactiveSta.startBearing,
-          startPitch = _this$_interactiveSta.startPitch;
+      var pos = _ref5.pos,
+          _ref5$deltaAngleX = _ref5.deltaAngleX,
+          deltaAngleX = _ref5$deltaAngleX === void 0 ? 0 : _ref5$deltaAngleX,
+          _ref5$deltaAngleY = _ref5.deltaAngleY,
+          deltaAngleY = _ref5$deltaAngleY === void 0 ? 0 : _ref5$deltaAngleY;
+      var _this$_state = this._state,
+          startRotatePos = _this$_state.startRotatePos,
+          startBearing = _this$_state.startBearing,
+          startPitch = _this$_state.startPitch;
 
-      if (!Number.isFinite(startBearing) || !Number.isFinite(startPitch)) {
+      if (!startRotatePos || !Number.isFinite(startBearing) || !Number.isFinite(startPitch)) {
         return this;
       }
 
-      var _this$_calculateNewPi = this._calculateNewPitchAndBearing({
-        deltaScaleX: deltaScaleX,
-        deltaScaleY: deltaScaleY,
-        startBearing: startBearing,
-        startPitch: startPitch
-      }),
-          pitch = _this$_calculateNewPi.pitch,
-          bearing = _this$_calculateNewPi.bearing;
+      var newRotation;
 
-      return this._getUpdatedState({
-        bearing: bearing,
-        pitch: pitch
-      });
+      if (pos) {
+        newRotation = this._calculateNewPitchAndBearing(_objectSpread$2(_objectSpread$2({}, this._getRotationParams(pos, startRotatePos)), {}, {
+          startBearing: startBearing,
+          startPitch: startPitch
+        }));
+      } else {
+        newRotation = {
+          bearing: startBearing + deltaAngleX,
+          pitch: startPitch + deltaAngleY
+        };
+      }
+
+      return this._getUpdatedState(newRotation);
     }
   }, {
     key: "rotateEnd",
@@ -3821,9 +3245,9 @@ var MapState = function (_ViewState) {
       var pos = _ref7.pos,
           startPos = _ref7.startPos,
           scale = _ref7.scale;
-      var _this$_interactiveSta2 = this._interactiveState,
-          startZoom = _this$_interactiveSta2.startZoom,
-          startZoomLngLat = _this$_interactiveSta2.startZoomLngLat;
+      var _this$_state2 = this._state,
+          startZoom = _this$_state2.startZoom,
+          startZoomLngLat = _this$_state2.startZoomLngLat;
 
       if (!Number.isFinite(startZoom)) {
         startZoom = this._viewportProps.zoom;
@@ -3974,7 +3398,7 @@ var MapState = function (_ViewState) {
     value: function _getUpdatedState(newProps) {
       return new this.constructor(_objectSpread$2(_objectSpread$2(_objectSpread$2({
         makeViewport: this.makeViewport
-      }, this._viewportProps), this._interactiveState), newProps));
+      }, this._viewportProps), this._state), newProps));
     }
   }, {
     key: "_applyConstraints",
@@ -4043,48 +3467,16 @@ var MapState = function (_ViewState) {
         bearing: bearing
       };
     }
-  }]);
-
-  return MapState;
-}(ViewState);
-
-var MapController = function (_Controller) {
-  _inherits(MapController, _Controller);
-
-  var _super2 = _createSuper$3(MapController);
-
-  function MapController(props) {
-    _classCallCheck(this, MapController);
-
-    props.dragMode = props.dragMode || 'pan';
-    return _super2.call(this, MapState, props);
-  }
-
-  _createClass(MapController, [{
-    key: "_getTransitionProps",
-    value: function _getTransitionProps() {
-      return LINEAR_TRANSITION_PROPS;
-    }
   }, {
-    key: "_onPanRotate",
-    value: function _onPanRotate(event) {
-      if (!this.dragRotate) {
-        return false;
-      }
-
-      var deltaX = event.deltaX,
-          deltaY = event.deltaY;
-
-      var _this$getCenter = this.getCenter(event),
-          _this$getCenter2 = _slicedToArray(_this$getCenter, 2),
-          centerY = _this$getCenter2[1];
-
-      var startY = centerY - deltaY;
-
-      var _this$controllerState = this.controllerState.getViewportProps(),
-          width = _this$controllerState.width,
-          height = _this$controllerState.height;
-
+    key: "_getRotationParams",
+    value: function _getRotationParams(pos, startPos) {
+      var deltaX = pos[0] - startPos[0];
+      var deltaY = pos[1] - startPos[1];
+      var centerY = pos[1];
+      var startY = startPos[1];
+      var _this$_viewportProps5 = this._viewportProps,
+          width = _this$_viewportProps5.width,
+          height = _this$_viewportProps5.height;
       var deltaScaleX = deltaX / width;
       var deltaScaleY = 0;
 
@@ -4099,28 +3491,50 @@ var MapController = function (_Controller) {
       }
 
       deltaScaleY = Math.min(1, Math.max(-1, deltaScaleY));
-      var newControllerState = this.controllerState.rotate({
+      return {
         deltaScaleX: deltaScaleX,
         deltaScaleY: deltaScaleY
-      });
-      return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
-        isDragging: true,
-        isRotating: true
-      });
+      };
+    }
+  }]);
+
+  return MapState;
+}(ViewState);
+
+var MapController = function (_Controller) {
+  _inherits(MapController, _Controller);
+
+  var _super2 = _createSuper$4(MapController);
+
+  function MapController(props) {
+    _classCallCheck(this, MapController);
+
+    props.dragMode = props.dragMode || 'pan';
+    return _super2.call(this, MapState, props);
+  }
+
+  _createClass(MapController, [{
+    key: "_getTransitionProps",
+    value: function _getTransitionProps(opts) {
+      return opts ? _objectSpread$2(_objectSpread$2({}, LINEAR_TRANSITION_PROPS), {}, {
+        transitionInterpolator: new LinearInterpolator(_objectSpread$2(_objectSpread$2({}, opts), {}, {
+          makeViewport: this.controllerState.makeViewport
+        }))
+      }) : LINEAR_TRANSITION_PROPS;
     }
   }]);
 
   return MapController;
 }(Controller);
 
-function _createSuper$4(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$4(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+function _createSuper$5(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$5(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
-function _isNativeReflectConstruct$4() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+function _isNativeReflectConstruct$5() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
 var MapView = function (_View) {
   _inherits(MapView, _View);
 
-  var _super = _createSuper$4(MapView);
+  var _super = _createSuper$5(MapView);
 
   function MapView(props) {
     _classCallCheck(this, MapView);
@@ -4143,11 +3557,11 @@ var MapView = function (_View) {
 }(View);
 MapView.displayName = 'MapView';
 
-function _createForOfIteratorHelper$6(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$6(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper$8(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$8(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray$6(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$6(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$6(o, minLen); }
+function _unsupportedIterableToArray$8(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$8(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$8(o, minLen); }
 
-function _arrayLikeToArray$6(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function _arrayLikeToArray$8(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 var DEFAULT_LIGHTING_EFFECT = new LightingEffect();
 
 var EffectManager = function () {
@@ -4206,7 +3620,7 @@ var EffectManager = function () {
   }, {
     key: "cleanup",
     value: function cleanup() {
-      var _iterator = _createForOfIteratorHelper$6(this.effects),
+      var _iterator = _createForOfIteratorHelper$8(this.effects),
           _step;
 
       try {
@@ -4220,7 +3634,7 @@ var EffectManager = function () {
         _iterator.f();
       }
 
-      var _iterator2 = _createForOfIteratorHelper$6(this._internalEffects),
+      var _iterator2 = _createForOfIteratorHelper$8(this._internalEffects),
           _step2;
 
       try {
@@ -4254,14 +3668,14 @@ var EffectManager = function () {
   return EffectManager;
 }();
 
-function _createSuper$5(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$5(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+function _createSuper$6(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$6(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
-function _isNativeReflectConstruct$5() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+function _isNativeReflectConstruct$6() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
 var DrawLayersPass = function (_LayersPass) {
   _inherits(DrawLayersPass, _LayersPass);
 
-  var _super = _createSuper$5(DrawLayersPass);
+  var _super = _createSuper$6(DrawLayersPass);
 
   function DrawLayersPass() {
     _classCallCheck(this, DrawLayersPass);
@@ -4276,9 +3690,9 @@ function ownKeys$3(object, enumerableOnly) { var keys = Object.keys(object); if 
 
 function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$3(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$3(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-function _createSuper$6(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$6(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+function _createSuper$7(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$7(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
-function _isNativeReflectConstruct$6() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+function _isNativeReflectConstruct$7() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 var PICKING_PARAMETERS = {
   blendFunc: [1, 0, 32771, 0],
   blendEquation: 32774
@@ -4287,7 +3701,7 @@ var PICKING_PARAMETERS = {
 var PickLayersPass = function (_LayersPass) {
   _inherits(PickLayersPass, _LayersPass);
 
-  var _super = _createSuper$6(PickLayersPass);
+  var _super = _createSuper$7(PickLayersPass);
 
   function PickLayersPass() {
     _classCallCheck(this, PickLayersPass);
@@ -4299,8 +3713,12 @@ var PickLayersPass = function (_LayersPass) {
     key: "render",
     value: function render(props) {
       if (props.pickingFBO) {
+        this.useAlpha = true;
+
         this._drawPickingBuffer(props);
       } else {
+        this.useAlpha = false;
+
         _get(_getPrototypeOf(PickLayersPass.prototype), "render", this).call(this, props);
       }
     }
@@ -4370,7 +3788,7 @@ var PickLayersPass = function (_LayersPass) {
         blend: false
       } : _objectSpread$3(_objectSpread$3({}, PICKING_PARAMETERS), {}, {
         blend: true,
-        blendColor: [0, 0, 0, (layerIndex + 1) / 255]
+        blendColor: [0, 0, 0, this.useAlpha ? (layerIndex + 1) / 255 : 1]
       });
       return Object.assign({}, layer.props.parameters, pickParameters);
     }
@@ -4379,11 +3797,11 @@ var PickLayersPass = function (_LayersPass) {
   return PickLayersPass;
 }(LayersPass);
 
-function _createForOfIteratorHelper$7(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$7(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper$9(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$9(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray$7(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$7(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$7(o, minLen); }
+function _unsupportedIterableToArray$9(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$9(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$9(o, minLen); }
 
-function _arrayLikeToArray$7(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function _arrayLikeToArray$9(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 function ownKeys$4(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
@@ -4463,7 +3881,7 @@ var DeckRenderer = function () {
     value: function finalize() {
       var renderBuffers = this.renderBuffers;
 
-      var _iterator = _createForOfIteratorHelper$7(renderBuffers),
+      var _iterator = _createForOfIteratorHelper$9(renderBuffers),
           _step;
 
       try {
@@ -4484,7 +3902,7 @@ var DeckRenderer = function () {
     value: function _preRender(effects, opts) {
       var lastPostProcessEffect = null;
 
-      var _iterator2 = _createForOfIteratorHelper$7(effects),
+      var _iterator2 = _createForOfIteratorHelper$9(effects),
           _step2;
 
       try {
@@ -4517,7 +3935,7 @@ var DeckRenderer = function () {
         renderBuffers.push(new Framebuffer(this.gl), new Framebuffer(this.gl));
       }
 
-      var _iterator3 = _createForOfIteratorHelper$7(renderBuffers),
+      var _iterator3 = _createForOfIteratorHelper$9(renderBuffers),
           _step3;
 
       try {
@@ -4541,7 +3959,7 @@ var DeckRenderer = function () {
         target: null
       };
 
-      var _iterator4 = _createForOfIteratorHelper$7(effects),
+      var _iterator4 = _createForOfIteratorHelper$9(effects),
           _step4;
 
       try {
@@ -4681,27 +4099,41 @@ function getUniqueObjects(_ref2) {
 
 function getEmptyPickingInfo(_ref) {
   var pickInfo = _ref.pickInfo,
+      mode = _ref.mode,
       viewports = _ref.viewports,
+      layerFilter = _ref.layerFilter,
       pixelRatio = _ref.pixelRatio,
       x = _ref.x,
       y = _ref.y,
       z = _ref.z;
-  var viewport = getViewportFromCoordinates({
-    viewports: viewports
-  });
+  var layer = pickInfo && pickInfo.pickedLayer;
+
+  var viewportFilter = layerFilter && layer && function (v) {
+    return layerFilter({
+      layer: layer,
+      viewport: v,
+      isPicking: true,
+      renderPass: "picking:".concat(mode)
+    });
+  };
+
+  var viewport = getViewportFromCoordinates(viewports, {
+    x: x,
+    y: y
+  }, viewportFilter);
   var coordinate = viewport && viewport.unproject([x - viewport.x, y - viewport.y], {
     targetZ: z
   });
   return {
     color: null,
     layer: null,
+    viewport: viewport,
     index: -1,
     picked: false,
     x: x,
     y: y,
     pixel: [x, y],
     coordinate: coordinate,
-    lngLat: coordinate,
     devicePixel: pickInfo && [pickInfo.pickedX, pickInfo.pickedY],
     pixelRatio: pixelRatio
   };
@@ -4799,17 +4231,23 @@ function getLayerPickingInfo(_ref2) {
   return info;
 }
 
-function getViewportFromCoordinates(_ref3) {
-  var viewports = _ref3.viewports;
-  var viewport = viewports[0];
-  return viewport;
+function getViewportFromCoordinates(viewports, pixel, filter) {
+  for (var i = viewports.length - 1; i >= 0; i--) {
+    var viewport = viewports[i];
+
+    if (viewport.containsPixel(pixel) && (!filter || filter(viewport))) {
+      return viewport;
+    }
+  }
+
+  return viewports[0];
 }
 
-function _createForOfIteratorHelper$8(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$8(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper$a(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$a(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray$8(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$8(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$8(o, minLen); }
+function _unsupportedIterableToArray$a(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$a(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$a(o, minLen); }
 
-function _arrayLikeToArray$8(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function _arrayLikeToArray$a(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 var DeckPicker = function () {
   function DeckPicker(gl) {
@@ -4873,15 +4311,19 @@ var DeckPicker = function () {
           viewports = _ref.viewports;
       var lastPickedInfo = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.lastPickedInfo.info;
       var lastPickedLayerId = lastPickedInfo && lastPickedInfo.layer && lastPickedInfo.layer.id;
+      var lastPickedViewportId = lastPickedInfo && lastPickedInfo.viewport && lastPickedInfo.viewport.id;
       var layer = lastPickedLayerId ? layers.find(function (l) {
         return l.id === lastPickedLayerId;
       }) : null;
-      var coordinate = viewports[0] && viewports[0].unproject([x, y]);
+      var viewport = lastPickedViewportId && viewports.find(function (v) {
+        return v.id === lastPickedViewportId;
+      }) || viewports[0];
+      var coordinate = viewport && viewport.unproject([x - viewport.x, y - viewport.y]);
       var info = {
         x: x,
         y: y,
+        viewport: viewport,
         coordinate: coordinate,
-        lngLat: coordinate,
         layer: layer
       };
 
@@ -5041,7 +4483,7 @@ var DeckPicker = function () {
         if (pickInfo.pickedColor && i + 1 < depth) {
           var layerId = pickInfo.pickedColor[3] - 1;
           affectedLayers[layerId] = true;
-          layers[layerId].clearPickingColor(pickInfo.pickedColor);
+          layers[layerId].disablePickingIndex(pickInfo.pickedObjectIndex);
         }
 
         infos = processPickInfo({
@@ -5049,6 +4491,7 @@ var DeckPicker = function () {
           lastPickedInfo: this.lastPickedInfo,
           mode: mode,
           layers: layers,
+          layerFilter: this.layerFilter,
           viewports: viewports,
           x: x,
           y: y,
@@ -5056,7 +4499,7 @@ var DeckPicker = function () {
           pixelRatio: pixelRatio
         });
 
-        var _iterator = _createForOfIteratorHelper$8(infos.values()),
+        var _iterator = _createForOfIteratorHelper$a(infos.values()),
             _step;
 
         try {
@@ -5184,7 +4627,7 @@ var DeckPicker = function () {
           pass = _ref4.pass,
           redrawReason = _ref4.redrawReason,
           pickZ = _ref4.pickZ;
-      assert$2(deviceRect.width > 0 && deviceRect.height > 0);
+      assert$1(deviceRect.width > 0 && deviceRect.height > 0);
 
       if (layers.length < 1) {
         return null;
@@ -7950,7 +7393,7 @@ if (typeof undefined$1 === 'function' && undefined$1.amd) {
     undefined$1(function() {
         return Hammer;
     });
-} else if ( module.exports) {
+} else if (module.exports) {
     module.exports = Hammer;
 } else {
     window[exportName] = Hammer;
@@ -8028,7 +7471,12 @@ enhancePointerEventInput(hammer.PointerEventInput);
 enhanceMouseInput(hammer.MouseInput);
 var Manager = hammer.Manager;
 
-var RECOGNIZERS = hammer ? [[hammer.Rotate, {
+var RECOGNIZERS = hammer ? [[hammer.Pan, {
+  event: 'tripan',
+  pointers: 3,
+  threshold: 0,
+  enable: false
+}], [hammer.Rotate, {
   enable: false
 }], [hammer.Pinch, {
   enable: false
@@ -8050,6 +7498,7 @@ var RECOGNIZERS = hammer ? [[hammer.Rotate, {
   enable: false
 }]] : null;
 var RECOGNIZER_COMPATIBLE_MAP = {
+  tripan: ['rotate', 'pinch', 'pan'],
   rotate: ['pinch'],
   pinch: ['pan'],
   pan: ['press', 'doubletap', 'anytap', 'tap'],
@@ -8092,6 +7541,15 @@ var EVENT_RECOGNIZER_MAP = {
   rotatemove: 'rotate',
   rotateend: 'rotate',
   rotatecancel: 'rotate',
+  tripan: 'tripan',
+  tripanstart: 'tripan',
+  tripanmove: 'tripan',
+  tripanup: 'tripan',
+  tripandown: 'tripan',
+  tripanleft: 'tripan',
+  tripanright: 'tripan',
+  tripanend: 'tripan',
+  tripancancel: 'tripan',
   pan: 'pan',
   panstart: 'pan',
   panmove: 'pan',
@@ -8750,9 +8208,9 @@ var EventRegistrar = function () {
 
         for (var _i = 0; _i < entriesToRemove.length; _i++) {
           var _entriesToRemove$_i = entriesToRemove[_i],
-              type = _entriesToRemove$_i.type,
-              handler = _entriesToRemove$_i.handler;
-          this.remove(type, handler);
+              _type = _entriesToRemove$_i.type,
+              _handler = _entriesToRemove$_i.handler;
+          this.remove(_type, _handler);
         }
       }
     }
@@ -8770,6 +8228,11 @@ var EventRegistrar = function () {
   return EventRegistrar;
 }();
 
+function _createForOfIteratorHelper$b(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$b(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray$b(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$b(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$b(o, minLen); }
+
+function _arrayLikeToArray$b(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 var DEFAULT_OPTIONS$1 = {
   events: null,
   recognizers: null,
@@ -8855,12 +8318,12 @@ var EventManager = function () {
       this.contextmenuInput = new ContextmenuInput(element, this._onOtherEvent, {
         enable: false
       });
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
+
+      var _iterator = _createForOfIteratorHelper$b(this.events),
+          _step;
 
       try {
-        for (var _iterator = this.events[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
           var _step$value = _slicedToArray(_step.value, 2),
               eventAlias = _step$value[0],
               eventRegistrar = _step$value[1];
@@ -8872,18 +8335,9 @@ var EventManager = function () {
           }
         }
       } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
+        _iterator.e(err);
       } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-            _iterator["return"]();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
+        _iterator.f();
       }
     }
   }, {
@@ -9017,12 +8471,12 @@ var EventManager = function () {
       if (eventRegistrar.isEmpty()) {
         var recognizerName = eventRegistrar.recognizerName;
         var isRecognizerUsed = false;
-        var _iteratorNormalCompletion2 = true;
-        var _didIteratorError2 = false;
-        var _iteratorError2 = undefined;
+
+        var _iterator2 = _createForOfIteratorHelper$b(events.values()),
+            _step2;
 
         try {
-          for (var _iterator2 = events.values()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
             var eh = _step2.value;
 
             if (eh.recognizerName === recognizerName && !eh.isEmpty()) {
@@ -9031,18 +8485,9 @@ var EventManager = function () {
             }
           }
         } catch (err) {
-          _didIteratorError2 = true;
-          _iteratorError2 = err;
+          _iterator2.e(err);
         } finally {
-          try {
-            if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-              _iterator2["return"]();
-            }
-          } finally {
-            if (_didIteratorError2) {
-              throw _iteratorError2;
-            }
-          }
+          _iterator2.f();
         }
 
         if (!isRecognizerUsed) {
@@ -9074,11 +8519,11 @@ function ownKeys$5(object, enumerableOnly) { var keys = Object.keys(object); if 
 
 function _objectSpread$5(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$5(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$5(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-function _createForOfIteratorHelper$9(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$9(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper$c(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$c(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray$9(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$9(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$9(o, minLen); }
+function _unsupportedIterableToArray$c(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$c(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$c(o, minLen); }
 
-function _arrayLikeToArray$9(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function _arrayLikeToArray$c(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 function noop() {}
 
@@ -9104,9 +8549,11 @@ function getPropTypes(PropTypes) {
     pickingRadius: PropTypes.number,
     useDevicePixels: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
     touchAction: PropTypes.string,
+    eventRecognizerOptions: PropTypes.object,
     onWebGLInitialized: PropTypes.func,
     onResize: PropTypes.func,
     onViewStateChange: PropTypes.func,
+    onInteractionStateChange: PropTypes.func,
     onBeforeRender: PropTypes.func,
     onAfterRender: PropTypes.func,
     onLoad: PropTypes.func,
@@ -9134,6 +8581,7 @@ var defaultProps = {
   controller: null,
   useDevicePixels: true,
   touchAction: 'none',
+  eventRecognizerOptions: {},
   _framebuffer: null,
   _animate: false,
   _pickable: true,
@@ -9141,6 +8589,7 @@ var defaultProps = {
   onWebGLInitialized: noop,
   onResize: noop,
   onViewStateChange: noop,
+  onInteractionStateChange: noop,
   onBeforeRender: noop,
   onAfterRender: noop,
   onLoad: noop,
@@ -9169,6 +8618,7 @@ var Deck = function () {
     this._lastPointerDownInfo = null;
     this.viewState = null;
     this.interactiveState = {
+      isHovering: false,
       isDragging: false
     };
     this._onEvent = this._onEvent.bind(this);
@@ -9178,7 +8628,7 @@ var Deck = function () {
     this._onRendererInitialized = this._onRendererInitialized.bind(this);
     this._onRenderFrame = this._onRenderFrame.bind(this);
     this._onViewStateChange = this._onViewStateChange.bind(this);
-    this._onInteractiveStateChange = this._onInteractiveStateChange.bind(this);
+    this._onInteractionStateChange = this._onInteractionStateChange.bind(this);
 
     if (props.viewState && props.initialViewState) {
       log.warn('View state tracking is disabled. Use either `initialViewState` for auto update or `viewState` for manual update.')();
@@ -9385,7 +8835,7 @@ var Deck = function () {
   }, {
     key: "_removeResources",
     value: function _removeResources(resourceIds) {
-      var _iterator = _createForOfIteratorHelper$9(resourceIds),
+      var _iterator = _createForOfIteratorHelper$c(resourceIds),
           _step;
 
       try {
@@ -9421,7 +8871,7 @@ var Deck = function () {
 
       if (typeof canvas === 'string') {
         canvas = document.getElementById(canvas);
-        assert$2(canvas);
+        assert$1(canvas);
       }
 
       if (!canvas) {
@@ -9587,10 +9037,11 @@ var Deck = function () {
             result = _this$_pick.result,
             emptyInfo = _this$_pick.emptyInfo;
 
+        this.interactiveState.isHovering = result.length > 0;
         var pickedInfo = emptyInfo;
         var handled = false;
 
-        var _iterator2 = _createForOfIteratorHelper$9(result),
+        var _iterator2 = _createForOfIteratorHelper$c(result),
             _step2;
 
         try {
@@ -9655,6 +9106,7 @@ var Deck = function () {
       this.animationLoop.attachTimeline(timeline);
       this.eventManager = new EventManager(this.props.parent || gl.canvas, {
         touchAction: this.props.touchAction,
+        recognizerOptions: this.props.eventRecognizerOptions,
         events: {
           pointerdown: this._onPointerDown,
           pointermove: this._onPointerMove,
@@ -9670,7 +9122,7 @@ var Deck = function () {
         timeline: timeline,
         eventManager: this.eventManager,
         onViewStateChange: this._onViewStateChange,
-        onInteractiveStateChange: this._onInteractiveStateChange,
+        onInteractionStateChange: this._onInteractionStateChange,
         views: this._getViews(),
         viewState: this._getViewState(),
         width: this.width,
@@ -9767,14 +9219,10 @@ var Deck = function () {
       }
     }
   }, {
-    key: "_onInteractiveStateChange",
-    value: function _onInteractiveStateChange(_ref3) {
-      var _ref3$isDragging = _ref3.isDragging,
-          isDragging = _ref3$isDragging === void 0 ? false : _ref3$isDragging;
-
-      if (isDragging !== this.interactiveState.isDragging) {
-        this.interactiveState.isDragging = isDragging;
-      }
+    key: "_onInteractionStateChange",
+    value: function _onInteractionStateChange(interactionState) {
+      this.interactiveState.isDragging = interactionState.isDragging;
+      this.props.onInteractionStateChange(interactionState);
     }
   }, {
     key: "_onEvent",
@@ -9991,15 +9439,15 @@ function needsDeckGLViewProps(child) {
   return componentClass && componentClass.deckGLViewProps;
 }
 
-function _createForOfIteratorHelper$a(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$a(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper$d(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$d(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray$a(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$a(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$a(o, minLen); }
+function _unsupportedIterableToArray$d(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$d(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$d(o, minLen); }
 
-function _arrayLikeToArray$a(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function _arrayLikeToArray$d(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 function positionChildrenUnderViews(_ref) {
-  var children = _ref.children,
-      viewports = _ref.viewports,
-      deck = _ref.deck,
+  var children = _ref.children;
+      _ref.viewports;
+      var deck = _ref.deck,
       ContextProvider = _ref.ContextProvider;
 
   var _ref2 = deck || {},
@@ -10012,7 +9460,7 @@ function positionChildrenUnderViews(_ref) {
   var views = {};
   var defaultViewId = viewManager.views[0].id;
 
-  var _iterator = _createForOfIteratorHelper$a(children),
+  var _iterator = _createForOfIteratorHelper$d(children),
       _step;
 
   try {
@@ -10138,16 +9586,16 @@ function extractStyles(_ref) {
   };
 }
 
-function _createSuper$7(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$7(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+function _createSuper$8(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$8(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
-function _isNativeReflectConstruct$7() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+function _isNativeReflectConstruct$8() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 var propTypes = Deck.getPropTypes(propTypes$1);
 var defaultProps$1 = Deck.defaultProps;
 
 var DeckGL = function (_React$Component) {
   _inherits(DeckGL, _React$Component);
 
-  var _super = _createSuper$7(DeckGL);
+  var _super = _createSuper$8(DeckGL);
 
   function DeckGL(props) {
     var _this;

@@ -1,19 +1,19 @@
-import '../common/_commonjsHelpers-37fa8da4.js';
-import '../common/typeof-c65245d2.js';
-import '../common/defineProperty-1b0b77a2.js';
-import { _ as _classCallCheck } from '../common/classCallCheck-4eda545c.js';
-import { b as _assertThisInitialized, a as _toConsumableArray, _ as _createClass } from '../common/assertThisInitialized-87ceda02.js';
-import { _ as _slicedToArray } from '../common/slicedToArray-14e71088.js';
 import { _ as _extends, a as _objectWithoutPropertiesLoose, b as _objectWithoutProperties } from '../common/deepmerge-9adb393e.js';
 import { r as react } from '../common/index-aae33e1a.js';
 import '../common/index-c103191b.js';
-import { f as fade, z as zIndex, a as formatMuiErrorMessage, l as lighten, d as darken } from '../common/createMuiTheme-0e5622a9.js';
-import { _ as _inheritsLoose, u as useTheme, g as getThemeProps } from '../common/withStyles-abfc6f73.js';
-import { w as withStyles, c as clsx } from '../common/withStyles-6a9e3764.js';
-import { T as TransitionGroupContext, u as useForkRef, A as AccordionContext, s as setRef, a as useTheme$1, b as Transition, r as reflow, g as getTransitionProps, P as Paper, c as useControlled } from '../common/AccordionContext-e0b0058c.js';
-export { P as Paper } from '../common/AccordionContext-e0b0058c.js';
-import { S as SvgIcon, c as capitalize } from '../common/SvgIcon-f69034ab.js';
+import { w as withStyles, c as clsx } from '../common/withStyles-e3313d25.js';
+import { c as capitalize, a as createSvgIcon } from '../common/createSvgIcon-bd98675a.js';
+import { T as TransitionGroupContext, u as useForkRef, A as AccordionContext, s as setRef, a as useTheme$1, b as Transition, r as reflow, g as getTransitionProps, P as Paper, c as useControlled } from '../common/AccordionContext-59dfc05d.js';
+export { P as Paper } from '../common/AccordionContext-59dfc05d.js';
+import { f as fade, z as zIndex, a as formatMuiErrorMessage, l as lighten, d as darken } from '../common/createMuiTheme-d4d75565.js';
 import { r as reactDom } from '../common/index-b1abb70f.js';
+import { c as _assertThisInitialized, a as _toConsumableArray, _ as _createClass } from '../common/setPrototypeOf-6a943dce.js';
+import { _ as _inheritsLoose, u as useTheme, g as getThemeProps } from '../common/withStyles-59908e3e.js';
+import { _ as _classCallCheck } from '../common/classCallCheck-4eda545c.js';
+import { _ as _slicedToArray } from '../common/slicedToArray-09da29a7.js';
+import '../common/typeof-c65245d2.js';
+import '../common/_commonjsHelpers-37fa8da4.js';
+import '../common/defineProperty-1b0b77a2.js';
 
 /**
  * Safe chained function
@@ -43,21 +43,6 @@ function createChainedFunction() {
       func.apply(this, args);
     };
   }, function () {});
-}
-
-/**
- * Private module reserved for @material-ui/x packages.
- */
-
-function createSvgIcon(path, displayName) {
-  var Component = function Component(props, ref) {
-    return /*#__PURE__*/react.createElement(SvgIcon, _extends({
-      ref: ref
-    }, props), path);
-  };
-
-  Component.muiName = SvgIcon.muiName;
-  return /*#__PURE__*/react.memo( /*#__PURE__*/react.forwardRef(Component));
 }
 
 // Corresponds to 10 frames at 60 Hz.
@@ -517,7 +502,7 @@ var TransitionGroup = /*#__PURE__*/function (_React$Component) {
   return TransitionGroup;
 }(react.Component);
 
-TransitionGroup.propTypes =  {};
+TransitionGroup.propTypes = {};
 TransitionGroup.defaultProps = defaultProps;
 
 var styles = function styles(theme) {
@@ -2832,22 +2817,22 @@ var InputBase = /*#__PURE__*/react.forwardRef(function InputBase(props, ref) {
       autoComplete = props.autoComplete,
       autoFocus = props.autoFocus,
       classes = props.classes,
-      className = props.className,
-      color = props.color,
-      defaultValue = props.defaultValue,
+      className = props.className;
+      props.color;
+      var defaultValue = props.defaultValue,
       disabled = props.disabled,
-      endAdornment = props.endAdornment,
-      error = props.error,
-      _props$fullWidth = props.fullWidth,
+      endAdornment = props.endAdornment;
+      props.error;
+      var _props$fullWidth = props.fullWidth,
       fullWidth = _props$fullWidth === void 0 ? false : _props$fullWidth,
       id = props.id,
       _props$inputComponent = props.inputComponent,
       inputComponent = _props$inputComponent === void 0 ? 'input' : _props$inputComponent,
       _props$inputProps = props.inputProps,
       inputPropsProp = _props$inputProps === void 0 ? {} : _props$inputProps,
-      inputRefProp = props.inputRef,
-      margin = props.margin,
-      _props$multiline = props.multiline,
+      inputRefProp = props.inputRef;
+      props.margin;
+      var _props$multiline = props.multiline,
       multiline = _props$multiline === void 0 ? false : _props$multiline,
       name = props.name,
       onBlur = props.onBlur,
@@ -2966,7 +2951,7 @@ var InputBase = /*#__PURE__*/react.forwardRef(function InputBase(props, ref) {
       var element = event.target || inputRef.current;
 
       if (element == null) {
-        throw new Error( formatMuiErrorMessage(1));
+        throw new Error(formatMuiErrorMessage(1));
       }
 
       checkDirty({
@@ -4111,9 +4096,9 @@ var NativeSelect = /*#__PURE__*/react.forwardRef(function NativeSelect(props, re
       IconComponent = _props$IconComponent === void 0 ? ArrowDropDownIcon : _props$IconComponent,
       _props$input = props.input,
       input = _props$input === void 0 ? defaultInput : _props$input,
-      inputProps = props.inputProps,
-      variant = props.variant,
-      other = _objectWithoutProperties(props, ["children", "classes", "IconComponent", "input", "inputProps", "variant"]);
+      inputProps = props.inputProps;
+      props.variant;
+      var other = _objectWithoutProperties(props, ["children", "classes", "IconComponent", "input", "inputProps", "variant"]);
 
   var muiFormControl = useFormControl$1();
   var fcs = formControlState({

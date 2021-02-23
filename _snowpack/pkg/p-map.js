@@ -1,5 +1,5 @@
-import { b as getDefaultExportFromNamespaceIfNotNamed } from './common/_commonjsHelpers-37fa8da4.js';
 import { n as node } from './common/_node-resolve:empty-0f7f843d.js';
+import { b as getDefaultExportFromNamespaceIfNotNamed } from './common/_commonjsHelpers-37fa8da4.js';
 
 var indentString = (string, count = 1, options) => {
 	options = {

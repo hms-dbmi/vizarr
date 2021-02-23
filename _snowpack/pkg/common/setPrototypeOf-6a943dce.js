@@ -57,4 +57,13 @@ function _assertThisInitialized(self) {
   return self;
 }
 
-export { _createClass as _, _toConsumableArray as a, _assertThisInitialized as b, _unsupportedIterableToArray as c, _iterableToArray as d };
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+
+  return _setPrototypeOf(o, p);
+}
+
+export { _createClass as _, _toConsumableArray as a, _setPrototypeOf as b, _assertThisInitialized as c, _unsupportedIterableToArray as d, _iterableToArray as e };

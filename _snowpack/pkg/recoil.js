@@ -1,6 +1,6 @@
-import './common/_commonjsHelpers-37fa8da4.js';
 import { r as react } from './common/index-aae33e1a.js';
 import { r as reactDom } from './common/index-b1abb70f.js';
+import './common/_commonjsHelpers-37fa8da4.js';
 
 function _defineProperty(obj, key, value) {
   if (key in obj) {
@@ -85,7 +85,7 @@ const recoilValues = new Map();
 
 function registerNode(node) {
   if (nodes.has(node.key)) {
-    const message = `Duplicate atom key "${node.key}". This is a FATAL ERROR in
+    `Duplicate atom key "${node.key}". This is a FATAL ERROR in
       production. But it is safe to ignore this warning if it occurred because of
       hot module replacement.`; // TODO Need to figure out if there is a standard/open-source equivalent to see if hot module replacement is happening:
   }
@@ -2168,7 +2168,7 @@ function useRecoilCallback(fn, deps) {
         gotoSnapshot
       })(...args);
     });
-    !!(ret instanceof Sentinel) ?  Recoil_invariant(false) : void 0;
+    !!(ret instanceof Sentinel) ? Recoil_invariant(false) : void 0;
     return ret;
   }, deps != null ? [...deps, storeRef] : undefined // eslint-disable-line fb-www/react-hooks-deps
   );

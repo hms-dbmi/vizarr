@@ -1,53 +1,62 @@
-import {openArray, HTTPStore} from "../_snowpack/pkg/zarr.js";
+import {ZarrPixelSource} from "../_snowpack/pkg/@hms-dbmi/viv.js";
 import pMap from "../_snowpack/pkg/p-map.js";
-import {getJson, rstrip, join} from "./utils.js";
-import {createLoader} from "./io.js";
-async function createLoaderFromPath(store, path) {
-  if (path === void 0) {
-    return;
-  }
-  try {
-    const data = await openArray({store, path});
-    let l = createLoader([data]);
-    return l;
-  } catch (err) {
-    console.log(`Failed to create loader: ${path}`);
-  }
-}
-export async function loadOMEWell(config, store, rootAttrs) {
+import {HTTPStore, openGroup} from "../_snowpack/pkg/zarr.js";
+import {join, loadMultiscales, guessTileSize, range} from "./utils.js";
+export async function loadWell(config, grp, wellAttrs) {
   const acquisitionId = config.acquisition ? parseInt(config.acquisition) : void 0;
   let acquisitions = [];
-  const wellAttrs = rootAttrs.well;
-  if (!wellAttrs.images) {
+  if (!wellAttrs?.images) {
     throw Error(`Well .zattrs missing images`);
   }
-  const [row, col] = store.url.split("/").filter(Boolean).slice(-2);
-  let images = wellAttrs.images;
+  if (!(grp.store instanceof HTTPStore)) {
+    throw Error("Store must be an HTTPStore to open well.");
+  }
+  const [row, col] = grp.path.split("/").filter(Boolean).slice(-2);
+  let {images} = wellAttrs;
   const acqIds = images.flatMap((img) => img.acquisition ? [img.acquisition] : []);
   if (acqIds.length > 1) {
-    const plateUrl = store.url.replace(`/${row}/${col}`, "");
-    const plateStore = new HTTPStore(plateUrl);
-    const plateAttrs = await getJson(plateStore, `.zattrs`);
-    acquisitions = plateAttrs?.plate?.acquisitions;
+    const platePath = grp.path.replace(`${row}/${col}`, "");
+    const plate = await openGroup(grp.store, platePath);
+    const plateAttrs = await plate.attrs.asObject();
+    acquisitions = plateAttrs?.plate?.acquisitions ?? [];
     if (acquisitionId && acqIds.includes(acquisitionId)) {
       images = images.filter((img) => img.acquisition === acquisitionId);
     }
   }
-  let imagePaths = images.map((img) => rstrip(img.path, "/"));
-  let imageAttrs = await getJson(store, `${imagePaths[0]}/.zattrs`);
-  let resolution = imageAttrs.multiscales[0].datasets[0].path;
-  const promises = imagePaths.map((p) => createLoaderFromPath(store, join(p, resolution)));
-  let loaders = await Promise.all(promises);
-  const loader = loaders.find(Boolean);
-  const sourceData = loadOME(config, imageAttrs.omero, loader);
-  const cols = Math.ceil(Math.sqrt(imagePaths.length));
+  const imgPaths = images.map((img) => img.path);
+  const cols = Math.ceil(Math.sqrt(imgPaths.length));
+  const rows = Math.ceil(imgPaths.length / cols);
+  const imgAttrs = await grp.getItem(imgPaths[0]).then((g) => g.attrs.asObject());
+  if (!("omero" in imgAttrs)) {
+    throw Error("Path for image is not valid.");
+  }
+  let resolution = imgAttrs.multiscales[0].datasets[0].path;
+  const promises = imgPaths.map((p) => grp.getItem(join(p, resolution)));
+  const meta = parseOmeroMeta(imgAttrs.omero);
+  const data = await Promise.all(promises);
+  const tileSize = guessTileSize(data[0]);
+  const loaders = range(rows).flatMap((row2) => {
+    return range(cols).map((col2) => {
+      const offset = col2 + row2 * cols;
+      return {name: String(offset), row: row2, col: col2, loader: new ZarrPixelSource(data[offset], meta.axis_labels, tileSize)};
+    });
+  });
+  const sourceData = {
+    loaders,
+    ...meta,
+    loader: [loaders[0].loader],
+    defaults: {
+      selection: meta.defaultSelection,
+      colormap: config.colormap ?? "",
+      opacity: config.opacity ?? 1
+    },
+    name: `Well ${row}${col}`
+  };
   if (acquisitions.length > 0) {
     sourceData.acquisitions = acquisitions;
     sourceData.acquisitionId = acquisitionId || -1;
   }
-  sourceData.loaders = loaders;
-  sourceData.name = `Well ${row}${col}`;
-  sourceData.rows = Math.ceil(imagePaths.length / cols);
+  sourceData.rows = rows;
   sourceData.columns = cols;
   sourceData.onClick = (info) => {
     let gridCoord = info.gridCoord;
@@ -55,11 +64,10 @@ export async function loadOMEWell(config, store, rootAttrs) {
       return;
     }
     const {row: row2, column} = gridCoord;
-    const {source} = sourceData;
     let imgSource = void 0;
-    if (typeof source === "string" && !isNaN(row2) && !isNaN(column)) {
+    if (grp.store instanceof HTTPStore && grp.path !== "" && !isNaN(row2) && !isNaN(column)) {
       const field = row2 * cols + column;
-      imgSource = join(source, imagePaths[field]);
+      imgSource = join(grp.store.url, grp.path, imgPaths[field]);
     }
     if (config.onClick) {
       delete info.layer;
@@ -71,59 +79,60 @@ export async function loadOMEWell(config, store, rootAttrs) {
   };
   return sourceData;
 }
-export async function loadOMEPlate(config, store, rootAttrs) {
-  const plateAttrs = rootAttrs.plate;
+export async function loadPlate(config, grp, plateAttrs) {
   if (!("columns" in plateAttrs) || !("rows" in plateAttrs)) {
     throw Error(`Plate .zattrs missing columns or rows`);
   }
-  let rows = plateAttrs.rows.length;
-  let columns = plateAttrs.columns.length;
-  let rowNames = plateAttrs.rows.map((row) => row.name);
-  let columnNames = plateAttrs.columns.map((col) => col.name);
-  let wellPaths = plateAttrs.wells.map((well) => rstrip(well.path, "/"));
-  let field = "0";
-  let acquisitionPath = plateAttrs?.acquisitions?.[0]?.path || "";
-  const imagePaths = rowNames.flatMap((row) => {
-    return columnNames.map((col) => {
-      const wellPath = join(acquisitionPath, row, col);
-      return wellPaths.includes(wellPath) ? join(wellPath, field) : "";
-    });
+  const rows = plateAttrs.rows.map((row) => row.name);
+  const columns = plateAttrs.columns.map((row) => row.name);
+  const wellPaths = plateAttrs.wells.map((well) => well.path);
+  const wellAttrs = await grp.getItem(wellPaths[0]).then((g) => g.attrs.asObject());
+  if (!("well" in wellAttrs)) {
+    throw Error("Path for image is not valid, not a well.");
+  }
+  const imgPath = wellAttrs.well.images[0].path;
+  const imgAttrs = await grp.getItem(join(wellPaths[0], imgPath)).then((g) => g.attrs.asObject());
+  if (!("omero" in imgAttrs)) {
+    throw Error("Path for image is not valid.");
+  }
+  const {datasets} = imgAttrs.multiscales[0];
+  const resolution = datasets[datasets.length - 1].path;
+  const mapper = ([key, path]) => grp.getItem(path).then((arr) => [key, arr]);
+  const promises = await pMap(wellPaths.map((p) => [p, join(p, imgPath, resolution)]), mapper, {concurrency: 10});
+  const meta = parseOmeroMeta(imgAttrs.omero);
+  const data = await Promise.all(promises);
+  const tileSize = guessTileSize(data[0][1]);
+  const loaders = data.map((d) => {
+    const [row, col] = d[0].split("/");
+    return {
+      name: `${row}${col}`,
+      row: rows.indexOf(row),
+      col: columns.indexOf(col),
+      loader: new ZarrPixelSource(d[1], meta.axis_labels, tileSize)
+    };
   });
-  let imageAttrs = void 0;
-  async function getImageAttrs(path) {
-    if (path === "")
-      return;
-    try {
-      return await getJson(store, join(path, ".zattrs"));
-    } catch (err) {
-    }
-  }
-  for (let i = 0; i < imagePaths.length; i++) {
-    imageAttrs = await getImageAttrs(imagePaths[i]);
-    if (imageAttrs) {
-      break;
-    }
-  }
-  let resolution = imageAttrs.multiscales[0].datasets.slice(-1)[0].path;
-  const mapper = (path) => createLoaderFromPath(store, path ? join(path, resolution) : void 0);
-  const promises = await pMap(imagePaths, mapper, {concurrency: 10});
-  let loaders = await Promise.all(promises);
-  const loader = loaders.find(Boolean);
-  const sourceData = loadOME(config, imageAttrs.omero, loader);
-  sourceData.loaders = loaders;
-  sourceData.name = plateAttrs.name || "Plate";
-  sourceData.rows = rows;
-  sourceData.columns = columns;
+  const sourceData = {
+    loaders,
+    ...meta,
+    loader: [loaders[0].loader],
+    defaults: {
+      selection: meta.defaultSelection,
+      colormap: config.colormap ?? "",
+      opacity: config.opacity ?? 1
+    },
+    name: plateAttrs.name || "Plate",
+    rows: rows.length,
+    columns: columns.length
+  };
   sourceData.onClick = (info) => {
     let gridCoord = info.gridCoord;
     if (!gridCoord) {
       return;
     }
     const {row, column} = gridCoord;
-    let {source} = sourceData;
     let imgSource = void 0;
-    if (typeof source === "string" && !isNaN(row) && !isNaN(column)) {
-      imgSource = join(source, acquisitionPath, rowNames[row], columnNames[column]);
+    if (grp.store instanceof HTTPStore && !isNaN(row) && !isNaN(column)) {
+      imgSource = join(grp.store.url, grp.path, rows[row], columns[column]);
     }
     if (config.onClick) {
       delete info.layer;
@@ -135,9 +144,24 @@ export async function loadOMEPlate(config, store, rootAttrs) {
   };
   return sourceData;
 }
-export function loadOME(config, imageData, loader) {
-  const {name, opacity = 1, colormap = "", translate, source} = config;
-  const {rdefs, channels} = imageData;
+export async function loadOmeroMultiscales(config, grp, attrs) {
+  const {name, opacity = 1, colormap = ""} = config;
+  const data = await loadMultiscales(grp, attrs.multiscales);
+  const meta = parseOmeroMeta(attrs.omero);
+  const tileSize = guessTileSize(data[0]);
+  const loader = data.map((arr) => new ZarrPixelSource(arr, meta.axis_labels, tileSize));
+  return {
+    loader,
+    name: meta.name ?? name,
+    defaults: {
+      selection: meta.defaultSelection,
+      colormap,
+      opacity
+    },
+    ...meta
+  };
+}
+function parseOmeroMeta({rdefs, channels, name}) {
   const t = rdefs.defaultT ?? 0;
   const z = rdefs.defaultZ ?? 0;
   const colors = [];
@@ -151,20 +175,13 @@ export function loadOME(config, imageData, loader) {
     names.push(c.label);
   });
   return {
-    loader,
-    source,
-    name: imageData.name ?? name,
-    channel_axis: 1,
-    colors,
+    name,
     names,
+    colors,
     contrast_limits,
     visibilities,
-    defaults: {
-      selection: [t, 0, z, 0, 0],
-      colormap,
-      opacity
-    },
-    axis_labels: ["t", "c", "z", "y", "x"],
-    translate: translate ?? [0, 0]
+    channel_axis: 1,
+    defaultSelection: [t, 0, z, 0, 0],
+    axis_labels: ["t", "c", "z", "y", "x"]
   };
 }

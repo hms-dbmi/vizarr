@@ -1,8 +1,8 @@
-import { a as _objectWithoutPropertiesLoose, _ as _extends, b as _objectWithoutProperties } from './deepmerge-9adb393e.js';
 import { r as react } from './index-aae33e1a.js';
+import { d as defaultTheme, w as withStyles, c as clsx } from './withStyles-e3313d25.js';
+import { u as useTheme$1, _ as _inheritsLoose } from './withStyles-59908e3e.js';
+import { a as _objectWithoutPropertiesLoose, _ as _extends, b as _objectWithoutProperties } from './deepmerge-9adb393e.js';
 import './index-c103191b.js';
-import { u as useTheme$1, _ as _inheritsLoose } from './withStyles-abfc6f73.js';
-import { d as defaultTheme, w as withStyles, c as clsx } from './withStyles-6a9e3764.js';
 import { r as reactDom } from './index-b1abb70f.js';
 
 function useTheme() {
@@ -23,9 +23,9 @@ function setRef(ref, value) {
 /* eslint-disable react-hooks/rules-of-hooks, react-hooks/exhaustive-deps */
 function useControlled(_ref) {
   var controlled = _ref.controlled,
-      defaultProp = _ref.default,
-      name = _ref.name,
-      _ref$state = _ref.state;
+      defaultProp = _ref.default;
+      _ref.name;
+      _ref.state;
 
   var _React$useRef = react.useRef(controlled !== undefined),
       isControlled = _React$useRef.current;
@@ -435,23 +435,23 @@ var Transition = /*#__PURE__*/function (_React$Component) {
     }
 
     var _this$props = this.props,
-        children = _this$props.children,
-        _in = _this$props.in,
-        _mountOnEnter = _this$props.mountOnEnter,
-        _unmountOnExit = _this$props.unmountOnExit,
-        _appear = _this$props.appear,
-        _enter = _this$props.enter,
-        _exit = _this$props.exit,
-        _timeout = _this$props.timeout,
-        _addEndListener = _this$props.addEndListener,
-        _onEnter = _this$props.onEnter,
-        _onEntering = _this$props.onEntering,
-        _onEntered = _this$props.onEntered,
-        _onExit = _this$props.onExit,
-        _onExiting = _this$props.onExiting,
-        _onExited = _this$props.onExited,
-        _nodeRef = _this$props.nodeRef,
-        childProps = _objectWithoutPropertiesLoose(_this$props, ["children", "in", "mountOnEnter", "unmountOnExit", "appear", "enter", "exit", "timeout", "addEndListener", "onEnter", "onEntering", "onEntered", "onExit", "onExiting", "onExited", "nodeRef"]);
+        children = _this$props.children;
+        _this$props.in;
+        _this$props.mountOnEnter;
+        _this$props.unmountOnExit;
+        _this$props.appear;
+        _this$props.enter;
+        _this$props.exit;
+        _this$props.timeout;
+        _this$props.addEndListener;
+        _this$props.onEnter;
+        _this$props.onEntering;
+        _this$props.onEntered;
+        _this$props.onExit;
+        _this$props.onExiting;
+        _this$props.onExited;
+        _this$props.nodeRef;
+        var childProps = _objectWithoutPropertiesLoose(_this$props, ["children", "in", "mountOnEnter", "unmountOnExit", "appear", "enter", "exit", "timeout", "addEndListener", "onEnter", "onEntering", "onEntered", "onExit", "onExiting", "onExited", "nodeRef"]);
 
     return (
       /*#__PURE__*/
@@ -466,7 +466,7 @@ var Transition = /*#__PURE__*/function (_React$Component) {
 }(react.Component);
 
 Transition.contextType = TransitionGroupContext;
-Transition.propTypes =  {}; // Name the function so it is clearer in the documentation
+Transition.propTypes = {}; // Name the function so it is clearer in the documentation
 
 function noop() {}
 

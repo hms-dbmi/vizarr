@@ -6,7 +6,7 @@ import {sourceInfoState} from "../../state.js";
 function AxisSliders({layerId}) {
   const sourceInfo = useRecoilValue(sourceInfoState);
   const {axis_labels, channel_axis, loader} = sourceInfo[layerId];
-  const sliders = axis_labels.slice(0, -2).map((name, i) => [name, i, loader.base.shape[i]]).filter((d) => {
+  const sliders = axis_labels.slice(0, -2).map((name, i) => [name, i, loader[0].shape[i]]).filter((d) => {
     if (d[1] === channel_axis)
       return false;
     if (d[2] > 1)

@@ -34,7 +34,7 @@ function LayerController({layerId}) {
       const initialLayerState = await initLayerStateFromSource(sourceData, layerId);
       setLayer(initialLayerState);
     }
-    if (layerId in sourceInfo && !layer.layerProps.loader) {
+    if (layerId in sourceInfo) {
       const config = sourceInfo[layerId];
       initLayer(config);
     }

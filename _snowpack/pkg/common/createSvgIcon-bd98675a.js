@@ -1,8 +1,8 @@
 import { b as _objectWithoutProperties, _ as _extends } from './deepmerge-9adb393e.js';
 import { r as react } from './index-aae33e1a.js';
 import './index-c103191b.js';
-import { a as formatMuiErrorMessage } from './createMuiTheme-0e5622a9.js';
-import { w as withStyles, c as clsx } from './withStyles-6a9e3764.js';
+import { w as withStyles, c as clsx } from './withStyles-e3313d25.js';
+import { a as formatMuiErrorMessage } from './createMuiTheme-d4d75565.js';
 
 // It should to be noted that this function isn't equivalent to `text-transform: capitalize`.
 //
@@ -10,7 +10,7 @@ import { w as withStyles, c as clsx } from './withStyles-6a9e3764.js';
 // We only handle the first word.
 function capitalize(string) {
   if (typeof string !== 'string') {
-    throw new Error( formatMuiErrorMessage(7));
+    throw new Error(formatMuiErrorMessage(7));
   }
 
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -104,4 +104,19 @@ var SvgIcon$1 = withStyles(styles, {
   name: 'MuiSvgIcon'
 })(SvgIcon);
 
-export { SvgIcon$1 as S, capitalize as c };
+/**
+ * Private module reserved for @material-ui/x packages.
+ */
+
+function createSvgIcon(path, displayName) {
+  var Component = function Component(props, ref) {
+    return /*#__PURE__*/react.createElement(SvgIcon$1, _extends({
+      ref: ref
+    }, props), path);
+  };
+
+  Component.muiName = SvgIcon$1.muiName;
+  return /*#__PURE__*/react.memo( /*#__PURE__*/react.forwardRef(Component));
+}
+
+export { createSvgIcon as a, capitalize as c };

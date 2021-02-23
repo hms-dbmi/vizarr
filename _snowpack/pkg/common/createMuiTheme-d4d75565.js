@@ -1,5 +1,5 @@
-import { _ as _defineProperty } from './defineProperty-1b0b77a2.js';
 import { b as _objectWithoutProperties, _ as _extends, d as deepmerge } from './deepmerge-9adb393e.js';
+import { _ as _defineProperty } from './defineProperty-1b0b77a2.js';
 
 var common = {
   black: '#000',
@@ -244,7 +244,7 @@ function decomposeColor(color) {
   var type = color.substring(0, marker);
 
   if (['rgb', 'rgba', 'hsl', 'hsla'].indexOf(type) === -1) {
-    throw new Error( formatMuiErrorMessage(3, color));
+    throw new Error(formatMuiErrorMessage(3, color));
   }
 
   var values = color.substring(marker + 1, color.length - 1).split(',');
@@ -636,11 +636,11 @@ function createPalette(palette) {
     }
 
     if (!color.main) {
-      throw new Error( formatMuiErrorMessage(4, mainShade));
+      throw new Error(formatMuiErrorMessage(4, mainShade));
     }
 
     if (typeof color.main !== 'string') {
-      throw new Error( formatMuiErrorMessage(5, JSON.stringify(color.main)));
+      throw new Error(formatMuiErrorMessage(5, JSON.stringify(color.main)));
     }
 
     addLightOrDark(color, 'light', lightShade, tonalOffset);
@@ -919,8 +919,8 @@ var transitions = {
         _options$easing = options.easing,
         easingOption = _options$easing === void 0 ? easing.easeInOut : _options$easing,
         _options$delay = options.delay,
-        delay = _options$delay === void 0 ? 0 : _options$delay,
-        other = _objectWithoutProperties(options, ["duration", "easing", "delay"]);
+        delay = _options$delay === void 0 ? 0 : _options$delay;
+        _objectWithoutProperties(options, ["duration", "easing", "delay"]);
 
     return (Array.isArray(props) ? props : [props]).map(function (animatedProp) {
       return "".concat(animatedProp, " ").concat(typeof durationOption === 'string' ? durationOption : formatMs(durationOption), " ").concat(easingOption, " ").concat(typeof delay === 'string' ? delay : formatMs(delay));

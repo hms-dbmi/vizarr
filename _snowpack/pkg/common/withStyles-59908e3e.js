@@ -1,8 +1,8 @@
-import { c as createCommonjsModule } from './_commonjsHelpers-37fa8da4.js';
-import { _ as _createClass, b as _assertThisInitialized, a as _toConsumableArray } from './assertThisInitialized-87ceda02.js';
 import { _ as _extends, a as _objectWithoutPropertiesLoose, d as deepmerge, b as _objectWithoutProperties } from './deepmerge-9adb393e.js';
 import { r as react } from './index-aae33e1a.js';
 import './index-c103191b.js';
+import { c as createCommonjsModule } from './_commonjsHelpers-37fa8da4.js';
+import { b as _setPrototypeOf, _ as _createClass, c as _assertThisInitialized, a as _toConsumableArray } from './setPrototypeOf-6a943dce.js';
 
 /** @license React v16.13.1
  * react-is.production.min.js
@@ -149,7 +149,7 @@ var isBrowser = (typeof window === "undefined" ? "undefined" : _typeof(window)) 
 function _inheritsLoose(subClass, superClass) {
   subClass.prototype = Object.create(superClass.prototype);
   subClass.prototype.constructor = subClass;
-  subClass.__proto__ = superClass;
+  _setPrototypeOf(subClass, superClass);
 }
 
 var plainObjectConstrurctor = {}.constructor;
@@ -2092,7 +2092,7 @@ var Jss =
 function () {
   function Jss(options) {
     this.id = instanceCounter++;
-    this.version = "10.5.0";
+    this.version = "10.5.1";
     this.plugins = new PluginsRegistry();
     this.options = {
       id: {
@@ -2295,7 +2295,7 @@ var create = function create(options) {
  * A global Jss instance.
  */
 
-var jss = create();
+create();
 
 var now = Date.now();
 var fnValuesNs = "fnValues" + now;
@@ -2828,6 +2828,7 @@ var defaultUnits = {
   'font-size': px,
   'font-size-delta': px,
   'letter-spacing': px,
+  'text-decoration-thickness': px,
   'text-indent': px,
   'text-stroke': px,
   'text-stroke-width': px,
@@ -2861,6 +2862,7 @@ var defaultUnits = {
   // Grid properties
   grid: px,
   'grid-gap': px,
+  'row-gap': px,
   'grid-row-gap': px,
   'grid-column-gap': px,
   'grid-template-rows': px,
@@ -2921,7 +2923,7 @@ function iterate(prop, value, options) {
         value[_innerProp] = iterate(prop + "-" + _innerProp, value[_innerProp], options);
       }
     }
-  } else if (typeof value === 'number') {
+  } else if (typeof value === 'number' && !Number.isNaN(value)) {
     var unit = options[prop] || units[prop]; // Add the unit if available, except for the special case of 0px.
 
     if (unit && !(value === 0 && unit === px)) {
@@ -3417,7 +3419,7 @@ function supportedProperty(prop, options) {
   // For server-side rendering.
   if (!el) return prop; // Remove cache for benchmark tests or return property from the cache.
 
-  if ( cache$1[prop] != null) {
+  if (cache$1[prop] != null) {
     return cache$1[prop];
   } // Check if 'transition' or 'transform' natively supported in browser.
 
@@ -3496,7 +3498,7 @@ function supportedValue(property, value) {
 
   var cacheKey = property + prefixedValue; // Remove cache for benchmark tests or return value from cache.
 
-  if ( cache$1$1[cacheKey] != null) {
+  if (cache$1$1[cacheKey] != null) {
     return cache$1$1[cacheKey];
   } // IE can even throw an error in some cases, for e.g. style.content = 'bar'.
 
@@ -3628,8 +3630,8 @@ function jssPreset() {
 function mergeClasses() {
   var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var baseClasses = options.baseClasses,
-      newClasses = options.newClasses,
-      Component = options.Component;
+      newClasses = options.newClasses;
+      options.Component;
 
   if (!newClasses) {
     return baseClasses;
@@ -3676,7 +3678,7 @@ function useTheme() {
   return theme;
 }
 
-var jss$1 = create(jssPreset()); // Use a singleton or the provided one by the context.
+var jss = create(jssPreset()); // Use a singleton or the provided one by the context.
 //
 // The counter-based approach doesn't tolerate any mistake.
 // It's much safer to use the same counter everywhere.
@@ -3687,7 +3689,7 @@ var sheetsManager = new Map();
 var defaultOptions = {
   disableGeneration: false,
   generateClassName: generateClassName,
-  jss: jss$1,
+  jss: jss,
   sheetsCache: null,
   sheetsManager: sheetsManager,
   sheetsRegistry: null
@@ -4111,8 +4113,8 @@ var withStyles = function withStyles(stylesOrCreator) {
       classNamePrefix: classNamePrefix
     }, stylesOptions));
     var WithStyles = /*#__PURE__*/react.forwardRef(function WithStyles(props, ref) {
-      var classesProp = props.classes,
-          innerRef = props.innerRef,
+      props.classes;
+          var innerRef = props.innerRef,
           other = _objectWithoutProperties(props, ["classes", "innerRef"]); // The wrapper receives only user supplied props, which could be a subset of
       // the actual props Component might receive due to merging with defaultProps.
       // So copying it here would give us the same result in the wrapper as well.

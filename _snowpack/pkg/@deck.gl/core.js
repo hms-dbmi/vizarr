@@ -1,14 +1,14 @@
-import '../common/_commonjsHelpers-37fa8da4.js';
-import { _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, t as transformMat4, c as transformMat3, d as transformMat2d, e as transformMat2, f as _get } from '../common/transform-35a4c5f8.js';
-import '../common/process-2545f00a.js';
-import '../common/typeof-c65245d2.js';
-import '../common/defineProperty-1b0b77a2.js';
+import { _ as _createClass } from '../common/setPrototypeOf-6a943dce.js';
+import { _ as _defineProperty } from '../common/defineProperty-1b0b77a2.js';
 import { _ as _classCallCheck } from '../common/classCallCheck-4eda545c.js';
-import { _ as _createClass } from '../common/assertThisInitialized-87ceda02.js';
+import { _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, i as isArray, c as config, d as checkNumber, t as transformMat4, v as vec2_transformMat4AsVector, e as transformMat3, f as transformMat2d, g as transformMat2, V as Vector, h as clamp, m as mod, M as Matrix4, j as Viewport } from '../common/layer-29b250de.js';
+import { L as LinearInterpolator, T as TRANSITION_EVENTS, V as ViewState, C as Controller, a as View } from '../common/linear-interpolator-8791ab04.js';
+export { C as CompositeLayer } from '../common/composite-layer-f873e7fb.js';
+import '../common/slicedToArray-09da29a7.js';
+import '../common/typeof-c65245d2.js';
+import '../common/process-2545f00a.js';
+import '../common/_commonjsHelpers-37fa8da4.js';
 import '../common/_node-resolve:empty-0f7f843d.js';
-import { i as isArray, c as config, a as checkNumber, v as vec2_transformMat4AsVector, V as Vector, f as flatten, d as debug, L as Layer, b as clamp, m as mod, M as Matrix4, e as Viewport } from '../common/layer-4d223d3d.js';
-import '../common/slicedToArray-14e71088.js';
-import { L as LinearInterpolator, T as TRANSITION_EVENTS, V as ViewState, C as Controller, a as View } from '../common/view-state-eb76c72f.js';
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
@@ -132,241 +132,9 @@ var Vector2 = function (_Vector) {
   return Vector2;
 }(Vector);
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
 function _createSuper$1(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$1(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
 function _isNativeReflectConstruct$1() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-var TRACE_RENDER_LAYERS = 'compositeLayer.renderLayers';
-
-var CompositeLayer = function (_Layer) {
-  _inherits(CompositeLayer, _Layer);
-
-  var _super = _createSuper$1(CompositeLayer);
-
-  function CompositeLayer() {
-    _classCallCheck(this, CompositeLayer);
-
-    return _super.apply(this, arguments);
-  }
-
-  _createClass(CompositeLayer, [{
-    key: "getSubLayers",
-    value: function getSubLayers() {
-      return this.internalState && this.internalState.subLayers || [];
-    }
-  }, {
-    key: "initializeState",
-    value: function initializeState() {}
-  }, {
-    key: "setState",
-    value: function setState(updateObject) {
-      _get(_getPrototypeOf(CompositeLayer.prototype), "setState", this).call(this, updateObject);
-
-      this.setNeedsUpdate();
-    }
-  }, {
-    key: "getPickingInfo",
-    value: function getPickingInfo(_ref) {
-      var info = _ref.info;
-      var object = info.object;
-      var isDataWrapped = object && object.__source && object.__source.parent && object.__source.parent.id === this.id;
-
-      if (!isDataWrapped) {
-        return info;
-      }
-
-      return Object.assign(info, {
-        object: object.__source.object,
-        index: object.__source.index
-      });
-    }
-  }, {
-    key: "renderLayers",
-    value: function renderLayers() {
-      return null;
-    }
-  }, {
-    key: "shouldRenderSubLayer",
-    value: function shouldRenderSubLayer(id, data) {
-      var overridingProps = this.props._subLayerProps;
-      return data && data.length || overridingProps && overridingProps[id];
-    }
-  }, {
-    key: "getSubLayerClass",
-    value: function getSubLayerClass(id, DefaultLayerClass) {
-      var overridingProps = this.props._subLayerProps;
-      return overridingProps && overridingProps[id] && overridingProps[id].type || DefaultLayerClass;
-    }
-  }, {
-    key: "getSubLayerRow",
-    value: function getSubLayerRow(row, sourceObject, sourceObjectIndex) {
-      row.__source = {
-        parent: this,
-        object: sourceObject,
-        index: sourceObjectIndex
-      };
-      return row;
-    }
-  }, {
-    key: "getSubLayerAccessor",
-    value: function getSubLayerAccessor(accessor) {
-      if (typeof accessor === 'function') {
-        var objectInfo = {
-          data: this.props.data,
-          target: []
-        };
-        return function (x, i) {
-          if (x.__source) {
-            objectInfo.index = x.__source.index;
-            return accessor(x.__source.object, objectInfo);
-          }
-
-          return accessor(x, i);
-        };
-      }
-
-      return accessor;
-    }
-  }, {
-    key: "getSubLayerProps",
-    value: function getSubLayerProps() {
-      var sublayerProps = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      var _this$props = this.props,
-          opacity = _this$props.opacity,
-          pickable = _this$props.pickable,
-          visible = _this$props.visible,
-          parameters = _this$props.parameters,
-          getPolygonOffset = _this$props.getPolygonOffset,
-          highlightedObjectIndex = _this$props.highlightedObjectIndex,
-          autoHighlight = _this$props.autoHighlight,
-          highlightColor = _this$props.highlightColor,
-          coordinateSystem = _this$props.coordinateSystem,
-          coordinateOrigin = _this$props.coordinateOrigin,
-          wrapLongitude = _this$props.wrapLongitude,
-          positionFormat = _this$props.positionFormat,
-          modelMatrix = _this$props.modelMatrix,
-          extensions = _this$props.extensions,
-          overridingProps = _this$props._subLayerProps;
-      var newProps = {
-        opacity: opacity,
-        pickable: pickable,
-        visible: visible,
-        parameters: parameters,
-        getPolygonOffset: getPolygonOffset,
-        highlightedObjectIndex: highlightedObjectIndex,
-        autoHighlight: autoHighlight,
-        highlightColor: highlightColor,
-        coordinateSystem: coordinateSystem,
-        coordinateOrigin: coordinateOrigin,
-        wrapLongitude: wrapLongitude,
-        positionFormat: positionFormat,
-        modelMatrix: modelMatrix,
-        extensions: extensions
-      };
-      var overridingSublayerProps = overridingProps && overridingProps[sublayerProps.id];
-      var overridingSublayerTriggers = overridingSublayerProps && overridingSublayerProps.updateTriggers;
-      var sublayerId = sublayerProps.id || 'sublayer';
-
-      if (overridingSublayerProps) {
-        var propTypes = this.constructor._propTypes;
-
-        for (var key in overridingSublayerProps) {
-          var propType = propTypes[key];
-
-          if (propType && propType.type === 'accessor') {
-            overridingSublayerProps[key] = this.getSubLayerAccessor(overridingSublayerProps[key]);
-          }
-        }
-      }
-
-      Object.assign(newProps, sublayerProps, overridingSublayerProps, {
-        id: "".concat(this.props.id, "-").concat(sublayerId),
-        updateTriggers: Object.assign({
-          all: this.props.updateTriggers.all
-        }, sublayerProps.updateTriggers, overridingSublayerTriggers)
-      });
-
-      var _iterator = _createForOfIteratorHelper(extensions),
-          _step;
-
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var extension = _step.value;
-          var passThroughProps = extension.getSubLayerProps.call(this, extension);
-
-          if (passThroughProps) {
-            Object.assign(newProps, passThroughProps, {
-              updateTriggers: Object.assign(newProps.updateTriggers, passThroughProps.updateTriggers)
-            });
-          }
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-
-      return newProps;
-    }
-  }, {
-    key: "_getAttributeManager",
-    value: function _getAttributeManager() {
-      return null;
-    }
-  }, {
-    key: "_renderLayers",
-    value: function _renderLayers() {
-      var subLayers = this.internalState.subLayers;
-      var shouldUpdate = !subLayers || this.needsUpdate();
-
-      if (shouldUpdate) {
-        subLayers = this.renderLayers();
-        subLayers = flatten(subLayers, Boolean);
-        this.internalState.subLayers = subLayers;
-      }
-
-      debug(TRACE_RENDER_LAYERS, this, shouldUpdate, subLayers);
-
-      var _iterator2 = _createForOfIteratorHelper(subLayers),
-          _step2;
-
-      try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-          var layer = _step2.value;
-          layer.parent = this;
-        }
-      } catch (err) {
-        _iterator2.e(err);
-      } finally {
-        _iterator2.f();
-      }
-    }
-  }, {
-    key: "isComposite",
-    get: function get() {
-      return true;
-    }
-  }, {
-    key: "isLoaded",
-    get: function get() {
-      return _get(_getPrototypeOf(CompositeLayer.prototype), "isLoaded", this) && this.getSubLayers().every(function (layer) {
-        return layer.isLoaded;
-      });
-    }
-  }]);
-
-  return CompositeLayer;
-}(Layer);
-CompositeLayer.layerName = 'CompositeLayer';
-
-function _createSuper$2(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$2(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _isNativeReflectConstruct$2() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 var DEFAULT_STATE = {
   orbitAxis: 'Z',
   rotationX: 0,
@@ -394,7 +162,7 @@ var zoom2Scale = function zoom2Scale(zoom) {
 var OrbitState = function (_ViewState) {
   _inherits(OrbitState, _ViewState);
 
-  var _super = _createSuper$2(OrbitState);
+  var _super = _createSuper$1(OrbitState);
 
   function OrbitState(_ref) {
     var _this;
@@ -422,6 +190,7 @@ var OrbitState = function (_ViewState) {
         maxZoom = _ref$maxZoom === void 0 ? DEFAULT_STATE.maxZoom : _ref$maxZoom,
         startPanPosition = _ref.startPanPosition,
         startTarget = _ref.startTarget,
+        startRotatePos = _ref.startRotatePos,
         startRotationX = _ref.startRotationX,
         startRotationOrbit = _ref.startRotationOrbit,
         startZoomPosition = _ref.startZoomPosition,
@@ -442,9 +211,10 @@ var OrbitState = function (_ViewState) {
       minZoom: minZoom,
       maxZoom: maxZoom
     });
-    _this._interactiveState = {
+    _this._state = {
       startPanPosition: startPanPosition,
       startTarget: startTarget,
+      startRotatePos: startRotatePos,
       startRotationX: startRotationX,
       startRotationOrbit: startRotationOrbit,
       startZoomPosition: startZoomPosition,
@@ -455,16 +225,6 @@ var OrbitState = function (_ViewState) {
   }
 
   _createClass(OrbitState, [{
-    key: "getViewportProps",
-    value: function getViewportProps() {
-      return this._viewportProps;
-    }
-  }, {
-    key: "getInteractiveState",
-    value: function getInteractiveState() {
-      return this._interactiveState;
-    }
-  }, {
     key: "panStart",
     value: function panStart(_ref2) {
       var pos = _ref2.pos;
@@ -477,11 +237,11 @@ var OrbitState = function (_ViewState) {
   }, {
     key: "pan",
     value: function pan(_ref3) {
-      var pos = _ref3.pos,
-          startPos = _ref3.startPos;
-      var _this$_interactiveSta = this._interactiveState,
-          startPanPosition = _this$_interactiveSta.startPanPosition,
-          startTarget = _this$_interactiveSta.startTarget;
+      var pos = _ref3.pos;
+          _ref3.startPos;
+      var _this$_state = this._state,
+          startPanPosition = _this$_state.startPanPosition,
+          startTarget = _this$_state.startTarget;
       var delta = new Vector2(pos).subtract(startPanPosition);
       return this._getUpdatedState({
         target: this._calculateNewTarget({
@@ -503,6 +263,7 @@ var OrbitState = function (_ViewState) {
     value: function rotateStart(_ref4) {
       var pos = _ref4.pos;
       return this._getUpdatedState({
+        startRotatePos: pos,
         startRotationX: this._viewportProps.rotationX,
         startRotationOrbit: this._viewportProps.rotationOrbit
       });
@@ -510,25 +271,45 @@ var OrbitState = function (_ViewState) {
   }, {
     key: "rotate",
     value: function rotate(_ref5) {
-      var deltaScaleX = _ref5.deltaScaleX,
-          deltaScaleY = _ref5.deltaScaleY;
-      var _this$_interactiveSta2 = this._interactiveState,
-          startRotationX = _this$_interactiveSta2.startRotationX,
-          startRotationOrbit = _this$_interactiveSta2.startRotationOrbit;
+      var pos = _ref5.pos,
+          _ref5$deltaAngleX = _ref5.deltaAngleX,
+          deltaAngleX = _ref5$deltaAngleX === void 0 ? 0 : _ref5$deltaAngleX,
+          _ref5$deltaAngleY = _ref5.deltaAngleY,
+          deltaAngleY = _ref5$deltaAngleY === void 0 ? 0 : _ref5$deltaAngleY;
+      var _this$_state2 = this._state,
+          startRotatePos = _this$_state2.startRotatePos,
+          startRotationX = _this$_state2.startRotationX,
+          startRotationOrbit = _this$_state2.startRotationOrbit;
+      var _this$_viewportProps = this._viewportProps,
+          width = _this$_viewportProps.width,
+          height = _this$_viewportProps.height;
 
-      if (!Number.isFinite(startRotationX) || !Number.isFinite(startRotationOrbit)) {
+      if (!startRotatePos || !Number.isFinite(startRotationX) || !Number.isFinite(startRotationOrbit)) {
         return this;
       }
 
-      if (startRotationX < -90 || startRotationX > 90) {
-        deltaScaleX *= -1;
+      var newRotation;
+
+      if (pos) {
+        var deltaScaleX = (pos[0] - startRotatePos[0]) / width;
+        var deltaScaleY = (pos[1] - startRotatePos[1]) / height;
+
+        if (startRotationX < -90 || startRotationX > 90) {
+          deltaScaleX *= -1;
+        }
+
+        newRotation = {
+          rotationX: startRotationX + deltaScaleY * 180,
+          rotationOrbit: startRotationOrbit + deltaScaleX * 180
+        };
+      } else {
+        newRotation = {
+          rotationX: startRotationX + deltaAngleY,
+          rotationOrbit: startRotationOrbit + deltaAngleX
+        };
       }
 
-      return this._getUpdatedState({
-        rotationX: startRotationX + deltaScaleY * 180,
-        rotationOrbit: startRotationOrbit + deltaScaleX * 180,
-        isRotating: true
-      });
+      return this._getUpdatedState(newRotation);
     }
   }, {
     key: "rotateEnd",
@@ -567,15 +348,15 @@ var OrbitState = function (_ViewState) {
       var pos = _ref7.pos,
           startPos = _ref7.startPos,
           scale = _ref7.scale;
-      var _this$_viewportProps = this._viewportProps,
-          zoom = _this$_viewportProps.zoom,
-          width = _this$_viewportProps.width,
-          height = _this$_viewportProps.height,
-          target = _this$_viewportProps.target;
-      var _this$_interactiveSta3 = this._interactiveState,
-          startZoom = _this$_interactiveSta3.startZoom,
-          startZoomPosition = _this$_interactiveSta3.startZoomPosition,
-          startTarget = _this$_interactiveSta3.startTarget;
+      var _this$_viewportProps2 = this._viewportProps,
+          zoom = _this$_viewportProps2.zoom,
+          width = _this$_viewportProps2.width,
+          height = _this$_viewportProps2.height,
+          target = _this$_viewportProps2.target;
+      var _this$_state3 = this._state,
+          startZoom = _this$_state3.startZoom,
+          startZoomPosition = _this$_state3.startZoomPosition,
+          startTarget = _this$_state3.startTarget;
 
       if (!Number.isFinite(startZoom)) {
         startZoom = zoom;
@@ -711,9 +492,9 @@ var OrbitState = function (_ViewState) {
     value: function _calculateNewZoom(_ref8) {
       var scale = _ref8.scale,
           startZoom = _ref8.startZoom;
-      var _this$_viewportProps2 = this._viewportProps,
-          maxZoom = _this$_viewportProps2.maxZoom,
-          minZoom = _this$_viewportProps2.minZoom;
+      var _this$_viewportProps3 = this._viewportProps,
+          maxZoom = _this$_viewportProps3.maxZoom,
+          minZoom = _this$_viewportProps3.minZoom;
 
       if (!Number.isFinite(startZoom)) {
         startZoom = this._viewportProps.zoom;
@@ -745,7 +526,7 @@ var OrbitState = function (_ViewState) {
   }, {
     key: "_getUpdatedState",
     value: function _getUpdatedState(newProps) {
-      return new OrbitState(Object.assign({}, this._viewportProps, this._interactiveState, newProps));
+      return new OrbitState(Object.assign({}, this._viewportProps, this._state, newProps));
     }
   }, {
     key: "_applyConstraints",
@@ -770,10 +551,10 @@ var OrbitState = function (_ViewState) {
   return OrbitState;
 }(ViewState);
 
-var OrbitController = function (_Controller) {
+(function (_Controller) {
   _inherits(OrbitController, _Controller);
 
-  var _super2 = _createSuper$2(OrbitController);
+  var _super2 = _createSuper$1(OrbitController);
 
   function OrbitController(props) {
     _classCallCheck(this, OrbitController);
@@ -789,11 +570,11 @@ var OrbitController = function (_Controller) {
   }]);
 
   return OrbitController;
-}(Controller);
+})(Controller);
 
-function _createSuper$3(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$3(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+function _createSuper$2(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$2(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
-function _isNativeReflectConstruct$3() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+function _isNativeReflectConstruct$2() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 var LINEAR_TRANSITION_PROPS$1 = {
   transitionDuration: 300,
   transitionEasing: function transitionEasing(t) {
@@ -806,7 +587,7 @@ var LINEAR_TRANSITION_PROPS$1 = {
 var OrthographicController = function (_Controller) {
   _inherits(OrthographicController, _Controller);
 
-  var _super = _createSuper$3(OrthographicController);
+  var _super = _createSuper$2(OrthographicController);
 
   function OrthographicController(props) {
     _classCallCheck(this, OrthographicController);
@@ -830,9 +611,13 @@ var OrthographicController = function (_Controller) {
   return OrthographicController;
 }(Controller);
 
-function _createSuper$4(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$4(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
-function _isNativeReflectConstruct$4() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _createSuper$3(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$3(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$3() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 var viewMatrix = new Matrix4().lookAt({
   eye: [0, 0, 1]
 });
@@ -857,36 +642,25 @@ function getProjectionMatrix(_ref) {
 var OrthographicViewport = function (_Viewport) {
   _inherits(OrthographicViewport, _Viewport);
 
-  var _super = _createSuper$4(OrthographicViewport);
+  var _super = _createSuper$3(OrthographicViewport);
 
-  function OrthographicViewport(_ref2) {
-    var _this;
-
-    var id = _ref2.id,
-        x = _ref2.x,
-        y = _ref2.y,
-        width = _ref2.width,
-        height = _ref2.height,
-        _ref2$near = _ref2.near,
-        near = _ref2$near === void 0 ? 0.1 : _ref2$near,
-        _ref2$far = _ref2.far,
-        far = _ref2$far === void 0 ? 1000 : _ref2$far,
-        _ref2$zoom = _ref2.zoom,
-        zoom = _ref2$zoom === void 0 ? 0 : _ref2$zoom,
-        _ref2$target = _ref2.target,
-        target = _ref2$target === void 0 ? [0, 0, 0] : _ref2$target,
-        _ref2$flipY = _ref2.flipY,
-        flipY = _ref2$flipY === void 0 ? true : _ref2$flipY;
-
+  function OrthographicViewport(props) {
     _classCallCheck(this, OrthographicViewport);
 
+    var width = props.width,
+        height = props.height,
+        _props$near = props.near,
+        near = _props$near === void 0 ? 0.1 : _props$near,
+        _props$far = props.far,
+        far = _props$far === void 0 ? 1000 : _props$far,
+        _props$zoom = props.zoom,
+        zoom = _props$zoom === void 0 ? 0 : _props$zoom,
+        _props$target = props.target,
+        target = _props$target === void 0 ? [0, 0, 0] : _props$target,
+        _props$flipY = props.flipY,
+        flipY = _props$flipY === void 0 ? true : _props$flipY;
     var scale = Math.pow(2, zoom);
-    return _possibleConstructorReturn(_this, new Viewport({
-      id: id,
-      x: x,
-      y: y,
-      width: width,
-      height: height,
+    return _super.call(this, _objectSpread(_objectSpread({}, props), {}, {
       position: target,
       viewMatrix: viewMatrix.clone().scale([scale, scale * (flipY ? -1 : 1), scale]),
       projectionMatrix: getProjectionMatrix({
@@ -905,7 +679,7 @@ var OrthographicViewport = function (_Viewport) {
 var OrthographicView = function (_View) {
   _inherits(OrthographicView, _View);
 
-  var _super2 = _createSuper$4(OrthographicView);
+  var _super2 = _createSuper$3(OrthographicView);
 
   function OrthographicView(props) {
     _classCallCheck(this, OrthographicView);
@@ -928,4 +702,4 @@ var OrthographicView = function (_View) {
 }(View);
 OrthographicView.displayName = 'OrthographicView';
 
-export { CompositeLayer, OrthographicView };
+export { OrthographicView };

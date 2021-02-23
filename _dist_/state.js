@@ -1,14 +1,15 @@
 import {atom, atomFamily, selector, waitForAll} from "../_snowpack/pkg/recoil.js";
 export const DEFAULT_VIEW_STATE = {zoom: 0, target: [0, 0, 0], default: true};
 export const DEFAULT_LAYER_PROPS = {
-  loader: void 0,
+  loader: [],
   colorValues: [],
   sliderValues: [],
   contrastLimits: [],
   loaderSelection: [],
   channelIsOn: [],
   colormap: "",
-  opacity: 1
+  opacity: 1,
+  excludeBackground: true
 };
 export const sourceInfoState = atom({
   key: "sourceInfo",
