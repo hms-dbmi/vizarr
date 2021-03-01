@@ -36,10 +36,10 @@ npm install
 npm start
 ```
 
-The `start` command will start a development server on `http://localhost:8080` which you can navivate
+The `start` command will start a development server on `http://localhost:8080` which you can navigate
 to in your web browser. You can "live" edit the contents of any of the files within `src/` or `public/`
-and the changes will be instantly when your save your changes. Stop the development server when you are 
-done making changes.
+when running this server; changes are reflected instantly instantly in the browser. Stop the development 
+server when you are done making changes.
 
 - `src/` - contains all TypeScript source code
 - `public/` - contains all static assets required for the site
@@ -75,7 +75,7 @@ to automatically format your code when making a pull-request.
 Build a production version of the site:
 
 ```bash
-npm version [<newversion> | major | minor | patch]
+npm version [<new version> | major | minor | patch]
 npm publish
 ```
 
