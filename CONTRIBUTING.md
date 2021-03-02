@@ -38,7 +38,7 @@ npm start
 
 The `start` command will start a development server on `http://localhost:8080` which you can navigate
 to in your web browser. You can "live" edit the contents of any of the files within `src/` or `public/`
-when running this server; changes are reflected instantly instantly in the browser. Stop the development 
+when running this server; changes are reflected instantly in the browser. Stop the development 
 server when you are done making changes.
 
 - `src/` - contains all TypeScript source code
