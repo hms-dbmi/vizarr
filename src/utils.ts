@@ -107,24 +107,8 @@ export function fitBounds(
   return { zoom, target: [width / 2, height / 2, 0] };
 }
 
-type Array16 = [
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number
-];
+// prettier-ignore
+type Array16 = [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number];
 
 function isArray16(o: unknown): o is Array16 {
   if (!Array.isArray(o)) return false;
