@@ -34,7 +34,6 @@ const defaultProps = {
 };
 
 export default class GridLayer<P extends GridLayerProps = GridLayerProps> extends CompositeLayer<any, P> {
-
   getPickingInfo({ info }: { info: any }) {
     // provide Grid row and column info for mouse events (hover & click)
     if (!info.coordinate) {
@@ -58,7 +57,7 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
       const x = d.col * (width + spacer);
       const layerProps = {
         loader: d.loader,
-        modelMatrix: (new Matrix4()).translate([x, y, 0]),
+        modelMatrix: new Matrix4().translate([x, y, 0]),
         id: `${id}-GridLayer-${d.row}-${d.col}`,
         pickable: false,
       };
