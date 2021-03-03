@@ -1,9 +1,8 @@
 import { CompositeLayer } from '@deck.gl/core';
 import { SolidPolygonLayer, TextLayer } from '@deck.gl/layers';
 import type { CompositeLayerProps } from '@deck.gl/core/lib/composite-layer';
-import pMap from 'p-map';
-
-import { XRLayer } from '@hms-dbmi/viv';
+import { Matrix4 } from 'math.gl';
+import { MultiscaleImageLayer } from '@hms-dbmi/viv';
 import type { GridLoader } from './state';
 
 export interface GridLayerProps extends CompositeLayerProps<any> {
@@ -21,82 +20,20 @@ export interface GridLayerProps extends CompositeLayerProps<any> {
 }
 
 const defaultProps = {
-  ...XRLayer.defaultProps,
+  ...MultiscaleImageLayer.defaultProps,
   // Special grid props
   loaders: { type: 'array', value: [], compare: true },
   spacer: { type: 'number', value: 5, compare: true },
   rows: { type: 'number', value: 0, compare: true },
   columns: { type: 'number', value: 0, compare: true },
   concurrency: { type: 'number', value: 10, compare: false }, // set concurrency for queue
-  text: { type: 'boolean', value: false, compare: true },
+  text: { type: 'boolean', value: true, compare: true },
   // Deck.gl
   onClick: { type: 'function', value: null, compare: true },
   onHover: { type: 'function', value: null, compare: true },
 };
 
-function scaleBounds(width: number, height: number, translate = [0, 0], scale = 1) {
-  const [left, top] = translate;
-  const right = width * scale + left;
-  const bottom = height * scale + top;
-  return [left, bottom, right, top];
-}
-
-function validateWidthHeight(d: { data: { width: number; height: number } }[]) {
-  const [first] = d;
-  // Return early if no grid data. Maybe throw an error?
-  const { width, height } = first.data;
-  // Verify that all grid data is same shape (ignoring undefined)
-  d.forEach(({ data }) => {
-    if (data?.width !== width || data?.height !== height) {
-      throw new Error('Grid data is not same shape.');
-    }
-  });
-  return { width, height };
-}
-
-function refreshGridData(props: { loaders: GridLoader[]; concurrency?: number; loaderSelection: number[][] }) {
-  const { loaders, loaderSelection = [] } = props;
-  let { concurrency } = props;
-  if (concurrency && loaderSelection.length > 0) {
-    // There are `loaderSelection.length` requests per loader. This block scales
-    // the provided concurrency to map to the number of actual requests.
-    concurrency = Math.ceil(concurrency / loaderSelection.length);
-  }
-  const mapper = async (d: GridLoader) => {
-    const promises = loaderSelection.map((selection) => d.loader.getRaster({ selection }));
-    const tiles = await Promise.all(promises);
-    return {
-      ...d,
-      data: {
-        data: tiles.map((d) => d.data),
-        width: tiles[0].width,
-        height: tiles[0].height,
-      },
-    };
-  };
-  return pMap(loaders, mapper, { concurrency });
-}
-
 export default class GridLayer<P extends GridLayerProps = GridLayerProps> extends CompositeLayer<any, P> {
-  initializeState() {
-    this.state = { gridData: [], width: 0, height: 0 };
-    refreshGridData(this.props).then((gridData) => {
-      const { width, height } = validateWidthHeight(gridData);
-      this.setState({ gridData, width, height });
-    });
-  }
-
-  updateState({ props, oldProps, changeFlags }: { props: GridLayerProps; oldProps: GridLayerProps; changeFlags: any }) {
-    const { propsChanged } = changeFlags;
-    const loaderChanged = typeof propsChanged === 'string' && propsChanged.includes('props.loaders');
-    const loaderSelectionChanged = props.loaderSelection !== oldProps.loaderSelection;
-    if (loaderChanged || loaderSelectionChanged) {
-      // Only fetch new data to render if loader has changed
-      refreshGridData(this.props).then((gridData) => {
-        this.setState({ gridData });
-      });
-    }
-  }
 
   getPickingInfo({ info }: { info: any }) {
     // provide Grid row and column info for mouse events (hover & click)
@@ -104,7 +41,7 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
       return info;
     }
     const spacer = this.props.spacer || 0;
-    const { width, height } = this.state;
+    const [height, width] = this.props.loaders[0].loader[0].shape.slice(-2);
     const [x, y] = info.coordinate;
     const row = Math.floor(y / (height + spacer));
     const column = Math.floor(x / (width + spacer));
@@ -113,21 +50,19 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
   }
 
   renderLayers() {
-    const { gridData, width, height } = this.state;
-    if (width === 0 || height === 0) return null; // early return if no data
-
+    if (this.props.loaders.length === 0) return null;
+    const [height, width] = this.props.loaders[0].loader[0].shape.slice(-2);
     const { rows, columns, spacer = 0, id = '' } = this.props;
-    const layers = gridData.map((d: any) => {
+    const layers = this.props.loaders.map((d: any) => {
       const y = d.row * (height + spacer);
       const x = d.col * (width + spacer);
       const layerProps = {
-        channelData: d.data, // coerce to null if no data
-        bounds: scaleBounds(width, height, [x, y]),
+        loader: d.loader,
+        modelMatrix: (new Matrix4()).translate([x, y, 0]),
         id: `${id}-GridLayer-${d.row}-${d.col}`,
-        dtype: d.loader.dtype || 'Uint16', // fallback if missing,
         pickable: false,
       };
-      return new (XRLayer as any)({ ...this.props, ...layerProps });
+      return new (MultiscaleImageLayer as any)({ ...this.props, ...layerProps });
     });
 
     if (this.props.pickable) {
@@ -155,7 +90,7 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
     if (this.props.text) {
       const textLayer = new TextLayer({
         id: `${id}-GridLayer-text`,
-        data: gridData,
+        data: this.props.loaders,
         getPosition: (d: any) => [d.col * (width + spacer), d.row * (height + spacer)],
         getText: (d: any) => d.name,
         getColor: [255, 255, 255, 255],

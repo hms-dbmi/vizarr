@@ -59,13 +59,13 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
       const arr: ZarrArray = new (ZarrArray as any)(grp.store, join(grp.path, p, res), data[level].meta);
       return new ZarrPixelSource(arr, meta.axis_labels, tileSize);
     });
-    return { name: String(i), row: Math.floor(i / cols), col: i % cols, loader: loader[loader.length - 1] };
+    return { name: String(i), row: Math.floor(i / cols), col: i % cols, loader };
   });
 
   const sourceData: SourceData = {
     loaders,
     ...meta,
-    loader: [loaders[0].loader],
+    loader: loaders[0].loader,
     model_matrix: parseMatrix(config.model_matrix),
     defaults: {
       selection: meta.defaultSelection,
@@ -149,7 +149,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
       name: `${row}${col}`,
       row: rows.indexOf(row),
       col: columns.indexOf(col),
-      loader: loader[loader.length - 1],
+      loader: loader,
     };
   });
 
@@ -157,7 +157,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   const sourceData: SourceData = {
     loaders,
     ...meta,
-    loader: [loaders[0].loader],
+    loader: loaders[0].loader,
     model_matrix: parseMatrix(config.model_matrix),
     defaults: {
       selection: meta.defaultSelection,
