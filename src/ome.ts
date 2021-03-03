@@ -1,8 +1,7 @@
 import { ZarrPixelSource } from '@hms-dbmi/viv';
-import pMap from 'p-map';
-import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
+import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray, openArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
-import { join, loadMultiscales, guessTileSize, range, parseMatrix } from './utils';
+import { join, loadMultiscales, guessTileSize, parseMatrix } from './utils';
 
 export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAttrs: Ome.Well): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
@@ -42,22 +41,25 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   const rows = Math.ceil(imgPaths.length / cols);
 
   // Use first image for rendering settings, resolutions etc.
-  const imgAttrs = (await grp.getItem(imgPaths[0]).then((g) => g.attrs.asObject())) as Ome.Attrs;
+  const img = await grp.getItem(imgPaths[0]);
+  const imgAttrs = (await img.attrs.asObject()) as Ome.Attrs;
   if (!('omero' in imgAttrs)) {
     throw Error('Path for image is not valid.');
   }
-  let resolution = imgAttrs.multiscales[0].datasets[0].path;
+  const { datasets } = imgAttrs.multiscales[0];
+  const resolutions = datasets.map((d) => d.path);
 
   // Create loader for every Image.
-  const promises = imgPaths.map((p) => grp.getItem(join(p, resolution)));
+  const pyramid = resolutions.map((p) => grp.getItem(join(imgPaths[0], p)));
   const meta = parseOmeroMeta(imgAttrs.omero);
-  const data = (await Promise.all(promises)) as ZarrArray[];
+  const data = (await Promise.all(pyramid)) as ZarrArray[];
   const tileSize = guessTileSize(data[0]);
-  const loaders = range(rows).flatMap((row) => {
-    return range(cols).map((col) => {
-      const offset = col + row * cols;
-      return { name: String(offset), row, col, loader: new ZarrPixelSource(data[offset], meta.axis_labels, tileSize) };
+  const loaders = imgPaths.map((p, i) => {
+    const loader = resolutions.map((res, level) => {
+      const arr: ZarrArray = new (ZarrArray as any)(grp.store, join(grp.path, p, res), data[level].meta);
+      return new ZarrPixelSource(arr, meta.axis_labels, tileSize);
     });
+    return { name: String(i), row: Math.floor(i / cols), col: i % cols, loader: loader[loader.length - 1] };
   });
 
   const sourceData: SourceData = {
@@ -128,25 +130,26 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   }
   // Lowest resolution is the 'path' of the last 'dataset' from the first multiscales
   const { datasets } = imgAttrs.multiscales[0];
-  const resolution = datasets[datasets.length - 1].path;
+  const resolutions = datasets.map((d) => d.path);
 
   // Create loader for every Well. Some loaders may be undefined if Wells are missing.
-  const mapper = ([key, path]: string[]) => grp.getItem(path).then((arr) => [key, arr]) as Promise<[string, ZarrArray]>;
-  const promises = await pMap(
-    wellPaths.map((p) => [p, join(p, imgPath, resolution)]),
-    mapper,
-    { concurrency: 10 }
+  const promises = resolutions.map((res) =>
+    openArray({ store: grp.store, path: join(grp.path, wellPaths[0], imgPath, res) })
   );
-  const meta = parseOmeroMeta(imgAttrs.omero);
   const data = await Promise.all(promises);
-  const tileSize = guessTileSize(data[0][1]);
-  const loaders = data.map((d) => {
-    const [row, col] = d[0].split('/');
+  const meta = parseOmeroMeta(imgAttrs.omero);
+  const tileSize = guessTileSize(data[0]);
+  const loaders = wellPaths.map((d) => {
+    const [row, col] = d.split('/');
+    const loader = resolutions.map((res, i) => {
+      const arr = new (ZarrArray as any)(grp.store, join(grp.path, d, imgPath, res), data[i].meta);
+      return new ZarrPixelSource(arr, meta.axis_labels, tileSize);
+    });
     return {
       name: `${row}${col}`,
       row: rows.indexOf(row),
       col: columns.indexOf(col),
-      loader: new ZarrPixelSource(d[1], meta.axis_labels, tileSize),
+      loader: loader[loader.length - 1],
     };
   });
 
