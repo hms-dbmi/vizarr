@@ -123,7 +123,7 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
     if (!isArray16(arr)) {
       throw Error('Invalid modelMatrix size. Must be 16.');
     }
-    matrix.set(...arr);
+    matrix.setRowMajor(...arr);
   } catch {
     const msg = `Failed to parse modelMatrix. Got ${JSON.stringify(model_matrix)}, using identity.`;
     console.warn(msg);
