@@ -1,6 +1,6 @@
 import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray } from 'zarr';
 import type { Group as ZarrGroup } from 'zarr';
-import { Matrix4 } from 'math.gl';
+import { Matrix4 } from '@math.gl/core/dist/esm';
 
 export const MAX_CHANNELS = 6;
 
