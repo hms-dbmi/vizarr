@@ -11,6 +11,7 @@ import {
   MAGENTA_GREEN,
   MAX_CHANNELS,
   open,
+  parseMatrix,
   range,
   RGB
 } from "./utils.js";
@@ -34,6 +35,7 @@ function loadSingleChannel(config, data, max) {
     names: ["channel_0"],
     contrast_limits: [contrast_limits ?? [0, max]],
     visibilities: [visibility ?? true],
+    model_matrix: parseMatrix(config.model_matrix),
     defaults: {
       selection: Array(data[0].shape.length).fill(0),
       colormap,
@@ -43,7 +45,7 @@ function loadSingleChannel(config, data, max) {
   };
 }
 function loadMultiChannel(config, data, max) {
-  const {names, channel_axis, name, opacity = 1, colormap = ""} = config;
+  const {names, channel_axis, name, model_matrix, opacity = 1, colormap = ""} = config;
   let {contrast_limits, visibilities, colors} = config;
   const n = data[0].shape[channel_axis];
   for (const channelProp of [contrast_limits, visibilities, names, colors]) {
@@ -84,6 +86,7 @@ function loadMultiChannel(config, data, max) {
     names: names ?? range(n).map((i) => `channel_${i}`),
     contrast_limits: contrast_limits ?? Array(n).fill([0, max]),
     visibilities,
+    model_matrix: parseMatrix(config.model_matrix),
     defaults: {
       selection: Array(data[0].shape.length).fill(0),
       colormap,
@@ -142,6 +145,7 @@ export function initLayerStateFromSource(sourceData, layerId) {
     colors,
     visibilities,
     contrast_limits,
+    model_matrix,
     defaults,
     loaders,
     rows,
@@ -186,6 +190,7 @@ export function initLayerStateFromSource(sourceData, layerId) {
       channelIsOn,
       opacity,
       colormap,
+      modelMatrix: model_matrix,
       onClick
     },
     on: true

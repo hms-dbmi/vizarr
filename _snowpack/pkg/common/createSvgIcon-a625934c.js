@@ -1,7 +1,7 @@
 import { b as _objectWithoutProperties, _ as _extends } from './deepmerge-9adb393e.js';
 import { r as react } from './index-aae33e1a.js';
 import './index-c103191b.js';
-import { w as withStyles, c as clsx } from './withStyles-e3313d25.js';
+import { w as withStyles, c as clsx } from './withStyles-9f1c7537.js';
 import { a as formatMuiErrorMessage } from './createMuiTheme-d4d75565.js';
 
 // It should to be noted that this function isn't equivalent to `text-transform: capitalize`.

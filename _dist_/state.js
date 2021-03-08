@@ -1,4 +1,6 @@
 import {atom, atomFamily, selector, waitForAll} from "../_snowpack/pkg/recoil.js";
+import {Matrix4} from "../_snowpack/pkg/@math.gl/core/dist/esm.js";
+;
 export const DEFAULT_VIEW_STATE = {zoom: 0, target: [0, 0, 0], default: true};
 export const DEFAULT_LAYER_PROPS = {
   loader: [],
@@ -27,7 +29,7 @@ export const layerStateFamily = atomFamily({
   key: "layerStateFamily",
   default: (id) => ({
     Layer: null,
-    layerProps: {id, ...DEFAULT_LAYER_PROPS},
+    layerProps: {id, modelMatrix: new Matrix4(), ...DEFAULT_LAYER_PROPS},
     on: false
   })
 });

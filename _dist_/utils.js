@@ -1,4 +1,5 @@
 import {ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray} from "../_snowpack/pkg/zarr.js";
+import {Matrix4} from "../_snowpack/pkg/@math.gl/core/dist/esm.js";
 export const MAX_CHANNELS = 6;
 export const COLORS = {
   cyan: "#00FFFF",
@@ -78,4 +79,25 @@ export function fitBounds([width, height], [targetWidth, targetHeight], maxZoom,
   const scaleY = (targetHeight - padding * 2) / height;
   const zoom = Math.min(maxZoom, Math.log2(Math.min(scaleX, scaleY)));
   return {zoom, target: [width / 2, height / 2, 0]};
+}
+function isArray16(o) {
+  if (!Array.isArray(o))
+    return false;
+  return o.length === 16 && o.every((i) => typeof i === "number");
+}
+export function parseMatrix(model_matrix) {
+  if (!model_matrix)
+    return new Matrix4();
+  const matrix = new Matrix4();
+  try {
+    const arr = typeof model_matrix === "string" ? JSON.parse(model_matrix) : model_matrix;
+    if (!isArray16(arr)) {
+      throw Error("Invalid modelMatrix size. Must be 16.");
+    }
+    matrix.setRowMajor(...arr);
+  } catch {
+    const msg = `Failed to parse modelMatrix. Got ${JSON.stringify(model_matrix)}, using identity.`;
+    console.warn(msg);
+  }
+  return matrix;
 }

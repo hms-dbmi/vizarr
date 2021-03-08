@@ -24,14 +24,6 @@ function _arrayLikeToArray(arr, len) {
   return arr2;
 }
 
-function _arrayWithoutHoles(arr) {
-  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
-}
-
-function _iterableToArray(iter) {
-  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
-}
-
 function _unsupportedIterableToArray(o, minLen) {
   if (!o) return;
   if (typeof o === "string") return _arrayLikeToArray(o, minLen);
@@ -39,14 +31,6 @@ function _unsupportedIterableToArray(o, minLen) {
   if (n === "Object" && o.constructor) n = o.constructor.name;
   if (n === "Map" || n === "Set") return Array.from(o);
   if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
-}
-
-function _nonIterableSpread() {
-  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-}
-
-function _toConsumableArray(arr) {
-  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
 }
 
 function _assertThisInitialized(self) {
@@ -66,4 +50,4 @@ function _setPrototypeOf(o, p) {
   return _setPrototypeOf(o, p);
 }
 
-export { _createClass as _, _toConsumableArray as a, _setPrototypeOf as b, _assertThisInitialized as c, _unsupportedIterableToArray as d, _iterableToArray as e };
+export { _createClass as _, _setPrototypeOf as a, _assertThisInitialized as b, _unsupportedIterableToArray as c, _arrayLikeToArray as d };

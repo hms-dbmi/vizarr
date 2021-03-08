@@ -2,7 +2,8 @@ import { _ as _extends, a as _objectWithoutPropertiesLoose, d as deepmerge, b as
 import { r as react } from './index-aae33e1a.js';
 import './index-c103191b.js';
 import { c as createCommonjsModule } from './_commonjsHelpers-37fa8da4.js';
-import { b as _setPrototypeOf, _ as _createClass, c as _assertThisInitialized, a as _toConsumableArray } from './setPrototypeOf-6a943dce.js';
+import { a as _setPrototypeOf, _ as _createClass, b as _assertThisInitialized } from './setPrototypeOf-f270a38e.js';
+import { _ as _toConsumableArray } from './toConsumableArray-89516743.js';
 
 /** @license React v16.13.1
  * react-is.production.min.js

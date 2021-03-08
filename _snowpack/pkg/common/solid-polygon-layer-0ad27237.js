@@ -1,9 +1,10 @@
 import { _ as _classCallCheck } from './classCallCheck-4eda545c.js';
-import { _ as _createClass } from './setPrototypeOf-6a943dce.js';
-import { A as assert, B as uid, o as assert$1, C as getAccessorFromBuffer, x as createIterable, D as Buffer, E as defaultTypedArrayManager, p as equals$1, i as isArray, _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, k as _get, F as COORDINATE_SYSTEM, G as hasFeatures, y as Model, L as Layer, H as FEATURES } from './layer-29b250de.js';
+import { _ as _createClass } from './setPrototypeOf-f270a38e.js';
+import { j as assert, u as uid, b as assert$1, k as getAccessorFromBuffer, h as createIterable, B as Buffer, n as defaultTypedArrayManager, _ as _get, C as COORDINATE_SYSTEM, o as hasFeatures, M as Model, L as Layer, F as FEATURES } from './layer-8f126b7a.js';
+import { j as equals$1, i as isArray, _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn } from './matrix4-3a7b6be3.js';
 import { _ as _defineProperty } from './defineProperty-1b0b77a2.js';
-import { _ as _slicedToArray } from './slicedToArray-09da29a7.js';
-import { p as project } from './project-ddaf7c66.js';
+import { _ as _slicedToArray } from './slicedToArray-4a4de7f2.js';
+import { p as project } from './project-213cc694.js';
 
 var lightingShader = "#if (defined(SHADER_TYPE_FRAGMENT) && defined(LIGHTING_FRAGMENT)) || (defined(SHADER_TYPE_VERTEX) && defined(LIGHTING_VERTEX))\n\nstruct AmbientLight {\n vec3 color;\n};\n\nstruct PointLight {\n vec3 color;\n vec3 position;\n vec3 attenuation;\n};\n\nstruct DirectionalLight {\n  vec3 color;\n  vec3 direction;\n};\n\nuniform AmbientLight lighting_uAmbientLight;\nuniform PointLight lighting_uPointLight[MAX_LIGHTS];\nuniform DirectionalLight lighting_uDirectionalLight[MAX_LIGHTS];\nuniform int lighting_uPointLightCount;\nuniform int lighting_uDirectionalLightCount;\n\nuniform bool lighting_uEnabled;\n\nfloat getPointLightAttenuation(PointLight pointLight, float distance) {\n  return pointLight.attenuation.x\n       + pointLight.attenuation.y * distance\n       + pointLight.attenuation.z * distance * distance;\n}\n\n#endif\n";
 

@@ -1,7 +1,7 @@
 import {ZarrPixelSource} from "../_snowpack/pkg/@hms-dbmi/viv.js";
 import pMap from "../_snowpack/pkg/p-map.js";
 import {HTTPStore, openGroup} from "../_snowpack/pkg/zarr.js";
-import {join, loadMultiscales, guessTileSize, range} from "./utils.js";
+import {join, loadMultiscales, guessTileSize, range, parseMatrix} from "./utils.js";
 export async function loadWell(config, grp, wellAttrs) {
   const acquisitionId = config.acquisition ? parseInt(config.acquisition) : void 0;
   let acquisitions = [];
@@ -45,6 +45,7 @@ export async function loadWell(config, grp, wellAttrs) {
     loaders,
     ...meta,
     loader: [loaders[0].loader],
+    model_matrix: parseMatrix(config.model_matrix),
     defaults: {
       selection: meta.defaultSelection,
       colormap: config.colormap ?? "",
@@ -115,6 +116,7 @@ export async function loadPlate(config, grp, plateAttrs) {
     loaders,
     ...meta,
     loader: [loaders[0].loader],
+    model_matrix: parseMatrix(config.model_matrix),
     defaults: {
       selection: meta.defaultSelection,
       colormap: config.colormap ?? "",
@@ -153,6 +155,7 @@ export async function loadOmeroMultiscales(config, grp, attrs) {
   return {
     loader,
     name: meta.name ?? name,
+    model_matrix: parseMatrix(config.model_matrix),
     defaults: {
       selection: meta.defaultSelection,
       colormap,

@@ -9,6 +9,7 @@
     "@material-ui/core/styles": "./@material-ui/core/styles.js",
     "@material-ui/icons": "./@material-ui/icons.js",
     "@material-ui/styles": "./@material-ui/styles.js",
+    "@math.gl/core/dist/esm": "./@math.gl/core/dist/esm.js",
     "deck.gl": "./deck.gl.js",
     "imjoy-rpc": "./imjoy-rpc.js",
     "p-map": "./p-map.js",
