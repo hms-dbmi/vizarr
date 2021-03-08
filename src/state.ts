@@ -3,7 +3,7 @@ import type { ZarrArray } from 'zarr';
 import type { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
 import type { VivLayerProps } from 'viv-layers';
 import type GridLayer from './gridLayer';
-import { Matrix4 } from 'math.gl';
+import { Matrix4 } from '@math.gl/core/dist/esm';
 
 export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
 export const DEFAULT_LAYER_PROPS = {
