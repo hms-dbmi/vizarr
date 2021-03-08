@@ -1,7 +1,7 @@
 import { CompositeLayer } from '@deck.gl/core';
 import { SolidPolygonLayer, TextLayer } from '@deck.gl/layers';
 import type { CompositeLayerProps } from '@deck.gl/core/lib/composite-layer';
-import { Matrix4 } from 'math.gl';
+import { Matrix4 } from '@math.gl/core/dist/esm';
 import { MultiscaleImageLayer } from '@hms-dbmi/viv';
 import type { GridLoader } from './state';
 
