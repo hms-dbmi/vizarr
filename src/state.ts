@@ -46,7 +46,7 @@ export interface SingleChannelConfig extends BaseConfig {
 export type ImageLayerConfig = MultichannelConfig | SingleChannelConfig;
 
 export interface GridLoader {
-  loader: ZarrPixelSource<string[]>;
+  loader: ZarrPixelSource<string[]>[];
   row: number;
   col: number;
   name: string;
