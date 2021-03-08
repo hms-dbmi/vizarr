@@ -19,6 +19,7 @@ import {
   MAGENTA_GREEN,
   MAX_CHANNELS,
   open,
+  parseMatrix,
   range,
   RGB,
 } from './utils';
@@ -45,6 +46,7 @@ function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<st
     names: ['channel_0'],
     contrast_limits: [contrast_limits ?? [0, max]],
     visibilities: [visibility ?? true],
+    model_matrix: parseMatrix(config.model_matrix),
     defaults: {
       selection: Array(data[0].shape.length).fill(0),
       colormap,
@@ -55,7 +57,7 @@ function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<st
 }
 
 function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<string[]>[], max: number): SourceData {
-  const { names, channel_axis, name, opacity = 1, colormap = '' } = config;
+  const { names, channel_axis, name, model_matrix, opacity = 1, colormap = '' } = config;
   let { contrast_limits, visibilities, colors } = config;
 
   const n = data[0].shape[channel_axis as number];
@@ -104,6 +106,7 @@ function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<stri
     names: names ?? range(n).map((i) => `channel_${i}`),
     contrast_limits: contrast_limits ?? Array(n).fill([0, max]),
     visibilities,
+    model_matrix: parseMatrix(config.model_matrix),
     defaults: {
       selection: Array(data[0].shape.length).fill(0),
       colormap,
@@ -181,6 +184,7 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
     colors,
     visibilities,
     contrast_limits,
+    model_matrix,
     defaults,
     // Grid
     loaders,
@@ -231,6 +235,7 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
       channelIsOn,
       opacity,
       colormap,
+      modelMatrix: model_matrix,
       onClick,
     },
     on: true,

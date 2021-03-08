@@ -3,6 +3,7 @@ import type { ZarrArray } from 'zarr';
 import type { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
 import type { VivLayerProps } from 'viv-layers';
 import type GridLayer from './gridLayer';
+import { Matrix4 } from 'math.gl';
 
 export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
 export const DEFAULT_LAYER_PROPS = {
@@ -24,6 +25,7 @@ interface BaseConfig {
   colormap?: string;
   opacity?: number;
   acquisition?: string;
+  model_matrix?: string | number[];
   onClick?: (e: any) => void;
 }
 
@@ -68,6 +70,7 @@ export type SourceData = {
     colormap: string;
     opacity: number;
   };
+  model_matrix: Matrix4;
   axis_labels: string[];
   onClick?: (e: any) => void;
 };
@@ -105,7 +108,7 @@ export const layerStateFamily = atomFamily({
   key: 'layerStateFamily',
   default: (id: string): LayerState => ({
     Layer: null,
-    layerProps: { id, ...DEFAULT_LAYER_PROPS },
+    layerProps: { id, modelMatrix: new Matrix4(), ...DEFAULT_LAYER_PROPS },
     on: false,
   }),
 });

@@ -2,7 +2,7 @@ import { ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
 import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
-import { join, loadMultiscales, guessTileSize, range } from './utils';
+import { join, loadMultiscales, guessTileSize, range, parseMatrix } from './utils';
 
 export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAttrs: Ome.Well): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
@@ -64,6 +64,7 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
     loaders,
     ...meta,
     loader: [loaders[0].loader],
+    model_matrix: parseMatrix(config.model_matrix),
     defaults: {
       selection: meta.defaultSelection,
       colormap: config.colormap ?? '',
@@ -154,6 +155,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
     loaders,
     ...meta,
     loader: [loaders[0].loader],
+    model_matrix: parseMatrix(config.model_matrix),
     defaults: {
       selection: meta.defaultSelection,
       colormap: config.colormap ?? '',
@@ -199,6 +201,7 @@ export async function loadOmeroMultiscales(
   return {
     loader: loader,
     name: meta.name ?? name,
+    model_matrix: parseMatrix(config.model_matrix),
     defaults: {
       selection: meta.defaultSelection,
       colormap,
