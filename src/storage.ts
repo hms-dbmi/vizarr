@@ -22,15 +22,17 @@ export class FileReferenceStore implements AsyncStore<ArrayBuffer> {
     throw Error('Protocol not supported, got: ' + JSON.stringify(protocol));
   }
 
-  _fetch({ url, offset, size }: { url: string; offset?: number; size?: number }) {
-    const init: RequestInit = {};
+  _fetch({ url, offset, size }: { url: string; offset?: number; size?: number }, opt: RequestInit) {
     if (offset && size) {
-      init.headers = { Range: `bytes=${offset}-${offset + size - 1}` };
+      opt.headers = {
+        ...opt.headers,
+        Range: `bytes=${offset}-${offset + size - 1}`,
+      };
     }
-    return fetch(this._url(url), init);
+    return fetch(this._url(url), opt);
   }
 
-  async getItem(key: string) {
+  async getItem(key: string, opts: RequestInit = {}) {
     const entry = this.ref.get(key);
 
     if (!entry) {
@@ -43,7 +45,7 @@ export class FileReferenceStore implements AsyncStore<ArrayBuffer> {
     }
 
     const [url, offset, size] = entry;
-    const res = await this._fetch({ url, offset, size });
+    const res = await this._fetch({ url, offset, size }, opts);
 
     if (res.status === 200 || res.status === 206) {
       return res.arrayBuffer();
