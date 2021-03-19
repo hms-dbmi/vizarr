@@ -1,6 +1,6 @@
 import '../common/index-aae33e1a.js';
 import { c as createCommonjsModule } from '../common/_commonjsHelpers-37fa8da4.js';
-import { B as BoundsCheckError, s as slice } from '../common/zarr-36520a38.js';
+import { B as BoundsCheckError, s as slice } from '../common/zarr-b2ebc47a.js';
 import { S as Stats, _ as _get, M as Model, s as lngLatToWorld, L as Layer, C as COORDINATE_SYSTEM, i as log, q as _asyncToGenerator, r as regenerator, t as Vector3, f as flatten, l as load, c as Texture2D, v as isWebGL2 } from '../common/layer-8f126b7a.js';
 import { p as project32, a as picking, G as Geometry, c as cutPolylineByGrid, b as cutPolylineByMercatorBounds, T as Tesselator, S as SolidPolygonLayer } from '../common/solid-polygon-layer-0ad27237.js';
 import { C as CompositeLayer } from '../common/composite-layer-33fb44a4.js';

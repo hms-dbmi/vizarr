@@ -1,5 +1,6 @@
 import {ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray} from "../_snowpack/pkg/zarr.js";
 import {Matrix4} from "../_snowpack/pkg/@math.gl/core/dist/esm.js";
+import {FileReferenceStore} from "./storage.js";
 export const MAX_CHANNELS = 6;
 export const COLORS = {
   cyan: "#00FFFF",
@@ -13,15 +14,19 @@ export const COLORS = {
 export const MAGENTA_GREEN = [COLORS.magenta, COLORS.green];
 export const RGB = [COLORS.red, COLORS.green, COLORS.blue];
 export const CYMRGB = Object.values(COLORS).slice(0, -2);
-function normalizeStore(source) {
+async function normalizeStore(source) {
   if (typeof source === "string") {
+    if (source.endsWith(".json")) {
+      const store = await FileReferenceStore.fromUrl(source);
+      return {store};
+    }
     const [root, path] = source.split(".zarr");
     return {store: new HTTPStore(root + ".zarr"), path};
   }
-  return {store: source, path: ""};
+  return {store: source};
 }
 export async function open(source) {
-  const {store, path} = normalizeStore(source);
+  const {store, path} = await normalizeStore(source);
   return openGroup(store, path).catch((err) => {
     if (err instanceof ContainsArrayError) {
       return openArray({store, path});

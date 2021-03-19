@@ -81,7 +81,7 @@ function loadMultiChannel(config, data, max) {
   return {
     loader: data,
     name,
-    channel_axis,
+    channel_axis: Number(channel_axis),
     colors,
     names: names ?? range(n).map((i) => `channel_${i}`),
     contrast_limits: contrast_limits ?? Array(n).fill([0, max]),
