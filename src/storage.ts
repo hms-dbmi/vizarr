@@ -10,6 +10,9 @@ export class FileReferenceStore implements AsyncStore<ArrayBuffer> {
 
   static async fromUrl(url: string) {
     const json: Record<string, Ref> = await fetch(url).then((res) => res.json());
+    if ('version' in json) {
+      throw Error('Only v0 ReferenceFileSystem description is currently supported!');
+    }
     const ref = new Map(Object.entries(json));
     return new FileReferenceStore(ref);
   }
