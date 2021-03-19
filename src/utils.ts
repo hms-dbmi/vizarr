@@ -23,12 +23,12 @@ async function normalizeStore(source: string | ZarrArray['store']) {
   if (typeof source === 'string') {
     if (source.endsWith('.json')) {
       const store = await FileReferenceStore.fromUrl(source);
-      return { store, path: '' };
+      return { store };
     }
     const [root, path] = source.split('.zarr');
     return { store: new HTTPStore(root + '.zarr'), path };
   }
-  return { store: source, path: '' };
+  return { store: source };
 }
 
 export async function open(source: string | ZarrArray['store']) {
