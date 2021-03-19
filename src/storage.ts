@@ -22,14 +22,12 @@ export class FileReferenceStore implements AsyncStore<ArrayBuffer> {
     throw Error('Protocol not supported, got: ' + JSON.stringify(protocol));
   }
 
-  _fetch({ url, offset, size }: { url: string; offset?: number; size?: number }, opt: RequestInit) {
-    if (offset && size) {
-      opt.headers = {
-        ...opt.headers,
-        Range: `bytes=${offset}-${offset + size - 1}`,
-      };
+  _fetch({ url, offset, size }: { url: string; offset?: number; size?: number }, opts: RequestInit) {
+    if (offset !== undefined && size !== undefined) {
+      // add range headers to request options
+      opts = { ...opts, headers: { ...opts.headers, Range: `bytes=${offset}-${offset + size - 1}` } };
     }
-    return fetch(this._url(url), opt);
+    return fetch(this._url(url), opts);
   }
 
   async getItem(key: string, opts: RequestInit = {}) {
