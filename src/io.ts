@@ -59,7 +59,6 @@ function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<st
 function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<string[]>[], max: number): SourceData {
   const { names, channel_axis, name, model_matrix, opacity = 1, colormap = '' } = config;
   let { contrast_limits, visibilities, colors } = config;
-
   const n = data[0].shape[channel_axis as number];
   for (const channelProp of [contrast_limits, visibilities, names, colors]) {
     if (channelProp && channelProp.length !== n) {
@@ -101,7 +100,7 @@ function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<stri
   return {
     loader: data,
     name,
-    channel_axis: channel_axis as number,
+    channel_axis: Number(channel_axis as number),
     colors,
     names: names ?? range(n).map((i) => `channel_${i}`),
     contrast_limits: contrast_limits ?? Array(n).fill([0, max]),
