@@ -22,7 +22,7 @@ async function normalizeStore(source: string | ZarrArray['store']) {
     if (source.endsWith('.json')) {
       // import custom store implementation
       const { ReferenceStore } = await import('reference-spec-reader');
-      const store = ReferenceStore.fromJSON(await fetch(source).then(res => res.json()));
+      const store = ReferenceStore.fromJSON(await fetch(source).then((res) => res.json()));
       return { store };
     }
     const [root, path] = source.split('.zarr');
