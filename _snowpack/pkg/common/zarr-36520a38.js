@@ -10338,4 +10338,4 @@ addCodec(Zlib.codecId, () => Zlib);
 addCodec(GZip.codecId, () => GZip);
 addCodec(Blosc.codecId, () => Blosc);
 
-export { BoundsCheckError as B, ContainsArrayError as C, Group as G, HTTPStore as H, KeyError as K, ZarrArray as Z, HTTPError as a, openArray as b, openGroup as o, slice as s };
+export { BoundsCheckError as B, ContainsArrayError as C, Group as G, HTTPStore as H, ZarrArray as Z, openArray as a, openGroup as o, slice as s };

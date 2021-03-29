@@ -1,6 +1,5 @@
 import {ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray} from "../_snowpack/pkg/zarr.js";
 import {Matrix4} from "../_snowpack/pkg/@math.gl/core/dist/esm.js";
-import {FileReferenceStore} from "./storage.js";
 export const MAX_CHANNELS = 6;
 export const COLORS = {
   cyan: "#00FFFF",
@@ -17,7 +16,8 @@ export const CYMRGB = Object.values(COLORS).slice(0, -2);
 async function normalizeStore(source) {
   if (typeof source === "string") {
     if (source.endsWith(".json")) {
-      const store = await FileReferenceStore.fromUrl(source);
+      const {ReferenceStore} = await import("../_snowpack/pkg/reference-spec-reader.js");
+      const store = ReferenceStore.fromJSON(await fetch(source).then((res) => res.json()));
       return {store};
     }
     const [root, path] = source.split(".zarr");

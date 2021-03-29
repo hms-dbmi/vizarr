@@ -16,6 +16,7 @@
     "react": "./react.js",
     "react-dom": "./react-dom.js",
     "recoil": "./recoil.js",
+    "reference-spec-reader": "./reference-spec-reader.js",
     "zarr": "./zarr.js"
   }
 }
