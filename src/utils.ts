@@ -2,8 +2,6 @@ import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray } from '
 import type { Group as ZarrGroup } from 'zarr';
 import { Matrix4 } from '@math.gl/core/dist/esm';
 
-import { FileReferenceStore } from './storage';
-
 export const MAX_CHANNELS = 6;
 
 export const COLORS = {
@@ -22,7 +20,9 @@ export const CYMRGB = Object.values(COLORS).slice(0, -2);
 async function normalizeStore(source: string | ZarrArray['store']) {
   if (typeof source === 'string') {
     if (source.endsWith('.json')) {
-      const store = await FileReferenceStore.fromUrl(source);
+      // import custom store implementation
+      const { ReferenceStore } = await import('reference-spec-reader');
+      const store = ReferenceStore.fromJSON(await fetch(source).then((res) => res.json()));
       return { store };
     }
     const [root, path] = source.split('.zarr');
