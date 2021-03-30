@@ -24,7 +24,7 @@ import {
   RGB,
 } from './utils';
 
-function getAxisLabels(arr: ZarrArray, axis_labels?: string[], channel_axis?: number): string[] {
+function getAxisLabels(arr: ZarrArray, axis_labels?: string[], channel_axis?: number) {
   if (!axis_labels || axis_labels.length != arr.shape.length) {
     // default axis_labels are e.g. ['0', '1', 'y', 'x']
     const nonXYaxisLabels = arr.shape.slice(0, -2).map((d, i) => '' + i);
@@ -33,7 +33,7 @@ function getAxisLabels(arr: ZarrArray, axis_labels?: string[], channel_axis?: nu
   if (channel_axis) {
     axis_labels[channel_axis] = 'c';
   }
-  return axis_labels;
+  return axis_labels as [...string[], 'y', 'x'];
 }
 
 function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<string[]>[], max: number): SourceData {

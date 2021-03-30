@@ -235,6 +235,6 @@ function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero) {
     visibilities,
     channel_axis: 1,
     defaultSelection: [t, 0, z, 0, 0],
-    axis_labels: ['t', 'c', 'z', 'y', 'x'],
+    axis_labels: ['t', 'c', 'z', 'y', 'x'] as [...string[], 'y', 'x'],
   };
 }
