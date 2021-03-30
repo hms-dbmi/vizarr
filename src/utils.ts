@@ -33,9 +33,29 @@ async function normalizeStore(source: string | ZarrArray['store']) {
 
 export async function open(source: string | ZarrArray['store']) {
   const { store, path } = await normalizeStore(source);
-  return openGroup(store, path).catch((err) => {
+
+  function nested(store) {
+    const get = (target, key) => {
+      if (key === 'getItem' || key === 'setItem' || key === 'containsItem') {
+        return (path, ...args) => {
+          if (path.endsWith('.zarray') || path.endsWith('.zattrs') || path.endsWith('.zgroup')) {
+            return target[key](path, ...args);
+          }
+          const prefix = path.split('/');
+          const chunkKey = prefix.pop();
+          const newPath = [...prefix, chunkKey.replaceAll('.', '/')].join('/');
+          return target[key](newPath, ...args);
+        }
+      }
+      return Reflect.get(target, key);
+    };
+    return new Proxy(store, { get });
+  }
+  const nested_store = nested(store);
+
+  return openGroup(nested_store, path).catch((err) => {
     if (err instanceof ContainsArrayError) {
-      return openArray({ store, path });
+      return openArray({ nested_store, path });
     }
     throw err;
   });
