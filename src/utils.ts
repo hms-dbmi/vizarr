@@ -22,20 +22,18 @@ async function normalizeStore(source: string | ZarrArray['store']) {
     if (source.endsWith('.json')) {
       // import custom store implementation
       const { ReferenceStore } = await import('reference-spec-reader');
-      const store = ReferenceStore.fromJSON(await fetch(source).then((res) => res.json()));
-      return { store };
+      return ReferenceStore.fromJSON(await fetch(source).then((res) => res.json()));
     }
-    const [root, path] = source.split('.zarr');
-    return { store: new HTTPStore(root + '.zarr'), path };
+    return new HTTPStore(source);
   }
-  return { store: source };
+  return source;
 }
 
 export async function open(source: string | ZarrArray['store']) {
-  const { store, path } = await normalizeStore(source);
-  return openGroup(store, path).catch((err) => {
+  const store = await normalizeStore(source);
+  return openGroup(store).catch((err) => {
     if (err instanceof ContainsArrayError) {
-      return openArray({ store, path });
+      return openArray({ store });
     }
     throw err;
   });
