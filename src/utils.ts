@@ -50,24 +50,15 @@ export async function loadMultiscales(grp: ZarrGroup, multiscales: Ome.Multiscal
 
 export function nested(store: ZarrArray['store']) {
   const get = (target: ZarrArray['store'], key: string | number | symbol) => {
-    if (key === 'getItem' || key === 'containsItem' || key === 'setItem') {
-      return (path: string, ...args: any[]) => {
+    if (key === 'getItem' || key === 'containsItem') {
+      return (path: string, ...args: unknown[]) => {
         if (path.endsWith('.zarray') || path.endsWith('.zattrs') || path.endsWith('.zgroup')) {
-          if (key === 'setItem') {
-            // TypeScript: setItem() needs 'value'
-            return target[key](path, args[0]);
-          } else {
-            return target[key](path, ...args);
-          }
+          return target[key](path, ...args);
         }
         const prefix = path.split('/');
-        const chunkKey = prefix.pop() as string;
+        const chunkKey = prefix.pop()!;
         const newPath = [...prefix, chunkKey.replaceAll('.', '/')].join('/');
-        if (key === 'setItem') {
-          return target[key](newPath, args[0]);
-        } else {
-          return target[key](newPath, ...args);
-        }
+        return target[key](newPath, ...args);
       };
     }
     return Reflect.get(target, key);
