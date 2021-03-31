@@ -2,9 +2,28 @@ import { ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
 import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
-import { join, loadMultiscales, guessTileSize, range, parseMatrix } from './utils';
+import {
+  guessTileSize,
+  join,
+  loadMultiscales,
+  nested,
+  parseMatrix,
+  range
+} from './utils';
 
-export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAttrs: Ome.Well): Promise<SourceData> {
+// OME-Zarr uses nested chunks since version 0.2
+function isNested(version: String | undefined) : boolean {
+  return version != undefined && version !== "0.1";
+}
+
+export async function loadWell(
+  config: ImageLayerConfig,
+  grp: ZarrGroup,
+  wellAttrs: Ome.Well
+): Promise<SourceData> {
+  if (isNested(wellAttrs.version)) {
+    grp.store = nested(grp.store);
+  }
   // Can filter Well fields by URL query ?acquisition=ID
   const acquisitionId: number | undefined = config.acquisition ? parseInt(config.acquisition) : undefined;
   let acquisitions: Ome.Acquisition[] = [];
@@ -104,7 +123,14 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   return sourceData;
 }
 
-export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateAttrs: Ome.Plate): Promise<SourceData> {
+export async function loadPlate(
+  config: ImageLayerConfig,
+  grp: ZarrGroup,
+  plateAttrs: Ome.Plate
+): Promise<SourceData> {
+  if (isNested(plateAttrs.version)) {
+    grp.store = nested(grp.store);
+  }
   if (!('columns' in plateAttrs) || !('rows' in plateAttrs)) {
     throw Error(`Plate .zattrs missing columns or rows`);
   }
@@ -193,6 +219,9 @@ export async function loadOmeroMultiscales(
   grp: ZarrGroup,
   attrs: { multiscales: Ome.Multiscale[]; omero: Ome.Omero }
 ): Promise<SourceData> {
+  if (isNested(attrs.multiscales[0]?.version)) {
+    grp.store = nested(grp.store);
+  }
   const { name, opacity = 1, colormap = '' } = config;
   const data = await loadMultiscales(grp, attrs.multiscales);
   const meta = parseOmeroMeta(attrs.omero);

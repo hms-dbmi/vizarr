@@ -33,29 +33,9 @@ async function normalizeStore(source: string | ZarrArray['store']) {
 
 export async function open(source: string | ZarrArray['store']) {
   const { store, path } = await normalizeStore(source);
-
-  function nested(store) {
-    const get = (target, key) => {
-      if (key === 'getItem' || key === 'setItem' || key === 'containsItem') {
-        return (path, ...args) => {
-          if (path.endsWith('.zarray') || path.endsWith('.zattrs') || path.endsWith('.zgroup')) {
-            return target[key](path, ...args);
-          }
-          const prefix = path.split('/');
-          const chunkKey = prefix.pop();
-          const newPath = [...prefix, chunkKey.replaceAll('.', '/')].join('/');
-          return target[key](newPath, ...args);
-        }
-      }
-      return Reflect.get(target, key);
-    };
-    return new Proxy(store, { get });
-  }
-  const nested_store = nested(store);
-
-  return openGroup(nested_store, path).catch((err) => {
+  return openGroup(store, path).catch((err) => {
     if (err instanceof ContainsArrayError) {
-      return openArray({ nested_store, path });
+      return openArray({ store, path });
     }
     throw err;
   });
@@ -68,6 +48,33 @@ export async function loadMultiscales(grp: ZarrGroup, multiscales: Ome.Multiscal
     return nodes;
   }
   throw Error('Multiscales metadata included a path to a group.');
+}
+
+export function nested(store: ZarrArray['store']) {
+  const get = (target: ZarrArray['store'], key: string | number | symbol) => {
+    if (key === 'getItem' || key === 'containsItem' || key === 'setItem') {
+      return (path: string, ...args: any[]) => {
+        if (path.endsWith('.zarray') || path.endsWith('.zattrs') || path.endsWith('.zgroup')) {
+          if (key === 'setItem') {
+            // TypeScript: setItem() needs 'value'
+            return target[key](path, args[0]);
+          } else {
+            return target[key](path, ...args);
+          }
+        }
+        const prefix = path.split('/');
+        const chunkKey = prefix.pop() as string;
+        const newPath = [...prefix, chunkKey.replaceAll('.', '/')].join('/');
+        if (key === 'setItem') {
+          return target[key](newPath, args[0]);
+        } else {
+          return target[key](newPath, ...args);
+        }
+      }
+    }
+    return Reflect.get(target, key);
+  };
+  return new Proxy(store, { get });
 }
 
 export function hexToRGB(hex: string): number[] {
