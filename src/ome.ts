@@ -2,25 +2,14 @@ import { ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
 import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
-import {
-  guessTileSize,
-  join,
-  loadMultiscales,
-  nested,
-  parseMatrix,
-  range
-} from './utils';
+import { guessTileSize, join, loadMultiscales, nested, parseMatrix, range } from './utils';
 
 // OME-Zarr uses nested chunks since version 0.2
-function isNested(version: String | undefined) : boolean {
-  return version != undefined && version !== "0.1";
+function isNested(version: String | undefined): boolean {
+  return version != undefined && version !== '0.1';
 }
 
-export async function loadWell(
-  config: ImageLayerConfig,
-  grp: ZarrGroup,
-  wellAttrs: Ome.Well
-): Promise<SourceData> {
+export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAttrs: Ome.Well): Promise<SourceData> {
   if (isNested(wellAttrs.version)) {
     grp.store = nested(grp.store);
   }
@@ -123,11 +112,7 @@ export async function loadWell(
   return sourceData;
 }
 
-export async function loadPlate(
-  config: ImageLayerConfig,
-  grp: ZarrGroup,
-  plateAttrs: Ome.Plate
-): Promise<SourceData> {
+export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateAttrs: Ome.Plate): Promise<SourceData> {
   if (isNested(plateAttrs.version)) {
     grp.store = nested(grp.store);
   }

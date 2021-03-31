@@ -68,7 +68,7 @@ export function nested(store: ZarrArray['store']) {
         } else {
           return target[key](newPath, ...args);
         }
-      }
+      };
     }
     return Reflect.get(target, key);
   };
