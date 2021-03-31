@@ -17,7 +17,7 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
     throw Error('Store must be an HTTPStore to open well.');
   }
 
-  const [row, col] = grp.path.split('/').filter(Boolean).slice(-2);
+  const [row, col] = grp.store.url.split('/').filter(Boolean).slice(-2);
 
   let { images } = wellAttrs;
 
@@ -26,8 +26,8 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
 
   if (acqIds.length > 1) {
     // Need to get acquisitions metadata from parent Plate
-    const platePath = grp.path.replace(`${row}/${col}`, '');
-    const plate = await openGroup(grp.store, platePath);
+    const plateUrl = grp.store.url.replace(`${row}/${col}`, '');
+    const plate = await openGroup(new HTTPStore(plateUrl));
     const plateAttrs = (await plate.attrs.asObject()) as { plate: Ome.Plate };
     acquisitions = plateAttrs?.plate?.acquisitions ?? [];
 
@@ -88,9 +88,9 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
     }
     const { row, column } = gridCoord;
     let imgSource = undefined;
-    if (grp.store instanceof HTTPStore && grp.path !== '' && !isNaN(row) && !isNaN(column)) {
+    if (grp.store instanceof HTTPStore && !isNaN(row) && !isNaN(column)) {
       const field = row * cols + column;
-      imgSource = join(grp.store.url, grp.path, imgPaths[field]);
+      imgSource = join(grp.store.url, imgPaths[field]);
     }
     if (config.onClick) {
       delete info.layer;
@@ -175,7 +175,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
     let imgSource = undefined;
     // TODO: use a regex for the path??
     if (grp.store instanceof HTTPStore && !isNaN(row) && !isNaN(column)) {
-      imgSource = join(grp.store.url, grp.path, rows[row], columns[column]);
+      imgSource = join(grp.store.url, rows[row], columns[column]);
     }
     if (config.onClick) {
       delete info.layer;
@@ -235,6 +235,6 @@ function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero) {
     visibilities,
     channel_axis: 1,
     defaultSelection: [t, 0, z, 0, 0],
-    axis_labels: ['t', 'c', 'z', 'y', 'x'],
+    axis_labels: ['t', 'c', 'z', 'y', 'x'] as [...string[], 'y', 'x'],
   };
 }
