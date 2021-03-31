@@ -17,19 +17,17 @@ async function normalizeStore(source) {
   if (typeof source === "string") {
     if (source.endsWith(".json")) {
       const {ReferenceStore} = await import("../_snowpack/pkg/reference-spec-reader.js");
-      const store = ReferenceStore.fromJSON(await fetch(source).then((res) => res.json()));
-      return {store};
+      return ReferenceStore.fromJSON(await fetch(source).then((res) => res.json()));
     }
-    const [root, path] = source.split(".zarr");
-    return {store: new HTTPStore(root + ".zarr"), path};
+    return new HTTPStore(source);
   }
-  return {store: source};
+  return source;
 }
 export async function open(source) {
-  const {store, path} = await normalizeStore(source);
-  return openGroup(store, path).catch((err) => {
+  const store = await normalizeStore(source);
+  return openGroup(store).catch((err) => {
     if (err instanceof ContainsArrayError) {
-      return openArray({store, path});
+      return openArray({store});
     }
     throw err;
   });

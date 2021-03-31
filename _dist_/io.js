@@ -1,5 +1,5 @@
 import {DTYPE_VALUES, ImageLayer, MultiscaleImageLayer, ZarrPixelSource} from "../_snowpack/pkg/@hms-dbmi/viv.js";
-import {Group as ZarrGroup, openGroup} from "../_snowpack/pkg/zarr.js";
+import {Group as ZarrGroup, HTTPStore, openGroup} from "../_snowpack/pkg/zarr.js";
 import GridLayer from "./gridLayer.js";
 import {loadOmeroMultiscales, loadPlate, loadWell} from "./ome.js";
 import {
@@ -109,9 +109,9 @@ export async function createSourceData(config) {
     if ("omero" in attrs) {
       return loadOmeroMultiscales(config, node, attrs);
     }
-    if (Object.keys(attrs).length === 0 && node.path !== "") {
-      const parentPath = node.path.slice(0, node.path.lastIndexOf("/"));
-      const parent = await openGroup(node.store, parentPath);
+    if (Object.keys(attrs).length === 0 && node.store instanceof HTTPStore) {
+      const parentUrl = node.store.url.slice(0, node.store.url.lastIndexOf("/"));
+      const parent = await openGroup(new HTTPStore(parentUrl));
       const parentAttrs = await parent.attrs.asObject();
       if ("plate" in parentAttrs) {
         return loadPlate(config, parent, parentAttrs.plate);

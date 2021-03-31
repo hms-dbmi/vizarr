@@ -11,12 +11,12 @@ export async function loadWell(config, grp, wellAttrs) {
   if (!(grp.store instanceof HTTPStore)) {
     throw Error("Store must be an HTTPStore to open well.");
   }
-  const [row, col] = grp.path.split("/").filter(Boolean).slice(-2);
+  const [row, col] = grp.store.url.split("/").filter(Boolean).slice(-2);
   let {images} = wellAttrs;
   const acqIds = images.flatMap((img) => img.acquisition ? [img.acquisition] : []);
   if (acqIds.length > 1) {
-    const platePath = grp.path.replace(`${row}/${col}`, "");
-    const plate = await openGroup(grp.store, platePath);
+    const plateUrl = grp.store.url.replace(`${row}/${col}`, "");
+    const plate = await openGroup(new HTTPStore(plateUrl));
     const plateAttrs = await plate.attrs.asObject();
     acquisitions = plateAttrs?.plate?.acquisitions ?? [];
     if (acquisitionId && acqIds.includes(acquisitionId)) {
@@ -66,9 +66,9 @@ export async function loadWell(config, grp, wellAttrs) {
     }
     const {row: row2, column} = gridCoord;
     let imgSource = void 0;
-    if (grp.store instanceof HTTPStore && grp.path !== "" && !isNaN(row2) && !isNaN(column)) {
+    if (grp.store instanceof HTTPStore && !isNaN(row2) && !isNaN(column)) {
       const field = row2 * cols + column;
-      imgSource = join(grp.store.url, grp.path, imgPaths[field]);
+      imgSource = join(grp.store.url, imgPaths[field]);
     }
     if (config.onClick) {
       delete info.layer;
@@ -134,7 +134,7 @@ export async function loadPlate(config, grp, plateAttrs) {
     const {row, column} = gridCoord;
     let imgSource = void 0;
     if (grp.store instanceof HTTPStore && !isNaN(row) && !isNaN(column)) {
-      imgSource = join(grp.store.url, grp.path, rows[row], columns[column]);
+      imgSource = join(grp.store.url, rows[row], columns[column]);
     }
     if (config.onClick) {
       delete info.layer;
