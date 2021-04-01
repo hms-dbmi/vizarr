@@ -19,10 +19,13 @@ export const CYMRGB = Object.values(COLORS).slice(0, -2);
 
 async function normalizeStore(source: string | ZarrArray['store']) {
   if (typeof source === 'string') {
-    if (source.endsWith('.json')) {
-      // import custom store implementation
+    if (source.endsWith('.json') || source.startsWith('reference://')) {
+      // Import custom store implementation
       const { ReferenceStore } = await import('reference-spec-reader');
-      return ReferenceStore.fromJSON(await fetch(source).then((res) => res.json()));
+      const url = new URL(source.replace('reference://', ''));
+      const target = url.searchParams.get('target') ?? undefined;
+      url.searchParams.delete('target');
+      return ReferenceStore.fromJSON(await fetch(url.href).then((res) => res.json()), { target });
     }
     return new HTTPStore(source);
   }
