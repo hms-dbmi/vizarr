@@ -40,7 +40,7 @@ the example [Jupyter Notebooks](example/).
 ### Limitations
 `vizarr` was built to support the registration use case above where multiple, pyramidal OME-Zarr images
 are viewed within a Jupyter Notebook. Support for other Zarr arrays is supported but not as well tested. 
-More information regarding thew viewing of generic Zarr arrays can be found in in the example notebooks.
+More information regarding the viewing of generic Zarr arrays can be found in in the example notebooks.
 
 ### Citation
 If you are using Vizarr in your work please cite our preprint:
