@@ -125,6 +125,7 @@ function isNested(attrs: Ome.Attrs) {
   } else if ('well' in attrs) {
     version = attrs.well.version;
   }
+  // OME-Zarr uses nested chunks since version 0.2
   return version && version !== '0.1';
 }
 
