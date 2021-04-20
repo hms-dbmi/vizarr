@@ -18,6 +18,7 @@ import {
   loadMultiscales,
   MAGENTA_GREEN,
   MAX_CHANNELS,
+  nested,
   open,
   parseMatrix,
   range,
@@ -115,12 +116,29 @@ function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<stri
   };
 }
 
+function isNested(attrs: Ome.Attrs) {
+  let version;
+  if ('plate' in attrs) {
+    version = attrs.plate.version;
+  } else if ('omero' in attrs) {
+    version = attrs.multiscales[0].version;
+  } else if ('well' in attrs) {
+    version = attrs.well.version;
+  }
+  // OME-Zarr uses nested chunks since version 0.2
+  return version && version !== '0.1';
+}
+
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
   const node = await open(config.source);
   let data: ZarrArray[];
 
   if (node instanceof ZarrGroup) {
     const attrs = (await node.attrs.asObject()) as Ome.Attrs;
+
+    if (isNested(attrs)) {
+      node.store = nested(node.store);
+    }
 
     if ('plate' in attrs) {
       return loadPlate(config, node, attrs.plate);
