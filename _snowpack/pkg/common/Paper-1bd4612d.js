@@ -1,9 +1,9 @@
 import { r as react } from './index-aae33e1a.js';
-import { d as defaultTheme, w as withStyles, c as clsx } from './withStyles-9f1c7537.js';
-import { u as useTheme$1, _ as _inheritsLoose } from './withStyles-d059db10.js';
-import { a as _objectWithoutPropertiesLoose, _ as _extends, b as _objectWithoutProperties } from './deepmerge-9adb393e.js';
+import { a as defaultTheme, w as withStyles } from './withStyles-002e64ba.js';
+import { u as useTheme$1, _ as _inheritsLoose, b as _objectWithoutPropertiesLoose, a as _extends, c as _objectWithoutProperties } from './withStyles-1776452a.js';
 import './index-c103191b.js';
 import { r as reactDom } from './index-b1abb70f.js';
+import { r as require$$6 } from './clsx.m-a5a7580e.js';
 
 function useTheme() {
   var theme = useTheme$1() || defaultTheme;
@@ -18,30 +18,6 @@ function setRef(ref, value) {
   } else if (ref) {
     ref.current = value;
   }
-}
-
-/* eslint-disable react-hooks/rules-of-hooks, react-hooks/exhaustive-deps */
-function useControlled(_ref) {
-  var controlled = _ref.controlled,
-      defaultProp = _ref.default;
-      _ref.name;
-      _ref.state;
-
-  var _React$useRef = react.useRef(controlled !== undefined),
-      isControlled = _React$useRef.current;
-
-  var _React$useState = react.useState(defaultProp),
-      valueState = _React$useState[0],
-      setValue = _React$useState[1];
-
-  var value = isControlled ? controlled : valueState;
-
-  var setValueIfUncontrolled = react.useCallback(function (newValue) {
-    if (!isControlled) {
-      setValue(newValue);
-    }
-  }, []);
-  return [value, setValueIfUncontrolled];
 }
 
 function useForkRef(refA, refB) {
@@ -435,23 +411,23 @@ var Transition = /*#__PURE__*/function (_React$Component) {
     }
 
     var _this$props = this.props,
-        children = _this$props.children;
-        _this$props.in;
-        _this$props.mountOnEnter;
-        _this$props.unmountOnExit;
-        _this$props.appear;
-        _this$props.enter;
-        _this$props.exit;
-        _this$props.timeout;
-        _this$props.addEndListener;
-        _this$props.onEnter;
-        _this$props.onEntering;
-        _this$props.onEntered;
-        _this$props.onExit;
-        _this$props.onExiting;
-        _this$props.onExited;
-        _this$props.nodeRef;
-        var childProps = _objectWithoutPropertiesLoose(_this$props, ["children", "in", "mountOnEnter", "unmountOnExit", "appear", "enter", "exit", "timeout", "addEndListener", "onEnter", "onEntering", "onEntered", "onExit", "onExiting", "onExited", "nodeRef"]);
+        children = _this$props.children,
+        _in = _this$props.in,
+        _mountOnEnter = _this$props.mountOnEnter,
+        _unmountOnExit = _this$props.unmountOnExit,
+        _appear = _this$props.appear,
+        _enter = _this$props.enter,
+        _exit = _this$props.exit,
+        _timeout = _this$props.timeout,
+        _addEndListener = _this$props.addEndListener,
+        _onEnter = _this$props.onEnter,
+        _onEntering = _this$props.onEntering,
+        _onEntered = _this$props.onEntered,
+        _onExit = _this$props.onExit,
+        _onExiting = _this$props.onExiting,
+        _onExited = _this$props.onExited,
+        _nodeRef = _this$props.nodeRef,
+        childProps = _objectWithoutPropertiesLoose(_this$props, ["children", "in", "mountOnEnter", "unmountOnExit", "appear", "enter", "exit", "timeout", "addEndListener", "onEnter", "onEntering", "onEntered", "onExit", "onExiting", "onExited", "nodeRef"]);
 
     return (
       /*#__PURE__*/
@@ -466,7 +442,7 @@ var Transition = /*#__PURE__*/function (_React$Component) {
 }(react.Component);
 
 Transition.contextType = TransitionGroupContext;
-Transition.propTypes = {}; // Name the function so it is clearer in the documentation
+Transition.propTypes =  {}; // Name the function so it is clearer in the documentation
 
 function noop() {}
 
@@ -543,19 +519,12 @@ var Paper = /*#__PURE__*/react.forwardRef(function Paper(props, ref) {
       other = _objectWithoutProperties(props, ["classes", "className", "component", "square", "elevation", "variant"]);
 
   return /*#__PURE__*/react.createElement(Component, _extends({
-    className: clsx(classes.root, className, variant === 'outlined' ? classes.outlined : classes["elevation".concat(elevation)], !square && classes.rounded),
+    className: require$$6(classes.root, className, variant === 'outlined' ? classes.outlined : classes["elevation".concat(elevation)], !square && classes.rounded),
     ref: ref
   }, other));
 });
-var Paper$1 = withStyles(styles, {
+var require$$8 = withStyles(styles, {
   name: 'MuiPaper'
 })(Paper);
 
-/**
- * @ignore - internal component.
- * @type {React.Context<{} | {expanded: boolean, disabled: boolean, toggle: () => void}>}
- */
-
-var AccordionContext = react.createContext({});
-
-export { AccordionContext as A, Paper$1 as P, TransitionGroupContext as T, useTheme as a, Transition as b, useControlled as c, getTransitionProps as g, reflow as r, setRef as s, useForkRef as u };
+export { TransitionGroupContext as T, useTheme as a, Transition as b, require$$8 as c, getTransitionProps as g, reflow as r, setRef as s, useForkRef as u };

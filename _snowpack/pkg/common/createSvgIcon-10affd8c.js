@@ -1,8 +1,8 @@
-import { b as _objectWithoutProperties, _ as _extends } from './deepmerge-9adb393e.js';
+import { c as _objectWithoutProperties, a as _extends } from './withStyles-1776452a.js';
 import { r as react } from './index-aae33e1a.js';
 import './index-c103191b.js';
-import { w as withStyles, c as clsx } from './withStyles-9f1c7537.js';
-import { a as formatMuiErrorMessage } from './createMuiTheme-d4d75565.js';
+import { f as formatMuiErrorMessage, r as require$$6 } from './clsx.m-a5a7580e.js';
+import { w as withStyles } from './withStyles-002e64ba.js';
 
 // It should to be noted that this function isn't equivalent to `text-transform: capitalize`.
 //
@@ -10,7 +10,7 @@ import { a as formatMuiErrorMessage } from './createMuiTheme-d4d75565.js';
 // We only handle the first word.
 function capitalize(string) {
   if (typeof string !== 'string') {
-    throw new Error(formatMuiErrorMessage(7));
+    throw new Error( formatMuiErrorMessage(7));
   }
 
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -90,7 +90,7 @@ var SvgIcon = /*#__PURE__*/react.forwardRef(function SvgIcon(props, ref) {
       other = _objectWithoutProperties(props, ["children", "classes", "className", "color", "component", "fontSize", "htmlColor", "titleAccess", "viewBox"]);
 
   return /*#__PURE__*/react.createElement(Component, _extends({
-    className: clsx(classes.root, className, color !== 'inherit' && classes["color".concat(capitalize(color))], fontSize !== 'default' && classes["fontSize".concat(capitalize(fontSize))]),
+    className: require$$6(classes.root, className, color !== 'inherit' && classes["color".concat(capitalize(color))], fontSize !== 'default' && classes["fontSize".concat(capitalize(fontSize))]),
     focusable: "false",
     viewBox: viewBox,
     color: htmlColor,

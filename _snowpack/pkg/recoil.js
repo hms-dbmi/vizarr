@@ -85,7 +85,7 @@ const recoilValues = new Map();
 
 function registerNode(node) {
   if (nodes.has(node.key)) {
-    `Duplicate atom key "${node.key}". This is a FATAL ERROR in
+    const message = `Duplicate atom key "${node.key}". This is a FATAL ERROR in
       production. But it is safe to ignore this warning if it occurred because of
       hot module replacement.`; // TODO Need to figure out if there is a standard/open-source equivalent to see if hot module replacement is happening:
   }
@@ -2168,7 +2168,7 @@ function useRecoilCallback(fn, deps) {
         gotoSnapshot
       })(...args);
     });
-    !!(ret instanceof Sentinel) ? Recoil_invariant(false) : void 0;
+    !!(ret instanceof Sentinel) ?  Recoil_invariant(false) : void 0;
     return ret;
   }, deps != null ? [...deps, storeRef] : undefined // eslint-disable-line fb-www/react-hooks-deps
   );

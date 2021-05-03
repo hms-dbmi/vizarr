@@ -1,7 +1,6 @@
-import { _ as _slicedToArray } from './slicedToArray-4a4de7f2.js';
+import { _ as _slicedToArray } from './slicedToArray-cdb146e7.js';
 import { _ as _classCallCheck } from './classCallCheck-4eda545c.js';
-import { a as _setPrototypeOf, b as _assertThisInitialized, _ as _createClass } from './setPrototypeOf-f270a38e.js';
-import { _ as _typeof } from './typeof-c65245d2.js';
+import { c as _setPrototypeOf, a as _typeof, b as _assertThisInitialized, _ as _createClass } from './setPrototypeOf-d164daa3.js';
 
 function _inherits(subClass, superClass) {
   if (typeof superClass !== "function" && superClass !== null) {
@@ -716,7 +715,7 @@ function transformMat4(out, a, m) {
  * @function
  */
 
-(function () {
+var forEach = function () {
   var vec = create();
   return function (a, stride, offset, count, fn, arg) {
     var i, l;
@@ -745,7 +744,7 @@ function transformMat4(out, a, m) {
 
     return a;
   };
-})();
+}();
 
 function vec2_transformMat4AsVector(out, a, m) {
   var x = a[0];
@@ -1125,7 +1124,7 @@ var len = length;
  * @function
  */
 
-(function () {
+var forEach$1 = function () {
   var vec = create$1();
   return function (a, stride, offset, count, fn, arg) {
     var i, l;
@@ -1156,7 +1155,7 @@ var len = length;
 
     return a;
   };
-})();
+}();
 
 function _createSuper$1(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$2(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
@@ -2289,7 +2288,7 @@ function transformQuat$1(out, a, q) {
  * @function
  */
 
-(function () {
+var forEach$2 = function () {
   var vec = create$2();
   return function (a, stride, offset, count, fn, arg) {
     var i, l;
@@ -2322,7 +2321,7 @@ function transformQuat$1(out, a, q) {
 
     return a;
   };
-})();
+}();
 
 function _createSuper$2(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$3(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
@@ -2852,4 +2851,4 @@ var Matrix4 = function (_Matrix) {
   return Matrix4;
 }(Matrix);
 
-export { add$1 as $, transformMat4$2 as A, multiply as B, scale$1 as C, lerp$1 as D, translate as E, rotateX$1 as F, rotateZ$1 as G, scale as H, negate$1 as I, perspective as J, invert as K, equals$1 as L, Matrix4 as M, add as N, negate as O, sub as P, ARRAY_TYPE as Q, vec4_transformMat3 as R, checkVector as S, deprecated as T, Matrix as U, create$1 as V, fromValues as W, dot as X, len as Y, normalize as Z, _inherits as _, _getPrototypeOf as a, dot$1 as a0, lerp$2 as a1, length$1 as a2, squaredLength as a3, normalize$1 as a4, EPSILON as a5, transformQuat$1 as a6, getScaling as a7, _possibleConstructorReturn as b, config as c, checkNumber as d, transformMat3 as e, transformMat2d as f, transformMat2 as g, clamp as h, isArray as i, equals as j, _construct as k, lerp as l, assert as m, MathArray as n, angle as o, cross as p, rotateY as q, rotateX as r, rotateZ as s, transformMat4 as t, transformMat4$1 as u, vec2_transformMat4AsVector as v, vec3_transformMat4AsVector as w, transformMat3$1 as x, vec3_transformMat2 as y, transformQuat as z };
+export { add$1 as $, scale$1 as A, lerp$1 as B, translate as C, rotateX$1 as D, rotateZ$1 as E, scale as F, negate$1 as G, perspective as H, invert as I, equals$1 as J, add as K, negate as L, Matrix4 as M, equals as N, sub as O, lerp as P, ARRAY_TYPE as Q, vec4_transformMat3 as R, checkVector as S, deprecated as T, Matrix as U, create$1 as V, fromValues as W, dot as X, len as Y, normalize as Z, _inherits as _, _getPrototypeOf as a, dot$1 as a0, lerp$2 as a1, length$1 as a2, squaredLength as a3, normalize$1 as a4, EPSILON as a5, transformQuat$1 as a6, getScaling as a7, _possibleConstructorReturn as b, config as c, checkNumber as d, transformMat3 as e, transformMat2d as f, transformMat2 as g, clamp as h, isArray as i, _construct as j, assert as k, MathArray as l, angle as m, cross as n, rotateY as o, rotateZ as p, transformMat4$1 as q, rotateX as r, vec3_transformMat4AsVector as s, transformMat4 as t, transformMat3$1 as u, vec2_transformMat4AsVector as v, vec3_transformMat2 as w, transformQuat as x, transformMat4$2 as y, multiply as z };

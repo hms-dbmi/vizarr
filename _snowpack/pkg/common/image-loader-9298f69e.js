@@ -1,6 +1,6 @@
-import { q as _asyncToGenerator, r as regenerator } from './layer-8f126b7a.js';
+import { q as _asyncToGenerator, r as regenerator } from './layer-660a8390.js';
 import { p as process } from './process-2545f00a.js';
-import { _ as _typeof } from './typeof-c65245d2.js';
+import { a as _typeof } from './setPrototypeOf-d164daa3.js';
 
 function assert(condition, message) {
   if (!condition) {
@@ -17,7 +17,7 @@ var globals = {
 var global_ = globals.global || globals.self || globals.window;
 var isBrowser = (typeof process === "undefined" ? "undefined" : _typeof(process)) !== 'object' || String(process) !== '[object process]' || process.browser;
 var matches = typeof process !== 'undefined' && process.version && process.version.match(/v([0-9]*)/);
-matches && parseFloat(matches[1]) || 0;
+var nodeVersion = matches && parseFloat(matches[1]) || 0;
 
 var _parseImageNode = global_._parseImageNode;
 var IMAGE_SUPPORTED = typeof Image !== 'undefined';
@@ -541,7 +541,7 @@ function getLoadableImageType(type) {
   }
 }
 
-var VERSION = "2.3.12" ;
+var VERSION =  "2.3.12" ;
 var EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'ico', 'svg'];
 var MIME_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/bmp', 'image/vnd.microsoft.icon', 'image/svg+xml'];
 var ImageLoader = {

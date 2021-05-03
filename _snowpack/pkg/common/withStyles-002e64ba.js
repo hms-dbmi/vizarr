@@ -1,5 +1,6 @@
-import { b as _objectWithoutProperties, _ as _extends, d as deepmerge } from './deepmerge-9adb393e.js';
+import { c as _objectWithoutProperties, a as _extends, d as deepmerge, w as withStyles$1 } from './withStyles-1776452a.js';
 import { _ as _defineProperty } from './defineProperty-1b0b77a2.js';
+import { f as formatMuiErrorMessage, c as createUnarySpacing } from './clsx.m-a5a7580e.js';
 
 var common = {
   black: '#000',
@@ -125,29 +126,6 @@ var grey = {
   A700: '#616161'
 };
 
-/**
- * WARNING: Don't import this directly.
- * Use `MuiError` from `@material-ui/utils/macros/MuiError.macro` instead.
- * @param {number} code
- */
-function formatMuiErrorMessage(code) {
-  // Apply babel-plugin-transform-template-literals in loose mode
-  // loose mode is safe iff we're concatenating primitives
-  // see https://babeljs.io/docs/en/babel-plugin-transform-template-literals#loose
-
-  /* eslint-disable prefer-template */
-  var url = 'https://material-ui.com/production-error/?code=' + code;
-
-  for (var i = 1; i < arguments.length; i += 1) {
-    // rest params over-transpile for this case
-    // eslint-disable-next-line prefer-rest-params
-    url += '&args[]=' + encodeURIComponent(arguments[i]);
-  }
-
-  return 'Minified Material-UI error #' + code + '; visit ' + url + ' for the full message.';
-  /* eslint-enable prefer-template */
-}
-
 /* eslint-disable no-use-before-define */
 
 /**
@@ -244,7 +222,7 @@ function decomposeColor(color) {
   var type = color.substring(0, marker);
 
   if (['rgb', 'rgba', 'hsl', 'hsla'].indexOf(type) === -1) {
-    throw new Error(formatMuiErrorMessage(3, color));
+    throw new Error( formatMuiErrorMessage(3, color));
   }
 
   var values = color.substring(marker + 1, color.length - 1).split(',');
@@ -636,11 +614,11 @@ function createPalette(palette) {
     }
 
     if (!color.main) {
-      throw new Error(formatMuiErrorMessage(4, mainShade));
+      throw new Error( formatMuiErrorMessage(4, mainShade));
     }
 
     if (typeof color.main !== 'string') {
-      throw new Error(formatMuiErrorMessage(5, JSON.stringify(color.main)));
+      throw new Error( formatMuiErrorMessage(5, JSON.stringify(color.main)));
     }
 
     addLightOrDark(color, 'light', lightShade, tonalOffset);
@@ -790,32 +768,6 @@ var shape = {
   borderRadius: 4
 };
 
-function createUnarySpacing(theme) {
-  var themeSpacing = theme.spacing || 8;
-
-  if (typeof themeSpacing === 'number') {
-    return function (abs) {
-
-      return themeSpacing * abs;
-    };
-  }
-
-  if (Array.isArray(themeSpacing)) {
-    return function (abs) {
-
-      return themeSpacing[abs];
-    };
-  }
-
-  if (typeof themeSpacing === 'function') {
-    return themeSpacing;
-  }
-
-  return function () {
-    return undefined;
-  };
-}
-
 function createSpacing() {
   var spacingInput = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 8;
 
@@ -919,8 +871,8 @@ var transitions = {
         _options$easing = options.easing,
         easingOption = _options$easing === void 0 ? easing.easeInOut : _options$easing,
         _options$delay = options.delay,
-        delay = _options$delay === void 0 ? 0 : _options$delay;
-        _objectWithoutProperties(options, ["duration", "easing", "delay"]);
+        delay = _options$delay === void 0 ? 0 : _options$delay,
+        other = _objectWithoutProperties(options, ["duration", "easing", "delay"]);
 
     return (Array.isArray(props) ? props : [props]).map(function (animatedProp) {
       return "".concat(animatedProp, " ").concat(typeof durationOption === 'string' ? durationOption : formatMs(durationOption), " ").concat(easingOption, " ").concat(typeof delay === 'string' ? delay : formatMs(delay));
@@ -994,4 +946,12 @@ function createMuiTheme() {
   return muiTheme;
 }
 
-export { formatMuiErrorMessage as a, duration as b, createMuiTheme as c, darken as d, fade as f, lighten as l, zIndex as z };
+var defaultTheme = createMuiTheme();
+
+function withStyles(stylesOrCreator, options) {
+  return withStyles$1(stylesOrCreator, _extends({
+    defaultTheme: defaultTheme
+  }, options));
+}
+
+export { defaultTheme as a, duration as b, darken as d, fade as f, lighten as l, withStyles as w, zIndex as z };

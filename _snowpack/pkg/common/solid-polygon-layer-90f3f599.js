@@ -1,10 +1,10 @@
 import { _ as _classCallCheck } from './classCallCheck-4eda545c.js';
-import { _ as _createClass } from './setPrototypeOf-f270a38e.js';
-import { j as assert, u as uid, b as assert$1, k as getAccessorFromBuffer, h as createIterable, B as Buffer, n as defaultTypedArrayManager, _ as _get, C as COORDINATE_SYSTEM, o as hasFeatures, M as Model, L as Layer, F as FEATURES } from './layer-8f126b7a.js';
-import { j as equals$1, i as isArray, _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn } from './matrix4-3a7b6be3.js';
+import { _ as _createClass } from './setPrototypeOf-d164daa3.js';
+import { j as assert, u as uid, b as assert$1, k as getAccessorFromBuffer, h as createIterable, B as Buffer, n as defaultTypedArrayManager, _ as _get, C as COORDINATE_SYSTEM, o as hasFeatures, M as Model, L as Layer, F as FEATURES } from './layer-660a8390.js';
+import { N as equals$1, i as isArray, _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn } from './matrix4-e4e8695c.js';
 import { _ as _defineProperty } from './defineProperty-1b0b77a2.js';
-import { _ as _slicedToArray } from './slicedToArray-4a4de7f2.js';
-import { p as project } from './project-213cc694.js';
+import { _ as _slicedToArray } from './slicedToArray-cdb146e7.js';
+import { p as project } from './project-ae3b3777.js';
 
 var lightingShader = "#if (defined(SHADER_TYPE_FRAGMENT) && defined(LIGHTING_FRAGMENT)) || (defined(SHADER_TYPE_VERTEX) && defined(LIGHTING_VERTEX))\n\nstruct AmbientLight {\n vec3 color;\n};\n\nstruct PointLight {\n vec3 color;\n vec3 position;\n vec3 attenuation;\n};\n\nstruct DirectionalLight {\n  vec3 color;\n  vec3 direction;\n};\n\nuniform AmbientLight lighting_uAmbientLight;\nuniform PointLight lighting_uPointLight[MAX_LIGHTS];\nuniform DirectionalLight lighting_uDirectionalLight[MAX_LIGHTS];\nuniform int lighting_uPointLightCount;\nuniform int lighting_uDirectionalLightCount;\n\nuniform bool lighting_uEnabled;\n\nfloat getPointLightAttenuation(PointLight pointLight, float distance) {\n  return pointLight.attenuation.x\n       + pointLight.attenuation.y * distance\n       + pointLight.attenuation.z * distance * distance;\n}\n\n#endif\n";
 
@@ -736,7 +736,7 @@ function areaCalcCallback(p1x, p1y, p2x, p2y) {
   return (p1x + p2x) * (p1y - p2y);
 }
 
-(function () {
+var Polygon = function () {
   function Polygon(points) {
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
@@ -792,7 +792,7 @@ function areaCalcCallback(p1x, p1y, p2x, p2y) {
   }]);
 
   return Polygon;
-})();
+}();
 
 function push(target, source) {
   var size = source.length;
@@ -2700,9 +2700,9 @@ var SolidPolygonLayer = function (_Layer) {
   }, {
     key: "updateGeometry",
     value: function updateGeometry(_ref3) {
-      var props = _ref3.props;
-          _ref3.oldProps;
-          var changeFlags = _ref3.changeFlags;
+      var props = _ref3.props,
+          oldProps = _ref3.oldProps,
+          changeFlags = _ref3.changeFlags;
       var geometryConfigChanged = changeFlags.dataChanged || changeFlags.updateTriggersChanged && (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon);
 
       if (geometryConfigChanged) {

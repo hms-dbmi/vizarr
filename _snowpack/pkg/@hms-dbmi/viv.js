@@ -1,19 +1,20 @@
 import '../common/index-aae33e1a.js';
 import { c as createCommonjsModule } from '../common/_commonjsHelpers-37fa8da4.js';
-import { B as BoundsCheckError, s as slice } from '../common/zarr-36520a38.js';
-import { S as Stats, _ as _get, M as Model, s as lngLatToWorld, L as Layer, C as COORDINATE_SYSTEM, i as log, q as _asyncToGenerator, r as regenerator, t as Vector3, f as flatten, l as load, c as Texture2D, v as isWebGL2 } from '../common/layer-8f126b7a.js';
-import { p as project32, a as picking, G as Geometry, c as cutPolylineByGrid, b as cutPolylineByMercatorBounds, T as Tesselator, S as SolidPolygonLayer } from '../common/solid-polygon-layer-0ad27237.js';
-import { C as CompositeLayer } from '../common/composite-layer-33fb44a4.js';
-import { Q as ARRAY_TYPE, _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, R as vec4_transformMat3, x as transformMat3, e as transformMat3$1, S as checkVector, T as deprecated, U as Matrix, V as create$2, W as fromValues, X as dot$1, p as cross, Y as len, Z as normalize$1, $ as add$1, C as scale$2, a0 as dot$2, a1 as lerp$1, a2 as length$1, a3 as squaredLength$1, a4 as normalize$2, a5 as EPSILON, m as assert, a6 as transformQuat, d as checkNumber, n as MathArray, l as lerp$2, a7 as getScaling, j as equals, M as Matrix4 } from '../common/matrix4-3a7b6be3.js';
+import { B as BoundsCheckError, s as slice } from '../common/zarr-fd3d4b27.js';
+import { S as Stats, _ as _get, M as Model, s as lngLatToWorld, L as Layer, C as COORDINATE_SYSTEM, i as log, q as _asyncToGenerator, r as regenerator, t as Vector3, f as flatten, l as load, c as Texture2D, v as isWebGL2 } from '../common/layer-660a8390.js';
+import { p as project32, a as picking, G as Geometry, c as cutPolylineByGrid, b as cutPolylineByMercatorBounds, T as Tesselator, S as SolidPolygonLayer } from '../common/solid-polygon-layer-90f3f599.js';
+import { C as CompositeLayer } from '../common/composite-layer-1bf9b89a.js';
+import { Q as ARRAY_TYPE, _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, R as vec4_transformMat3, u as transformMat3, e as transformMat3$1, S as checkVector, T as deprecated, U as Matrix, V as create$2, W as fromValues, X as dot$1, n as cross, Y as len, Z as normalize$1, $ as add$1, A as scale$2, a0 as dot$2, a1 as lerp$1, a2 as length$1, a3 as squaredLength$1, a4 as normalize$2, a5 as EPSILON, k as assert, a6 as transformQuat, d as checkNumber, l as MathArray, P as lerp$2, a7 as getScaling, N as equals, M as Matrix4 } from '../common/matrix4-e4e8695c.js';
 import { _ as _classCallCheck } from '../common/classCallCheck-4eda545c.js';
-import { _ as _createClass } from '../common/setPrototypeOf-f270a38e.js';
+import { _ as _createClass } from '../common/setPrototypeOf-d164daa3.js';
 import { _ as _defineProperty } from '../common/defineProperty-1b0b77a2.js';
-import { _ as _slicedToArray } from '../common/slicedToArray-4a4de7f2.js';
-import { _ as _toConsumableArray } from '../common/toConsumableArray-89516743.js';
+import { _ as _slicedToArray } from '../common/slicedToArray-cdb146e7.js';
+import { _ as _toConsumableArray } from '../common/toConsumableArray-06af309a.js';
 import '../common/process-2545f00a.js';
-import '../common/typeof-c65245d2.js';
+import '../common/interopRequireDefault-0a992762.js';
+import '../common/interopRequireWildcard-7a8da193.js';
 import '../common/_node-resolve:empty-0f7f843d.js';
-import '../common/project-213cc694.js';
+import '../common/project-ae3b3777.js';
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
@@ -1111,7 +1112,7 @@ var rotationTo = function () {
  * @returns {quat} out
  */
 
-(function () {
+var sqlerp = function () {
   var temp1 = create$1();
   var temp2 = create$1();
   return function (out, a, b, c, d, t) {
@@ -1120,7 +1121,7 @@ var rotationTo = function () {
     slerp(out, temp1, temp2, 2 * t * (1 - t));
     return out;
   };
-})();
+}();
 /**
  * Sets the specified quaternion with values corresponding to the given
  * axes. Each axis is a vec3 and is expected to be unit length and
@@ -1132,7 +1133,7 @@ var rotationTo = function () {
  * @returns {quat} out
  */
 
-(function () {
+var setAxes = function () {
   var matr = create();
   return function (out, view, right, up) {
     matr[0] = right[0];
@@ -1146,7 +1147,7 @@ var rotationTo = function () {
     matr[8] = -view[2];
     return normalize(out, fromMat3(out, matr));
   };
-})();
+}();
 
 function _createSuper$1(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$1(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
@@ -3013,8 +3014,8 @@ var GeoJsonLayer = function (_CompositeLayer) {
   }, {
     key: "_updateStateBinary",
     value: function _updateStateBinary(_ref2) {
-      var props = _ref2.props;
-          _ref2.changeFlags;
+      var props = _ref2.props,
+          changeFlags = _ref2.changeFlags;
       var layerProps = createLayerPropsFromBinary(props.data, this.encodePickingColor);
       this.setState({
         layerProps: layerProps
@@ -4288,7 +4289,7 @@ var MATRIX3 = {
   COLUMN2ROW2: 8
 };
 
-(function () {
+var OrientedBoundingBox = function () {
   function OrientedBoundingBox() {
     var center = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [0, 0, 0];
     var halfAxes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -4481,7 +4482,7 @@ var MATRIX3 = {
   }]);
 
   return OrientedBoundingBox;
-})();
+}();
 
 var scratchPosition = new Vector3();
 var scratchNormal$1 = new Vector3();
@@ -4567,7 +4568,7 @@ function _arrayLikeToArray$2(arr, len) { if (len == null || len > arr.length) le
 var faces = [new Vector3([1, 0, 0]), new Vector3([0, 1, 0]), new Vector3([0, 0, 1])];
 var scratchPlaneCenter = new Vector3();
 var scratchPlaneNormal = new Vector3();
-new Plane(new Vector3(1.0, 0.0, 0.0), 0.0);
+var scratchPlane = new Plane(new Vector3(1.0, 0.0, 0.0), 0.0);
 
 var CullingVolume = function () {
   _createClass(CullingVolume, null, [{
@@ -4868,7 +4869,7 @@ var defined = function defined(val) {
   return val !== null && typeof val !== 'undefined';
 };
 
-(function () {
+var PerspectiveFrustum = function () {
   function PerspectiveFrustum() {
     var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
@@ -4957,7 +4958,7 @@ var defined = function defined(val) {
   }]);
 
   return PerspectiveFrustum;
-})();
+}();
 
 function update$1(frustum) {
   assert(Number.isFinite(frustum.fov) && Number.isFinite(frustum.aspectRatio) && Number.isFinite(frustum.near) && Number.isFinite(frustum.far));
@@ -4988,35 +4989,35 @@ function update$1(frustum) {
   }
 }
 
-new Vector3();
-new Vector3();
-new Vector3();
-new Vector3();
-new Vector3();
-new Vector3();
-new Vector3();
-new Vector3();
-new Vector3();
-new Vector3();
-new Vector3();
-new Vector3();
+var fromPointsXMin = new Vector3();
+var fromPointsYMin = new Vector3();
+var fromPointsZMin = new Vector3();
+var fromPointsXMax = new Vector3();
+var fromPointsYMax = new Vector3();
+var fromPointsZMax = new Vector3();
+var fromPointsCurrentPos = new Vector3();
+var fromPointsScratch = new Vector3();
+var fromPointsRitterCenter = new Vector3();
+var fromPointsMinBoxPt = new Vector3();
+var fromPointsMaxBoxPt = new Vector3();
+var fromPointsNaiveCenterScratch = new Vector3();
 
-new Matrix3();
-new Matrix3();
-new Matrix3();
-new Matrix3();
-new Matrix3();
+var scratchMatrix = new Matrix3();
+var scratchUnitary = new Matrix3();
+var scratchDiagonal = new Matrix3();
+var jMatrix = new Matrix3();
+var jMatrixTranspose = new Matrix3();
 
-new Vector3();
-new Vector3();
-new Vector3();
-new Vector3();
-new Vector3();
-new Matrix3();
-({
+var scratchVector2$1 = new Vector3();
+var scratchVector3 = new Vector3();
+var scratchVector4 = new Vector3();
+var scratchVector5 = new Vector3();
+var scratchVector6 = new Vector3();
+var scratchCovarianceResult = new Matrix3();
+var scratchEigenResult = {
   diagonal: new Matrix3(),
   unitary: new Matrix3()
-});
+};
 
 function _createForOfIteratorHelper$3(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$3(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
@@ -6039,10 +6040,10 @@ var TileLayer = function (_CompositeLayer) {
   }, {
     key: "updateState",
     value: function updateState(_ref3) {
-      var props = _ref3.props;
-          _ref3.oldProps;
-          _ref3.context;
-          var changeFlags = _ref3.changeFlags;
+      var props = _ref3.props,
+          oldProps = _ref3.oldProps,
+          context = _ref3.context,
+          changeFlags = _ref3.changeFlags;
       var tileset = this.state.tileset;
       var createTileCache = !tileset || changeFlags.dataChanged || changeFlags.updateTriggersChanged && (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData);
 
@@ -6413,7 +6414,8 @@ var xmlNode = function(tagname, parent, val) {
 
 const buildOptions = util.buildOptions;
 
-'<((!\\[CDATA\\[([\\s\\S]*?)(]]>))|((NAME:)?(NAME))([^>]*)>|((\\/)(NAME)\\s*>))([^<]*)'
+const regx =
+  '<((!\\[CDATA\\[([\\s\\S]*?)(]]>))|((NAME:)?(NAME))([^>]*)>|((\\/)(NAME)\\s*>))([^<]*)'
   .replace(/NAME/g, util.nameRegexp);
 
 //const tagsRegx = new RegExp("<(\\/?[\\w:\\-\._]+)([^>]*)>(\\s*"+cdataRegx+")*([^<]+)?","g");
@@ -7627,7 +7629,7 @@ function isCDATA(name) {
 
 var json2xml = Parser;
 
-createCommonjsModule(function (module, exports) {
+var parser = createCommonjsModule(function (module, exports) {
 
 
 
@@ -8973,7 +8975,7 @@ function _nullishCoalesce$1(lhs, rhsFn) { if (lhs != null) { return lhs; } else 
 // We need to give a different way of getting this for safari, so 4 is probably a safe bet
 // for parallel processing in the meantime.  More can't really hurt since they'll just block
 // each other and not the UI thread, which is the real benefit.
-_nullishCoalesce$1(_optionalChain$8([globalThis, 'optionalAccess', _ => _.navigator, 'optionalAccess', _2 => _2.hardwareConcurrency]), () => ( 4));
+const defaultPoolSize = _nullishCoalesce$1(_optionalChain$8([globalThis, 'optionalAccess', _ => _.navigator, 'optionalAccess', _2 => _2.hardwareConcurrency]), () => ( 4));
 
 /*
  * The 'indexer' for a Zarr-based source translates

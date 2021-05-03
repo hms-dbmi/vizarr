@@ -1,15 +1,16 @@
-import { _ as _createClass } from '../common/setPrototypeOf-f270a38e.js';
+export { C as CompositeLayer } from '../common/composite-layer-1bf9b89a.js';
+import { _ as _createClass } from '../common/setPrototypeOf-d164daa3.js';
 import { _ as _defineProperty } from '../common/defineProperty-1b0b77a2.js';
 import { _ as _classCallCheck } from '../common/classCallCheck-4eda545c.js';
-import { _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, i as isArray, c as config, d as checkNumber, t as transformMat4, v as vec2_transformMat4AsVector, e as transformMat3, f as transformMat2d, g as transformMat2, h as clamp, M as Matrix4 } from '../common/matrix4-3a7b6be3.js';
-import { L as LinearInterpolator, T as TRANSITION_EVENTS, V as ViewState, C as Controller, a as View } from '../common/linear-interpolator-9d7fc4f0.js';
-import { V as Vector, m as mod, a as Viewport } from '../common/layer-8f126b7a.js';
-export { C as CompositeLayer } from '../common/composite-layer-33fb44a4.js';
-import '../common/slicedToArray-4a4de7f2.js';
-import '../common/typeof-c65245d2.js';
-import '../common/toConsumableArray-89516743.js';
+import { _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, i as isArray, c as config, d as checkNumber, t as transformMat4, v as vec2_transformMat4AsVector, e as transformMat3, f as transformMat2d, g as transformMat2, h as clamp, M as Matrix4 } from '../common/matrix4-e4e8695c.js';
+import { L as LinearInterpolator, T as TRANSITION_EVENTS, V as ViewState, C as Controller, a as View } from '../common/linear-interpolator-68e3af6c.js';
+import { V as Vector, m as mod, a as Viewport } from '../common/layer-660a8390.js';
+import '../common/slicedToArray-cdb146e7.js';
+import '../common/toConsumableArray-06af309a.js';
 import '../common/process-2545f00a.js';
 import '../common/_commonjsHelpers-37fa8da4.js';
+import '../common/interopRequireDefault-0a992762.js';
+import '../common/interopRequireWildcard-7a8da193.js';
 import '../common/_node-resolve:empty-0f7f843d.js';
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
@@ -239,8 +240,8 @@ var OrbitState = function (_ViewState) {
   }, {
     key: "pan",
     value: function pan(_ref3) {
-      var pos = _ref3.pos;
-          _ref3.startPos;
+      var pos = _ref3.pos,
+          startPos = _ref3.startPos;
       var _this$_state = this._state,
           startPanPosition = _this$_state.startPanPosition,
           startTarget = _this$_state.startTarget;
@@ -553,7 +554,7 @@ var OrbitState = function (_ViewState) {
   return OrbitState;
 }(ViewState);
 
-(function (_Controller) {
+var OrbitController = function (_Controller) {
   _inherits(OrbitController, _Controller);
 
   var _super2 = _createSuper$1(OrbitController);
@@ -572,7 +573,7 @@ var OrbitState = function (_ViewState) {
   }]);
 
   return OrbitController;
-})(Controller);
+}(Controller);
 
 function _createSuper$2(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$2(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 

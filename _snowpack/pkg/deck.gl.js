@@ -1,18 +1,19 @@
 import { _ as _classCallCheck } from './common/classCallCheck-4eda545c.js';
-import { _ as _createClass, b as _assertThisInitialized } from './common/setPrototypeOf-f270a38e.js';
-import { _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, M as Matrix4, h as clamp } from './common/matrix4-3a7b6be3.js';
+import { _ as _createClass, b as _assertThisInitialized, a as _typeof } from './common/setPrototypeOf-d164daa3.js';
+import { _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, M as Matrix4, h as clamp } from './common/matrix4-e4e8695c.js';
 import { r as react } from './common/index-aae33e1a.js';
 import { p as propTypes$1 } from './common/index-c103191b.js';
-import { _ as _toConsumableArray } from './common/toConsumableArray-89516743.js';
-import { d as deepEqual, L as LinearInterpolator, T as TRANSITION_EVENTS, V as ViewState, C as Controller, a as View } from './common/linear-interpolator-9d7fc4f0.js';
-import { w as env, i as log, x as register, y as registerLoaders, v as isWebGL2, o as hasFeatures, F as FEATURES, j as assert, R as Resource$1, q as _asyncToGenerator, r as regenerator, z as log$1, A as instrumentGLContext, D as isWebGL, E as resetParameters, G as resizeGLContext, H as Framebuffer, I as lumaStats, J as createGLContext, W as WebMercatorViewport, K as mod, t as Vector3, C as COORDINATE_SYSTEM, P as PROJECTION_MODE, N as memoize, O as pixelsToWorld, Q as ProgramManager, U as setParameters, X as withParameters, Y as clear, Z as cssToDeviceRatio, c as Texture2D, $ as Renderbuffer, _ as _get, l as load, d as debug, f as flatten, L as Layer, a0 as LIFECYCLE, S as Stats, a as Viewport, b as assert$1, a1 as WebMercatorViewport$1, a2 as cssToDevicePixels, a3 as readPixelsToArray, a4 as EVENTS, n as defaultTypedArrayManager } from './common/layer-8f126b7a.js';
+import { _ as _toConsumableArray } from './common/toConsumableArray-06af309a.js';
+import { d as deepEqual, L as LinearInterpolator, T as TRANSITION_EVENTS, V as ViewState, C as Controller, a as View } from './common/linear-interpolator-68e3af6c.js';
+import { w as env, i as log, x as register, y as registerLoaders, v as isWebGL2, o as hasFeatures, F as FEATURES, j as assert, R as Resource$1, q as _asyncToGenerator, r as regenerator, z as log$1, A as instrumentGLContext, D as isWebGL, E as resetParameters, G as resizeGLContext, H as Framebuffer, I as lumaStats, J as createGLContext, K as mod, W as WebMercatorViewport, t as Vector3, C as COORDINATE_SYSTEM, P as PROJECTION_MODE, N as memoize, O as pixelsToWorld, Q as ProgramManager, U as setParameters, X as withParameters, Y as clear, Z as cssToDeviceRatio, c as Texture2D, $ as Renderbuffer, _ as _get, l as load, d as debug, f as flatten, L as Layer, a0 as LIFECYCLE, S as Stats, a as Viewport, b as assert$1, a1 as WebMercatorViewport$1, a2 as cssToDevicePixels, a3 as readPixelsToArray, a4 as EVENTS, n as defaultTypedArrayManager } from './common/layer-660a8390.js';
 import { _ as _defineProperty } from './common/defineProperty-1b0b77a2.js';
-import { p as project } from './common/project-213cc694.js';
-import { _ as _slicedToArray } from './common/slicedToArray-4a4de7f2.js';
-import { I as ImageLoader } from './common/image-loader-620b4a01.js';
+import { p as project } from './common/project-ae3b3777.js';
+import { _ as _slicedToArray } from './common/slicedToArray-cdb146e7.js';
+import { I as ImageLoader } from './common/image-loader-9298f69e.js';
 import { c as createCommonjsModule } from './common/_commonjsHelpers-37fa8da4.js';
-import { _ as _typeof } from './common/typeof-c65245d2.js';
 import './common/process-2545f00a.js';
+import './common/interopRequireDefault-0a992762.js';
+import './common/interopRequireWildcard-7a8da193.js';
 import './common/_node-resolve:empty-0f7f843d.js';
 
 function isJSON(text) {
@@ -29,7 +30,7 @@ var jsonLoader = {
   parseTextSync: JSON.parse
 };
 
-var version = "8.4.6" ;
+var version =  "8.4.6" ;
 var existingVersion = env.global.deck && env.global.deck.VERSION;
 
 if (existingVersion && existingVersion !== version) {
@@ -7395,7 +7396,7 @@ if (typeof undefined$1 === 'function' && undefined$1.amd) {
     undefined$1(function() {
         return Hammer;
     });
-} else if (module.exports) {
+} else if ( module.exports) {
     module.exports = Hammer;
 } else {
     window[exportName] = Hammer;
@@ -9447,9 +9448,9 @@ function _unsupportedIterableToArray$d(o, minLen) { if (!o) return; if (typeof o
 
 function _arrayLikeToArray$d(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 function positionChildrenUnderViews(_ref) {
-  var children = _ref.children;
-      _ref.viewports;
-      var deck = _ref.deck,
+  var children = _ref.children,
+      viewports = _ref.viewports,
+      deck = _ref.deck,
       ContextProvider = _ref.ContextProvider;
 
   var _ref2 = deck || {},

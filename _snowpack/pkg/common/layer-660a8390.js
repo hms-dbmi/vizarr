@@ -1,12 +1,13 @@
-import { _ as _slicedToArray } from './slicedToArray-4a4de7f2.js';
+import { _ as _slicedToArray } from './slicedToArray-cdb146e7.js';
 import { _ as _classCallCheck } from './classCallCheck-4eda545c.js';
-import { _ as _createClass, b as _assertThisInitialized } from './setPrototypeOf-f270a38e.js';
-import { k as _construct, _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, m as assert$7, d as checkNumber, n as MathArray, i as isArray$2, c as config, o as angle, p as cross, r as rotateX, q as rotateY, s as rotateZ, u as transformMat4, w as vec3_transformMat4AsVector, x as transformMat3, y as vec3_transformMat2, z as transformQuat, A as transformMat4$1, B as multiply, C as scale, D as lerp, E as translate, F as rotateX$1, G as rotateZ$1, H as scale$1, I as negate, J as perspective, K as invert, L as equals, N as add$1, O as negate$1, j as equals$1, M as Matrix4, P as sub, l as lerp$1 } from './matrix4-3a7b6be3.js';
-import { _ as _typeof } from './typeof-c65245d2.js';
-import { _ as _toConsumableArray } from './toConsumableArray-89516743.js';
+import { a as _typeof, _ as _createClass, b as _assertThisInitialized } from './setPrototypeOf-d164daa3.js';
+import { j as _construct, _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, k as assert$7, d as checkNumber, l as MathArray, i as isArray$2, c as config, m as angle, n as cross, r as rotateX, o as rotateY, p as rotateZ, q as transformMat4, s as vec3_transformMat4AsVector, u as transformMat3, w as vec3_transformMat2, x as transformQuat, y as transformMat4$1, z as multiply, A as scale, B as lerp, C as translate, D as rotateX$1, E as rotateZ$1, F as scale$1, G as negate, H as perspective, I as invert, J as equals, K as add$1, L as negate$1, N as equals$1, M as Matrix4, O as sub, P as lerp$1 } from './matrix4-e4e8695c.js';
+import { _ as _toConsumableArray } from './toConsumableArray-06af309a.js';
 import { _ as _defineProperty } from './defineProperty-1b0b77a2.js';
 import { p as process } from './process-2545f00a.js';
 import { c as createCommonjsModule, a as commonjsGlobal } from './_commonjsHelpers-37fa8da4.js';
+import { i as interopRequireDefault } from './interopRequireDefault-0a992762.js';
+import { _ as _typeof_1, i as interopRequireWildcard } from './interopRequireWildcard-7a8da193.js';
 import { n as node } from './_node-resolve:empty-0f7f843d.js';
 
 function assert(condition, message) {
@@ -757,7 +758,7 @@ var runtime = (function (exports) {
   // as the regeneratorRuntime namespace. Otherwise create a new empty
   // object. Either way, the resulting object will be used to initialize
   // the regeneratorRuntime variable at the top of this file.
-  module.exports 
+   module.exports 
 ));
 
 try {
@@ -856,7 +857,7 @@ function isTransferable(object) {
   return false;
 }
 
-var VERSION = "2.3.12" ;
+var VERSION =  "2.3.12" ;
 function validateLoaderVersion(loader) {
   var coreVersion = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : VERSION;
   assert(loader, 'no loader provided');
@@ -3331,7 +3332,7 @@ function getLoaders(loaders, context) {
   return candidateLoaders && candidateLoaders.length ? candidateLoaders : null;
 }
 
-var VERSION$1 = "2.3.12" ;
+var VERSION$1 =  "2.3.12" ;
 function canParseWithWorker(loader, data, options, context) {
   if (!WorkerFarm.isSupported()) {
     return false;
@@ -3953,92 +3954,6 @@ function _load() {
   }));
   return _load.apply(this, arguments);
 }
-
-var interopRequireDefault = createCommonjsModule(function (module) {
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : {
-    "default": obj
-  };
-}
-
-module.exports = _interopRequireDefault;
-});
-
-var _typeof_1 = createCommonjsModule(function (module) {
-function _typeof(obj) {
-  "@babel/helpers - typeof";
-
-  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-    module.exports = _typeof = function _typeof(obj) {
-      return typeof obj;
-    };
-  } else {
-    module.exports = _typeof = function _typeof(obj) {
-      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    };
-  }
-
-  return _typeof(obj);
-}
-
-module.exports = _typeof;
-});
-
-var interopRequireWildcard = createCommonjsModule(function (module) {
-function _getRequireWildcardCache() {
-  if (typeof WeakMap !== "function") return null;
-  var cache = new WeakMap();
-
-  _getRequireWildcardCache = function _getRequireWildcardCache() {
-    return cache;
-  };
-
-  return cache;
-}
-
-function _interopRequireWildcard(obj) {
-  if (obj && obj.__esModule) {
-    return obj;
-  }
-
-  if (obj === null || _typeof_1(obj) !== "object" && typeof obj !== "function") {
-    return {
-      "default": obj
-    };
-  }
-
-  var cache = _getRequireWildcardCache();
-
-  if (cache && cache.has(obj)) {
-    return cache.get(obj);
-  }
-
-  var newObj = {};
-  var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;
-
-  for (var key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;
-
-      if (desc && (desc.get || desc.set)) {
-        Object.defineProperty(newObj, key, desc);
-      } else {
-        newObj[key] = obj[key];
-      }
-    }
-  }
-
-  newObj["default"] = obj;
-
-  if (cache) {
-    cache.set(obj, newObj);
-  }
-
-  return newObj;
-}
-
-module.exports = _interopRequireWildcard;
-});
 
 var globals_1 = createCommonjsModule(function (module, exports) {
 
@@ -4911,9 +4826,9 @@ function decorateMessage(id, message, opts) {
 }
 
 function logImageInNode(_ref3) {
-  var image = _ref3.image;
-      _ref3.message;
-      var _ref3$scale = _ref3.scale,
+  var image = _ref3.image,
+      _ref3$message = _ref3.message,
+      _ref3$scale = _ref3.scale,
       scale = _ref3$scale === void 0 ? 1 : _ref3$scale;
   var asciify = null;
 
@@ -6637,7 +6552,7 @@ function setDevicePixelRatio(gl, devicePixelRatio, options) {
   }
 }
 
-var VERSION$3 = "8.4.3" ;
+var VERSION$3 =  "8.4.3" ;
 var STARTUP_MESSAGE = 'set luma.log.level=1 (or higher) to trace rendering';
 
 var StatsManager = function () {
@@ -8266,9 +8181,9 @@ var Texture = function (_Resource) {
           compressed = _ref2$compressed === void 0 ? false : _ref2$compressed,
           _ref2$offset = _ref2.offset,
           offset = _ref2$offset === void 0 ? 0 : _ref2$offset,
-          _ref2$border = _ref2.border;
-          _ref2$border === void 0 ? this.border : _ref2$border;
-          var _ref2$parameters = _ref2.parameters,
+          _ref2$border = _ref2.border,
+          border = _ref2$border === void 0 ? this.border : _ref2$border,
+          _ref2$parameters = _ref2.parameters,
           parameters = _ref2$parameters === void 0 ? {} : _ref2$parameters;
 
       var _this$_deduceParamete3 = this._deduceParameters({
@@ -9959,7 +9874,7 @@ var Framebuffer = function (_Resource) {
   }, {
     key: "checkStatus",
     value: function checkStatus() {
-      this.gl;
+      var gl = this.gl;
       var status = this.getStatus();
 
       if (status !== 36053) {
@@ -16476,9 +16391,9 @@ function getUniformsFromViewport() {
       coordinateSystem = _ref$coordinateSystem === void 0 ? COORDINATE_SYSTEM.DEFAULT : _ref$coordinateSystem,
       coordinateOrigin = _ref.coordinateOrigin,
       _ref$autoWrapLongitud = _ref.autoWrapLongitude,
-      autoWrapLongitude = _ref$autoWrapLongitud === void 0 ? false : _ref$autoWrapLongitud;
-      _ref.projectionMode;
-      _ref.positionOrigin;
+      autoWrapLongitude = _ref$autoWrapLongitud === void 0 ? false : _ref$autoWrapLongitud,
+      projectionMode = _ref.projectionMode,
+      positionOrigin = _ref.positionOrigin;
 
   assert$5(viewport);
 
@@ -22073,19 +21988,19 @@ var Layer = function (_Component) {
   }, {
     key: "shouldUpdateState",
     value: function shouldUpdateState(_ref4) {
-      _ref4.oldProps;
-          _ref4.props;
-          _ref4.context;
-          var changeFlags = _ref4.changeFlags;
+      var oldProps = _ref4.oldProps,
+          props = _ref4.props,
+          context = _ref4.context,
+          changeFlags = _ref4.changeFlags;
       return changeFlags.propsOrDataChanged;
     }
   }, {
     key: "updateState",
     value: function updateState(_ref5) {
       var oldProps = _ref5.oldProps,
-          props = _ref5.props;
-          _ref5.context;
-          var changeFlags = _ref5.changeFlags;
+          props = _ref5.props,
+          context = _ref5.context,
+          changeFlags = _ref5.changeFlags;
       var attributeManager = this.getAttributeManager();
 
       if (changeFlags.dataChanged && attributeManager) {
@@ -22181,8 +22096,8 @@ var Layer = function (_Component) {
   }, {
     key: "getPickingInfo",
     value: function getPickingInfo(_ref6) {
-      var info = _ref6.info;
-          _ref6.mode;
+      var info = _ref6.info,
+          mode = _ref6.mode;
       var index = info.index;
 
       if (index >= 0) {

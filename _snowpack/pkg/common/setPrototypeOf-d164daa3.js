@@ -1,3 +1,19 @@
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+
+  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+    _typeof = function _typeof(obj) {
+      return typeof obj;
+    };
+  } else {
+    _typeof = function _typeof(obj) {
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    };
+  }
+
+  return _typeof(obj);
+}
+
 function _defineProperties(target, props) {
   for (var i = 0; i < props.length; i++) {
     var descriptor = props[i];
@@ -50,4 +66,4 @@ function _setPrototypeOf(o, p) {
   return _setPrototypeOf(o, p);
 }
 
-export { _createClass as _, _setPrototypeOf as a, _assertThisInitialized as b, _unsupportedIterableToArray as c, _arrayLikeToArray as d };
+export { _createClass as _, _typeof as a, _assertThisInitialized as b, _setPrototypeOf as c, _unsupportedIterableToArray as d, _arrayLikeToArray as e };

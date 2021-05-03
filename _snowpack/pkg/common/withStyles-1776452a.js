@@ -1,9 +1,87 @@
-import { _ as _extends, a as _objectWithoutPropertiesLoose, d as deepmerge, b as _objectWithoutProperties } from './deepmerge-9adb393e.js';
 import { r as react } from './index-aae33e1a.js';
 import './index-c103191b.js';
 import { c as createCommonjsModule } from './_commonjsHelpers-37fa8da4.js';
-import { a as _setPrototypeOf, _ as _createClass, b as _assertThisInitialized } from './setPrototypeOf-f270a38e.js';
-import { _ as _toConsumableArray } from './toConsumableArray-89516743.js';
+import { a as _typeof$1, c as _setPrototypeOf, _ as _createClass, b as _assertThisInitialized } from './setPrototypeOf-d164daa3.js';
+import { _ as _toConsumableArray } from './toConsumableArray-06af309a.js';
+
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+
+  return target;
+}
+
+function _objectWithoutProperties(source, excluded) {
+  if (source == null) return {};
+  var target = _objectWithoutPropertiesLoose(source, excluded);
+  var key, i;
+
+  if (Object.getOwnPropertySymbols) {
+    var sourceSymbolKeys = Object.getOwnPropertySymbols(source);
+
+    for (i = 0; i < sourceSymbolKeys.length; i++) {
+      key = sourceSymbolKeys[i];
+      if (excluded.indexOf(key) >= 0) continue;
+      if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;
+      target[key] = source[key];
+    }
+  }
+
+  return target;
+}
+
+function _extends() {
+  _extends = Object.assign || function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
+  };
+
+  return _extends.apply(this, arguments);
+}
+
+function isPlainObject(item) {
+  return item && _typeof$1(item) === 'object' && item.constructor === Object;
+}
+function deepmerge(target, source) {
+  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
+    clone: true
+  };
+  var output = options.clone ? _extends({}, target) : target;
+
+  if (isPlainObject(target) && isPlainObject(source)) {
+    Object.keys(source).forEach(function (key) {
+      // Avoid prototype pollution
+      if (key === '__proto__') {
+        return;
+      }
+
+      if (isPlainObject(source[key]) && key in target) {
+        output[key] = deepmerge(target[key], source[key], options);
+      } else {
+        output[key] = source[key];
+      }
+    });
+  }
+
+  return output;
+}
 
 /** @license React v16.13.1
  * react-is.production.min.js
@@ -2296,7 +2374,7 @@ var create = function create(options) {
  * A global Jss instance.
  */
 
-create();
+var jss = create();
 
 var now = Date.now();
 var fnValuesNs = "fnValues" + now;
@@ -3420,7 +3498,7 @@ function supportedProperty(prop, options) {
   // For server-side rendering.
   if (!el) return prop; // Remove cache for benchmark tests or return property from the cache.
 
-  if (cache$1[prop] != null) {
+  if ( cache$1[prop] != null) {
     return cache$1[prop];
   } // Check if 'transition' or 'transform' natively supported in browser.
 
@@ -3499,7 +3577,7 @@ function supportedValue(property, value) {
 
   var cacheKey = property + prefixedValue; // Remove cache for benchmark tests or return value from cache.
 
-  if (cache$1$1[cacheKey] != null) {
+  if ( cache$1$1[cacheKey] != null) {
     return cache$1$1[cacheKey];
   } // IE can even throw an error in some cases, for e.g. style.content = 'bar'.
 
@@ -3631,8 +3709,8 @@ function jssPreset() {
 function mergeClasses() {
   var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var baseClasses = options.baseClasses,
-      newClasses = options.newClasses;
-      options.Component;
+      newClasses = options.newClasses,
+      Component = options.Component;
 
   if (!newClasses) {
     return baseClasses;
@@ -3679,7 +3757,7 @@ function useTheme() {
   return theme;
 }
 
-var jss = create(jssPreset()); // Use a singleton or the provided one by the context.
+var jss$1 = create(jssPreset()); // Use a singleton or the provided one by the context.
 //
 // The counter-based approach doesn't tolerate any mistake.
 // It's much safer to use the same counter everywhere.
@@ -3690,12 +3768,45 @@ var sheetsManager = new Map();
 var defaultOptions = {
   disableGeneration: false,
   generateClassName: generateClassName,
-  jss: jss,
+  jss: jss$1,
   sheetsCache: null,
   sheetsManager: sheetsManager,
   sheetsRegistry: null
 };
 var StylesContext = react.createContext(defaultOptions);
+
+var injectFirstNode;
+function StylesProvider(props) {
+  var children = props.children,
+      _props$injectFirst = props.injectFirst,
+      injectFirst = _props$injectFirst === void 0 ? false : _props$injectFirst,
+      _props$disableGenerat = props.disableGeneration,
+      disableGeneration = _props$disableGenerat === void 0 ? false : _props$disableGenerat,
+      localOptions = _objectWithoutProperties(props, ["children", "injectFirst", "disableGeneration"]);
+
+  var outerOptions = react.useContext(StylesContext);
+
+  var context = _extends({}, outerOptions, {
+    disableGeneration: disableGeneration
+  }, localOptions);
+
+  if (!context.jss.options.insertionPoint && injectFirst && typeof window !== 'undefined') {
+    if (!injectFirstNode) {
+      var head = document.head;
+      injectFirstNode = document.createComment('mui-inject-first');
+      head.insertBefore(injectFirstNode, head.firstChild);
+    }
+
+    context.jss = create({
+      plugins: jssPreset().plugins,
+      insertionPoint: injectFirstNode
+    });
+  }
+
+  return /*#__PURE__*/react.createElement(StylesContext.Provider, {
+    value: context
+  }, children);
+}
 
 /* eslint-disable import/prefer-default-export */
 // Global index counter to preserve source order.
@@ -4114,8 +4225,8 @@ var withStyles = function withStyles(stylesOrCreator) {
       classNamePrefix: classNamePrefix
     }, stylesOptions));
     var WithStyles = /*#__PURE__*/react.forwardRef(function WithStyles(props, ref) {
-      props.classes;
-          var innerRef = props.innerRef,
+      var classesProp = props.classes,
+          innerRef = props.innerRef,
           other = _objectWithoutProperties(props, ["classes", "innerRef"]); // The wrapper receives only user supplied props, which could be a subset of
       // the actual props Component might receive due to merging with defaultProps.
       // So copying it here would give us the same result in the wrapper as well.
@@ -4157,4 +4268,4 @@ var withStyles = function withStyles(stylesOrCreator) {
   };
 };
 
-export { ThemeContext as T, _inheritsLoose as _, getThemeProps as g, makeStyles as m, nested as n, useTheme as u, withStyles as w };
+export { SheetsRegistry as S, ThemeContext as T, _inheritsLoose as _, _extends as a, _objectWithoutPropertiesLoose as b, _objectWithoutProperties as c, deepmerge as d, createGenerateClassName as e, StylesProvider as f, getThemeProps as g, hoistNonReactStatics_cjs as h, mergeClasses as i, jssPreset as j, StylesContext as k, makeStyles as m, nested as n, reactIs as r, sheetsManager as s, useTheme as u, withStyles as w };
