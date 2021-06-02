@@ -259,6 +259,6 @@ export function initLayerStateFromSource(sourceData: SourceData, layerId: string
   };
 }
 
-function getLayer(sourceData: SourceData): LayerCtr<ImageLayer | MultiscaleImageLayer | GridLayer> {
+function getLayer(sourceData: SourceData): LayerCtr<typeof ImageLayer | typeof MultiscaleImageLayer | GridLayer> {
   return sourceData.loaders ? GridLayer : sourceData.loader.length > 1 ? MultiscaleImageLayer : ImageLayer;
 }
