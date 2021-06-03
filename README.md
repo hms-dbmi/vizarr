@@ -2,9 +2,9 @@
   <img width="400" src="./assets/logo-wide.png" alt="Vizarr">
 </p>
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/hms-dbmi/vizarr/master?filepath=example%2Fgetting_started.ipynb)
-[![launch ImJoy](https://imjoy.io/static/badge/launch-imjoy-badge.svg)](https://imjoy.io/#/app?workspace=vizarr&plugin=https://github.com/hms-dbmi/vizarr/blob/master/example/VizarrDemo.imjoy.html)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hms-dbmi/vizarr/blob/master/example/mandelbrot.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/hms-dbmi/vizarr/main?filepath=example%2Fgetting_started.ipynb)
+[![launch ImJoy](https://imjoy.io/static/badge/launch-imjoy-badge.svg)](https://imjoy.io/#/app?workspace=vizarr&plugin=https://github.com/hms-dbmi/vizarr/blob/main/example/VizarrDemo.imjoy.html)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hms-dbmi/vizarr/blob/main/example/mandelbrot.ipynb)
 
 ![Multiscale OME-Zarr in Jupyter Notebook with Vizarr](./assets/screenshot.png)
 
@@ -31,7 +31,7 @@ Vizarr supports viewing 2D slices of n-Dimensional Zarr arrays, allowing users t
 a single channel or blended composites of multiple channels during analysis. It has special support 
 for the developing [OME-Zarr format](https://github.com/ome/omero-ms-zarr/blob/master/spec.md)
 for multiscale and multimodal images. Currently [Viv](https://github.com/hms-dbmi/viv) supports 
-`u1`, `u2`, `u4`, and `f4` arrays, but contributions are welcome to support more `np.dtypes`!
+`i1`, `i2`, `i4`, `u1`, `u2`, `u4`, and `f4` arrays, but contributions are welcome to support more `np.dtypes`!
 
 ### Getting started 
 The easiest way to get started with `vizarr` is to clone this repository and open one of 

@@ -52,7 +52,7 @@ build and can be executed by running `npm run <command>`.
 Create a new feature branch:
 
 ```bash
-git checkout master -b your-feature-branch-name
+git checkout main -b your-feature-branch-name
 ```
 
 Add and commit your changed files.
@@ -65,7 +65,7 @@ Update your remote branch:
 git push -u origin your-feature-branch-name
 ```
 
-You can then make a pull-request to `vizarr`'s `master` branch. When making a pull-request, 
+You can then make a pull-request to `vizarr`'s `main` branch. When making a pull-request, 
 your code will be checked for linting with `prettier`. Please run `npm run format`
 to automatically format your code when making a pull-request. 
 
