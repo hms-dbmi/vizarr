@@ -1,15 +1,15 @@
+import { _ as _classCallCheck } from '../common/classCallCheck-4eda545c.js';
+import { _ as _createClass } from '../common/setPrototypeOf-d164daa3.js';
+import { S as Stats, _ as _get, M as Model, s as lngLatToWorld, L as Layer, C as COORDINATE_SYSTEM, i as log, q as _asyncToGenerator, r as regenerator, t as Vector3, f as flatten, l as load, c as Texture2D, v as isWebGL2 } from '../common/layer-660a8390.js';
+import { Q as ARRAY_TYPE, _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, R as vec4_transformMat3, u as transformMat3, e as transformMat3$1, S as checkVector, T as deprecated, U as Matrix, V as create$2, W as fromValues, X as dot$1, n as cross, Y as len, Z as normalize$1, $ as add$1, A as scale$2, a0 as dot$2, a1 as lerp$1, a2 as length$1, a3 as squaredLength$1, a4 as normalize$2, a5 as EPSILON, k as assert, a6 as transformQuat, d as checkNumber, l as MathArray, P as lerp$2, a7 as getScaling, N as equals, M as Matrix4 } from '../common/matrix4-e4e8695c.js';
+import { _ as _toConsumableArray } from '../common/toConsumableArray-06af309a.js';
+import { _ as _defineProperty } from '../common/defineProperty-1b0b77a2.js';
 import '../common/index-aae33e1a.js';
 import { c as createCommonjsModule } from '../common/_commonjsHelpers-37fa8da4.js';
 import { B as BoundsCheckError, s as slice } from '../common/zarr-fd3d4b27.js';
-import { S as Stats, _ as _get, M as Model, s as lngLatToWorld, L as Layer, C as COORDINATE_SYSTEM, i as log, q as _asyncToGenerator, r as regenerator, t as Vector3, f as flatten, l as load, c as Texture2D, v as isWebGL2 } from '../common/layer-660a8390.js';
 import { p as project32, a as picking, G as Geometry, c as cutPolylineByGrid, b as cutPolylineByMercatorBounds, T as Tesselator, S as SolidPolygonLayer } from '../common/solid-polygon-layer-90f3f599.js';
 import { C as CompositeLayer } from '../common/composite-layer-1bf9b89a.js';
-import { Q as ARRAY_TYPE, _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, R as vec4_transformMat3, u as transformMat3, e as transformMat3$1, S as checkVector, T as deprecated, U as Matrix, V as create$2, W as fromValues, X as dot$1, n as cross, Y as len, Z as normalize$1, $ as add$1, A as scale$2, a0 as dot$2, a1 as lerp$1, a2 as length$1, a3 as squaredLength$1, a4 as normalize$2, a5 as EPSILON, k as assert, a6 as transformQuat, d as checkNumber, l as MathArray, P as lerp$2, a7 as getScaling, N as equals, M as Matrix4 } from '../common/matrix4-e4e8695c.js';
-import { _ as _classCallCheck } from '../common/classCallCheck-4eda545c.js';
-import { _ as _createClass } from '../common/setPrototypeOf-d164daa3.js';
-import { _ as _defineProperty } from '../common/defineProperty-1b0b77a2.js';
 import { _ as _slicedToArray } from '../common/slicedToArray-cdb146e7.js';
-import { _ as _toConsumableArray } from '../common/toConsumableArray-06af309a.js';
 import '../common/process-2545f00a.js';
 import '../common/interopRequireDefault-0a992762.js';
 import '../common/interopRequireWildcard-7a8da193.js';
@@ -6664,6 +6664,7 @@ const getTraversalObj = function(xmlData, options) {
         const closeIndex = result.index;
         const separatorIndex = tagExp.indexOf(" ");
         let tagName = tagExp;
+        let shouldBuildAttributesMap = true;
         if(separatorIndex !== -1){
           tagName = tagExp.substr(0, separatorIndex).replace(/\s\s*$/, '');
           tagExp = tagExp.substr(separatorIndex + 1);
@@ -6673,6 +6674,7 @@ const getTraversalObj = function(xmlData, options) {
           const colonIndex = tagName.indexOf(":");
           if(colonIndex !== -1){
             tagName = tagName.substr(colonIndex+1);
+            shouldBuildAttributesMap = tagName !== result.data.substr(colonIndex + 1);
           }
         }
 
@@ -6703,7 +6705,7 @@ const getTraversalObj = function(xmlData, options) {
           if (options.stopNodes.length && options.stopNodes.includes(childNode.tagname)) {
             childNode.startIndex=closeIndex;
           }
-          if(tagName !== tagExp){
+          if(tagName !== tagExp && shouldBuildAttributesMap){
             childNode.attrsMap = buildAttributesMap(tagExp, options);
           }
           currentNode.addChild(childNode);
@@ -7759,8 +7761,25 @@ const DTYPE_VALUES = {
     type: GL.INT,
     max: 2 ** (32 - 1) - 1,
     sampler: 'isampler2D'
+  },
+  // Cast Float64 as 32 bit float point so it can be rendered.
+  Float64: {
+    format: GL.R32F,
+    dataFormat: GL.RED,
+    type: GL.FLOAT,
+    // Not sure what to do about this one - a good use case for channel stats, I suppose:
+    // https://en.wikipedia.org/wiki/Single-precision_floating-point_format.
+    max: 3.4 * 10 ** 38,
+    sampler: 'sampler2D',
+    cast: (data) => new Float32Array(data)
   }
 } ;
+
+var RENDERING_MODES; (function (RENDERING_MODES) {
+  const MAX_INTENSITY_PROJECTION = 'Maximum Intensity Projection'; RENDERING_MODES["MAX_INTENSITY_PROJECTION"] = MAX_INTENSITY_PROJECTION;
+  const MIN_INTENSITY_PROJECTION = 'Minimum Intensity Projection'; RENDERING_MODES["MIN_INTENSITY_PROJECTION"] = MIN_INTENSITY_PROJECTION;
+  const ADDITIVE = 'Additive'; RENDERING_MODES["ADDITIVE"] = ADDITIVE;
+})(RENDERING_MODES || (RENDERING_MODES = {}));
 
 function padWithDefault(arr, defaultValue, padWidth) {
   for (let i = 0; i < padWidth; i += 1) {
@@ -7870,14 +7889,15 @@ function onPointer(layer) {
   }
 }
 
-function _nullishCoalesce(lhs, rhsFn) { if (lhs != null) { return lhs; } else { return rhsFn(); } } function _optionalChain(ops) { let lastAccessLHS = undefined; let value = ops[0]; let i = 1; while (i < ops.length) { const op = ops[i]; const fn = ops[i + 1]; i += 2; if ((op === 'optionalAccess' || op === 'optionalCall') && value == null) { return undefined; } if (op === 'access' || op === 'optionalAccess') { lastAccessLHS = value; value = fn(value); } else if (op === 'call' || op === 'optionalCall') { value = fn((...args) => value.call(lastAccessLHS, ...args)); lastAccessLHS = undefined; } } return value; }/* eslint-disable prefer-destructuring */
+function _nullishCoalesce$1(lhs, rhsFn) { if (lhs != null) { return lhs; } else { return rhsFn(); } } function _optionalChain$1(ops) { let lastAccessLHS = undefined; let value = ops[0]; let i = 1; while (i < ops.length) { const op = ops[i]; const fn = ops[i + 1]; i += 2; if ((op === 'optionalAccess' || op === 'optionalCall') && value == null) { return undefined; } if (op === 'access' || op === 'optionalAccess') { lastAccessLHS = value; value = fn(value); } else if (op === 'call' || op === 'optionalCall') { value = fn((...args) => value.call(lastAccessLHS, ...args)); lastAccessLHS = undefined; } } return value; }/* eslint-disable prefer-destructuring */
 
 const SHADER_MODULES = [
   { fs: fs1, fscmap: fsColormap1, vs: vs1 },
   { fs: fs2, fscmap: fsColormap2, vs: vs2 }
 ];
 
-function getRenderingAttrs(dtype, gl) {
+function getRenderingAttrs(dtype, gl, interpolation) {
+  const isLinear = interpolation === GL.LINEAR;
   if (!isWebGL2(gl)) {
     // WebGL1
     return {
@@ -7886,15 +7906,22 @@ function getRenderingAttrs(dtype, gl) {
       type: GL.FLOAT,
       sampler: 'sampler2D',
       shaderModule: SHADER_MODULES[0],
+      filter: interpolation,
       cast: data => new Float32Array(data)
     };
   }
-  const values = getDtypeValues(dtype);
-  return { ...values, shaderModule: SHADER_MODULES[1] };
+  // Linear filtering only works when the data type is cast to Float32.
+  const values = getDtypeValues(isLinear ? 'Float32' : dtype);
+  return {
+    ...values,
+    shaderModule: SHADER_MODULES[1],
+    filter: interpolation,
+    cast: isLinear ? data => new Float32Array(data) : data => data
+  };
 }
 
 const defaultProps$5 = {
-  pickable: true,
+  pickable: { type: 'boolean', value: true, compare: true },
   coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
   channelData: { type: 'object', value: {}, compare: true },
   bounds: { type: 'array', value: [0, 0, 1, 1], compare: true },
@@ -7909,23 +7936,55 @@ const defaultProps$5 = {
   lensBorderColor: { type: 'array', value: [255, 255, 255], compare: true },
   lensBorderRadius: { type: 'number', value: 0.02, compare: true },
   unprojectLensBounds: { type: 'array', value: [0, 0, 0, 0], compare: true },
-  transparentColor: { type: 'array', value: null, compare: true }
+  transparentColor: { type: 'array', value: null, compare: true },
+  interpolation: {
+    type: 'number',
+    value: GL.NEAREST,
+    compare: true
+  }
 };
 
 /**
- * This layer serves as the workhorse of the project, handling all the rendering.  Much of it is
- * adapted from BitmapLayer in DeckGL.
- * XR = eXtended Range i.e more than the standard 8-bit RGBA data format
- * (16/32 bit floats/ints/uints with more than 3/4 channels).
+ * @typedef LayerProps
+ * @type {object}
+ * @property {Array.<Array.<number>>} sliderValues List of [begin, end] values to control each channel's ramp function.
+ * @property {Array.<Array.<number>>} colorValues List of [r, g, b] values for each channel.
+ * @property {Array.<boolean>} channelIsOn List of boolean values for each channel for whether or not it is visible.
+ * @property {string} dtype Dtype for the layer.
+ * @property {number=} opacity Opacity of the layer.
+ * @property {string=} colormap String indicating a colormap (default: '').  The full list of options is here: https://github.com/glslify/glsl-colormap#glsl-colormap
+ * @property {Array.<number>=} domain Override for the possible max/min values (i.e something different than 65535 for uint16/'<u2').
+ * @property {String=} id Unique identifier for this layer.
+ * @property {function=} onHover Hook function from deck.gl to handle hover objects.
+ * @property {boolean=} isLensOn Whether or not to use the lens.
+ * @property {number=} lensSelection Numeric index of the channel to be focused on by the lens.
+ * @property {number=} lensRadius Pixel radius of the lens (default: 100).
+ * @property {Array.<number>=} lensBorderColor RGB color of the border of the lens (default [255, 255, 255]).
+ * @property {number=} lensBorderRadius Percentage of the radius of the lens for a border (default 0.02).
+ * @property {function=} onClick Hook function from deck.gl to handle clicked-on objects.
+ * @property {Object=} modelMatrix Math.gl Matrix4 object containing an affine transformation to be applied to the image.
+ * @property {Array.<number>=} transparentColor An RGB (0-255 range) color to be considered "transparent" if provided.
+ * In other words, any fragment shader output equal transparentColor (before applying opacity) will have opacity 0.
+ * This parameter only needs to be a truthy value when using colormaps because each colormap has its own transparent color that is calculated on the shader.
+ * Thus setting this to a truthy value (with a colormap set) indicates that the shader should make that color transparent.
+ * @property {number=} interpolation The TEXTURE_MIN_FILTER and TEXTURE_MAG_FILTER for WebGL rendering (see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter) - default is GL.NEAREST
  */
-class XRLayer extends Layer {
+/**
+ * @type {{ new (...props: import('../../types').Viv<LayerProps>[]) }}
+ * @ignore
+ */
+const XRLayer = class extends Layer {
   /**
    * This function chooses a shader (colormapping or not) and
    * replaces `usampler` with `sampler` if the data is not an unsigned integer
    */
   getShaders() {
-    const { colormap, dtype } = this.props;
-    const { shaderModule, sampler } = getRenderingAttrs(dtype, this.context.gl);
+    const { colormap, dtype, interpolation } = this.props;
+    const { shaderModule, sampler } = getRenderingAttrs(
+      dtype,
+      this.context.gl,
+      interpolation
+    );
     return super.getShaders({
       fs: colormap ? shaderModule.fscmap : shaderModule.fs,
       vs: shaderModule.vs,
@@ -7981,7 +8040,11 @@ class XRLayer extends Layer {
    */
   updateState({ props, oldProps, changeFlags }) {
     // setup model first
-    if (changeFlags.extensionsChanged || props.colormap !== oldProps.colormap) {
+    if (
+      changeFlags.extensionsChanged ||
+      props.colormap !== oldProps.colormap ||
+      props.interpolation !== oldProps.interpolation
+    ) {
       const { gl } = this.context;
       if (this.state.model) {
         this.state.model.delete();
@@ -7991,8 +8054,9 @@ class XRLayer extends Layer {
       this.getAttributeManager().invalidateAll();
     }
     if (
-      props.channelData !== oldProps.channelData &&
-      _optionalChain([props, 'access', _ => _.channelData, 'optionalAccess', _2 => _2.data]) !== _optionalChain([oldProps, 'access', _3 => _3.channelData, 'optionalAccess', _4 => _4.data])
+      (props.channelData !== oldProps.channelData &&
+        _optionalChain$1([props, 'access', _ => _.channelData, 'optionalAccess', _2 => _2.data]) !== _optionalChain$1([oldProps, 'access', _3 => _3.channelData, 'optionalAccess', _4 => _4.data])) ||
+      props.interpolation !== oldProps.interpolation
     ) {
       this.loadChannelTextures(props.channelData);
     }
@@ -8168,18 +8232,22 @@ class XRLayer extends Layer {
    * This function creates textures from the data
    */
   dataToTexture(data, width, height) {
-    const attrs = getRenderingAttrs(this.props.dtype, this.context.gl);
+    const { interpolation } = this.props;
+    const attrs = getRenderingAttrs(
+      this.props.dtype,
+      this.context.gl,
+      interpolation
+    );
     return new Texture2D(this.context.gl, {
       width,
       height,
-      // data is cast in WebGL1 environment
-      data: _nullishCoalesce(_optionalChain([attrs, 'access', _5 => _5.cast, 'optionalCall', _6 => _6(data)]), () => ( data)),
+      data: _nullishCoalesce$1(_optionalChain$1([attrs, 'access', _5 => _5.cast, 'optionalCall', _6 => _6(data)]), () => ( data)),
       // we don't want or need mimaps
       mipmaps: false,
       parameters: {
         // NEAREST for integer data
-        [GL.TEXTURE_MIN_FILTER]: GL.NEAREST,
-        [GL.TEXTURE_MAG_FILTER]: GL.NEAREST,
+        [GL.TEXTURE_MIN_FILTER]: attrs.filter,
+        [GL.TEXTURE_MAG_FILTER]: attrs.filter,
         // CLAMP_TO_EDGE to remove tile artifacts
         [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
         [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
@@ -8189,7 +8257,7 @@ class XRLayer extends Layer {
       type: attrs.type
     });
   }
-}
+};
 
 XRLayer.layerName = 'XRLayer';
 XRLayer.defaultProps = defaultProps$5;
@@ -8210,18 +8278,16 @@ const PHOTOMETRIC_INTERPRETATIONS = {
 
 const defaultProps$1$1 = {
   ...BitmapLayer.defaultProps,
-  pickable: true,
-  coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-  bounds: { type: 'array', value: [0, 0, 1, 1], compare: true },
-  opacity: { type: 'number', value: 1, compare: true }
+  pickable: { type: 'boolean', value: true, compare: true },
+  coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
 };
 
 const getPhotometricInterpretationShader = (
   photometricInterpretation,
-  tansparentColorInHook
+  transparentColorInHook
 ) => {
-  const useTransparentColor = tansparentColorInHook ? 'true' : 'false';
-  const transparentColorVector = `vec3(${(tansparentColorInHook || [0, 0, 0])
+  const useTransparentColor = transparentColorInHook ? 'true' : 'false';
+  const transparentColorVector = `vec3(${(transparentColorInHook || [0, 0, 0])
     .map(i => String(i / 255))
     .join(',')})`;
   switch (photometricInterpretation) {
@@ -8276,12 +8342,12 @@ const getTransparentColor = photometricInterpretation => {
 
 class BitmapLayerWrapper extends BitmapLayer {
   _getModel(gl) {
-    const { photometricInterpretation, tansparentColorInHook } = this.props;
+    const { photometricInterpretation, transparentColorInHook } = this.props;
     // This is a port to the GPU of a subset of https://github.com/geotiffjs/geotiff.js/blob/master/src/rgb.js
     // Safari was too slow doing this off of the GPU and it is noticably faster on other browsers as well.
     const photometricInterpretationShader = getPhotometricInterpretationShader(
       photometricInterpretation,
-      tansparentColorInHook
+      transparentColorInHook
     );
     if (!gl) {
       return null;
@@ -8306,7 +8372,25 @@ class BitmapLayerWrapper extends BitmapLayer {
     });
   }
 }
-class BitmapLayer$1 extends CompositeLayer {
+
+/**
+ * @typedef LayerProps
+ * @type {object}
+ * @property {number=} opacity Opacity of the layer.
+ * @property {function=} onClick Hook function from deck.gl to handle clicked-on objects.
+ * @property {Object=} modelMatrix Math.gl Matrix4 object containing an affine transformation to be applied to the image.
+ * @property {number=} photometricInterpretation One of WhiteIsZero BlackIsZero YCbCr or RGB (default)
+ * @property {Array.<number>=} transparentColor An RGB (0-255 range) color to be considered "transparent" if provided.
+ * In other words, any fragment shader output equal transparentColor (before applying opacity) will have opacity 0.
+ * This parameter only needs to be a truthy value when using colormaps because each colormap has its own transparent color that is calculated on the shader.
+ * Thus setting this to a truthy value (with a colormap set) indicates that the shader should make that color transparent.
+ * @property {String=} id Unique identifier for this layer.
+ */
+/**
+ * @type {{ new (...props: import('../types').Viv<LayerProps>[]) }}
+ * @ignore
+ */
+const BitmapLayer$1 = class extends CompositeLayer {
   initializeState(args) {
     const { gl } = this.context;
     // This tells WebGL how to read row data from the texture.  For example, the default here is 4 (i.e for RGBA, one byte per channel) so
@@ -8323,7 +8407,7 @@ class BitmapLayer$1 extends CompositeLayer {
   renderLayers() {
     const {
       photometricInterpretation,
-      transparentColor: tansparentColorInHook
+      transparentColor: transparentColorInHook
     } = this.props;
     const transparentColor = getTransparentColor(photometricInterpretation);
     return new BitmapLayerWrapper(this.props, {
@@ -8332,11 +8416,11 @@ class BitmapLayer$1 extends CompositeLayer {
       // what color is "transparent" in the original color space (i.e what shows when opacity is 0).
       transparentColor,
       // This is our transparentColor props which needs to be applied in the hook that converts to the RGB space.
-      tansparentColorInHook,
+      transparentColorInHook,
       id: `${this.props.id}-wrapped`
     });
   }
-}
+};
 
 BitmapLayer$1.layerName = 'BitmapLayer';
 // From https://github.com/geotiffjs/geotiff.js/blob/8ef472f41b51d18074aece2300b6a8ad91a21ae1/src/globals.js#L202-L213
@@ -8344,7 +8428,9 @@ BitmapLayer$1.PHOTOMETRIC_INTERPRETATIONS = PHOTOMETRIC_INTERPRETATIONS;
 BitmapLayer$1.defaultProps = {
   ...defaultProps$1$1,
   // We don't want this layer to bind the texture so the type should not be `image`.
-  image: { type: 'object', value: {}, compare: true }
+  image: { type: 'object', value: {}, compare: true },
+  transparentColor: { type: 'array', value: [0, 0, 0], compare: true },
+  photometricInterpretation: { type: 'number', value: 2, compare: true }
 };
 BitmapLayerWrapper.defaultProps = defaultProps$1$1;
 BitmapLayerWrapper.layerName = 'BitmapLayerWrapper';
@@ -8397,25 +8483,7 @@ function renderSubLayers(props) {
     y,
     z
   } = props.tile;
-  const {
-    colorValues,
-    sliderValues,
-    channelIsOn,
-    visible,
-    opacity,
-    data,
-    colormap,
-    dtype,
-    id,
-    onHover,
-    pickable,
-    unprojectLensBounds,
-    isLensOn,
-    lensSelection,
-    onClick,
-    loader,
-    modelMatrix
-  } = props;
+  const { data, id, loader, maxZoom } = props;
   // Only render in positive coorinate system
   if ([left, bottom, right, top].some(v => v < 0) || !data) {
     return null;
@@ -8430,21 +8498,15 @@ function renderSubLayers(props) {
     data.width < base.tileSize ? width : right,
     top
   ];
-  if (isInterleaved(base)) {
-    const { photometricInterpretation } = base;
+  if (isInterleaved(base.shape)) {
+    const { photometricInterpretation = 2 } = base.meta;
     return new BitmapLayer$1(props, {
       image: data,
       photometricInterpretation,
       // Shared props with XRLayer:
       bounds,
       id: `tile-sub-layer-${bounds}-${id}`,
-      tileId: { x, y, z },
-      onHover,
-      pickable,
-      onClick,
-      modelMatrix,
-      opacity,
-      visible
+      tileId: { x, y, z }
     });
   }
   return new XRLayer(props, {
@@ -8452,38 +8514,22 @@ function renderSubLayers(props) {
     // Uncomment to help debugging - shades the tile being hovered over.
     // autoHighlight: true,
     // highlightColor: [80, 80, 80, 50],
-    data: null,
-    sliderValues,
-    colorValues,
-    channelIsOn,
-    dtype,
-    colormap,
-    unprojectLensBounds,
-    isLensOn,
-    lensSelection,
     // Shared props with BitmapLayer:
     bounds,
     id: `tile-sub-layer-${bounds}-${id}`,
     tileId: { x, y, z },
-    onHover,
-    pickable,
-    onClick,
-    modelMatrix,
-    opacity,
-    visible
+    // The auto setting is NEAREST at the highest resolution but LINEAR otherwise.
+    interpolation: z === maxZoom ? GL.NEAREST : GL.LINEAR
   });
 }
 
 const defaultProps$2$1 = {
-  pickable: true,
+  pickable: { type: 'boolean', value: true, compare: true },
   coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
   sliderValues: { type: 'array', value: [], compare: true },
   colorValues: { type: 'array', value: [], compare: true },
   channelIsOn: { type: 'array', value: [], compare: true },
-  minZoom: { type: 'number', value: 0, compare: true },
-  maxZoom: { type: 'number', value: 0, compare: true },
   renderSubLayers: { type: 'function', value: renderSubLayers, compare: false },
-  opacity: { type: 'number', value: 1, compare: true },
   colormap: { type: 'string', value: '', compare: true },
   dtype: { type: 'string', value: 'Uint16', compare: true },
   domain: { type: 'array', value: [], compare: true },
@@ -8494,7 +8540,8 @@ const defaultProps$2$1 = {
   lensRadius: { type: 'number', value: 100, compare: true },
   lensBorderColor: { type: 'array', value: [255, 255, 255], compare: true },
   lensBorderRadius: { type: 'number', value: 0.02, compare: true },
-  transparentColor: { type: 'array', value: null, compare: true }
+  transparentColor: { type: 'array', value: null, compare: true },
+  interpolation: { type: 'number', value: null, compare: true }
 };
 
 /**
@@ -8527,7 +8574,7 @@ MultiscaleImageLayerBase.layerName = 'MultiscaleImageLayerBase';
 MultiscaleImageLayerBase.defaultProps = defaultProps$2$1;
 
 const defaultProps$3$1 = {
-  pickable: true,
+  pickable: { type: 'boolean', value: true, compare: true },
   coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
   sliderValues: { type: 'array', value: [], compare: true },
   channelIsOn: { type: 'array', value: [], compare: true },
@@ -8551,35 +8598,47 @@ const defaultProps$3$1 = {
   lensBorderRadius: { type: 'number', value: 0.02, compare: true },
   onClick: { type: 'function', value: null, compare: true },
   transparentColor: { type: 'array', value: null, compare: true },
-  onViewportLoad: { type: 'function', value: null, compare: true }
+  onViewportLoad: { type: 'function', value: null, compare: true },
+  interpolation: {
+    type: 'number',
+    value: GL.NEAREST,
+    compare: true
+  }
 };
 
 /**
- * This layer wraps XRLayer and generates a static image
- * @param {Object} props
- * @param {Array} props.sliderValues List of [begin, end] values to control each channel's ramp function.
- * @param {Array} props.colorValues List of [r, g, b] values for each channel.
- * @param {Array} props.channelIsOn List of boolean values for each channel for whether or not it is visible.
- * @param {number} props.opacity Opacity of the layer.
- * @param {string} props.colormap String indicating a colormap (default: '').  The full list of options is here: https://github.com/glslify/glsl-colormap#glsl-colormap
- * @param {Array} props.domain Override for the possible max/min values (i.e something different than 65535 for uint16/'<u2').
- * @param {string} props.viewportId Id for the current view.  This needs to match the viewState id in deck.gl and is necessary for the lens.
- * @param {Object} props.loader PixelSource. Represents an N-dimensional image.
- * @param {function} props.onHover Hook function from deck.gl to handle hover objects.
- * @param {boolean} props.isLensOn Whether or not to use the lens.
- * @param {number} props.lensSelection Numeric index of the channel to be focused on by the lens.
- * @param {number} props.lensRadius Pixel radius of the lens (default: 100).
- * @param {Array} props.lensBorderColor RGB color of the border of the lens.
- * @param {number} props.lensBorderRadius Percentage of the radius of the lens for a border (default 0.02).
- * @param {function} props.onClick Hook function from deck.gl to handle clicked-on objects.
- * @param {Object} props.modelMatrix Math.gl Matrix4 object containing an affine transformation to be applied to the image.
- * @param {Array} props.transparentColor An RGB (0-255 range) color to be considered "transparent" if provided.
+ * @typedef LayerProps
+ * @type {Object}
+ * @property {Array.<Array.<number>>} sliderValues List of [begin, end] values to control each channel's ramp function.
+ * @property {Array.<Array.<number>>} colorValues List of [r, g, b] values for each channel.
+ * @property {Array.<boolean>} channelIsOn List of boolean values for each channel for whether or not it is visible.
+ * @property {Object} loader PixelSource. Represents an N-dimensional image.
+ * @property {Array} loaderSelection Selection to be used for fetching data.
+ * @property {number=} opacity Opacity of the layer.
+ * @property {string=} colormap String indicating a colormap (default: '').  The full list of options is here: https://github.com/glslify/glsl-colormap#glsl-colormap
+ * @property {Array.<Array.<number>>=} domain Override for the possible max/min values (i.e something different than 65535 for uint16/'<u2').
+ * @property {string=} viewportId Id for the current view.  This needs to match the viewState id in deck.gl and is necessary for the lens.
+ * @property {function=} onHover Hook function from deck.gl to handle hover objects.
+ * @property {boolean=} isLensOn Whether or not to use the lens.
+ * @property {number=} lensSelection Numeric index of the channel to be focused on by the lens.
+ * @property {number=} lensRadius Pixel radius of the lens (default: 100).
+ * @property {Array.<number>=} lensBorderColor RGB color of the border of the lens.
+ * @property {number=} lensBorderRadius Percentage of the radius of the lens for a border (default 0.02).
+ * @property {function=} onClick Hook function from deck.gl to handle clicked-on objects.
+ * @property {Object=} modelMatrix Math.gl Matrix4 object containing an affine transformation to be applied to the image.
+ * @property {Array.<number>=} transparentColor An RGB (0-255 range) color to be considered "transparent" if provided.
  * In other words, any fragment shader output equal transparentColor (before applying opacity) will have opacity 0.
  * This parameter only needs to be a truthy value when using colormaps because each colormap has its own transparent color that is calculated on the shader.
  * Thus setting this to a truthy value (with a colormap set) indicates that the shader should make that color transparent.
- * @param {function} props.onViewportLoad Function that gets called when the data in the viewport loads.
+ * @property {function=} onViewportLoad Function that gets called when the data in the viewport loads.
+ * @property {String=} id Unique identifier for this layer.
  */
-class ImageLayer extends CompositeLayer {
+
+/**
+ * @type {{ new <S extends string[]>(...props: import('../types').Viv<LayerProps, S>[]) }}
+ * @ignore
+ */
+const ImageLayer = class extends CompositeLayer {
   initializeState() {
     this.state = {
       unprojectLensBounds: [0, 0, 0, 0],
@@ -8596,6 +8655,10 @@ class ImageLayer extends CompositeLayer {
     }
   }
 
+  finalizeState() {
+    this.state.abortController.abort();
+  }
+
   updateState({ changeFlags, props, oldProps }) {
     const { propsChanged } = changeFlags;
     const loaderChanged =
@@ -8606,32 +8669,41 @@ class ImageLayer extends CompositeLayer {
     if (loaderChanged || loaderSelectionChanged) {
       // Only fetch new data to render if loader has changed
       const { loader, loaderSelection = [], onViewportLoad } = this.props;
-      const getRaster = selection => loader.getRaster({ selection });
+      const abortController = new AbortController();
+      this.setState({ abortController });
+      const { signal } = abortController;
+      const getRaster = selection => loader.getRaster({ selection, signal });
       const dataPromises = loaderSelection.map(getRaster);
 
-      Promise.all(dataPromises).then(rasters => {
-        const raster = {
-          data: rasters.map(d => d.data),
-          width: rasters[0].width,
-          height: rasters[0].height
-        };
+      Promise.all(dataPromises)
+        .then(rasters => {
+          const raster = {
+            data: rasters.map(d => d.data),
+            width: rasters[0].width,
+            height: rasters[0].height
+          };
 
-        if (isInterleaved(loader)) {
-          // data is for BitmapLayer and needs to be of form { data: Uint8Array, width, height };
-          // eslint-disable-next-line prefer-destructuring
-          raster.data = raster.data[0];
-          if (raster.data.length === raster.width * raster.height * 3) {
-            // data is RGB (not RGBA) and need to update texture formats
-            raster.format = GL.RGB;
-            raster.dataFormat = GL.RGB;
+          if (isInterleaved(loader.shape)) {
+            // data is for BitmapLayer and needs to be of form { data: Uint8Array, width, height };
+            // eslint-disable-next-line prefer-destructuring
+            raster.data = raster.data[0];
+            if (raster.data.length === raster.width * raster.height * 3) {
+              // data is RGB (not RGBA) and need to update texture formats
+              raster.format = GL.RGB;
+              raster.dataFormat = GL.RGB;
+            }
           }
-        }
 
-        if (onViewportLoad) {
-          onViewportLoad(raster);
-        }
-        this.setState({ ...raster });
-      });
+          if (onViewportLoad) {
+            onViewportLoad(raster);
+          }
+          this.setState({ ...raster });
+        })
+        .catch(e => {
+          if (e !== SIGNAL_ABORTED) {
+            throw e; // re-throws error if not our signal
+          }
+        });
     }
   }
 
@@ -8645,72 +8717,31 @@ class ImageLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {
-      loader,
-      visible,
-      opacity,
-      colormap,
-      sliderValues,
-      colorValues,
-      channelIsOn,
-      domain,
-      pickable,
-      isLensOn,
-      lensSelection,
-      lensBorderColor,
-      lensRadius,
-      id,
-      onClick,
-      onHover,
-      modelMatrix,
-      transparentColor
-    } = this.props;
-    const { dtype, photometricInterpretation } = loader;
-    const { width, height, data, unprojectLensBounds } = this.state;
+    const { loader, id } = this.props;
+    const { dtype } = loader;
+    const { width, height, data } = this.state;
     if (!(width && height)) return null;
 
     const bounds = [0, height, width, 0];
-    if (isInterleaved(loader)) {
+    if (isInterleaved(loader.shape)) {
+      const { photometricInterpretation = 2 } = loader.meta;
       return new BitmapLayer$1(this.props, {
         image: this.state,
         photometricInterpretation,
         // Shared props with XRLayer:
         bounds,
-        id: `image-sub-layer-${bounds}-${id}`,
-        onHover,
-        pickable,
-        onClick,
-        modelMatrix,
-        opacity,
-        visible
+        id: `image-sub-layer-${bounds}-${id}`
       });
     }
     return new XRLayer(this.props, {
       channelData: { data, height, width },
-      sliderValues,
-      colorValues,
-      channelIsOn,
-      domain,
-      dtype,
-      colormap,
-      unprojectLensBounds,
-      isLensOn,
-      lensSelection,
-      lensBorderColor,
-      lensRadius,
       // Shared props with BitmapLayer:
       bounds,
       id: `image-sub-layer-${bounds}-${id}`,
-      onHover,
-      pickable,
-      onClick,
-      modelMatrix,
-      opacity,
-      visible,
-      transparentColor
+      dtype
     });
   }
-}
+};
 
 ImageLayer.layerName = 'ImageLayer';
 ImageLayer.defaultProps = defaultProps$3$1;
@@ -8719,7 +8750,7 @@ ImageLayer.defaultProps = defaultProps$3$1;
 const DECK_GL_TILE_SIZE = 512;
 
 const defaultProps$4$1 = {
-  pickable: true,
+  pickable: { type: 'boolean', value: true, compare: true },
   onHover: { type: 'function', value: null, compare: false },
   sliderValues: { type: 'array', value: [], compare: true },
   colorValues: { type: 'array', value: [], compare: true },
@@ -8741,37 +8772,41 @@ const defaultProps$4$1 = {
 };
 
 /**
- * This layer generates a MultiscaleImageLayer (tiled) and a ImageLayer (background for the tiled layer)
- * @param {Object} props
- * @param {Array} props.sliderValues List of [begin, end] values to control each channel's ramp function.
- * @param {Array} props.colorValues List of [r, g, b] values for each channel.
- * @param {Array} props.channelIsOn List of boolean values for each channel for whether or not it is visible.
- * @param {number} props.opacity Opacity of the layer.
- * @param {string} props.colormap String indicating a colormap (default: '').  The full list of options is here: https://github.com/glslify/glsl-colormap#glsl-colormap
- * @param {Array} props.domain Override for the possible max/min values (i.e something different than 65535 for uint16/'<u2').
- * @param {string} props.viewportId Id for the current view.  This needs to match the viewState id in deck.gl and is necessary for the lens.
- * @param {Array} props.loader Image pyramid. PixelSource[], where each PixelSource is decreasing in shape.
- * @param {Array} props.loaderSelection Selection to be used for fetching data.
- * @param {String} props.id Unique identifier for this layer.
- * @param {function} props.onTileError Custom override for handle tile fetching errors.
- * @param {function} props.onHover Hook function from deck.gl to handle hover objects.
- * @param {boolean} props.isLensOn Whether or not to use the lens.
- * @param {number} props.lensSelection Numeric index of the channel to be focused on by the lens.
- * @param {number} props.lensRadius Pixel radius of the lens (default: 100).
- * @param {Array} props.lensBorderColor RGB color of the border of the lens (default [255, 255, 255]).
- * @param {number} props.lensBorderRadius Percentage of the radius of the lens for a border (default 0.02).
- * @param {number} props.maxRequests Maximum parallel ongoing requests allowed before aborting.
- * @param {function} props.onClick Hook function from deck.gl to handle clicked-on objects.
- * @param {Object} props.modelMatrix Math.gl Matrix4 object containing an affine transformation to be applied to the image.
- * @param {Array} props.transparentColor An RGB (0-255 range) color to be considered "transparent" if provided.
+ * @typedef LayerProps
+ * @type {object}
+ * @property {Array.<Array.<number>>} sliderValues List of [begin, end] values to control each channel's ramp function.
+ * @property {Array.<Array.<number>>} colorValues List of [r, g, b] values for each channel.
+ * @property {Array.<boolean>} channelIsOn List of boolean values for each channel for whether or not it is visible.
+ * @property {Array} loader Image pyramid. PixelSource[], where each PixelSource is decreasing in shape.
+ * @property {Array} loaderSelection Selection to be used for fetching data.
+ * @property {number=} opacity Opacity of the layer.
+ * @property {string=} colormap String indicating a colormap (default: '').  The full list of options is here: https://github.com/glslify/glsl-colormap#glsl-colormap
+ * @property {Array.<Array.<number>>=} domain Override for the possible max/min values (i.e something different than 65535 for uint16/'<u2').
+ * @property {string=} viewportId Id for the current view.  This needs to match the viewState id in deck.gl and is necessary for the lens.
+ * @property {String=} id Unique identifier for this layer.
+ * @property {function=} onTileError Custom override for handle tile fetching errors.
+ * @property {function=} onHover Hook function from deck.gl to handle hover objects.
+ * @property {boolean=} isLensOn Whether or not to use the lens.
+ * @property {number=} lensSelection Numeric index of the channel to be focused on by the lens.
+ * @property {number=} lensRadius Pixel radius of the lens (default: 100).
+ * @property {Array.<number>=} lensBorderColor RGB color of the border of the lens (default [255, 255, 255]).
+ * @property {number=} lensBorderRadius Percentage of the radius of the lens for a border (default 0.02).
+ * @property {number=} maxRequests Maximum parallel ongoing requests allowed before aborting.
+ * @property {function=} onClick Hook function from deck.gl to handle clicked-on objects.
+ * @property {Object=} modelMatrix Math.gl Matrix4 object containing an affine transformation to be applied to the image.
+ * @property {Array.<number>=} transparentColor An RGB (0-255 range) color to be considered "transparent" if provided.
  * In other words, any fragment shader output equal transparentColor (before applying opacity) will have opacity 0.
  * This parameter only needs to be a truthy value when using colormaps because each colormap has its own transparent color that is calculated on the shader.
  * Thus setting this to a truthy value (with a colormap set) indicates that the shader should make that color transparent.
- * @param {string} props.refinementStrategy 'best-available' | 'no-overlap' | 'never' will be passed to TileLayer. A default will be chosen based on opacity.
- * @param {boolean} props.excludeBackground Whether to exclude the background image. The background image is also excluded for opacity!=1.
+ * @property {string=} refinementStrategy 'best-available' | 'no-overlap' | 'never' will be passed to TileLayer. A default will be chosen based on opacity.
+ * @property {boolean=} excludeBackground Whether to exclude the background image. The background image is also excluded for opacity!=1.
  */
 
-class MultiscaleImageLayer extends CompositeLayer {
+/**
+ * @type {{ new <S extends string[]>(...props: import('../../types').Viv<LayerProps, S>[]) }}
+ * @ignore
+ */
+const MultiscaleImageLayer = class extends CompositeLayer {
   initializeState() {
     this.state = {
       unprojectLensBounds: [0, 0, 0, 0]
@@ -8788,28 +8823,16 @@ class MultiscaleImageLayer extends CompositeLayer {
   renderLayers() {
     const {
       loader,
-      sliderValues,
-      colorValues,
-      channelIsOn,
       loaderSelection,
-      domain,
       opacity,
-      colormap,
       viewportId,
       onTileError,
       onHover,
-      pickable,
       id,
-      isLensOn,
-      lensSelection,
-      lensBorderColor,
-      lensBorderRadius,
-      maxRequests,
       onClick,
       modelMatrix,
       transparentColor,
       excludeBackground,
-      onViewportLoad,
       refinementStrategy
     } = this.props;
 
@@ -8857,7 +8880,7 @@ class MultiscaleImageLayer extends CompositeLayer {
           height: tiles[0].height
         };
 
-        if (isInterleaved(loader)) {
+        if (isInterleaved(loader[resolution].shape)) {
           // eslint-disable-next-line prefer-destructuring
           tile.data = tile.data[0];
           if (tile.data.length === tile.width * tile.height * 3) {
@@ -8898,16 +8921,10 @@ class MultiscaleImageLayer extends CompositeLayer {
       tileSize: modelMatrix
         ? tileSize * (1 / modelMatrix.getScale()[0])
         : tileSize,
-      onClick,
       extent: [0, 0, width, height],
       // See the above note within for why the use of zoomOffset and the rounding necessary.
       minZoom: Math.round(-(loader.length - 1) + zoomOffset),
       maxZoom: Math.round(zoomOffset),
-      colorValues,
-      sliderValues,
-      channelIsOn,
-      maxRequests,
-      domain,
       // We want a no-overlap caching strategy with an opacity < 1 to prevent
       // multiple rendered sublayers (some of which have been cached) from overlapping
       refinementStrategy:
@@ -8919,19 +8936,7 @@ class MultiscaleImageLayer extends CompositeLayer {
         getTileData: [loader, loaderSelection]
       },
       onTileError: onTileError || loader[0].onTileError,
-      opacity,
-      colormap,
-      viewportId,
-      onHover,
-      pickable,
-      unprojectLensBounds,
-      isLensOn,
-      lensSelection,
-      lensBorderColor,
-      lensBorderRadius,
-      modelMatrix,
-      transparentColor,
-      onViewportLoad
+      unprojectLensBounds
     });
 
     // This gives us a background image and also solves the current
@@ -8956,26 +8961,237 @@ class MultiscaleImageLayer extends CompositeLayer {
           // since the background image might not have the same color output from the fragment shader
           // as the tiled layer at a higher resolution level.
           !transparentColor,
-        pickable: true,
+        pickable: { type: 'boolean', value: true, compare: true },
         onHover,
-        onClick
+        onClick,
+        // Background image is nicest when LINEAR in my opinion.
+        interpolation: GL.LINEAR
       });
     const layers = [baseLayer, tiledLayer];
     return layers;
   }
-}
+};
 
 MultiscaleImageLayer.layerName = 'MultiscaleImageLayer';
 MultiscaleImageLayer.defaultProps = defaultProps$4$1;
+
+const RENDERING_MODES_BLEND = {
+  [RENDERING_MODES.MAX_INTENSITY_PROJECTION]: {
+    _BEFORE_RENDER: `\
+      float maxVals[6] = float[6](-1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+    `,
+    _RENDER: `\
+    
+      float intensityArray[6] = float[6](intensityValue0, intensityValue1, intensityValue2, intensityValue3, intensityValue4, intensityValue5);
+
+      for(int i = 0; i < 6; i++) {
+        if(intensityArray[i] > maxVals[i]) {
+          maxVals[i] = intensityArray[i];
+        }
+      }
+    `,
+    _AFTER_RENDER: `\
+      vec3 rgbCombo = vec3(0.0);
+      for(int i = 0; i < 6; i++) {
+        vec3 hsvCombo = rgb2hsv(vec3(colorValues[i]));
+        hsvCombo = vec3(hsvCombo.xy, maxVals[i]);
+        rgbCombo += hsv2rgb(hsvCombo);
+      }
+      color = vec4(rgbCombo, 1.0);
+    `
+  },
+  [RENDERING_MODES.MIN_INTENSITY_PROJECTION]: {
+    _BEFORE_RENDER: `\
+      float minVals[6] = float[6](1. / 0., 1. / 0., 1. / 0., 1. / 0., 1. / 0., 1. / 0.);
+    `,
+    _RENDER: `\
+    
+      float intensityArray[6] = float[6](intensityValue0, intensityValue1, intensityValue2, intensityValue3, intensityValue4, intensityValue5);
+
+      for(int i = 0; i < 6; i++) {
+        if(intensityArray[i] < minVals[i]) {
+          minVals[i] = intensityArray[i];
+        }
+      }
+    `,
+    _AFTER_RENDER: `\
+      vec3 rgbCombo = vec3(0.0);
+      for(int i = 0; i < 6; i++) {
+        vec3 hsvCombo = rgb2hsv(vec3(colorValues[i]));
+        hsvCombo = vec3(hsvCombo.xy, minVals[i]);
+        rgbCombo += hsv2rgb(hsvCombo);
+      }
+      color = vec4(rgbCombo, 1.0);
+    `
+  },
+  [RENDERING_MODES.ADDITIVE]: {
+    _BEFORE_RENDER: ``,
+    _RENDER: `\
+      vec3 rgbCombo = vec3(0.0);
+      vec3 hsvCombo = vec3(0.0);
+      float intensityArray[6] = float[6](intensityValue0, intensityValue1, intensityValue2, intensityValue3, intensityValue4, intensityValue5);
+      float total = 0.0;
+      for(int i = 0; i < 6; i++) {
+        float intensityValue = intensityArray[i];
+        hsvCombo = rgb2hsv(vec3(colorValues[i]));
+        hsvCombo = vec3(hsvCombo.xy, intensityValue);
+        rgbCombo += hsv2rgb(hsvCombo);
+        total += intensityValue;
+      }
+      // Do not go past 1 in opacity.
+      total = min(total, 1.0);
+      vec4 val_color = vec4(rgbCombo, total);
+      // Opacity correction
+      val_color.a = 1.0 - pow(1.0 - val_color.a, 1.0);
+      color.rgb += (1.0 - color.a) * val_color.a * val_color.rgb;
+      color.a += (1.0 - color.a) * val_color.a;
+      if (color.a >= 0.95) {
+        break;
+      }
+    `,
+    _AFTER_RENDER: ``
+  }
+};
+
+const RENDERING_MODES_COLORMAP = {
+  [RENDERING_MODES.MAX_INTENSITY_PROJECTION]: {
+    _BEFORE_RENDER: `\
+      float maxVals[6] = float[6](-1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+    `,
+    _RENDER: `\
+    
+      float intensityArray[6] = float[6](intensityValue0, intensityValue1, intensityValue2, intensityValue3, intensityValue4, intensityValue5);
+
+      for(int i = 0; i < 6; i++) {
+        if(intensityArray[i] > maxVals[i]) {
+          maxVals[i] = intensityArray[i];
+        }
+      }
+    `,
+    _AFTER_RENDER: `\
+      float total = 0.0;
+      for(int i = 0; i < 6; i++) {
+        total += maxVals[i];
+      }
+      // Do not go past 1 in opacity/colormap value.
+      total = min(total, 1.0);
+      color = colormap(total, total);
+    `
+  },
+  [RENDERING_MODES.MIN_INTENSITY_PROJECTION]: {
+    _BEFORE_RENDER: `\
+      float minVals[6] = float[6](1. / 0., 1. / 0., 1. / 0., 1. / 0., 1. / 0., 1. / 0.);
+    `,
+    _RENDER: `\
+    
+      float intensityArray[6] = float[6](intensityValue0, intensityValue1, intensityValue2, intensityValue3, intensityValue4, intensityValue5);
+
+      for(int i = 0; i < 6; i++) {
+        if(intensityArray[i] < minVals[i]) {
+          minVals[i] = intensityArray[i];
+        }
+      }
+    `,
+    _AFTER_RENDER: `\
+      float total = 0.0;
+      for(int i = 0; i < 6; i++) {
+        total += minVals[i];
+      }
+      // Do not go past 1 in opacity/colormap value.
+      total = min(total, 1.0);
+      color = colormap(total, total);
+    `
+  },
+  [RENDERING_MODES.ADDITIVE]: {
+    _BEFORE_RENDER: ``,
+    _RENDER: `\
+    float intensityArray[6] = float[6](intensityValue0, intensityValue1, intensityValue2, intensityValue3, intensityValue4, intensityValue5);
+		float total = 0.0;
+
+		for(int i = 0; i < 6; i++) {
+			total += intensityArray[i];
+		}
+		// Do not go past 1 in opacity/colormap value.
+		total = min(total, 1.0);
+
+		vec4 val_color = colormap(total, total);
+
+		// Opacity correction
+		val_color.a = 1.0 - pow(1.0 - val_color.a, 1.0);
+		color.rgb += (1.0 - color.a) * val_color.a * val_color.rgb;
+		color.a += (1.0 - color.a) * val_color.a;
+		if (color.a >= 0.95) {
+			break;
+		}
+    p += ray_dir * dt;
+    `,
+    _AFTER_RENDER: ``
+  }
+};
+
+const defaultProps$7 = {
+  pickable: false,
+  coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+  channelData: { type: 'object', value: {}, compare: true },
+  colorValues: { type: 'array', value: [], compare: true },
+  sliderValues: { type: 'array', value: [], compare: true },
+  dtype: { type: 'string', value: 'Uint8', compare: true },
+  colormap: { type: 'string', value: '', compare: true },
+  xSlice: { type: 'array', value: null, compare: true },
+  ySlice: { type: 'array', value: null, compare: true },
+  zSlice: { type: 'array', value: null, compare: true },
+  clippingPlanes: { type: 'array', value: [], compare: true },
+  renderingMode: {
+    type: 'string',
+    value: RENDERING_MODES.ADDITIVE,
+    compare: true
+  },
+  resolutionMatrix: { type: 'object', value: new Matrix4(), compare: true }
+};
+
+const defaultProps$8 = {
+  pickable: false,
+  coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+  sliderValues: { type: 'array', value: [], compare: true },
+  channelIsOn: { type: 'array', value: [], compare: true },
+  colorValues: { type: 'array', value: [], compare: true },
+  colormap: { type: 'string', value: '', compare: true },
+  loaderSelection: { type: 'array', value: [], compare: true },
+  resolution: { type: 'number', value: 0, compare: true },
+  domain: { type: 'array', value: [], compare: true },
+  loader: {
+    type: 'object',
+    value: [
+      {
+        getRaster: async () => ({ data: [], height: 0, width: 0 }),
+        dtype: 'Uint16',
+        shape: [1],
+        labels: ['z']
+      }
+    ],
+    compare: true
+  },
+  xSlice: { type: 'array', value: null, compare: true },
+  ySlice: { type: 'array', value: null, compare: true },
+  zSlice: { type: 'array', value: null, compare: true },
+  clippingPlanes: { type: 'array', value: [], compare: true },
+  renderingMode: {
+    type: 'string',
+    value: RENDERING_MODES.MAX_INTENSITY_PROJECTION,
+    compare: true
+  },
+  onUpdate: { type: 'function', value: () => {}, compare: true },
+  useProgressIndicator: { type: 'boolean', value: true, compare: true }
+};
 /* eslint-enable */
 
-function _nullishCoalesce$1(lhs, rhsFn) { if (lhs != null) { return lhs; } else { return rhsFn(); } } function _optionalChain$8(ops) { let lastAccessLHS = undefined; let value = ops[0]; let i = 1; while (i < ops.length) { const op = ops[i]; const fn = ops[i + 1]; i += 2; if ((op === 'optionalAccess' || op === 'optionalCall') && value == null) { return undefined; } if (op === 'access' || op === 'optionalAccess') { lastAccessLHS = value; value = fn(value); } else if (op === 'call' || op === 'optionalCall') { value = fn((...args) => value.call(lastAccessLHS, ...args)); lastAccessLHS = undefined; } } return value; }
+function _nullishCoalesce$3(lhs, rhsFn) { if (lhs != null) { return lhs; } else { return rhsFn(); } } function _optionalChain$b(ops) { let lastAccessLHS = undefined; let value = ops[0]; let i = 1; while (i < ops.length) { const op = ops[i]; const fn = ops[i + 1]; i += 2; if ((op === 'optionalAccess' || op === 'optionalCall') && value == null) { return undefined; } if (op === 'access' || op === 'optionalAccess') { lastAccessLHS = value; value = fn(value); } else if (op === 'call' || op === 'optionalCall') { value = fn((...args) => value.call(lastAccessLHS, ...args)); lastAccessLHS = undefined; } } return value; }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/NavigatorConcurrentHardware/hardwareConcurrency
 // We need to give a different way of getting this for safari, so 4 is probably a safe bet
 // for parallel processing in the meantime.  More can't really hurt since they'll just block
 // each other and not the UI thread, which is the real benefit.
-const defaultPoolSize = _nullishCoalesce$1(_optionalChain$8([globalThis, 'optionalAccess', _ => _.navigator, 'optionalAccess', _2 => _2.hardwareConcurrency]), () => ( 4));
+const defaultPoolSize = _nullishCoalesce$3(_optionalChain$b([globalThis, 'optionalAccess', _ => _.navigator, 'optionalAccess', _2 => _2.hardwareConcurrency]), () => ( 4));
 
 /*
  * The 'indexer' for a Zarr-based source translates
@@ -9007,6 +9223,7 @@ const DTYPE_LOOKUP$1 = {
   u2: 'Uint16',
   u4: 'Uint32',
   f4: 'Float32',
+  f8: 'Float64',
   i1: 'Int8',
   i2: 'Int16',
   i4: 'Int32'
