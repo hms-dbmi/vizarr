@@ -21,7 +21,7 @@ export interface GridLayerProps extends CompositeLayerProps<any> {
 }
 
 const defaultProps = {
-  ...XRLayer.defaultProps,
+  ...(XRLayer as any).defaultProps,
   // Special grid props
   loaders: { type: 'array', value: [], compare: true },
   spacer: { type: 'number', value: 5, compare: true },

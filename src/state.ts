@@ -77,7 +77,7 @@ export type SourceData = {
 
 export type LayerCtr<T> = new (...args: any[]) => T;
 export type LayerState = {
-  Layer: null | LayerCtr<ImageLayer | MultiscaleImageLayer | GridLayer>;
+  Layer: null | LayerCtr<typeof ImageLayer | typeof MultiscaleImageLayer | GridLayer>;
   layerProps: VivLayerProps & {
     loader: ZarrPixelSource<string[]> | ZarrPixelSource<string[]>[];
     contrastLimits: number[][];
