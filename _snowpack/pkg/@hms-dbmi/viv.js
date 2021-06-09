@@ -1,20 +1,20 @@
 import { _ as _classCallCheck } from '../common/classCallCheck-4eda545c.js';
 import { _ as _createClass } from '../common/setPrototypeOf-d164daa3.js';
-import { S as Stats, _ as _get, M as Model, s as lngLatToWorld, L as Layer, C as COORDINATE_SYSTEM, i as log, q as _asyncToGenerator, r as regenerator, t as Vector3, f as flatten, l as load, c as Texture2D, v as isWebGL2 } from '../common/layer-660a8390.js';
+import { S as Stats, _ as _get, M as Model, s as lngLatToWorld, L as Layer, C as COORDINATE_SYSTEM, i as log, q as _asyncToGenerator, r as regenerator, t as Vector3, f as flatten, l as load, c as Texture2D, v as isWebGL2, w as hasFeature, F as FEATURES } from '../common/layer-3339c0fa.js';
 import { Q as ARRAY_TYPE, _ as _inherits, a as _getPrototypeOf, b as _possibleConstructorReturn, R as vec4_transformMat3, u as transformMat3, e as transformMat3$1, S as checkVector, T as deprecated, U as Matrix, V as create$2, W as fromValues, X as dot$1, n as cross, Y as len, Z as normalize$1, $ as add$1, A as scale$2, a0 as dot$2, a1 as lerp$1, a2 as length$1, a3 as squaredLength$1, a4 as normalize$2, a5 as EPSILON, k as assert, a6 as transformQuat, d as checkNumber, l as MathArray, P as lerp$2, a7 as getScaling, N as equals, M as Matrix4 } from '../common/matrix4-e4e8695c.js';
 import { _ as _toConsumableArray } from '../common/toConsumableArray-06af309a.js';
 import { _ as _defineProperty } from '../common/defineProperty-1b0b77a2.js';
 import '../common/index-aae33e1a.js';
 import { c as createCommonjsModule } from '../common/_commonjsHelpers-37fa8da4.js';
 import { B as BoundsCheckError, s as slice } from '../common/zarr-fd3d4b27.js';
-import { p as project32, a as picking, G as Geometry, c as cutPolylineByGrid, b as cutPolylineByMercatorBounds, T as Tesselator, S as SolidPolygonLayer } from '../common/solid-polygon-layer-90f3f599.js';
-import { C as CompositeLayer } from '../common/composite-layer-1bf9b89a.js';
+import { p as project32, a as picking, G as Geometry, c as cutPolylineByGrid, b as cutPolylineByMercatorBounds, T as Tesselator, S as SolidPolygonLayer } from '../common/solid-polygon-layer-70061558.js';
+import { C as CompositeLayer } from '../common/composite-layer-70acd78f.js';
 import { _ as _slicedToArray } from '../common/slicedToArray-cdb146e7.js';
 import '../common/process-2545f00a.js';
 import '../common/interopRequireDefault-0a992762.js';
 import '../common/interopRequireWildcard-7a8da193.js';
 import '../common/_node-resolve:empty-0f7f843d.js';
-import '../common/project-ae3b3777.js';
+import '../common/project-c0678e19.js';
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
@@ -7896,17 +7896,36 @@ const SHADER_MODULES = [
   { fs: fs2, fscmap: fsColormap2, vs: vs2 }
 ];
 
+function validateWebGL2Filter(gl, interpolation) {
+  const canShowFloat = hasFeature(gl, FEATURES.TEXTURE_FLOAT);
+  const canShowLinear = hasFeature(gl, FEATURES.TEXTURE_FILTER_LINEAR_FLOAT);
+
+  if (!canShowFloat) {
+    throw new Error(
+      'WebGL1 context does not support floating point textures.  Unable to display raster data.'
+    );
+  }
+
+  if (!canShowLinear && interpolation === GL.LINEAR) {
+    console.warn(
+      'LINEAR filtering not supported in WebGL1 context.  Falling back to NEAREST.'
+    );
+    return GL.NEAREST;
+  }
+
+  return interpolation;
+}
+
 function getRenderingAttrs(dtype, gl, interpolation) {
   const isLinear = interpolation === GL.LINEAR;
   if (!isWebGL2(gl)) {
-    // WebGL1
     return {
       format: GL.LUMINANCE,
       dataFormat: GL.LUMINANCE,
       type: GL.FLOAT,
       sampler: 'sampler2D',
       shaderModule: SHADER_MODULES[0],
-      filter: interpolation,
+      filter: validateWebGL2Filter(gl, interpolation),
       cast: data => new Float32Array(data)
     };
   }
@@ -8719,7 +8738,7 @@ const ImageLayer = class extends CompositeLayer {
   renderLayers() {
     const { loader, id } = this.props;
     const { dtype } = loader;
-    const { width, height, data } = this.state;
+    const { width, height, data, unprojectLensBounds } = this.state;
     if (!(width && height)) return null;
 
     const bounds = [0, height, width, 0];
@@ -8738,7 +8757,8 @@ const ImageLayer = class extends CompositeLayer {
       // Shared props with BitmapLayer:
       bounds,
       id: `image-sub-layer-${bounds}-${id}`,
-      dtype
+      dtype,
+      unprojectLensBounds
     });
   }
 };
