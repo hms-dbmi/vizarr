@@ -1,17 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <title>vizarr</title>
     <meta charset="utf-8" />
+    <meta name="description" content="A minimal, purely client-side program for viewing Zarr-based images." />
+
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔬</text></svg>">
     <link rel="alternate icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="A minimal, purely client-side program for viewing Zarr-based images." />
-    <title>vizarr</title>
+
+    <link rel="manifest" href="%PUBLIC_URL%manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="vizarr">
+    <meta name="apple-mobile-web-app-title" content="vizarr">
+    <meta name="theme-color" content="#000000">
+    <meta name="msapplication-navbutton-color" content="#000000">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="msapplication-starturl" content=".">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   </head>
   <body>
     <div id="root"></div>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <script type="module" src="/src/index.tsx"></script>
+    <script type="module">
+      // Check if service worker is supported
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register(new URL('sw.js', import.meta.url))
+        });
+      }
+    </script>
     <style>
       @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap');
       html {
