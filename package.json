@@ -12,11 +12,12 @@
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "reference-spec-reader": "^0.1.1",
+    "workbox-cli": "^6.1.5",
     "zarr": "^0.4.0"
   },
   "scripts": {
     "start": "snowpack dev",
-    "build": "snowpack build",
+    "build": "snowpack build && workbox generateSW workbox-config.js",
     "export": "npm run build",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
     "lint": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\"",
