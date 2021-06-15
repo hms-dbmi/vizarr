@@ -1,11 +1,10 @@
-import { atom, PrimitiveAtom, WritableAtom, SetStateAction } from 'jotai';
-import { splitAtom, waitForAll } from 'jotai/utils';
-import type { ZarrArray } from 'zarr';
 import type { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
-import type { VivLayerProps } from 'viv-layers';
-import type GridLayer from './gridLayer';
 import type { Matrix4 } from '@math.gl/core/dist/esm';
-import { atomFamily } from 'jotai/utils';
+import { atom, PrimitiveAtom, SetStateAction } from 'jotai';
+import { atomFamily, splitAtom, waitForAll } from 'jotai/utils';
+import type { VivLayerProps } from 'viv-layers';
+import type { ZarrArray } from 'zarr';
+import type GridLayer from './gridLayer';
 import { initLayerStateFromSource } from './io';
 
 export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
@@ -98,20 +97,22 @@ export type LayerState = {
   on: boolean;
 };
 
-export const sourceInfoAtom = atom<(SourceData & { id: string })[]>([]);
+type WithId<T> = T & { id: string };
+export interface AtomPairs {
+  sourceAtom: PrimitiveAtom<WithId<SourceData>>;
+  layerAtom: PrimitiveAtom<WithId<LayerState>>;
+}
+
+export const sourceInfoAtom = atom<WithId<SourceData>[]>([]);
+
+export const viewStateAtom = atom<ViewState>(DEFAULT_VIEW_STATE);
 
 export const sourceInfoAtomAtoms = splitAtom(sourceInfoAtom);
 
-export const layerFamilyAtom = atomFamily<
-  SourceData & { id: string },
-  LayerState & { id: string },
-  SetStateAction<LayerState & { id: string }>
->(
+export const layerFamilyAtom = atomFamily<WithId<SourceData>, WithId<LayerState>, SetStateAction<WithId<LayerState>>>(
   (param) => atom({ ...initLayerStateFromSource(param), id: param.id }),
   (a, b) => a.id === b.id
 );
-
-export const viewStateAtom = atom<ViewState>(DEFAULT_VIEW_STATE);
 
 export const layerAtoms = atom((get) => {
   const atoms = get(sourceInfoAtomAtoms);
@@ -119,8 +120,3 @@ export const layerAtoms = atom((get) => {
   const layerList = atoms.map((a) => layerFamilyAtom(get(a)));
   return get(waitForAll(layerList));
 });
-
-export interface AtomPairs {
-  sourceAtom: PrimitiveAtom<SourceData & { id: string }>;
-  layerAtom: WritableAtom<LayerState & { id: string }, SetStateAction<LayerState & { id: string }>>;
-}
