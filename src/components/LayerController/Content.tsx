@@ -9,6 +9,8 @@ import AxisSliders from './AxisSliders';
 import ChannelController from './ChannelController';
 
 import { range } from '../../utils';
+import { useAtom } from 'jotai';
+import type { AtomPairs } from '../../state';
 
 const Details = withStyles({
   root: {
@@ -18,35 +20,37 @@ const Details = withStyles({
   },
 })(AccordionDetails);
 
-function Content({ layerId, nChannels }: { layerId: string; nChannels: number }): JSX.Element {
+function Content({ sourceAtom, layerAtom }: AtomPairs): JSX.Element {
+  const [layer] = useAtom(layerAtom);
+  const nChannels = layer.layerProps.loaderSelection.length;
   return (
     <Details>
       <Grid container direction="column">
-        <AcquisitionController layerId={layerId} />
+        <AcquisitionController sourceAtom={sourceAtom} />
         <Grid>
           <Grid container justify="space-between">
             <Grid item xs={3}>
               <Typography variant="caption">opacity:</Typography>
             </Grid>
             <Grid item xs={8}>
-              <OpacitySlider layerId={layerId} />
+              <OpacitySlider sourceAtom={sourceAtom} layerAtom={layerAtom} />
             </Grid>
           </Grid>
         </Grid>
         <Divider />
-        <AxisSliders layerId={layerId} />
+        <AxisSliders sourceAtom={sourceAtom} layerAtom={layerAtom} />
         <Grid container justify="space-between">
           <Grid item xs={3}>
             <Typography variant="caption">channels:</Typography>
           </Grid>
           <Grid item xs={1}>
-            <AddChannelButton layerId={layerId} />
+            <AddChannelButton sourceAtom={sourceAtom} layerAtom={layerAtom} />
           </Grid>
         </Grid>
         <Divider />
         <Grid>
           {range(nChannels).map((i) => (
-            <ChannelController layerId={layerId} channelIndex={i} key={i + layerId} />
+            <ChannelController sourceAtom={sourceAtom} layerAtom={layerAtom} channelIndex={i} key={i} />
           ))}
         </Grid>
       </Grid>

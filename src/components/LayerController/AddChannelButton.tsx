@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import type { MouseEvent, ChangeEvent } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useAtom } from 'jotai';
 import { IconButton, Popover, Paper, Typography, Divider, NativeSelect } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
 
-import { layerStateFamily, sourceInfoState } from '../../state';
 import { hexToRGB, MAX_CHANNELS } from '../../utils';
+import type { AtomPairs } from '../../state';
 
-function AddChannelButton({ layerId }: { layerId: string }): JSX.Element {
-  const sourceInfo = useRecoilValue(sourceInfoState);
-  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
+function AddChannelButton({ sourceAtom, layerAtom }: AtomPairs): JSX.Element {
+  const [sourceData] = useAtom(sourceAtom);
+  const [layer, setLayer] = useAtom(layerAtom);
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);
-  const layerInfo = sourceInfo[layerId];
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -27,7 +26,7 @@ function AddChannelButton({ layerId }: { layerId: string }): JSX.Element {
       channel_axis,
       colors,
       contrast_limits,
-    } = layerInfo;
+    } = sourceData;
     handleClose();
     const channelIndex = +event.target.value;
     const channelSelection = [...selection];
@@ -55,9 +54,9 @@ function AddChannelButton({ layerId }: { layerId: string }): JSX.Element {
     });
   };
 
-  const { names } = sourceInfo[layerId];
+  const { names } = sourceData;
   const open = Boolean(anchorEl);
-  const id = open ? `layer-${layerId}-add-channel` : undefined;
+  const id = open ? `layer-${sourceData.id}-add-channel` : undefined;
   return (
     <>
       <IconButton
@@ -93,7 +92,7 @@ function AddChannelButton({ layerId }: { layerId: string }): JSX.Element {
           <NativeSelect
             fullWidth
             style={{ fontSize: '0.7em' }}
-            id={`layer-${layerId}-channel-select`}
+            id={`layer-${sourceData.id}-channel-select`}
             onChange={handleChange}
           >
             <option aria-label="None" value="">

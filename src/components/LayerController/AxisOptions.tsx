@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import type { MouseEvent, ChangeEvent } from 'react';
-import { useRecoilState } from 'recoil';
+import { useAtom } from 'jotai';
 import { IconButton, Popover, Paper, Typography, Divider, Input } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import { MoreHoriz } from '@material-ui/icons';
-
-import { layerStateFamily } from '../../state';
+import type { AtomPairs } from '../../state';
 
 const DenseInput = withStyles({
   root: {
@@ -14,8 +13,14 @@ const DenseInput = withStyles({
   },
 })(Input);
 
-function AxisOptions({ layerId, axisIndex, max }: { layerId: string; axisIndex: number; max: number }): JSX.Element {
-  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
+function AxisOptions({
+  sourceAtom,
+  layerAtom,
+  axisIndex,
+  max,
+}: AtomPairs & { axisIndex: number; max: number }): JSX.Element {
+  const [sourceData] = useAtom(sourceAtom);
+  const [layer, setLayer] = useAtom(layerAtom);
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
@@ -46,7 +51,7 @@ function AxisOptions({ layerId, axisIndex, max }: { layerId: string; axisIndex: 
   };
 
   const open = Boolean(anchorEl);
-  const id = open ? `${axisIndex}-index-${layerId}-options` : undefined;
+  const id = open ? `${axisIndex}-index-${sourceData.id}-options` : undefined;
   const value = layer.layerProps.loaderSelection[0] ? layer.layerProps.loaderSelection[0][axisIndex] : 1;
 
   return (

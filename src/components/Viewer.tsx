@@ -1,10 +1,11 @@
 import React, { useRef } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useAtom, atom } from 'jotai';
+import { useAtomValue, waitForAll } from 'jotai/utils';
 import DeckGL from 'deck.gl';
 import { OrthographicView } from '@deck.gl/core';
 import type { Layer } from '@deck.gl/core';
 
-import { viewerViewState, layersSelector, LayerState } from '../state';
+import { layerFamilyAtom, LayerState, sourceInfoAtomAtoms, viewStateAtom } from '../state';
 import { isInterleaved, fitBounds } from '../utils';
 
 function getLayerSize(props: LayerState['layerProps']) {
@@ -23,7 +24,7 @@ function getLayerSize(props: LayerState['layerProps']) {
 }
 
 function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }): JSX.Element {
-  const [viewState, setViewState] = useRecoilState(viewerViewState);
+  const [viewState, setViewState] = useAtom(viewStateAtom);
   const deckRef = useRef<DeckGL>(null);
   const views = [new OrthographicView({ id: 'ortho', controller: true })];
 
@@ -48,14 +49,20 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }): JSX.El
   );
 }
 
+const layerAtoms = atom((get) => {
+  const atoms = get(sourceInfoAtomAtoms);
+  if (atoms.length === 0) return [];
+  const layerList = atoms.map((a) => layerFamilyAtom(get(a)));
+  return get(waitForAll(layerList));
+});
+
 function Viewer(): JSX.Element {
-  const layerConstructors = useRecoilValue(layersSelector);
+  const layerConstructors = useAtomValue(layerAtoms);
   const layers = layerConstructors.map((l) => {
-    // Something weird with Recoil Loadable here. Need to cast to any.
-    const { Layer, layerProps, on } = l as any;
+    const { Layer, layerProps, on } = l;
     return !Layer || !on ? null : new Layer(layerProps);
   });
-  return <WrappedViewStateDeck layers={layers} />;
+  return <WrappedViewStateDeck layers={layers as Layer<any, any>[]} />;
 }
 
 export default Viewer;

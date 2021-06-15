@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { RecoilRoot } from 'recoil';
+import { Provider } from 'jotai';
 import { ThemeProvider } from '@material-ui/styles';
 
 import Vizarr from './vizarr';
@@ -8,9 +8,9 @@ import theme from './theme';
 
 ReactDOM.render(
   <ThemeProvider theme={theme}>
-    <RecoilRoot>
+    <Provider>
       <Vizarr />
-    </RecoilRoot>
+    </Provider>
   </ThemeProvider>,
   document.getElementById('root')
 );
