@@ -1,11 +1,11 @@
 import React from 'react';
 import { Grid, NativeSelect } from '@material-ui/core';
-import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import type { ChangeEvent } from 'react';
 import type { AtomPairs } from '../../state';
 
 function AcquisitionController({ sourceAtom }: Omit<AtomPairs, 'layerAtom'>): JSX.Element | null {
-  const [sourceData] = useAtom(sourceAtom);
+  const sourceData = useAtomValue(sourceAtom);
   const { acquisitionId, acquisitions } = sourceData;
 
   if (!acquisitions) {

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAtomValue } from 'jotai/utils';
 import { AccordionDetails, Grid, Typography, Divider } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 
@@ -9,7 +10,6 @@ import AxisSliders from './AxisSliders';
 import ChannelController from './ChannelController';
 
 import { range } from '../../utils';
-import { useAtom } from 'jotai';
 import type { AtomPairs } from '../../state';
 
 const Details = withStyles({
@@ -21,7 +21,7 @@ const Details = withStyles({
 })(AccordionDetails);
 
 function Content({ sourceAtom, layerAtom }: AtomPairs): JSX.Element {
-  const [layer] = useAtom(layerAtom);
+  const layer = useAtomValue(layerAtom);
   const nChannels = layer.layerProps.loaderSelection.length;
   return (
     <Details>

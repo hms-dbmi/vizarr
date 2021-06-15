@@ -1,11 +1,11 @@
 import React from 'react';
 import { Grid, Divider } from '@material-ui/core';
-import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import AxisSlider from './AxisSlider';
 import type { AtomPairs } from '../../state';
 
 function AxisSliders({ sourceAtom, layerAtom }: AtomPairs): JSX.Element | null {
-  const [sourceData] = useAtom(sourceAtom);
+  const sourceData = useAtomValue(sourceAtom);
   const { axis_labels, channel_axis, loader } = sourceData;
 
   const sliders = axis_labels

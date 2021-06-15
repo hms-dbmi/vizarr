@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import { AccordionSummary, Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import LayerVisibilityButton from './LayerVisibilityButton';
@@ -29,7 +29,7 @@ const DenseAccordionSummary = withStyles({
 })(AccordionSummary);
 
 function Header({ sourceAtom, layerAtom, name }: AtomPairs & { name: string }): JSX.Element {
-  const [sourceData] = useAtom(sourceAtom);
+  const sourceData = useAtomValue(sourceAtom);
   const label = `layer-controller-${sourceData.id}`;
   return (
     <DenseAccordionSummary aria-controls={label} id={label}>

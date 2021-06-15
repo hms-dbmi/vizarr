@@ -1,5 +1,6 @@
 import { Grid, Typography, Divider } from '@material-ui/core';
 import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import type { ChangeEvent } from 'react';
 import React, { useState, useEffect } from 'react';
 import { Slider } from '@material-ui/core';
@@ -25,7 +26,7 @@ function AxisSlider({
   max,
 }: AtomPairs & { axisIndex: number; max: number }): JSX.Element {
   const [layer, setLayer] = useAtom(layerAtom);
-  const [sourceData] = useAtom(sourceAtom);
+  const sourceData = useAtomValue(sourceAtom);
   const { axis_labels } = sourceData;
   let axisLabel = axis_labels[axisIndex];
   if (axisLabel === 't' || axisLabel === 'z') {

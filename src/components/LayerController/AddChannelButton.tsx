@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { MouseEvent, ChangeEvent } from 'react';
 import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import { IconButton, Popover, Paper, Typography, Divider, NativeSelect } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
 
@@ -8,7 +9,7 @@ import { hexToRGB, MAX_CHANNELS } from '../../utils';
 import type { AtomPairs } from '../../state';
 
 function AddChannelButton({ sourceAtom, layerAtom }: AtomPairs): JSX.Element {
-  const [sourceData] = useAtom(sourceAtom);
+  const sourceData = useAtomValue(sourceAtom);
   const [layer, setLayer] = useAtom(layerAtom);
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import type { ChangeEvent } from 'react';
 import { Slider, Typography, Grid, IconButton } from '@material-ui/core';
 import { RadioButtonChecked, RadioButtonUnchecked } from '@material-ui/icons';
@@ -11,7 +12,7 @@ interface ChannelConfig {
 }
 
 function ChannelController({ sourceAtom, layerAtom, channelIndex }: AtomPairs & ChannelConfig): JSX.Element {
-  const [sourceData] = useAtom(sourceAtom);
+  const sourceData = useAtomValue(sourceAtom);
   const [layer, setLayer] = useAtom(layerAtom);
 
   const handleContrastChange = (_: ChangeEvent<unknown>, v: number | number[]) => {

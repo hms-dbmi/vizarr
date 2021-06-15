@@ -26,7 +26,6 @@ function getLayerSize(props: LayerState['layerProps']) {
 function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }): JSX.Element {
   const [viewState, setViewState] = useAtom(viewStateAtom);
   const deckRef = useRef<DeckGL>(null);
-  const views = [new OrthographicView({ id: 'ortho', controller: true })];
 
   // If viewState hasn't been updated, use the first loader to guess viewState
   // TODO: There is probably a better place / way to set the intital view and this is a hack.
@@ -44,7 +43,7 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }): JSX.El
       layers={layers}
       viewState={viewState}
       onViewStateChange={(e) => setViewState(e.viewState)}
-      views={views}
+      views={[new OrthographicView({ id: 'ortho', controller: true })]}
     />
   );
 }

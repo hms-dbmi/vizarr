@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { MouseEvent, ChangeEvent } from 'react';
 import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import { IconButton, Popover, Paper, Typography, Divider, Input } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import { MoreHoriz } from '@material-ui/icons';
@@ -19,7 +20,7 @@ function AxisOptions({
   axisIndex,
   max,
 }: AtomPairs & { axisIndex: number; max: number }): JSX.Element {
-  const [sourceData] = useAtom(sourceAtom);
+  const sourceData = useAtomValue(sourceAtom);
   const [layer, setLayer] = useAtom(layerAtom);
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);
 
