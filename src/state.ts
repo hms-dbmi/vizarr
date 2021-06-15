@@ -1,5 +1,5 @@
 import { atom, PrimitiveAtom, WritableAtom, SetStateAction } from 'jotai';
-import { splitAtom } from 'jotai/utils';
+import { splitAtom, waitForAll } from 'jotai/utils';
 import type { ZarrArray } from 'zarr';
 import type { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
 import type { VivLayerProps } from 'viv-layers';
@@ -100,16 +100,27 @@ export type LayerState = {
 
 export const sourceInfoAtom = atom<(SourceData & { id: string })[]>([]);
 
-export const layerFamilyAtom = atomFamily<SourceData & { id: string }, LayerState, SetStateAction<LayerState>>(
-  (param) => atom(initLayerStateFromSource(param)),
+export const sourceInfoAtomAtoms = splitAtom(sourceInfoAtom);
+
+export const layerFamilyAtom = atomFamily<
+  SourceData & { id: string },
+  LayerState & { id: string },
+  SetStateAction<LayerState & { id: string }>
+>(
+  (param) => atom({ ...initLayerStateFromSource(param), id: param.id }),
   (a, b) => a.id === b.id
 );
 
 export const viewStateAtom = atom<ViewState>(DEFAULT_VIEW_STATE);
 
-export const sourceInfoAtomAtoms = splitAtom(sourceInfoAtom);
+export const layerAtoms = atom((get) => {
+  const atoms = get(sourceInfoAtomAtoms);
+  if (atoms.length === 0) return [];
+  const layerList = atoms.map((a) => layerFamilyAtom(get(a)));
+  return get(waitForAll(layerList));
+});
 
 export interface AtomPairs {
   sourceAtom: PrimitiveAtom<SourceData & { id: string }>;
-  layerAtom: WritableAtom<LayerState, SetStateAction<LayerState>>;
+  layerAtom: WritableAtom<LayerState & { id: string }, SetStateAction<LayerState & { id: string }>>;
 }

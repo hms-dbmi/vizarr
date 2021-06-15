@@ -1,11 +1,11 @@
 import React, { useRef } from 'react';
-import { useAtom, atom } from 'jotai';
-import { useAtomValue, waitForAll } from 'jotai/utils';
+import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import DeckGL from 'deck.gl';
 import { OrthographicView } from '@deck.gl/core';
 import type { Layer } from '@deck.gl/core';
 
-import { layerFamilyAtom, LayerState, sourceInfoAtomAtoms, viewStateAtom } from '../state';
+import { layerAtoms, LayerState, viewStateAtom } from '../state';
 import { isInterleaved, fitBounds } from '../utils';
 
 function getLayerSize(props: LayerState['layerProps']) {
@@ -48,13 +48,6 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }): JSX.El
     />
   );
 }
-
-const layerAtoms = atom((get) => {
-  const atoms = get(sourceInfoAtomAtoms);
-  if (atoms.length === 0) return [];
-  const layerList = atoms.map((a) => layerFamilyAtom(get(a)));
-  return get(waitForAll(layerList));
-});
 
 function Viewer(): JSX.Element {
   const layerConstructors = useAtomValue(layerAtoms);
