@@ -4,7 +4,7 @@ import { useAtomValue } from 'jotai/utils';
 import type { ChangeEvent } from 'react';
 import type { AtomPairs } from '../../state';
 
-function AcquisitionController({ sourceAtom }: Omit<AtomPairs, 'layerAtom'>): JSX.Element | null {
+function AcquisitionController({ sourceAtom }: Omit<AtomPairs, 'layerAtom'>) {
   const sourceData = useAtomValue(sourceAtom);
   const { acquisitionId, acquisitions } = sourceData;
 

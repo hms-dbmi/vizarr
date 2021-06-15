@@ -29,7 +29,7 @@ const useStyles = makeStyles({
   },
 });
 
-function Menu(): JSX.Element {
+function Menu() {
   const sourceAtoms = useAtomValue(sourceInfoAtomAtoms);
   const [hidden, toggle] = useReducer((v) => !v, false);
   const classes = useStyles();

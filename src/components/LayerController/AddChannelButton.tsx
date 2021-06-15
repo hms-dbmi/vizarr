@@ -8,7 +8,7 @@ import { Add } from '@material-ui/icons';
 import { hexToRGB, MAX_CHANNELS } from '../../utils';
 import type { AtomPairs } from '../../state';
 
-function AddChannelButton({ sourceAtom, layerAtom }: AtomPairs): JSX.Element {
+function AddChannelButton({ sourceAtom, layerAtom }: AtomPairs) {
   const sourceData = useAtomValue(sourceAtom);
   const [layer, setLayer] = useAtom(layerAtom);
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);

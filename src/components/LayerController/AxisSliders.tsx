@@ -4,7 +4,7 @@ import { useAtomValue } from 'jotai/utils';
 import AxisSlider from './AxisSlider';
 import type { AtomPairs } from '../../state';
 
-function AxisSliders({ sourceAtom, layerAtom }: AtomPairs): JSX.Element | null {
+function AxisSliders({ sourceAtom, layerAtom }: AtomPairs) {
   const sourceData = useAtomValue(sourceAtom);
   const { axis_labels, channel_axis, loader } = sourceData;
 

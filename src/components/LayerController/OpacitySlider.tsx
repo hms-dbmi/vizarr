@@ -16,7 +16,7 @@ const DenseSlider = withStyles({
   },
 })(Slider);
 
-function OpacitySlider({ layerAtom }: AtomPairs): JSX.Element {
+function OpacitySlider({ layerAtom }: AtomPairs) {
   const [layer, setLayer] = useAtom(layerAtom);
   const handleChange = (_: ChangeEvent<unknown>, value: number | number[]) => {
     const opacity = value as number;

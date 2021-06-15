@@ -20,7 +20,7 @@ const Details = withStyles({
   },
 })(AccordionDetails);
 
-function Content({ sourceAtom, layerAtom }: AtomPairs): JSX.Element {
+function Content({ sourceAtom, layerAtom }: AtomPairs) {
   const layer = useAtomValue(layerAtom);
   const nChannels = layer.layerProps.loaderSelection.length;
   return (

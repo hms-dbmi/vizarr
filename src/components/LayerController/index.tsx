@@ -28,7 +28,7 @@ const Accordion = withStyles({
   },
 })(MuiAccordion);
 
-function LayerController({ sourceAtom }: Omit<AtomPairs, 'layerAtom'>): JSX.Element {
+function LayerController({ sourceAtom }: Omit<AtomPairs, 'layerAtom'>) {
   const sourceInfo = useAtomValue(sourceAtom);
   const layerAtom = layerFamilyAtom(sourceInfo);
   const { name = '' } = sourceInfo;

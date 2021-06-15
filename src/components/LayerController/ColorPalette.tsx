@@ -19,7 +19,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 const RGB_COLORS: [string, number[]][] = Object.entries(COLORS).map(([name, hex]) => [name, hexToRGB(hex)]);
-function ColorPalette({ handleChange }: { handleChange: (c: number[]) => void }): JSX.Element {
+function ColorPalette({ handleChange }: { handleChange: (c: number[]) => void }) {
   const classes = useStyles();
   return (
     <div className={classes.container} aria-label="color-swatch">

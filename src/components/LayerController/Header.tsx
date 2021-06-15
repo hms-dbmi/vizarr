@@ -28,7 +28,7 @@ const DenseAccordionSummary = withStyles({
   expanded: {},
 })(AccordionSummary);
 
-function Header({ sourceAtom, layerAtom, name }: AtomPairs & { name: string }): JSX.Element {
+function Header({ sourceAtom, layerAtom, name }: AtomPairs & { name: string }) {
   const sourceData = useAtomValue(sourceAtom);
   const label = `layer-controller-${sourceData.id}`;
   return (

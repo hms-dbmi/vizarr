@@ -15,7 +15,7 @@ const DenseInput = withStyles({
   },
 })(Input);
 
-function ChannelOptions({ sourceAtom, layerAtom, channelIndex }: AtomPairs & { channelIndex: number }): JSX.Element {
+function ChannelOptions({ sourceAtom, layerAtom, channelIndex }: AtomPairs & { channelIndex: number }) {
   const sourceData = useAtomValue(sourceAtom);
   const [layer, setLayer] = useAtom(layerAtom);
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);

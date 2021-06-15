@@ -11,7 +11,7 @@ interface ChannelConfig {
   channelIndex: number;
 }
 
-function ChannelController({ sourceAtom, layerAtom, channelIndex }: AtomPairs & ChannelConfig): JSX.Element {
+function ChannelController({ sourceAtom, layerAtom, channelIndex }: AtomPairs & ChannelConfig) {
   const sourceData = useAtomValue(sourceAtom);
   const [layer, setLayer] = useAtom(layerAtom);
 

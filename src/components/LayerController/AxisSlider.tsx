@@ -19,12 +19,7 @@ const DenseSlider = withStyles({
   },
 })(Slider);
 
-function AxisSlider({
-  sourceAtom,
-  layerAtom,
-  axisIndex,
-  max,
-}: AtomPairs & { axisIndex: number; max: number }): JSX.Element {
+function AxisSlider({ sourceAtom, layerAtom, axisIndex, max }: AtomPairs & { axisIndex: number; max: number }) {
   const [layer, setLayer] = useAtom(layerAtom);
   const sourceData = useAtomValue(sourceAtom);
   const { axis_labels } = sourceData;

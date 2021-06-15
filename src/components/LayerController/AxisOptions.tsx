@@ -14,12 +14,7 @@ const DenseInput = withStyles({
   },
 })(Input);
 
-function AxisOptions({
-  sourceAtom,
-  layerAtom,
-  axisIndex,
-  max,
-}: AtomPairs & { axisIndex: number; max: number }): JSX.Element {
+function AxisOptions({ sourceAtom, layerAtom, axisIndex, max }: AtomPairs & { axisIndex: number; max: number }) {
   const sourceData = useAtomValue(sourceAtom);
   const [layer, setLayer] = useAtom(layerAtom);
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);

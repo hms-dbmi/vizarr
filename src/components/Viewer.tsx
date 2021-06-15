@@ -23,7 +23,7 @@ function getLayerSize(props: LayerState['layerProps']) {
   return { height, width, maxZoom };
 }
 
-function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }): JSX.Element {
+function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }) {
   const [viewState, setViewState] = useAtom(viewStateAtom);
   const deckRef = useRef<DeckGL>(null);
 
@@ -48,7 +48,7 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }): JSX.El
   );
 }
 
-function Viewer(): JSX.Element {
+function Viewer() {
   const layerConstructors = useAtomValue(layerAtoms);
   const layers = layerConstructors.map((l) => {
     const { Layer, layerProps, on } = l;
