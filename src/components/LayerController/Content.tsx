@@ -10,7 +10,7 @@ import AxisSliders from './AxisSliders';
 import ChannelController from './ChannelController';
 
 import { range } from '../../utils';
-import type { AtomPairs } from '../../state';
+import type { ControllerProps } from '../../state';
 
 const Details = withStyles({
   root: {
@@ -20,13 +20,13 @@ const Details = withStyles({
   },
 })(AccordionDetails);
 
-function Content({ sourceAtom, layerAtom }: AtomPairs) {
+function Content({ sourceAtom, layerAtom }: ControllerProps) {
   const layer = useAtomValue(layerAtom);
   const nChannels = layer.layerProps.loaderSelection.length;
   return (
     <Details>
       <Grid container direction="column">
-        <AcquisitionController sourceAtom={sourceAtom} />
+        <AcquisitionController sourceAtom={sourceAtom} layerAtom={layerAtom} />
         <Grid>
           <Grid container justify="space-between">
             <Grid item xs={3}>

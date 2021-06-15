@@ -50,9 +50,8 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }) {
 
 function Viewer() {
   const layerConstructors = useAtomValue(layerAtoms);
-  const layers = layerConstructors.map((l) => {
-    const { Layer, layerProps, on } = l;
-    return !Layer || !on ? null : new Layer(layerProps);
+  const layers = layerConstructors.map((layer) => {
+    return !layer.on ? null : new layer.Layer(layer.layerProps);
   });
   return <WrappedViewStateDeck layers={layers as Layer<any, any>[]} />;
 }

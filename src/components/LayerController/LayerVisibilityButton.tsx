@@ -4,10 +4,9 @@ import { useAtomValue } from 'jotai/utils';
 import type { MouseEvent } from 'react';
 import { IconButton } from '@material-ui/core';
 import { Visibility, VisibilityOff } from '@material-ui/icons';
+import type { ControllerProps } from '../../state';
 
-import type { AtomPairs } from '../../state';
-
-function LayerVisibilityButton({ sourceAtom, layerAtom }: AtomPairs) {
+function LayerVisibilityButton({ sourceAtom, layerAtom }: ControllerProps) {
   const sourceData = useAtomValue(sourceAtom);
   const [layer, setLayer] = useAtom(layerAtom);
   const toggle = (event: MouseEvent<HTMLButtonElement>) => {

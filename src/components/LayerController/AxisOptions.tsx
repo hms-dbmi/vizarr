@@ -5,7 +5,7 @@ import { useAtomValue } from 'jotai/utils';
 import { IconButton, Popover, Paper, Typography, Divider, Input } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import { MoreHoriz } from '@material-ui/icons';
-import type { AtomPairs } from '../../state';
+import type { ControllerProps } from '../../state';
 
 const DenseInput = withStyles({
   root: {
@@ -14,7 +14,12 @@ const DenseInput = withStyles({
   },
 })(Input);
 
-function AxisOptions({ sourceAtom, layerAtom, axisIndex, max }: AtomPairs & { axisIndex: number; max: number }) {
+interface Props {
+  axisIndex: number;
+  max: number;
+}
+
+function AxisOptions({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<Props>) {
   const sourceData = useAtomValue(sourceAtom);
   const [layer, setLayer] = useAtom(layerAtom);
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);

@@ -5,7 +5,7 @@ import { useAtomValue } from 'jotai/utils';
 import { IconButton, Popover, Paper, Typography, Divider, Input, NativeSelect } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import { MoreHoriz, Remove } from '@material-ui/icons';
-import type { AtomPairs } from '../../state';
+import type { ControllerProps } from '../../state';
 import ColorPalette from './ColorPalette';
 
 const DenseInput = withStyles({
@@ -15,7 +15,11 @@ const DenseInput = withStyles({
   },
 })(Input);
 
-function ChannelOptions({ sourceAtom, layerAtom, channelIndex }: AtomPairs & { channelIndex: number }) {
+interface Props {
+  channelIndex: number;
+}
+
+function ChannelOptions({ sourceAtom, layerAtom, channelIndex }: ControllerProps<Props>) {
   const sourceData = useAtomValue(sourceAtom);
   const [layer, setLayer] = useAtom(layerAtom);
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);

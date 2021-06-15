@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { Slider } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import DimensionOptions from './AxisOptions';
-import type { AtomPairs } from '../../state';
+import type { ControllerProps } from '../../state';
 
 const DenseSlider = withStyles({
   root: {
@@ -19,7 +19,12 @@ const DenseSlider = withStyles({
   },
 })(Slider);
 
-function AxisSlider({ sourceAtom, layerAtom, axisIndex, max }: AtomPairs & { axisIndex: number; max: number }) {
+interface Props {
+  axisIndex: number;
+  max: number;
+}
+
+function AxisSlider({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<Props>) {
   const [layer, setLayer] = useAtom(layerAtom);
   const sourceData = useAtomValue(sourceAtom);
   const { axis_labels } = sourceData;

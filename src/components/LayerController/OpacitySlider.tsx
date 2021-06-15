@@ -3,7 +3,7 @@ import { useAtom } from 'jotai';
 import type { ChangeEvent } from 'react';
 import { Slider } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
-import type { AtomPairs } from '../../state';
+import type { ControllerProps } from '../../state';
 
 const DenseSlider = withStyles({
   root: {
@@ -16,7 +16,7 @@ const DenseSlider = withStyles({
   },
 })(Slider);
 
-function OpacitySlider({ layerAtom }: AtomPairs) {
+function OpacitySlider({ layerAtom }: ControllerProps) {
   const [layer, setLayer] = useAtom(layerAtom);
   const handleChange = (_: ChangeEvent<unknown>, value: number | number[]) => {
     const opacity = value as number;

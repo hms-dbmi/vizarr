@@ -3,7 +3,7 @@ import { useAtomValue } from 'jotai/utils';
 import { AccordionSummary, Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import LayerVisibilityButton from './LayerVisibilityButton';
-import type { AtomPairs } from '../../state';
+import type { ControllerProps } from '../../state';
 
 const DenseAccordionSummary = withStyles({
   root: {
@@ -28,7 +28,11 @@ const DenseAccordionSummary = withStyles({
   expanded: {},
 })(AccordionSummary);
 
-function Header({ sourceAtom, layerAtom, name }: AtomPairs & { name: string }) {
+interface Props {
+  name: string;
+}
+
+function Header({ sourceAtom, layerAtom, name }: ControllerProps<Props>) {
   const sourceData = useAtomValue(sourceAtom);
   const label = `layer-controller-${sourceData.id}`;
   return (

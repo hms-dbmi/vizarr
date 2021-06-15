@@ -6,9 +6,9 @@ import { IconButton, Popover, Paper, Typography, Divider, NativeSelect } from '@
 import { Add } from '@material-ui/icons';
 
 import { hexToRGB, MAX_CHANNELS } from '../../utils';
-import type { AtomPairs } from '../../state';
+import type { ControllerProps } from '../../state';
 
-function AddChannelButton({ sourceAtom, layerAtom }: AtomPairs) {
+function AddChannelButton({ sourceAtom, layerAtom }: ControllerProps) {
   const sourceData = useAtomValue(sourceAtom);
   const [layer, setLayer] = useAtom(layerAtom);
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);

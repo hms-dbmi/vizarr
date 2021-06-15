@@ -2,9 +2,9 @@ import React from 'react';
 import { Grid, Divider } from '@material-ui/core';
 import { useAtomValue } from 'jotai/utils';
 import AxisSlider from './AxisSlider';
-import type { AtomPairs } from '../../state';
+import type { ControllerProps } from '../../state';
 
-function AxisSliders({ sourceAtom, layerAtom }: AtomPairs) {
+function AxisSliders({ sourceAtom, layerAtom }: ControllerProps) {
   const sourceData = useAtomValue(sourceAtom);
   const { axis_labels, channel_axis, loader } = sourceData;
 

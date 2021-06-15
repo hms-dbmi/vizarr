@@ -5,13 +5,13 @@ import type { ChangeEvent } from 'react';
 import { Slider, Typography, Grid, IconButton } from '@material-ui/core';
 import { RadioButtonChecked, RadioButtonUnchecked } from '@material-ui/icons';
 import ChannelOptions from './ChannelOptions';
-import type { AtomPairs } from '../../state';
+import type { ControllerProps } from '../../state';
 
 interface ChannelConfig {
   channelIndex: number;
 }
 
-function ChannelController({ sourceAtom, layerAtom, channelIndex }: AtomPairs & ChannelConfig) {
+function ChannelController({ sourceAtom, layerAtom, channelIndex }: ControllerProps<ChannelConfig>) {
   const sourceData = useAtomValue(sourceAtom);
   const [layer, setLayer] = useAtom(layerAtom);
 

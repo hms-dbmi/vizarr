@@ -5,7 +5,7 @@ import { withStyles } from '@material-ui/styles';
 
 import Header from './Header';
 import Content from './Content';
-import { AtomPairs, layerFamilyAtom } from '../../state';
+import { ControllerProps, layerFamilyAtom } from '../../state';
 
 const Accordion = withStyles({
   root: {
@@ -28,7 +28,7 @@ const Accordion = withStyles({
   },
 })(MuiAccordion);
 
-function LayerController({ sourceAtom }: Omit<AtomPairs, 'layerAtom'>) {
+function LayerController({ sourceAtom }: Omit<ControllerProps, 'layerAtom'>) {
   const sourceInfo = useAtomValue(sourceAtom);
   const layerAtom = layerFamilyAtom(sourceInfo);
   const { name = '' } = sourceInfo;

@@ -85,7 +85,7 @@ export type SourceData = {
 
 export type LayerCtr<T> = new (...args: any[]) => T;
 export type LayerState = {
-  Layer: null | LayerCtr<typeof ImageLayer | typeof MultiscaleImageLayer | GridLayer>;
+  Layer: LayerCtr<typeof ImageLayer | typeof MultiscaleImageLayer | GridLayer>;
   layerProps: VivLayerProps & {
     loader: ZarrPixelSource<string[]> | ZarrPixelSource<string[]>[];
     contrastLimits: number[][];
@@ -98,10 +98,11 @@ export type LayerState = {
 };
 
 type WithId<T> = T & { id: string };
-export interface AtomPairs {
+
+export type ControllerProps<T = {}> = {
   sourceAtom: PrimitiveAtom<WithId<SourceData>>;
   layerAtom: PrimitiveAtom<WithId<LayerState>>;
-}
+} & T;
 
 export const sourceInfoAtom = atom<WithId<SourceData>[]>([]);
 
@@ -117,6 +118,6 @@ export const layerFamilyAtom = atomFamily<WithId<SourceData>, WithId<LayerState>
 export const layerAtoms = atom((get) => {
   const atoms = get(sourceInfoAtomAtoms);
   if (atoms.length === 0) return [];
-  const layerList = atoms.map((a) => layerFamilyAtom(get(a)));
-  return get(waitForAll(layerList));
+  const layers = atoms.map((a) => layerFamilyAtom(get(a)));
+  return get(waitForAll(layers));
 });
