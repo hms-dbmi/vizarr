@@ -12,10 +12,11 @@
     "@math.gl/core/dist/esm": "./@math.gl/core/dist/esm.js",
     "deck.gl": "./deck.gl.js",
     "imjoy-rpc": "./imjoy-rpc.js",
+    "jotai": "./jotai.js",
+    "jotai/utils": "./jotai/utils.js",
     "p-map": "./p-map.js",
     "react": "./react.js",
     "react-dom": "./react-dom.js",
-    "recoil": "./recoil.js",
     "reference-spec-reader": "./reference-spec-reader.js",
     "zarr": "./zarr.js"
   }

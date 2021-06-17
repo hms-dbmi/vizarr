@@ -1,10 +1,9 @@
 import React from "../../../_snowpack/pkg/react.js";
 import {Grid, NativeSelect} from "../../../_snowpack/pkg/@material-ui/core.js";
-import {useRecoilValue} from "../../../_snowpack/pkg/recoil.js";
-import {sourceInfoState} from "../../state.js";
-function AcquisitionController({layerId}) {
-  const sourceInfo = useRecoilValue(sourceInfoState);
-  const {acquisitionId, acquisitions} = sourceInfo[layerId];
+import {useAtomValue} from "../../../_snowpack/pkg/jotai/utils.js";
+function AcquisitionController({sourceAtom}) {
+  const sourceData = useAtomValue(sourceAtom);
+  const {acquisitionId, acquisitions} = sourceData;
   if (!acquisitions) {
     return null;
   }

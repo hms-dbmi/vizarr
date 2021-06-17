@@ -1,10 +1,10 @@
 import {Grid, Typography, Divider} from "../../../_snowpack/pkg/@material-ui/core.js";
-import {useRecoilState, useRecoilValue} from "../../../_snowpack/pkg/recoil.js";
+import {useAtom} from "../../../_snowpack/pkg/jotai.js";
+import {useAtomValue} from "../../../_snowpack/pkg/jotai/utils.js";
 import React, {useState, useEffect} from "../../../_snowpack/pkg/react.js";
 import {Slider} from "../../../_snowpack/pkg/@material-ui/core.js";
 import {withStyles} from "../../../_snowpack/pkg/@material-ui/styles.js";
 import DimensionOptions from "./AxisOptions.js";
-import {layerStateFamily, sourceInfoState} from "../../state.js";
 const DenseSlider = withStyles({
   root: {
     color: "white",
@@ -15,10 +15,10 @@ const DenseSlider = withStyles({
     boxshadow: "0px 0px 0px 8px rgba(158, 158, 158, 0.16)"
   }
 })(Slider);
-function AxisSlider({layerId, axisIndex, max}) {
-  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
-  const sourceInfo = useRecoilValue(sourceInfoState);
-  const {axis_labels} = sourceInfo[layerId];
+function AxisSlider({sourceAtom, layerAtom, axisIndex, max}) {
+  const [layer, setLayer] = useAtom(layerAtom);
+  const sourceData = useAtomValue(sourceAtom);
+  const {axis_labels} = sourceData;
   let axisLabel = axis_labels[axisIndex];
   if (axisLabel === "t" || axisLabel === "z") {
     axisLabel = axisLabel.toUpperCase();
@@ -56,7 +56,8 @@ function AxisSlider({layerId, axisIndex, max}) {
     item: true,
     xs: 1
   }, /* @__PURE__ */ React.createElement(DimensionOptions, {
-    layerId,
+    sourceAtom,
+    layerAtom,
     axisIndex,
     max
   }))), /* @__PURE__ */ React.createElement(Grid, {

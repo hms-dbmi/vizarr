@@ -1,8 +1,9 @@
 import React, {useRef} from "../../_snowpack/pkg/react.js";
-import {useRecoilState, useRecoilValue} from "../../_snowpack/pkg/recoil.js";
+import {useAtom} from "../../_snowpack/pkg/jotai.js";
+import {useAtomValue} from "../../_snowpack/pkg/jotai/utils.js";
 import DeckGL from "../../_snowpack/pkg/deck.gl.js";
 import {OrthographicView} from "../../_snowpack/pkg/@deck.gl/core.js";
-import {viewerViewState, layersSelector} from "../state.js";
+import {layerAtoms, viewStateAtom} from "../state.js";
 import {isInterleaved, fitBounds} from "../utils.js";
 function getLayerSize(props) {
   const {loader, rows, columns} = props;
@@ -17,9 +18,8 @@ function getLayerSize(props) {
   return {height, width, maxZoom};
 }
 function WrappedViewStateDeck({layers}) {
-  const [viewState, setViewState] = useRecoilState(viewerViewState);
+  const [viewState, setViewState] = useAtom(viewStateAtom);
   const deckRef = useRef(null);
-  const views = [new OrthographicView({id: "ortho", controller: true})];
   if (deckRef.current && viewState?.default && layers[0]?.props?.loader) {
     const {deck} = deckRef.current;
     const {width, height, maxZoom} = getLayerSize(layers[0].props);
@@ -32,14 +32,13 @@ function WrappedViewStateDeck({layers}) {
     layers,
     viewState,
     onViewStateChange: (e) => setViewState(e.viewState),
-    views
+    views: [new OrthographicView({id: "ortho", controller: true})]
   });
 }
 function Viewer() {
-  const layerConstructors = useRecoilValue(layersSelector);
-  const layers = layerConstructors.map((l) => {
-    const {Layer, layerProps, on} = l;
-    return !Layer || !on ? null : new Layer(layerProps);
+  const layerConstructors = useAtomValue(layerAtoms);
+  const layers = layerConstructors.map((layer) => {
+    return !layer.on ? null : new layer.Layer(layer.layerProps);
   });
   return /* @__PURE__ */ React.createElement(WrappedViewStateDeck, {
     layers

@@ -1,12 +1,12 @@
 import React from "../../../_snowpack/pkg/react.js";
-import {useRecoilState, useRecoilValue} from "../../../_snowpack/pkg/recoil.js";
+import {useAtom} from "../../../_snowpack/pkg/jotai.js";
+import {useAtomValue} from "../../../_snowpack/pkg/jotai/utils.js";
 import {Slider, Typography, Grid, IconButton} from "../../../_snowpack/pkg/@material-ui/core.js";
 import {RadioButtonChecked, RadioButtonUnchecked} from "../../../_snowpack/pkg/@material-ui/icons.js";
 import ChannelOptions from "./ChannelOptions.js";
-import {layerStateFamily, sourceInfoState} from "../../state.js";
-function ChannelController({layerId, channelIndex}) {
-  const sourceInfo = useRecoilValue(sourceInfoState);
-  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
+function ChannelController({sourceAtom, layerAtom, channelIndex}) {
+  const sourceData = useAtomValue(sourceAtom);
+  const [layer, setLayer] = useAtom(layerAtom);
   const handleContrastChange = (_, v) => {
     setLayer((prev) => {
       const sliderValues2 = [...prev.layerProps.sliderValues];
@@ -26,7 +26,7 @@ function ChannelController({layerId, channelIndex}) {
   const color = `rgb(${colormap ? [255, 255, 255] : colorValues[channelIndex]})`;
   const on = channelIsOn[channelIndex];
   const [min, max] = contrastLimits[channelIndex];
-  const {channel_axis, names} = sourceInfo[layerId];
+  const {channel_axis, names} = sourceData;
   const selection = loaderSelection[channelIndex];
   const nameIndex = Number.isInteger(channel_axis) ? selection[channel_axis] : 0;
   const label = names[nameIndex];
@@ -46,7 +46,8 @@ function ChannelController({layerId, channelIndex}) {
     item: true,
     xs: 1
   }, /* @__PURE__ */ React.createElement(ChannelOptions, {
-    layerId,
+    sourceAtom,
+    layerAtom,
     channelIndex
   }))), /* @__PURE__ */ React.createElement(Grid, {
     container: true,

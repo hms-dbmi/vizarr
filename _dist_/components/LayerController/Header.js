@@ -1,4 +1,5 @@
 import React from "../../../_snowpack/pkg/react.js";
+import {useAtomValue} from "../../../_snowpack/pkg/jotai/utils.js";
 import {AccordionSummary, Typography} from "../../../_snowpack/pkg/@material-ui/core.js";
 import {withStyles} from "../../../_snowpack/pkg/@material-ui/styles.js";
 import LayerVisibilityButton from "./LayerVisibilityButton.js";
@@ -24,15 +25,17 @@ const DenseAccordionSummary = withStyles({
   },
   expanded: {}
 })(AccordionSummary);
-function Header({layerId, name}) {
-  const label = `layer-controller-${layerId}`;
+function Header({sourceAtom, layerAtom, name}) {
+  const sourceData = useAtomValue(sourceAtom);
+  const label = `layer-controller-${sourceData.id}`;
   return /* @__PURE__ */ React.createElement(DenseAccordionSummary, {
     "aria-controls": label,
     id: label
   }, /* @__PURE__ */ React.createElement("div", {
     style: {display: "flex", flexDirection: "row"}
   }, /* @__PURE__ */ React.createElement(LayerVisibilityButton, {
-    layerId
+    sourceAtom,
+    layerAtom
   }), /* @__PURE__ */ React.createElement(Typography, {
     style: {
       marginTop: "4px",

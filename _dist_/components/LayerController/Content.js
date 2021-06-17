@@ -1,4 +1,5 @@
 import React from "../../../_snowpack/pkg/react.js";
+import {useAtomValue} from "../../../_snowpack/pkg/jotai/utils.js";
 import {AccordionDetails, Grid, Typography, Divider} from "../../../_snowpack/pkg/@material-ui/core.js";
 import {withStyles} from "../../../_snowpack/pkg/@material-ui/styles.js";
 import AcquisitionController from "./AcquisitionController.js";
@@ -14,12 +15,15 @@ const Details = withStyles({
     borderRight: "1px solid rgba(150, 150, 150, .2)"
   }
 })(AccordionDetails);
-function Content({layerId, nChannels}) {
+function Content({sourceAtom, layerAtom}) {
+  const layer = useAtomValue(layerAtom);
+  const nChannels = layer.layerProps.loaderSelection.length;
   return /* @__PURE__ */ React.createElement(Details, null, /* @__PURE__ */ React.createElement(Grid, {
     container: true,
     direction: "column"
   }, /* @__PURE__ */ React.createElement(AcquisitionController, {
-    layerId
+    sourceAtom,
+    layerAtom
   }), /* @__PURE__ */ React.createElement(Grid, null, /* @__PURE__ */ React.createElement(Grid, {
     container: true,
     justify: "space-between"
@@ -32,9 +36,11 @@ function Content({layerId, nChannels}) {
     item: true,
     xs: 8
   }, /* @__PURE__ */ React.createElement(OpacitySlider, {
-    layerId
+    sourceAtom,
+    layerAtom
   })))), /* @__PURE__ */ React.createElement(Divider, null), /* @__PURE__ */ React.createElement(AxisSliders, {
-    layerId
+    sourceAtom,
+    layerAtom
   }), /* @__PURE__ */ React.createElement(Grid, {
     container: true,
     justify: "space-between"
@@ -47,11 +53,13 @@ function Content({layerId, nChannels}) {
     item: true,
     xs: 1
   }, /* @__PURE__ */ React.createElement(AddChannelButton, {
-    layerId
+    sourceAtom,
+    layerAtom
   }))), /* @__PURE__ */ React.createElement(Divider, null), /* @__PURE__ */ React.createElement(Grid, null, range(nChannels).map((i) => /* @__PURE__ */ React.createElement(ChannelController, {
-    layerId,
+    sourceAtom,
+    layerAtom,
     channelIndex: i,
-    key: i + layerId
+    key: i
   })))));
 }
 export default Content;

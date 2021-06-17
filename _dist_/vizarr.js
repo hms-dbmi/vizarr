@@ -1,14 +1,13 @@
 import * as __SNOWPACK_ENV__ from '../_snowpack/env.js';
 
 import React, {useEffect} from "../_snowpack/pkg/react.js";
-import {useSetRecoilState} from "../_snowpack/pkg/recoil.js";
-import {layerIdsState, sourceInfoState, viewerViewState} from "./state.js";
+import {useUpdateAtom} from "../_snowpack/pkg/jotai/utils.js";
+import {sourceInfoAtom, viewStateAtom} from "./state.js";
 import Viewer from "./components/Viewer.js";
 import Menu from "./components/Menu.js";
 function App() {
-  const setViewState = useSetRecoilState(viewerViewState);
-  const setLayerIds = useSetRecoilState(layerIdsState);
-  const setSourceInfo = useSetRecoilState(sourceInfoState);
+  const setSourceInfo = useUpdateAtom(sourceInfoAtom);
+  const setViewState = useUpdateAtom(viewStateAtom);
   async function addImage(config) {
     const {createSourceData} = await import("./io.js");
     const id = Math.random().toString(36).slice(2);
@@ -17,9 +16,8 @@ function App() {
       if (!sourceData.name) {
         sourceData.name = `image_${Object.keys(prevSourceInfo).length}`;
       }
-      return {...prevSourceInfo, [id]: sourceData};
+      return [...prevSourceInfo, {id, ...sourceData}];
     });
-    setLayerIds((prevIds) => [...prevIds, id]);
   }
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

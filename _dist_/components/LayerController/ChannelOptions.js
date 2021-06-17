@@ -1,9 +1,9 @@
 import React, {useState} from "../../../_snowpack/pkg/react.js";
-import {useRecoilState, useRecoilValue} from "../../../_snowpack/pkg/recoil.js";
+import {useAtom} from "../../../_snowpack/pkg/jotai.js";
+import {useAtomValue} from "../../../_snowpack/pkg/jotai/utils.js";
 import {IconButton, Popover, Paper, Typography, Divider, Input, NativeSelect} from "../../../_snowpack/pkg/@material-ui/core.js";
 import {withStyles} from "../../../_snowpack/pkg/@material-ui/styles.js";
 import {MoreHoriz, Remove} from "../../../_snowpack/pkg/@material-ui/icons.js";
-import {layerStateFamily, sourceInfoState} from "../../state.js";
 import ColorPalette from "./ColorPalette.js";
 const DenseInput = withStyles({
   root: {
@@ -11,11 +11,11 @@ const DenseInput = withStyles({
     fontSize: "0.7em"
   }
 })(Input);
-function ChannelOptions({layerId, channelIndex}) {
-  const sourceInfo = useRecoilValue(sourceInfoState);
-  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
+function ChannelOptions({sourceAtom, layerAtom, channelIndex}) {
+  const sourceData = useAtomValue(sourceAtom);
+  const [layer, setLayer] = useAtom(layerAtom);
   const [anchorEl, setAnchorEl] = useState(null);
-  const {channel_axis, names} = sourceInfo[layerId];
+  const {channel_axis, names} = sourceData;
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -89,7 +89,7 @@ function ChannelOptions({layerId, channelIndex}) {
     });
   };
   const open = Boolean(anchorEl);
-  const id = open ? `channel-${channelIndex}-${layerId}-options` : void 0;
+  const id = open ? `channel-${channelIndex}-${sourceData.name}-options` : void 0;
   const [min, max] = layer.layerProps.contrastLimits[channelIndex];
   return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(IconButton, {
     onClick: handleClick,
@@ -126,7 +126,7 @@ function ChannelOptions({layerId, channelIndex}) {
   }, "selection:"), /* @__PURE__ */ React.createElement(Divider, null), /* @__PURE__ */ React.createElement(NativeSelect, {
     fullWidth: true,
     style: {fontSize: "0.7em"},
-    id: `layer-${layerId}-channel-select`,
+    id: `layer-${sourceData.name}-channel-select`,
     onChange: handleSelectionChange,
     value: layer.layerProps.loaderSelection[channelIndex][channel_axis]
   }, names.map((name, i) => /* @__PURE__ */ React.createElement("option", {

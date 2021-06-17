@@ -153,7 +153,7 @@ export async function createSourceData(config) {
   }
   throw Error("Failed to load image.");
 }
-export function initLayerStateFromSource(sourceData, layerId) {
+export function initLayerStateFromSource(sourceData) {
   const {
     loader,
     channel_axis,
@@ -193,7 +193,6 @@ export function initLayerStateFromSource(sourceData, layerId) {
   return {
     Layer,
     layerProps: {
-      id: layerId,
       loader: loader.length === 1 ? loader[0] : loader,
       loaders,
       rows,

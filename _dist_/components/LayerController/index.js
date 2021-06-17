@@ -1,10 +1,10 @@
-import React, {useEffect} from "../../../_snowpack/pkg/react.js";
-import {useRecoilValue, useRecoilState} from "../../../_snowpack/pkg/recoil.js";
+import React from "../../../_snowpack/pkg/react.js";
+import {useAtomValue} from "../../../_snowpack/pkg/jotai/utils.js";
 import MuiAccordion from "../../../_snowpack/pkg/@material-ui/core/Accordion.js";
 import {withStyles} from "../../../_snowpack/pkg/@material-ui/styles.js";
-import {sourceInfoState, layerStateFamily} from "../../state.js";
 import Header from "./Header.js";
 import Content from "./Content.js";
+import {layerFamilyAtom} from "../../state.js";
 const Accordion = withStyles({
   root: {
     borderBottom: "1px solid rgba(150, 150, 150, .2)",
@@ -25,30 +25,19 @@ const Accordion = withStyles({
     padding: 1
   }
 })(MuiAccordion);
-function LayerController({layerId}) {
-  const sourceInfo = useRecoilValue(sourceInfoState);
-  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
-  useEffect(() => {
-    async function initLayer(sourceData) {
-      const {initLayerStateFromSource} = await import("../../io.js");
-      const initialLayerState = await initLayerStateFromSource(sourceData, layerId);
-      setLayer(initialLayerState);
-    }
-    if (layerId in sourceInfo) {
-      const config = sourceInfo[layerId];
-      initLayer(config);
-    }
-  }, [sourceInfo]);
-  const {name = ""} = sourceInfo[layerId];
-  const nChannels = layer.layerProps.loaderSelection.length;
+function LayerController({sourceAtom}) {
+  const sourceInfo = useAtomValue(sourceAtom);
+  const layerAtom = layerFamilyAtom(sourceInfo);
+  const {name = ""} = sourceInfo;
   return /* @__PURE__ */ React.createElement(Accordion, {
     defaultExpanded: true
   }, /* @__PURE__ */ React.createElement(Header, {
-    layerId,
+    sourceAtom,
+    layerAtom,
     name
   }), /* @__PURE__ */ React.createElement(Content, {
-    layerId,
-    nChannels
+    sourceAtom,
+    layerAtom
   }));
 }
 export default LayerController;

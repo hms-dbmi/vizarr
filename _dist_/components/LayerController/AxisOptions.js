@@ -1,17 +1,18 @@
 import React, {useState} from "../../../_snowpack/pkg/react.js";
-import {useRecoilState} from "../../../_snowpack/pkg/recoil.js";
+import {useAtom} from "../../../_snowpack/pkg/jotai.js";
+import {useAtomValue} from "../../../_snowpack/pkg/jotai/utils.js";
 import {IconButton, Popover, Paper, Typography, Divider, Input} from "../../../_snowpack/pkg/@material-ui/core.js";
 import {withStyles} from "../../../_snowpack/pkg/@material-ui/styles.js";
 import {MoreHoriz} from "../../../_snowpack/pkg/@material-ui/icons.js";
-import {layerStateFamily} from "../../state.js";
 const DenseInput = withStyles({
   root: {
     width: "5.5em",
     fontSize: "0.7em"
   }
 })(Input);
-function AxisOptions({layerId, axisIndex, max}) {
-  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
+function AxisOptions({sourceAtom, layerAtom, axisIndex, max}) {
+  const sourceData = useAtomValue(sourceAtom);
+  const [layer, setLayer] = useAtom(layerAtom);
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -36,7 +37,7 @@ function AxisOptions({layerId, axisIndex, max}) {
     });
   };
   const open = Boolean(anchorEl);
-  const id = open ? `${axisIndex}-index-${layerId}-options` : void 0;
+  const id = open ? `${axisIndex}-index-${sourceData.id}-options` : void 0;
   const value = layer.layerProps.loaderSelection[0] ? layer.layerProps.loaderSelection[0][axisIndex] : 1;
   return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(IconButton, {
     onClick: handleClick,

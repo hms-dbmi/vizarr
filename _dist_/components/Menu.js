@@ -1,9 +1,9 @@
 import React, {useReducer} from "../../_snowpack/pkg/react.js";
-import {useRecoilValue} from "../../_snowpack/pkg/recoil.js";
+import {useAtomValue} from "../../_snowpack/pkg/jotai/utils.js";
 import {Grid, IconButton} from "../../_snowpack/pkg/@material-ui/core.js";
 import {Add, Remove} from "../../_snowpack/pkg/@material-ui/icons.js";
 import {makeStyles} from "../../_snowpack/pkg/@material-ui/styles.js";
-import {layerIdsState} from "../state.js";
+import {sourceInfoAtomAtoms} from "../state.js";
 import LayerController from "./LayerController/index.js";
 const useStyles = makeStyles({
   root: {
@@ -27,7 +27,7 @@ const useStyles = makeStyles({
   }
 });
 function Menu() {
-  const layerIds = useRecoilValue(layerIdsState);
+  const sourceAtoms = useAtomValue(sourceInfoAtomAtoms);
   const [hidden, toggle] = useReducer((v) => !v, false);
   const classes = useStyles();
   return /* @__PURE__ */ React.createElement("div", {
@@ -46,9 +46,9 @@ function Menu() {
   }, hidden ? /* @__PURE__ */ React.createElement(Add, null) : /* @__PURE__ */ React.createElement(Remove, null)), /* @__PURE__ */ React.createElement("div", {
     className: classes.scroll,
     style: {display: hidden ? "none" : "flex"}
-  }, layerIds.map((id) => /* @__PURE__ */ React.createElement(LayerController, {
-    layerId: id,
-    key: id
+  }, sourceAtoms.map((sourceAtom) => /* @__PURE__ */ React.createElement(LayerController, {
+    key: `${sourceAtom}`,
+    sourceAtom
   })))));
 }
 export default Menu;
