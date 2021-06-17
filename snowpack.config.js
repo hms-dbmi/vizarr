@@ -1,9 +1,9 @@
-/** @type {import("snowpack").SnowpackUserConfig } */
 const pkg = require('./package.json');
 
 // pkg version avaiable in app via import.meta.env.SNOWPACK_PUBLIC_PACKAGE_VERSION
 process.env.SNOWPACK_PUBLIC_PACKAGE_VERSION = pkg.version;
 
+/** @type {import("snowpack").SnowpackUserConfig } */
 module.exports = {
   mount: {
     public: '/',
