@@ -1,13 +1,11 @@
-import React, { useEffect } from 'react';
-import { useRecoilValue, useRecoilState } from 'recoil';
+import React from 'react';
+import { useAtomValue } from 'jotai/utils';
 import MuiAccordion from '@material-ui/core/Accordion';
 import { withStyles } from '@material-ui/styles';
 
-import { sourceInfoState, layerStateFamily } from '../../state';
-import type { SourceData } from '../../state';
-
 import Header from './Header';
 import Content from './Content';
+import { ControllerProps, layerFamilyAtom } from '../../state';
 
 const Accordion = withStyles({
   root: {
@@ -30,29 +28,14 @@ const Accordion = withStyles({
   },
 })(MuiAccordion);
 
-function LayerController({ layerId }: { layerId: string }): JSX.Element {
-  const sourceInfo = useRecoilValue(sourceInfoState);
-  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
-
-  useEffect(() => {
-    async function initLayer(sourceData: SourceData) {
-      const { initLayerStateFromSource } = await import('../../io');
-      const initialLayerState = await initLayerStateFromSource(sourceData, layerId);
-      setLayer(initialLayerState);
-    }
-    // Loader only defined once layer state is initialized.
-    if (layerId in sourceInfo) {
-      const config = sourceInfo[layerId];
-      initLayer(config);
-    }
-  }, [sourceInfo]);
-
-  const { name = '' } = sourceInfo[layerId];
-  const nChannels = layer.layerProps.loaderSelection.length;
+function LayerController({ sourceAtom }: Omit<ControllerProps, 'layerAtom'>) {
+  const sourceInfo = useAtomValue(sourceAtom);
+  const layerAtom = layerFamilyAtom(sourceInfo);
+  const { name = '' } = sourceInfo;
   return (
     <Accordion defaultExpanded>
-      <Header layerId={layerId} name={name} />
-      <Content layerId={layerId} nChannels={nChannels} />
+      <Header sourceAtom={sourceAtom} layerAtom={layerAtom} name={name} />
+      <Content sourceAtom={sourceAtom} layerAtom={layerAtom} />
     </Accordion>
   );
 }

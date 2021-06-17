@@ -1,12 +1,12 @@
 import React from 'react';
 import { Grid, Divider } from '@material-ui/core';
-import { useRecoilValue } from 'recoil';
+import { useAtomValue } from 'jotai/utils';
 import AxisSlider from './AxisSlider';
-import { sourceInfoState } from '../../state';
+import type { ControllerProps } from '../../state';
 
-function AxisSliders({ layerId }: { layerId: string }): JSX.Element | null {
-  const sourceInfo = useRecoilValue(sourceInfoState);
-  const { axis_labels, channel_axis, loader } = sourceInfo[layerId];
+function AxisSliders({ sourceAtom, layerAtom }: ControllerProps) {
+  const sourceData = useAtomValue(sourceAtom);
+  const { axis_labels, channel_axis, loader } = sourceData;
 
   const sliders = axis_labels
     .slice(0, -2) // ignore last two axes, [y,x]
@@ -16,7 +16,9 @@ function AxisSliders({ layerId }: { layerId: string }): JSX.Element | null {
       if (d[2] > 1) return true; // keep if size > 1
       return false; // otherwise ignore as well
     })
-    .map(([name, i, size]) => <AxisSlider key={name} layerId={layerId} axisIndex={i} max={size - 1} />);
+    .map(([name, i, size]) => (
+      <AxisSlider key={name} sourceAtom={sourceAtom} layerAtom={layerAtom} axisIndex={i} max={size - 1} />
+    ));
 
   if (sliders.length === 0) return null;
   return (

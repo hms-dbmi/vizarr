@@ -1,10 +1,10 @@
 import React, { useReducer } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useAtomValue } from 'jotai/utils';
 import { Grid, IconButton } from '@material-ui/core';
 import { Add, Remove } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
 
-import { layerIdsState } from '../state';
+import { sourceInfoAtomAtoms } from '../state';
 import LayerController from './LayerController';
 
 const useStyles = makeStyles({
@@ -29,8 +29,8 @@ const useStyles = makeStyles({
   },
 });
 
-function Menu(): JSX.Element {
-  const layerIds = useRecoilValue(layerIdsState);
+function Menu() {
+  const sourceAtoms = useAtomValue(sourceInfoAtomAtoms);
   const [hidden, toggle] = useReducer((v) => !v, false);
   const classes = useStyles();
   return (
@@ -46,8 +46,8 @@ function Menu(): JSX.Element {
           {hidden ? <Add /> : <Remove />}
         </IconButton>
         <div className={classes.scroll} style={{ display: hidden ? 'none' : 'flex' }}>
-          {layerIds.map((id) => (
-            <LayerController layerId={id} key={id} />
+          {sourceAtoms.map((sourceAtom) => (
+            <LayerController key={`${sourceAtom}`} sourceAtom={sourceAtom} />
           ))}
         </div>
       </Grid>

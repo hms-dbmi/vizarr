@@ -1,20 +1,19 @@
 import React from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import type { ChangeEvent } from 'react';
 import { Slider, Typography, Grid, IconButton } from '@material-ui/core';
 import { RadioButtonChecked, RadioButtonUnchecked } from '@material-ui/icons';
-
 import ChannelOptions from './ChannelOptions';
-import { layerStateFamily, sourceInfoState } from '../../state';
+import type { ControllerProps } from '../../state';
 
 interface ChannelConfig {
-  layerId: string;
   channelIndex: number;
 }
 
-function ChannelController({ layerId, channelIndex }: ChannelConfig): JSX.Element {
-  const sourceInfo = useRecoilValue(sourceInfoState);
-  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
+function ChannelController({ sourceAtom, layerAtom, channelIndex }: ControllerProps<ChannelConfig>) {
+  const sourceData = useAtomValue(sourceAtom);
+  const [layer, setLayer] = useAtom(layerAtom);
 
   const handleContrastChange = (_: ChangeEvent<unknown>, v: number | number[]) => {
     setLayer((prev) => {
@@ -40,7 +39,7 @@ function ChannelController({ layerId, channelIndex }: ChannelConfig): JSX.Elemen
   const on = channelIsOn[channelIndex];
   const [min, max] = contrastLimits[channelIndex];
 
-  const { channel_axis, names } = sourceInfo[layerId];
+  const { channel_axis, names } = sourceData;
   const selection = loaderSelection[channelIndex];
   const nameIndex = Number.isInteger(channel_axis) ? selection[channel_axis as number] : 0;
   const label = names[nameIndex];
@@ -55,7 +54,7 @@ function ChannelController({ layerId, channelIndex }: ChannelConfig): JSX.Elemen
           </div>
         </Grid>
         <Grid item xs={1}>
-          <ChannelOptions layerId={layerId} channelIndex={channelIndex} />
+          <ChannelOptions sourceAtom={sourceAtom} layerAtom={layerAtom} channelIndex={channelIndex} />
         </Grid>
       </Grid>
       <Grid container justify="space-between">

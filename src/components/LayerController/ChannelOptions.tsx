@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import type { MouseEvent, ChangeEvent } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import { IconButton, Popover, Paper, Typography, Divider, Input, NativeSelect } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import { MoreHoriz, Remove } from '@material-ui/icons';
-
-import { layerStateFamily, sourceInfoState } from '../../state';
+import type { ControllerProps } from '../../state';
 import ColorPalette from './ColorPalette';
 
 const DenseInput = withStyles({
@@ -15,11 +15,15 @@ const DenseInput = withStyles({
   },
 })(Input);
 
-function ChannelOptions({ layerId, channelIndex }: { layerId: string; channelIndex: number }): JSX.Element {
-  const sourceInfo = useRecoilValue(sourceInfoState);
-  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
+interface Props {
+  channelIndex: number;
+}
+
+function ChannelOptions({ sourceAtom, layerAtom, channelIndex }: ControllerProps<Props>) {
+  const sourceData = useAtomValue(sourceAtom);
+  const [layer, setLayer] = useAtom(layerAtom);
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);
-  const { channel_axis, names } = sourceInfo[layerId];
+  const { channel_axis, names } = sourceData;
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -109,7 +113,7 @@ function ChannelOptions({ layerId, channelIndex }: { layerId: string; channelInd
   };
 
   const open = Boolean(anchorEl);
-  const id = open ? `channel-${channelIndex}-${layerId}-options` : undefined;
+  const id = open ? `channel-${channelIndex}-${sourceData.name}-options` : undefined;
   const [min, max] = layer.layerProps.contrastLimits[channelIndex];
 
   return (
@@ -153,7 +157,7 @@ function ChannelOptions({ layerId, channelIndex }: { layerId: string; channelInd
           <NativeSelect
             fullWidth
             style={{ fontSize: '0.7em' }}
-            id={`layer-${layerId}-channel-select`}
+            id={`layer-${sourceData.name}-channel-select`}
             onChange={handleSelectionChange}
             value={layer.layerProps.loaderSelection[channelIndex][channel_axis as number]}
           >

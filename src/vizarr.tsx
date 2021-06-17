@@ -1,16 +1,15 @@
 import React, { useEffect } from 'react';
-import { useSetRecoilState } from 'recoil';
+import { useUpdateAtom } from 'jotai/utils';
 
-import { layerIdsState, sourceInfoState, viewerViewState } from './state';
+import { sourceInfoAtom, viewStateAtom } from './state';
 import type { ImageLayerConfig } from './state';
 
 import Viewer from './components/Viewer';
 import Menu from './components/Menu';
 
 function App() {
-  const setViewState = useSetRecoilState(viewerViewState);
-  const setLayerIds = useSetRecoilState(layerIdsState);
-  const setSourceInfo = useSetRecoilState(sourceInfoState);
+  const setSourceInfo = useUpdateAtom(sourceInfoAtom);
+  const setViewState = useUpdateAtom(viewStateAtom);
 
   async function addImage(config: ImageLayerConfig) {
     const { createSourceData } = await import('./io');
@@ -20,9 +19,8 @@ function App() {
       if (!sourceData.name) {
         sourceData.name = `image_${Object.keys(prevSourceInfo).length}`;
       }
-      return { ...prevSourceInfo, [id]: sourceData };
+      return [...prevSourceInfo, { id, ...sourceData }];
     });
-    setLayerIds((prevIds) => [...prevIds, id]);
   }
 
   useEffect(() => {

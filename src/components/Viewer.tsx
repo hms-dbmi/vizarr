@@ -1,10 +1,11 @@
 import React, { useRef } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import DeckGL from 'deck.gl';
 import { OrthographicView } from '@deck.gl/core';
 import type { Layer } from '@deck.gl/core';
 
-import { viewerViewState, layersSelector, LayerState } from '../state';
+import { layerAtoms, LayerState, viewStateAtom } from '../state';
 import { isInterleaved, fitBounds } from '../utils';
 
 function getLayerSize(props: LayerState['layerProps']) {
@@ -22,10 +23,9 @@ function getLayerSize(props: LayerState['layerProps']) {
   return { height, width, maxZoom };
 }
 
-function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }): JSX.Element {
-  const [viewState, setViewState] = useRecoilState(viewerViewState);
+function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }) {
+  const [viewState, setViewState] = useAtom(viewStateAtom);
   const deckRef = useRef<DeckGL>(null);
-  const views = [new OrthographicView({ id: 'ortho', controller: true })];
 
   // If viewState hasn't been updated, use the first loader to guess viewState
   // TODO: There is probably a better place / way to set the intital view and this is a hack.
@@ -43,19 +43,17 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }): JSX.El
       layers={layers}
       viewState={viewState}
       onViewStateChange={(e) => setViewState(e.viewState)}
-      views={views}
+      views={[new OrthographicView({ id: 'ortho', controller: true })]}
     />
   );
 }
 
-function Viewer(): JSX.Element {
-  const layerConstructors = useRecoilValue(layersSelector);
-  const layers = layerConstructors.map((l) => {
-    // Something weird with Recoil Loadable here. Need to cast to any.
-    const { Layer, layerProps, on } = l as any;
-    return !Layer || !on ? null : new Layer(layerProps);
+function Viewer() {
+  const layerConstructors = useAtomValue(layerAtoms);
+  const layers = layerConstructors.map((layer) => {
+    return !layer.on ? null : new layer.Layer(layer.layerProps);
   });
-  return <WrappedViewStateDeck layers={layers} />;
+  return <WrappedViewStateDeck layers={layers as Layer<any, any>[]} />;
 }
 
 export default Viewer;

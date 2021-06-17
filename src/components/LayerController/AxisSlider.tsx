@@ -1,12 +1,12 @@
 import { Grid, Typography, Divider } from '@material-ui/core';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import type { ChangeEvent } from 'react';
 import React, { useState, useEffect } from 'react';
 import { Slider } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import DimensionOptions from './AxisOptions';
-
-import { layerStateFamily, sourceInfoState } from '../../state';
+import type { ControllerProps } from '../../state';
 
 const DenseSlider = withStyles({
   root: {
@@ -19,10 +19,15 @@ const DenseSlider = withStyles({
   },
 })(Slider);
 
-function AxisSlider({ layerId, axisIndex, max }: { layerId: string; axisIndex: number; max: number }): JSX.Element {
-  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
-  const sourceInfo = useRecoilValue(sourceInfoState);
-  const { axis_labels } = sourceInfo[layerId];
+interface Props {
+  axisIndex: number;
+  max: number;
+}
+
+function AxisSlider({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<Props>) {
+  const [layer, setLayer] = useAtom(layerAtom);
+  const sourceData = useAtomValue(sourceAtom);
+  const { axis_labels } = sourceData;
   let axisLabel = axis_labels[axisIndex];
   if (axisLabel === 't' || axisLabel === 'z') {
     axisLabel = axisLabel.toUpperCase();
@@ -65,7 +70,7 @@ function AxisSlider({ layerId, axisIndex, max }: { layerId: string; axisIndex: n
             </div>
           </Grid>
           <Grid item xs={1}>
-            <DimensionOptions layerId={layerId} axisIndex={axisIndex} max={max} />
+            <DimensionOptions sourceAtom={sourceAtom} layerAtom={layerAtom} axisIndex={axisIndex} max={max} />
           </Grid>
         </Grid>
         <Grid container justify="space-between">

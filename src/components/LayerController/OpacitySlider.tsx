@@ -1,10 +1,9 @@
 import React from 'react';
-import { useRecoilState } from 'recoil';
+import { useAtom } from 'jotai';
 import type { ChangeEvent } from 'react';
 import { Slider } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
-
-import { layerStateFamily } from '../../state';
+import type { ControllerProps } from '../../state';
 
 const DenseSlider = withStyles({
   root: {
@@ -17,8 +16,8 @@ const DenseSlider = withStyles({
   },
 })(Slider);
 
-function OpacitySlider({ layerId }: { layerId: string }): JSX.Element {
-  const [layer, setLayer] = useRecoilState(layerStateFamily(layerId));
+function OpacitySlider({ layerAtom }: ControllerProps) {
+  const [layer, setLayer] = useAtom(layerAtom);
   const handleChange = (_: ChangeEvent<unknown>, value: number | number[]) => {
     const opacity = value as number;
     setLayer((prev) => ({ ...prev, layerProps: { ...prev.layerProps, opacity } }));

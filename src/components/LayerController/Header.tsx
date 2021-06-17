@@ -1,7 +1,9 @@
 import React from 'react';
+import { useAtomValue } from 'jotai/utils';
 import { AccordionSummary, Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import LayerVisibilityButton from './LayerVisibilityButton';
+import type { ControllerProps } from '../../state';
 
 const DenseAccordionSummary = withStyles({
   root: {
@@ -26,12 +28,17 @@ const DenseAccordionSummary = withStyles({
   expanded: {},
 })(AccordionSummary);
 
-function Header({ layerId, name }: { layerId: string; name: string }): JSX.Element {
-  const label = `layer-controller-${layerId}`;
+interface Props {
+  name: string;
+}
+
+function Header({ sourceAtom, layerAtom, name }: ControllerProps<Props>) {
+  const sourceData = useAtomValue(sourceAtom);
+  const label = `layer-controller-${sourceData.id}`;
   return (
     <DenseAccordionSummary aria-controls={label} id={label}>
       <div style={{ display: 'flex', flexDirection: 'row' }}>
-        <LayerVisibilityButton layerId={layerId} />
+        <LayerVisibilityButton sourceAtom={sourceAtom} layerAtom={layerAtom} />
         <Typography
           style={{
             marginTop: '4px',

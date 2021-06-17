@@ -1,13 +1,12 @@
 import React from 'react';
 import { Grid, NativeSelect } from '@material-ui/core';
-import { useRecoilValue } from 'recoil';
+import { useAtomValue } from 'jotai/utils';
 import type { ChangeEvent } from 'react';
+import type { ControllerProps } from '../../state';
 
-import { sourceInfoState } from '../../state';
-
-function AcquisitionController({ layerId }: { layerId: string }): JSX.Element | null {
-  const sourceInfo = useRecoilValue(sourceInfoState);
-  const { acquisitionId, acquisitions } = sourceInfo[layerId];
+function AcquisitionController({ sourceAtom }: ControllerProps) {
+  const sourceData = useAtomValue(sourceAtom);
+  const { acquisitionId, acquisitions } = sourceData;
 
   if (!acquisitions) {
     return null;
