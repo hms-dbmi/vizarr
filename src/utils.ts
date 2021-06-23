@@ -24,7 +24,7 @@ async function normalizeStore(source: string | ZarrArray['store']) {
       const { ReferenceStore } = await import('reference-spec-reader');
       return ReferenceStore.fromJSON(await fetch(source).then((res) => res.json()));
     }
-    return new HTTPStore(source);
+    return new HTTPStore(source, { fetchOptions: { credentials: 'include' } });
   }
   return source;
 }
