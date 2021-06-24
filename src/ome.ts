@@ -2,7 +2,7 @@ import { ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
 import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
-import { join, loadMultiscales, guessTileSize, range, parseMatrix } from './utils';
+import { join, loadMultiscales, open, guessTileSize, range, parseMatrix } from './utils';
 
 export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAttrs: Ome.Well): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
@@ -27,7 +27,7 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   if (acqIds.length > 1) {
     // Need to get acquisitions metadata from parent Plate
     const plateUrl = grp.store.url.replace(`${row}/${col}`, '');
-    const plate = await openGroup(new HTTPStore(plateUrl));
+    const plate = await open(plateUrl) as ZarrGroup;
     const plateAttrs = (await plate.attrs.asObject()) as { plate: Ome.Plate };
     acquisitions = plateAttrs?.plate?.acquisitions ?? [];
 

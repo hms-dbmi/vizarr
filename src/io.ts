@@ -156,7 +156,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
       // No rootAttrs in this group.
       // if url is to a plate/acquisition/ check parent dir for 'plate' zattrs
       const parentUrl = node.store.url.slice(0, node.store.url.lastIndexOf('/'));
-      const parent = await openGroup(new HTTPStore(parentUrl));
+      const parent = await open(parentUrl) as ZarrGroup;
       const parentAttrs = (await parent.attrs.asObject()) as Ome.Attrs;
       if ('plate' in parentAttrs) {
         return loadPlate(config, parent, parentAttrs.plate);
