@@ -1,6 +1,8 @@
 import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray } from 'zarr';
 import type { Group as ZarrGroup } from 'zarr';
+import type { AsyncStore, Store } from 'zarr/types/storage/types';
 import { Matrix4 } from '@math.gl/core/dist/esm';
+import { LRUCacheStore } from './lru-store';
 
 export const MAX_CHANNELS = 6;
 
@@ -17,19 +19,30 @@ export const MAGENTA_GREEN = [COLORS.magenta, COLORS.green];
 export const RGB = [COLORS.red, COLORS.green, COLORS.blue];
 export const CYMRGB = Object.values(COLORS).slice(0, -2);
 
-async function normalizeStore(source: string | ZarrArray['store']) {
+async function normalizeStore(source: string | Store) {
   if (typeof source === 'string') {
+    let store: AsyncStore<ArrayBuffer>;
+
     if (source.endsWith('.json')) {
       // import custom store implementation
-      const { ReferenceStore } = await import('reference-spec-reader');
-      return ReferenceStore.fromJSON(await fetch(source).then((res) => res.json()));
+      const [{ ReferenceStore }, json] = await Promise.all([
+        import('reference-spec-reader'),
+        fetch(source).then((res) => res.json()),
+      ]);
+
+      store = new ReferenceStore(json);
+    } else {
+      store = new HTTPStore(source);
     }
-    return new HTTPStore(source);
+
+    // Wrap remote stores in a cache
+    return new LRUCacheStore(store);
   }
+
   return source;
 }
 
-export async function open(source: string | ZarrArray['store']) {
+export async function open(source: string | Store) {
   const store = await normalizeStore(source);
   return openGroup(store).catch((err) => {
     if (err instanceof ContainsArrayError) {
