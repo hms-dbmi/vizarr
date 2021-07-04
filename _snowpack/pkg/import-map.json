@@ -15,6 +15,7 @@
     "jotai": "./jotai.js",
     "jotai/utils": "./jotai/utils.js",
     "p-map": "./p-map.js",
+    "quick-lru": "./quick-lru.js",
     "react": "./react.js",
     "react-dom": "./react-dom.js",
     "reference-spec-reader": "./reference-spec-reader.js",
