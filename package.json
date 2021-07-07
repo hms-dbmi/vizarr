@@ -9,6 +9,7 @@
     "imjoy-rpc": "^0.2.23",
     "jotai": "^1.0.0",
     "p-map": "^4.0.0",
+    "quick-lru": "^6.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "reference-spec-reader": "^0.1.1",
