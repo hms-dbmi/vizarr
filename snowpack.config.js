@@ -18,17 +18,17 @@ module.exports = {
       plugins: [ resolveGeotiff() ],
     },
   },
-  devOptions: {
-    /* ... */
-  },
   buildOptions: {
     // change build dir to out/ (next.js compat)
     out: 'out',
     baseUrl: process.env.VIZARR_PREFIX || './',
   },
-  alias: {
-    /* ... */
-  },
+  optimize: {
+    bundle: true,
+    splitting: true,
+    minify: true,
+    sourcemap: true,
+  }
 };
 
 
