@@ -53,11 +53,12 @@ function App() {
       const api = await imjoy.setupRPC({
         name: 'vizarr',
         description: 'A minimal, purely client-side program for viewing Zarr-based images with Viv & ImJoy.',
-        version: import.meta.env.SNOWPACK_PUBLIC_PACKAGE_VERSION as string,
+        version: import.meta.env.VERSION as string,
       });
-      const add_image = async (props: ImageLayerConfig) => addImage(props);
-      const set_view_state = async (vs: { zoom: number; target: number[] }) => setViewState(vs);
-      api.export({ add_image, set_view_state });
+      api.export({
+        add_image: addImage,
+        set_view_state: setViewState,
+      });
     }
     // enable imjoy api when loaded as an iframe
     if (window.self !== window.top) {
