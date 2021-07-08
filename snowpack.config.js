@@ -10,10 +10,8 @@ module.exports = {
     '@snowpack/plugin-react-refresh',
     '@snowpack/plugin-typescript',
   ],
-  packageOptions: {
-    rollup: {
-      plugins: [ resolveGeotiff() ],
-    },
+  alias: {
+    'geotiff': './src/geotiff-resolve:empty.js',
   },
   buildOptions: {
     // change build dir to out/ (next.js compat)
@@ -30,25 +28,3 @@ module.exports = {
     VERSION: pkg.version,
   }
 };
-
-
-/* 
-* Custom Rollup Plugin for installing geotiff.js
-*
-* vizarr doesn't use geotiff component of viv.
-* This plugin just creates an empty shim for 
-* top-level imports in viv during install by snowpack.
-*/
-
-function resolveGeotiff() {
-  return {
-    name: 'resolve-empty-geotiff',
-    async load(id) {
-      if (!id.includes('geotiff.js')) return;
-      return `
-      export const fromBlob = '';
-      export const fromUrl = '';
-      `;
-    },
-  }
-}

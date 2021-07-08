@@ -53,7 +53,7 @@ function App() {
       const api = await imjoy.setupRPC({
         name: 'vizarr',
         description: 'A minimal, purely client-side program for viewing Zarr-based images with Viv & ImJoy.',
-        version: import.meta.env.VERSION as string,
+        version: import.meta.env.VERSION,
       });
       api.export({
         add_image: addImage,
