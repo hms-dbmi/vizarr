@@ -31,6 +31,7 @@ declare module Ome {
   interface Multiscale {
     datasets: { path: string }[];
     version?: string;
+    axes?: string[];
   }
 
   interface Acquisition {

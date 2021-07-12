@@ -121,6 +121,9 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 
   if (node instanceof ZarrGroup) {
     const attrs = (await node.attrs.asObject()) as Ome.Attrs;
+    if ('multiscales' in attrs && attrs.multiscales?.[0]?.axes) {
+      config.axis_labels = attrs.multiscales?.[0]?.axes;
+    }
 
     if ('plate' in attrs) {
       return loadPlate(config, node, attrs.plate);
