@@ -47,23 +47,6 @@ export async function loadMultiscales(grp, multiscales) {
   }
   throw Error("Multiscales metadata included a path to a group.");
 }
-export function nested(store) {
-  const get = (target, key) => {
-    if (key === "getItem" || key === "containsItem") {
-      return (path, ...args) => {
-        if (path.endsWith(".zarray") || path.endsWith(".zattrs") || path.endsWith(".zgroup")) {
-          return target[key](path, ...args);
-        }
-        const prefix = path.split("/");
-        const chunkKey = prefix.pop();
-        const newPath = [...prefix, chunkKey.replaceAll(".", "/")].join("/");
-        return target[key](newPath, ...args);
-      };
-    }
-    return Reflect.get(target, key);
-  };
-  return new Proxy(store, {get});
-}
 export function hexToRGB(hex) {
   if (hex.startsWith("#"))
     hex = hex.slice(1);

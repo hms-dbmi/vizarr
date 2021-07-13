@@ -10,7 +10,6 @@ import {
   loadMultiscales,
   MAGENTA_GREEN,
   MAX_CHANNELS,
-  nested,
   open,
   parseMatrix,
   range,
@@ -96,25 +95,11 @@ function loadMultiChannel(config, data, max) {
     axis_labels: data[0].labels
   };
 }
-function isNested(attrs) {
-  let version;
-  if ("plate" in attrs) {
-    version = attrs.plate.version;
-  } else if ("omero" in attrs) {
-    version = attrs.multiscales[0].version;
-  } else if ("well" in attrs) {
-    version = attrs.well.version;
-  }
-  return version && version !== "0.1";
-}
 export async function createSourceData(config) {
   const node = await open(config.source);
   let data;
   if (node instanceof ZarrGroup) {
     const attrs = await node.attrs.asObject();
-    if (isNested(attrs)) {
-      node.store = nested(node.store);
-    }
     if ("plate" in attrs) {
       return loadPlate(config, node, attrs.plate);
     }

@@ -6,7 +6,7 @@ import { _ as _toConsumableArray } from '../common/toConsumableArray-06af309a.js
 import { _ as _defineProperty } from '../common/defineProperty-1b0b77a2.js';
 import '../common/index-aae33e1a.js';
 import { c as createCommonjsModule } from '../common/_commonjsHelpers-37fa8da4.js';
-import { B as BoundsCheckError, s as slice } from '../common/zarr-fd3d4b27.js';
+import { B as BoundsCheckError, s as slice } from '../common/zarr-25a1ff65.js';
 import { p as project32, a as picking, G as Geometry, c as cutPolylineByGrid, b as cutPolylineByMercatorBounds, T as Tesselator, S as SolidPolygonLayer } from '../common/solid-polygon-layer-70061558.js';
 import { C as CompositeLayer } from '../common/composite-layer-70acd78f.js';
 import { _ as _slicedToArray } from '../common/slicedToArray-cdb146e7.js';
