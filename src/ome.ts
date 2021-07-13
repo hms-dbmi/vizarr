@@ -2,7 +2,7 @@ import { ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
 import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
-import { join, loadMultiscales, guessTileSize, range, parseMatrix } from './utils';
+import { join, loadMultiscales, getAxisLabels, guessTileSize, range, parseMatrix } from './utils';
 
 export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAttrs: Ome.Well): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
@@ -195,11 +195,14 @@ export async function loadOmeroMultiscales(
 ): Promise<SourceData> {
   const { name, opacity = 1, colormap = '' } = config;
   const data = await loadMultiscales(grp, attrs.multiscales);
-  const meta = parseOmeroMeta(attrs.omero);
+  const axis_labels = getAxisLabels(data[0], config.axis_labels);
+  const meta = parseOmeroMeta(attrs.omero, axis_labels);
   const tileSize = guessTileSize(data[0]);
-  const loader = data.map((arr) => new ZarrPixelSource(arr, meta.axis_labels, tileSize));
+
+  const loader = data.map((arr) => new ZarrPixelSource(arr, axis_labels, tileSize));
   return {
     loader: loader,
+    axis_labels,
     name: meta.name ?? name,
     model_matrix: parseMatrix(config.model_matrix),
     defaults: {
@@ -211,7 +214,7 @@ export async function loadOmeroMultiscales(
   };
 }
 
-function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero) {
+function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axis_labels: string[]) {
   const t = rdefs.defaultT ?? 0;
   const z = rdefs.defaultZ ?? 0;
 
@@ -227,14 +230,19 @@ function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero) {
     names.push(c.label);
   });
 
+  const defaultSelection = axis_labels.map(label => {
+    if (label == 't') return t;
+    if (label == 'z') return z;
+    return 0;
+  });
+
   return {
     name,
     names,
     colors,
     contrast_limits,
     visibilities,
-    channel_axis: 1,
-    defaultSelection: [t, 0, z, 0, 0],
-    axis_labels: ['t', 'c', 'z', 'y', 'x'] as [...string[], 'y', 'x'],
+    channel_axis: axis_labels.indexOf('c'),
+    defaultSelection,
   };
 }
