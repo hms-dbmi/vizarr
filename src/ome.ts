@@ -195,7 +195,8 @@ export async function loadOmeroMultiscales(
 ): Promise<SourceData> {
   const { name, opacity = 1, colormap = '' } = config;
   const data = await loadMultiscales(grp, attrs.multiscales);
-  const axis_labels = getAxisLabels(data[0], config.axis_labels);
+  const default_axes = ['t', 'c', 'z', 'y', 'x'];   // v0.1 & v0.2
+  const axis_labels = getAxisLabels(data[0], config.axis_labels || default_axes);
   const meta = parseOmeroMeta(attrs.omero, axis_labels);
   const tileSize = guessTileSize(data[0]);
 
