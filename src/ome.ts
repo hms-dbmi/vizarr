@@ -50,19 +50,22 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
 
   // Create loader for every Image.
   const promises = imgPaths.map((p) => grp.getItem(join(p, resolution)));
-  const meta = parseOmeroMeta(imgAttrs.omero);
   const data = (await Promise.all(promises)) as ZarrArray[];
+  const axis_labels = getOmeAxisLabels(data[0], config.axis_labels);
+  const meta = parseOmeroMeta(imgAttrs.omero, axis_labels);
+
   const tileSize = guessTileSize(data[0]);
   const loaders = range(rows).flatMap((row) => {
     return range(cols).map((col) => {
       const offset = col + row * cols;
-      return { name: String(offset), row, col, loader: new ZarrPixelSource(data[offset], meta.axis_labels, tileSize) };
+      return { name: String(offset), row, col, loader: new ZarrPixelSource(data[offset], axis_labels, tileSize) };
     });
   });
 
   const sourceData: SourceData = {
     loaders,
     ...meta,
+    axis_labels,
     loader: [loaders[0].loader],
     model_matrix: parseMatrix(config.model_matrix),
     defaults: {
@@ -137,8 +140,9 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
     mapper,
     { concurrency: 10 }
   );
-  const meta = parseOmeroMeta(imgAttrs.omero);
   const data = await Promise.all(promises);
+  const axis_labels = getOmeAxisLabels(undefined, imgAttrs.multiscales[0].axes || config.axis_labels);
+  const meta = parseOmeroMeta(imgAttrs.omero, axis_labels);
   const tileSize = guessTileSize(data[0][1]);
   const loaders = data.map((d) => {
     const [row, col] = d[0].split('/');
@@ -146,7 +150,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
       name: `${row}${col}`,
       row: rows.indexOf(row),
       col: columns.indexOf(col),
-      loader: new ZarrPixelSource(d[1], meta.axis_labels, tileSize),
+      loader: new ZarrPixelSource(d[1], axis_labels, tileSize),
     };
   });
 
@@ -154,6 +158,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   const sourceData: SourceData = {
     loaders,
     ...meta,
+    axis_labels,
     loader: [loaders[0].loader],
     model_matrix: parseMatrix(config.model_matrix),
     defaults: {
@@ -195,8 +200,7 @@ export async function loadOmeroMultiscales(
 ): Promise<SourceData> {
   const { name, opacity = 1, colormap = '' } = config;
   const data = await loadMultiscales(grp, attrs.multiscales);
-  const default_axes = ['t', 'c', 'z', 'y', 'x']; // v0.1 & v0.2
-  const axis_labels = getAxisLabels(data[0], config.axis_labels || default_axes);
+  const axis_labels = getOmeAxisLabels(data[0], config.axis_labels);
   const meta = parseOmeroMeta(attrs.omero, axis_labels);
   const tileSize = guessTileSize(data[0]);
 
@@ -246,4 +250,15 @@ function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axis_labels: strin
     channel_axis: axis_labels.indexOf('c'),
     defaultSelection,
   };
+}
+
+function getOmeAxisLabels(data?: ZarrArray, axes?: string[]): [...string[], 'y', 'x'] {
+  const default_axes = ['t', 'c', 'z', 'y', 'x']; // v0.1 & v0.2
+  axes = axes || default_axes;
+  if (data) {
+    // For Plate, we don't have data
+    return getAxisLabels(data, axes || default_axes);
+  } else {
+    return axes as [...string[], 'y', 'x'];
+  }
 }
