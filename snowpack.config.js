@@ -1,4 +1,10 @@
 const pkg = require('./package.json');
+const virtual = require('@rollup/plugin-virtual');
+
+const geotiff = `\
+export const fromBlob = '';
+export const fromUrl = '';
+`;
 
 // pkg version avaiable in app via import.meta.env.SNOWPACK_PUBLIC_PACKAGE_VERSION
 process.env.SNOWPACK_PUBLIC_PACKAGE_VERSION = pkg.version;
@@ -15,7 +21,7 @@ module.exports = {
   ],
   packageOptions: {
     rollup: {
-      plugins: [ resolveGeotiff() ],
+      plugins: [ virtual({ geotiff }) ],
     },
   },
   devOptions: {
@@ -30,25 +36,3 @@ module.exports = {
     /* ... */
   },
 };
-
-
-/* 
-* Custom Rollup Plugin for installing geotiff.js
-*
-* vizarr doesn't use geotiff component of viv.
-* This plugin just creates an empty shim for 
-* top-level imports in viv during install by snowpack.
-*/
-
-function resolveGeotiff() {
-  return {
-    name: 'resolve-empty-geotiff',
-    async load(id) {
-      if (!id.includes('geotiff.js')) return;
-      return `
-      export const fromBlob = '';
-      export const fromUrl = '';
-      `;
-    },
-  }
-}

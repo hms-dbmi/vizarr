@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "@danmarshall/deckgl-typings": "^4.3.10",
+    "@rollup/plugin-virtual": "^2.0.3",
     "@snowpack/plugin-react-refresh": "^2.3.7",
     "@snowpack/plugin-typescript": "^1.1.0",
     "@types/node": "^14.14.5",
