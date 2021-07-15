@@ -5,12 +5,12 @@ export class LRUCacheStore {
     this.maxSize = maxSize;
     this.cache = new QuickLRU({maxSize});
   }
-  async getItem(...args) {
+  getItem(...args) {
     const [key, opts] = args;
     if (this.cache.has(key)) {
       return this.cache.get(key);
     }
-    const value = await this.store.getItem(key, opts);
+    const value = this.store.getItem(key, opts);
     this.cache.set(key, value);
     return value;
   }
