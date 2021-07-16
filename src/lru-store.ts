@@ -13,7 +13,10 @@ export class LRUCacheStore<S extends AsyncStore<ArrayBuffer>> {
     if (this.cache.has(key)) {
       return this.cache.get(key)!;
     }
-    const value = this.store.getItem(key, opts);
+    const value = this.store.getItem(key, opts).catch(err => {
+      this.cache.delete(key);
+      throw err;
+    });
     this.cache.set(key, value);
     return value;
   }
