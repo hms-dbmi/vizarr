@@ -11,5 +11,5 @@ declare module 'viv-layers' {
     channelIsOn: boolean[];
     colormap: null | string;
     modelMatrix: Matrix4;
-  };
+  }
 }

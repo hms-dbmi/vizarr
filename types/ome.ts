@@ -3,7 +3,7 @@ declare module Ome {
 
   interface Channel {
     active: boolean;
-    coefficient: number, 
+    coefficient: number;
     color: string;
     family: string;
     inverted: boolean;
@@ -46,7 +46,7 @@ declare module Ome {
   }
 
   interface Plate {
-    acquisitions?: Acquisition[]; 
+    acquisitions?: Acquisition[];
     columns: { name: string }[];
     field_count: 4;
     name: string;
@@ -56,13 +56,13 @@ declare module Ome {
   }
 
   interface Well {
-    images: { path: string, acquisition?: number }[];
+    images: { path: string; acquisition?: number }[];
     version: Version;
   }
 
   type Attrs =
-    { multiscales: Multiscale[] } |
-    { omero: Omero, multiscales: Multiscale[] } |
-    { plate: Plate } |
-    { well: Well };
+    | { multiscales: Multiscale[] }
+    | { omero: Omero; multiscales: Multiscale[] }
+    | { plate: Plate }
+    | { well: Well };
 }

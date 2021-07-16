@@ -9,13 +9,10 @@ module.exports = {
     public: '/',
     src: '/_dist_',
   },
-  plugins: [
-    '@snowpack/plugin-react-refresh',
-    '@snowpack/plugin-typescript',
-  ],
+  plugins: ['@snowpack/plugin-react-refresh', '@snowpack/plugin-typescript'],
   packageOptions: {
     rollup: {
-      plugins: [ resolveGeotiff() ],
+      plugins: [resolveGeotiff()],
     },
   },
   devOptions: {
@@ -31,14 +28,13 @@ module.exports = {
   },
 };
 
-
-/* 
-* Custom Rollup Plugin for installing geotiff.js
-*
-* vizarr doesn't use geotiff component of viv.
-* This plugin just creates an empty shim for 
-* top-level imports in viv during install by snowpack.
-*/
+/*
+ * Custom Rollup Plugin for installing geotiff.js
+ *
+ * vizarr doesn't use geotiff component of viv.
+ * This plugin just creates an empty shim for
+ * top-level imports in viv during install by snowpack.
+ */
 
 function resolveGeotiff() {
   return {
@@ -50,5 +46,5 @@ function resolveGeotiff() {
       export const fromUrl = '';
       `;
     },
-  }
+  };
 }
