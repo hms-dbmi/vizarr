@@ -2,7 +2,6 @@ import QuickLRU from "../_snowpack/pkg/quick-lru.js";
 export class LRUCacheStore {
   constructor(store, maxSize = 100) {
     this.store = store;
-    this.maxSize = maxSize;
     this.cache = new QuickLRU({maxSize});
   }
   getItem(...args) {
@@ -10,15 +9,18 @@ export class LRUCacheStore {
     if (this.cache.has(key)) {
       return this.cache.get(key);
     }
-    const value = this.store.getItem(key, opts);
+    const value = this.store.getItem(key, opts).catch((err) => {
+      this.cache.delete(key);
+      throw err;
+    });
     this.cache.set(key, value);
     return value;
   }
   async containsItem(key) {
     return this.cache.has(key) || this.store.containsItem(key);
   }
-  async keys() {
-    return [];
+  keys() {
+    return this.store.keys();
   }
   deleteItem(key) {
     throw new Error("deleteItem not implemented");
