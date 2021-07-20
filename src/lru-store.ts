@@ -2,9 +2,9 @@ import type { AsyncStore } from 'zarr/types/storage/types';
 import QuickLRU from 'quick-lru';
 
 export class LRUCacheStore<S extends AsyncStore<ArrayBuffer>> {
-  private cache: QuickLRU<string, Promise<ArrayBuffer>>;
+  cache: QuickLRU<string, Promise<ArrayBuffer>>;
 
-  constructor(public store: S, public maxSize: number = 100) {
+  constructor(public store: S, maxSize: number = 100) {
     this.cache = new QuickLRU({ maxSize });
   }
 
@@ -13,7 +13,10 @@ export class LRUCacheStore<S extends AsyncStore<ArrayBuffer>> {
     if (this.cache.has(key)) {
       return this.cache.get(key)!;
     }
-    const value = this.store.getItem(key, opts);
+    const value = this.store.getItem(key, opts).catch((err) => {
+      this.cache.delete(key);
+      throw err;
+    });
     this.cache.set(key, value);
     return value;
   }
@@ -22,8 +25,8 @@ export class LRUCacheStore<S extends AsyncStore<ArrayBuffer>> {
     return this.cache.has(key) || this.store.containsItem(key);
   }
 
-  async keys() {
-    return [];
+  keys() {
+    return this.store.keys();
   }
 
   deleteItem(key: string): never {

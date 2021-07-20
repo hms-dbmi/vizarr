@@ -19,8 +19,8 @@
     "start": "snowpack dev",
     "build": "snowpack build",
     "export": "npm run build",
-    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
-    "lint": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\"",
+    "format": "prettier --write \"{src,types}/**/*.{js,jsx,ts,tsx}\" snowpack.config.js",
+    "lint": "prettier --check \"{src,types}/**/*.{js,jsx,ts,tsx}\" snowpack.config.js",
     "prepublishOnly": "npm run build && cp -r ./out/* .",
     "postpublish": "git clean -fd"
   },
