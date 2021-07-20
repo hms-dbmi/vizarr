@@ -13,6 +13,7 @@ import type {
 import {
   COLORS,
   CYMRGB,
+  getAxisLabels,
   guessTileSize,
   hexToRGB,
   loadMultiscales,
@@ -23,18 +24,6 @@ import {
   range,
   RGB,
 } from './utils';
-
-function getAxisLabels(arr: ZarrArray, axis_labels?: string[], channel_axis?: number) {
-  if (!axis_labels || axis_labels.length != arr.shape.length) {
-    // default axis_labels are e.g. ['0', '1', 'y', 'x']
-    const nonXYaxisLabels = arr.shape.slice(0, -2).map((d, i) => '' + i);
-    axis_labels = nonXYaxisLabels.concat(['y', 'x']);
-  }
-  if (channel_axis) {
-    axis_labels[channel_axis] = 'c';
-  }
-  return axis_labels as [...string[], 'y', 'x'];
-}
 
 function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<string[]>[], max: number): SourceData {
   const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
@@ -121,6 +110,9 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 
   if (node instanceof ZarrGroup) {
     const attrs = (await node.attrs.asObject()) as Ome.Attrs;
+    if ('multiscales' in attrs && attrs.multiscales?.[0]?.axes) {
+      config.axis_labels = attrs.multiscales?.[0]?.axes;
+    }
 
     if ('plate' in attrs) {
       return loadPlate(config, node, attrs.plate);
