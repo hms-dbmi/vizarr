@@ -7,6 +7,8 @@ import type { ImageLayerConfig } from './state';
 import Viewer from './components/Viewer';
 import Menu from './components/Menu';
 
+import { version } from '../package.json';
+
 function App() {
   const setSourceInfo = useUpdateAtom(sourceInfoAtom);
   const setViewState = useUpdateAtom(viewStateAtom);
@@ -53,7 +55,7 @@ function App() {
       const api = await imjoy.setupRPC({
         name: 'vizarr',
         description: 'A minimal, purely client-side program for viewing Zarr-based images with Viv & ImJoy.',
-        version: import.meta.env.SNOWPACK_PUBLIC_PACKAGE_VERSION as string,
+        version: version,
       });
       const add_image = async (props: ImageLayerConfig) => addImage(props);
       const set_view_state = async (vs: { zoom: number; target: number[] }) => setViewState(vs);
