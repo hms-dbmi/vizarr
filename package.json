@@ -16,8 +16,9 @@
     "zarr": "^0.5.1"
   },
   "scripts": {
-    "start": "snowpack dev",
-    "build": "snowpack build",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "export": "npm run build",
     "format": "prettier --write \"{src,types}/**/*.{js,jsx,ts,tsx}\" vite.config.js",
     "lint": "prettier --check \"{src,types}/**/*.{js,jsx,ts,tsx}\" vite.config.js",
