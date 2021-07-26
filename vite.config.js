@@ -7,12 +7,12 @@ export default defineConfig({
   plugins: [reactRefresh()],
   build: {
     outDir: 'out',
-    publicPath: process.env.VIZARR_PREFIX || './'
+    publicPath: process.env.VIZARR_PREFIX || './',
   },
   resolve: {
     alias: {
-      'zarr': 'zarr/core',
-      'geotiff': resolve(__dirname, 'src/empty-geotiff.js'),
+      zarr: 'zarr/core',
+      geotiff: resolve(__dirname, 'src/empty-geotiff.js'),
     },
-  }
-})
+  },
+});
