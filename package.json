@@ -22,7 +22,7 @@
     "export": "npm run check && npm run build",
     "format": "prettier --write \"{src,types}/**/*.{js,jsx,ts,tsx}\" vite.config.js",
     "lint": "prettier --check \"{src,types}/**/*.{js,jsx,ts,tsx}\" vite.config.js",
-    "check": "tsc --noEmit"
+    "check": "tsc"
   },
   "files": [
     "out"
