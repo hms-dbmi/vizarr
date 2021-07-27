@@ -12,7 +12,7 @@ export default defineConfig({
   resolve: {
     alias: {
       zarr: 'zarr/core',
-      geotiff: resolve(__dirname, 'src/empty-geotiff.js'),
+      geotiff: resolve(__dirname, 'src/empty:geotiff.js'),
     },
   },
 });

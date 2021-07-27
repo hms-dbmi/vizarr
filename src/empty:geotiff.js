@@ -3,7 +3,7 @@
  * top-level API so that it may be aliased by vite
  * when resolving 'geotiff' as a dependency.
  *
- * This avoids avoids trying to resolve any of geotiff's
+ * This avoids trying to resolve any of geotiff's
  * inner, difficult to resolve exports.
  */
 export const fromUrl = '';
