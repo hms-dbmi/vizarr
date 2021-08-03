@@ -17,7 +17,7 @@ function add(name: string, load: () => Promise<CodecModule>): void {
       cache.set(name, promise);
     }
     return cache.get(name)!;
-  }
+  };
   addCodec(name, loadAndCache);
 }
 
