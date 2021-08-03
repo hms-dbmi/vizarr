@@ -1,7 +1,16 @@
 import { defineConfig } from 'vite';
 import reactRefresh from '@vitejs/plugin-react-refresh';
+import virtual from 'esbuild-plugin-virtual';
 
-import { resolve } from 'path';
+/*
+ * This virtual module provides an "empty" export of geotiff's
+ * top-level API. This avoids trying to resolve any of geotiff's
+ * inner, difficult to resolve exports.
+ */
+const geotiff = `\
+export const fromUrl = '';
+export const fromBlob = '';
+`;
 
 export default defineConfig({
   plugins: [reactRefresh()],
@@ -12,7 +21,11 @@ export default defineConfig({
   resolve: {
     alias: {
       zarr: 'zarr/core',
-      geotiff: resolve(__dirname, 'src/empty:geotiff.js'),
+    },
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      plugins: [virtual({ geotiff })],
     },
   },
 });
