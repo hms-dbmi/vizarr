@@ -5,9 +5,9 @@ import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [reactRefresh()],
+  base: process.env.VIZARR_PREFIX || './',
   build: {
     outDir: 'out',
-    publicPath: process.env.VIZARR_PREFIX || './',
   },
   resolve: {
     alias: {
