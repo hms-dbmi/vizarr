@@ -51,7 +51,7 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   // Create loader for every Image.
   const promises = imgPaths.map((p) => grp.getItem(join(p, resolution)));
   const data = (await Promise.all(promises)) as ZarrArray[];
-  const axis_labels = getOmeAxisLabels(data[0], config.axis_labels);
+  const axis_labels = getOmeAxisLabels(config.axis_labels);
   const meta = parseOmeroMeta(imgAttrs.omero, axis_labels);
 
   const tileSize = guessTileSize(data[0]);
@@ -141,7 +141,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
     { concurrency: 10 }
   );
   const data = await Promise.all(promises);
-  const axis_labels = getOmeAxisLabels(undefined, imgAttrs.multiscales[0].axes || config.axis_labels);
+  const axis_labels = getOmeAxisLabels(imgAttrs.multiscales[0].axes || config.axis_labels);
   const meta = parseOmeroMeta(imgAttrs.omero, axis_labels);
   const tileSize = guessTileSize(data[0][1]);
   const loaders = data.map((d) => {
@@ -200,7 +200,7 @@ export async function loadOmeroMultiscales(
 ): Promise<SourceData> {
   const { name, opacity = 1, colormap = '' } = config;
   const data = await loadMultiscales(grp, attrs.multiscales);
-  const axis_labels = getOmeAxisLabels(data[0], config.axis_labels);
+  const axis_labels = getOmeAxisLabels(config.axis_labels);
   const meta = parseOmeroMeta(attrs.omero, axis_labels);
   const tileSize = guessTileSize(data[0]);
 
@@ -247,18 +247,12 @@ function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axis_labels: strin
     colors,
     contrast_limits,
     visibilities,
-    channel_axis: axis_labels.indexOf('c'),
+    channel_axis: axis_labels.includes('c') ? axis_labels.indexOf('c') : undefined,
     defaultSelection,
   };
 }
 
-function getOmeAxisLabels(data?: ZarrArray, axes?: string[]): [...string[], 'y', 'x'] {
+function getOmeAxisLabels(axes?: string[]): [...string[], 'y', 'x'] {
   const default_axes = ['t', 'c', 'z', 'y', 'x']; // v0.1 & v0.2
-  axes = axes || default_axes;
-  if (data) {
-    // For Plate, we don't have data
-    return getAxisLabels(data, axes || default_axes);
-  } else {
-    return axes as [...string[], 'y', 'x'];
-  }
+  return (axes || default_axes) as [...string[], 'y', 'x'];
 }
