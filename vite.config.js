@@ -8,6 +8,8 @@ export default defineConfig({
   base: process.env.VIZARR_PREFIX || './',
   build: {
     outDir: 'out',
+    sourcemap: true,
+    minify: false,
   },
   resolve: {
     alias: {
