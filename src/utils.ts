@@ -38,7 +38,7 @@ async function normalizeStore(source: string | Store) {
     // Wrap remote stores in a cache
     // see https://github.com/hms-dbmi/vizarr/pull/100#issuecomment-893493514
     // return new LRUCacheStore(store);
-    return store
+    return store;
   }
 
   return source;
