@@ -2,7 +2,7 @@ import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray } from '
 import type { Group as ZarrGroup } from 'zarr';
 import type { AsyncStore, Store } from 'zarr/types/storage/types';
 import { Matrix4 } from '@math.gl/core/dist/esm';
-import { LRUCacheStore } from './lru-store';
+// import { LRUCacheStore } from './lru-store';
 
 export const MAX_CHANNELS = 6;
 
@@ -36,7 +36,9 @@ async function normalizeStore(source: string | Store) {
     }
 
     // Wrap remote stores in a cache
-    return new LRUCacheStore(store);
+    // see https://github.com/hms-dbmi/vizarr/pull/100#issuecomment-893493514
+    // return new LRUCacheStore(store);
+    return store;
   }
 
   return source;
