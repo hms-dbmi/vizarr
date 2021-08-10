@@ -14,6 +14,7 @@ import {
   COLORS,
   CYMRGB,
   getAxisLabels,
+  getAxisLabelsFromMultiscales,
   guessTileSize,
   hexToRGB,
   loadMultiscales,
@@ -107,6 +108,7 @@ function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<stri
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
   const node = await open(config.source);
   let data: ZarrArray[];
+  let axis_labels;
 
   if (node instanceof ZarrGroup) {
     const attrs = (await node.attrs.asObject()) as Ome.Attrs;
@@ -139,11 +141,12 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
     }
 
     data = await loadMultiscales(node, attrs.multiscales);
+    axis_labels = getAxisLabelsFromMultiscales(attrs);
   } else {
     data = [node];
   }
 
-  const labels = getAxisLabels(data[0], config.axis_labels);
+  const labels = getAxisLabels(data[0], axis_labels || config.axis_labels);
   const tileSize = guessTileSize(data[0]);
   const loader = data.map((d) => new ZarrPixelSource(d, labels, tileSize));
   const [base] = loader;

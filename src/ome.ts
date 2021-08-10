@@ -2,7 +2,7 @@ import { ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
 import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
-import { join, loadMultiscales, getAxisLabels, guessTileSize, range, parseMatrix } from './utils';
+import { join, loadMultiscales, getAxisLabelsFromMultiscales, guessTileSize, range, parseMatrix } from './utils';
 
 export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAttrs: Ome.Well): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
@@ -253,10 +253,7 @@ function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axis_labels: strin
 }
 
 function getOmeAxisLabels(attrs: Ome.Attrs): [...string[], 'y', 'x'] {
-  let axis_labels;
-  if ('multiscales' in attrs && attrs.multiscales?.[0]?.axes) {
-    axis_labels = attrs.multiscales[0].axes;
-  }
+  let axis_labels = getAxisLabelsFromMultiscales(attrs);
   const default_axes = ['t', 'c', 'z', 'y', 'x']; // v0.1 & v0.2
   return (axis_labels || default_axes) as [...string[], 'y', 'x'];
 }
