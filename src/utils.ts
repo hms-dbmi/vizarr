@@ -100,12 +100,6 @@ export function getAxisLabels(arr: ZarrArray, axis_labels?: string[]): [...strin
   return axis_labels as [...string[], 'y', 'x'];
 }
 
-export function getAxisLabelsFromMultiscales(attrs) {
-  if ('multiscales' in attrs && attrs.multiscales?.[0]?.axes) {
-    return attrs.multiscales[0].axes;
-  }
-}
-
 export function isInterleaved(shape: number[]) {
   const lastDimSize = shape[shape.length - 1];
   return lastDimSize === 3 || lastDimSize === 4;

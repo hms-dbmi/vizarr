@@ -2,7 +2,7 @@ import { ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
 import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
-import { join, loadMultiscales, getAxisLabelsFromMultiscales, guessTileSize, range, parseMatrix } from './utils';
+import { join, loadMultiscales, guessTileSize, range, parseMatrix } from './utils';
 
 export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAttrs: Ome.Well): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
@@ -51,7 +51,7 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   // Create loader for every Image.
   const promises = imgPaths.map((p) => grp.getItem(join(p, resolution)));
   const data = (await Promise.all(promises)) as ZarrArray[];
-  const axis_labels = getOmeAxisLabels(imgAttrs);
+  const axis_labels = getOmeAxisLabels(imgAttrs.multiscales);
   const meta = parseOmeroMeta(imgAttrs.omero, axis_labels);
 
   const tileSize = guessTileSize(data[0]);
@@ -141,7 +141,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
     { concurrency: 10 }
   );
   const data = await Promise.all(promises);
-  const axis_labels = getOmeAxisLabels(imgAttrs);
+  const axis_labels = getOmeAxisLabels(imgAttrs.multiscales);
   const meta = parseOmeroMeta(imgAttrs.omero, axis_labels);
   const tileSize = guessTileSize(data[0][1]);
   const loaders = data.map((d) => {
@@ -200,7 +200,7 @@ export async function loadOmeroMultiscales(
 ): Promise<SourceData> {
   const { name, opacity = 1, colormap = '' } = config;
   const data = await loadMultiscales(grp, attrs.multiscales);
-  const axis_labels = getOmeAxisLabels(attrs);
+  const axis_labels = getOmeAxisLabels(attrs.multiscales);
   const meta = parseOmeroMeta(attrs.omero, axis_labels);
   const tileSize = guessTileSize(data[0]);
 
@@ -252,8 +252,7 @@ function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axis_labels: strin
   };
 }
 
-function getOmeAxisLabels(attrs: Ome.Attrs): [...string[], 'y', 'x'] {
-  let axis_labels = getAxisLabelsFromMultiscales(attrs);
+function getOmeAxisLabels(multiscales: Ome.Multiscale[]): [...string[], 'y', 'x'] {
   const default_axes = ['t', 'c', 'z', 'y', 'x']; // v0.1 & v0.2
-  return (axis_labels || default_axes) as [...string[], 'y', 'x'];
+  return (multiscales[0].axes || default_axes) as [...string[], 'y', 'x'];
 }
