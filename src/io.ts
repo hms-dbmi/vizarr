@@ -157,7 +157,9 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   // Now that we have data, try to figure out how to render initially.
 
   // If explicit channel axis is provided, try to load as multichannel.
-  if ('channel_axis' in config) {
+  if ('channel_axis' in config || labels.includes('c')) {
+    config = config as MultichannelConfig;
+    config.channel_axis = config.channel_axis || labels.indexOf('c');
     return loadMultiChannel(config, loader, max);
   }
 
