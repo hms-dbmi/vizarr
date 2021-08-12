@@ -13,6 +13,7 @@ import type {
 import {
   COLORS,
   CYMRGB,
+  getAxisLabels,
   guessTileSize,
   hexToRGB,
   loadMultiscales,
@@ -23,18 +24,6 @@ import {
   range,
   RGB,
 } from './utils';
-
-function getAxisLabels(arr: ZarrArray, axis_labels?: string[], channel_axis?: number) {
-  if (!axis_labels || axis_labels.length != arr.shape.length) {
-    // default axis_labels are e.g. ['0', '1', 'y', 'x']
-    const nonXYaxisLabels = arr.shape.slice(0, -2).map((d, i) => '' + i);
-    axis_labels = nonXYaxisLabels.concat(['y', 'x']);
-  }
-  if (channel_axis) {
-    axis_labels[channel_axis] = 'c';
-  }
-  return axis_labels as [...string[], 'y', 'x'];
-}
 
 function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<string[]>[], max: number): SourceData {
   const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
@@ -150,6 +139,10 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
     }
 
     data = await loadMultiscales(node, attrs.multiscales);
+    if (!config.axis_labels) {
+      // Update config axis_labels if present in multiscales
+      config.axis_labels = attrs.multiscales[0].axes;
+    }
   } else {
     data = [node];
   }
@@ -164,7 +157,9 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   // Now that we have data, try to figure out how to render initially.
 
   // If explicit channel axis is provided, try to load as multichannel.
-  if ('channel_axis' in config) {
+  if ('channel_axis' in config || labels.includes('c')) {
+    config = config as MultichannelConfig;
+    config.channel_axis = config.channel_axis || labels.indexOf('c');
     return loadMultiChannel(config, loader, max);
   }
 
