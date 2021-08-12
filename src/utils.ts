@@ -30,7 +30,7 @@ async function normalizeStore(source: string | Store) {
         fetch(source).then((res) => res.json()),
       ]);
 
-      store = new ReferenceStore(json);
+      store = ReferenceStore.fromJSON(json);
     } else {
       store = new HTTPStore(source);
     }
