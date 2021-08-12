@@ -8,6 +8,7 @@ export default defineConfig({
   base: process.env.VIZARR_PREFIX || './',
   build: {
     outDir: 'out',
+    assetsDir: '',
   },
   resolve: {
     alias: {
