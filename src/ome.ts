@@ -13,7 +13,7 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
     throw Error(`Well .zattrs missing images`);
   }
 
-  if (grp.path === '') {
+  if (!grp.path) {
     throw Error('Cannot inspect zarr path to open well.');
   }
 
