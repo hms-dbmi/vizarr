@@ -24,4 +24,4 @@ jobs:
           BRANCH: gh-pages
           FOLDER: out
           CLEAN: true
-          CLEAN_EXCLUDE: '["v0.1", "v0.2"]' # Manually add endpoints to keep
+          CLEAN_EXCLUDE: '["v0.1", "v0.2", "v0.3"]' # Manually add endpoints to keep
