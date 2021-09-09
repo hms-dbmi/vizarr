@@ -1,6 +1,6 @@
 {
   "name": "@hms-dbmi/vizarr",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "dependencies": {
     "@hms-dbmi/viv": "^0.10.2",
     "@material-ui/core": "^4.11.0",
@@ -24,9 +24,6 @@
     "lint": "prettier --check \"{src,types}/**/*.{js,jsx,ts,tsx}\" vite.config.js",
     "check": "tsc"
   },
-  "files": [
-    "out"
-  ],
   "prettier": {
     "trailingComma": "es5",
     "printWidth": 120,
