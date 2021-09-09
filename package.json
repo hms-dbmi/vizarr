@@ -24,9 +24,6 @@
     "lint": "prettier --check \"{src,types}/**/*.{js,jsx,ts,tsx}\" vite.config.js",
     "check": "tsc"
   },
-  "files": [
-    "out"
-  ],
   "prettier": {
     "trailingComma": "es5",
     "printWidth": 120,
