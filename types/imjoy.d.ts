@@ -13,5 +13,5 @@ declare module 'imjoy-rpc' {
     export: (funcs: ExportedFunctions) => void;
   }
 
-  async function setupRPC(props: ImJoySetupRPCProps): ImJoyAPI;
+  async function setupRPC(props: ImJoySetupRPCProps): Promise<ImJoyAPI>;
 }

@@ -7,7 +7,10 @@ import type { ZarrArray } from 'zarr';
 import type GridLayer from './gridLayer';
 import { initLayerStateFromSource } from './io';
 
-import type * as t from 'io-ts';
+import * as t from 'io-ts';
+import { BooleanFromString } from 'io-ts-types/lib/BooleanFromString';
+import { NumberFromString } from 'io-ts-types/lib/NumberFromString';
+import { JsonFromString, JsonArray } from 'io-ts-types/lib/JsonFromString';
 import type * as Ome from './ome-types';
 
 export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
@@ -29,32 +32,52 @@ interface ViewState {
   default?: boolean;
 }
 
-interface BaseConfig {
-  source: string | ZarrArray['store'];
-  axis_labels?: string[];
-  name?: string;
-  colormap?: string;
-  opacity?: number;
-  acquisition?: string;
-  model_matrix?: string | number[];
-  onClick?: (e: any) => void;
-}
+const isStore = (u: any): u is ZarrArray['store'] => {
+  const isObject = typeof u === 'object' && u !== null;
+  return isObject && u.getItem === 'function' && u.containsItem === 'function';
+};
 
-export interface MultichannelConfig extends BaseConfig {
-  colors?: string[];
-  channel_axis?: number;
-  contrast_limits?: number[][];
-  names?: string[];
-  visibilities?: boolean[];
-}
+const ZarrStore = new t.Type<ZarrArray['store'], ZarrArray['store'], unknown>(
+  'ZarrStore',
+  isStore,
+  (input, context) => (isStore(input) ? t.success(input) : t.failure(input, context)),
+  t.identity
+);
 
-export interface SingleChannelConfig extends BaseConfig {
-  color?: string;
-  contrast_limits?: number[];
-  visibility?: boolean;
-}
+const BaseConfig = t.intersection([
+  t.type({ source: t.union([t.string, ZarrStore]) }),
+  t.partial({
+    axis_labels: t.union([t.array(t.string), JsonFromString.pipe(t.array(t.string))]),
+    name: t.string,
+    colormap: t.string,
+    opacity: t.union([t.number, NumberFromString]),
+    acquisition: t.string,
+    model_matrix: t.string,
+    onClick: t.unknown,
+  }),
+]);
 
-export type ImageLayerConfig = MultichannelConfig | SingleChannelConfig;
+export const MultiChannelConfig = t.intersection([
+  BaseConfig,
+  t.partial({
+    colors: t.union([t.array(t.string), JsonFromString.pipe(t.array(t.string))]),
+    channel_axis: t.union([t.number, NumberFromString]),
+    contrast_limits: t.union([t.array(t.array(t.number)), JsonFromString.pipe(t.array(t.array(t.number)))]),
+    names: t.union([t.array(t.string), JsonFromString.pipe(t.array(t.string))]),
+    visibilities: t.union([t.array(t.boolean), JsonFromString.pipe(t.array(t.boolean))]),
+  }),
+]);
+
+export const SingleChannelConfig = t.intersection([
+  BaseConfig,
+  t.partial({
+    color: t.string,
+    contrast_limits: t.union([t.array(t.number), JsonFromString.pipe(t.array(t.number))]),
+    visibility: t.union([t.boolean, BooleanFromString]),
+  }),
+]);
+
+export const ImageLayerConfig = t.union([MultiChannelConfig, SingleChannelConfig]);
 
 export interface GridLoader {
   loader: ZarrPixelSource<string[]>;
