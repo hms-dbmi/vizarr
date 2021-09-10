@@ -110,11 +110,10 @@ function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<stri
 
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
   const node = await open(config.source);
-  const maybeAttrs = Ome.Attrs.decode(await node.attrs.asObject());
   let data: ZarrArray[];
 
-  if (node instanceof ZarrGroup && isRight(maybeAttrs)) {
-    const attrs = maybeAttrs.right;
+  if (node instanceof ZarrGroup) {
+    const attrs = await decodeAttrs(node.attrs, Ome.Attrs);
 
     if ('plate' in attrs) {
       return loadPlate(config, node, attrs.plate);
@@ -148,10 +147,8 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
       // Update config axis_labels if present in multiscales
       config.axis_labels = attrs.multiscales[0].axes;
     }
-  } else if (node instanceof ZarrArray) {
-    data = [node];
   } else {
-    throw new Error('Missing Attrs.');
+    data = [node];
   }
 
   const labels = getAxisLabels(data[0], config.axis_labels);

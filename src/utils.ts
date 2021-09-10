@@ -26,25 +26,21 @@ export const CYMRGB = Object.values(COLORS).slice(0, -2);
 async function normalizeStore(source: string | Store) {
   if (typeof source === 'string') {
     let store: AsyncStore<ArrayBuffer>;
-
     if (source.endsWith('.json')) {
       // import custom store implementation
       const [{ ReferenceStore }, json] = await Promise.all([
         import('reference-spec-reader'),
         fetch(source).then((res) => res.json()),
       ]);
-
       store = ReferenceStore.fromJSON(json);
     } else {
       store = new HTTPStore(source);
     }
-
     // Wrap remote stores in a cache
     // see https://github.com/hms-dbmi/vizarr/pull/100#issuecomment-893493514
     // return new LRUCacheStore(store);
     return store;
   }
-
   return source;
 }
 
@@ -134,8 +130,7 @@ export function fitBounds(
 type Array16 = [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number];
 
 function isArray16(o: unknown): o is Array16 {
-  if (!Array.isArray(o)) return false;
-  return o.length === 16 && o.every((i) => typeof i === 'number');
+  return Array.isArray(o) && o.length === 16 && o.every((i) => typeof i === 'number');
 }
 
 export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
@@ -154,8 +149,18 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
   return matrix;
 }
 
-export async function decodeAttrs<A>(attrs: ZarrGroup['attrs'], type: t.Decoder<unknown, A>) {
+export async function decodeAttrs<A>(attrs: ZarrGroup['attrs'], type: { name?: string } & t.Decoder<unknown, A>) {
   const ma = type.decode(await attrs.asObject());
-  if (isLeft(ma)) throw new Error('');
+  if (isLeft(ma)) {
+    const errs = ma.left
+      .filter((err) => err.value !== undefined)
+      .map((err) => {
+        const last = err.context[err.context.length - 1];
+        return `got ${JSON.stringify(last.actual)} for ${JSON.stringify(last.key)} for ${JSON.stringify(
+          last.type.name
+        )}`;
+      });
+    throw new Error(`Failed to validate ${type.name}.\n${errs.join('\n')}`);
+  }
   return ma.right;
 }
