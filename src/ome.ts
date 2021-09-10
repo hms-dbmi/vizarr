@@ -133,10 +133,17 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   const { datasets } = imgAttrs.multiscales[0];
   const resolution = datasets[datasets.length - 1].path;
 
+  async function getImgPath(wellPath:string) {
+    // This loads .zattrs for each well but also tries to load .zarray (404) and .zgroup
+    const wellAttrs = await grp.getItem(wellPath).then((g) => g.attrs.asObject());
+    return join(wellPath, wellAttrs.well.images[0].path);
+  }
+  const wellImagePaths = await Promise.all(wellPaths.map(getImgPath));
+
   // Create loader for every Well. Some loaders may be undefined if Wells are missing.
   const mapper = ([key, path]: string[]) => grp.getItem(path).then((arr) => [key, arr]) as Promise<[string, ZarrArray]>;
   const promises = await pMap(
-    wellPaths.map((p) => [p, join(p, imgPath, resolution)]),
+    wellImagePaths.map((p) => [p, join(p, resolution)]),
     mapper,
     { concurrency: 10 }
   );
