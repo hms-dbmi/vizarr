@@ -1,3 +1,4 @@
+import { isRight } from 'fp-ts/lib/Either';
 import { DTYPE_VALUES, ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
 import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
 import GridLayer from './gridLayer';
@@ -23,7 +24,10 @@ import {
   parseMatrix,
   range,
   RGB,
+  decodeAttrs,
 } from './utils';
+
+import * as Ome from './ome-types';
 
 function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<string[]>[], max: number): SourceData {
   const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
@@ -46,7 +50,7 @@ function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<st
 }
 
 function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<string[]>[], max: number): SourceData {
-  const { names, channel_axis, name, model_matrix, opacity = 1, colormap = '' } = config;
+  const { names, channel_axis, name, opacity = 1, colormap = '' } = config;
   let { contrast_limits, visibilities, colors } = config;
   const n = data[0].shape[channel_axis as number];
   for (const channelProp of [contrast_limits, visibilities, names, colors]) {
@@ -106,10 +110,11 @@ function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<stri
 
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
   const node = await open(config.source);
+  const maybeAttrs = Ome.Attrs.decode(await node.attrs.asObject());
   let data: ZarrArray[];
 
-  if (node instanceof ZarrGroup) {
-    const attrs = (await node.attrs.asObject()) as Ome.Attrs;
+  if (node instanceof ZarrGroup && isRight(maybeAttrs)) {
+    const attrs = maybeAttrs.right;
 
     if ('plate' in attrs) {
       return loadPlate(config, node, attrs.plate);
@@ -128,7 +133,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
       // if url is to a plate/acquisition/ check parent dir for 'plate' zattrs
       const parentUrl = node.store.url.slice(0, node.store.url.lastIndexOf('/'));
       const parent = await openGroup(new HTTPStore(parentUrl));
-      const parentAttrs = (await parent.attrs.asObject()) as Ome.Attrs;
+      const parentAttrs = await decodeAttrs(parent.attrs, Ome.Attrs);
       if ('plate' in parentAttrs) {
         return loadPlate(config, parent, parentAttrs.plate);
       }
@@ -143,8 +148,10 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
       // Update config axis_labels if present in multiscales
       config.axis_labels = attrs.multiscales[0].axes;
     }
-  } else {
+  } else if (node instanceof ZarrArray) {
     data = [node];
+  } else {
+    throw new Error('Missing Attrs.');
   }
 
   const labels = getAxisLabels(data[0], config.axis_labels);

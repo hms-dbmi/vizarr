@@ -31,7 +31,6 @@ function AcquisitionController({ sourceAtom }: ControllerProps) {
             Filter by Acquisition
           </option>
           {acquisitions.map((acq) => {
-            acq = acq as Ome.Acquisition;
             return (
               <option value={acq.id} key={acq.id}>
                 Acquisition: {acq.name}

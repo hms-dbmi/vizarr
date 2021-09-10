@@ -4,6 +4,10 @@ import type { AsyncStore, Store } from 'zarr/types/storage/types';
 import { Matrix4 } from '@math.gl/core/dist/esm';
 // import { LRUCacheStore } from './lru-store';
 
+import { isLeft } from 'fp-ts/lib/Either';
+import type * as t from 'io-ts';
+import type * as Ome from './ome-types';
+
 export const MAX_CHANNELS = 6;
 
 export const COLORS = {
@@ -54,7 +58,7 @@ export async function open(source: string | Store) {
   });
 }
 
-export async function loadMultiscales(grp: ZarrGroup, multiscales: Ome.Multiscale[]) {
+export async function loadMultiscales(grp: ZarrGroup, multiscales: t.TypeOf<typeof Ome.Multiscale>[]) {
   const { datasets } = multiscales[0] || [{ path: '0' }];
   const nodes = await Promise.all(datasets.map(({ path }) => grp.getItem(path)));
   if (nodes.every((node): node is ZarrArray => node instanceof ZarrArray)) {
@@ -148,4 +152,10 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
     console.warn(msg);
   }
   return matrix;
+}
+
+export async function decodeAttrs<A>(attrs: ZarrGroup['attrs'], type: t.Decoder<unknown, A>) {
+  const ma = type.decode(await attrs.asObject());
+  if (isLeft(ma)) throw new Error('');
+  return ma.right;
 }
