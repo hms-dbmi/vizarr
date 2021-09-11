@@ -219,16 +219,16 @@ export async function loadOmeroMultiscales(
 
   const loader = data.map((arr) => new ZarrPixelSource(arr, axis_labels, tileSize));
   return {
+    ...meta,
+    name: meta.name ?? name,
     loader: loader,
     axis_labels,
-    name: meta.name ?? name,
     model_matrix: parseMatrix(config.model_matrix),
     defaults: {
       selection: meta.defaultSelection,
       colormap,
       opacity,
     },
-    ...meta,
   };
 }
 
