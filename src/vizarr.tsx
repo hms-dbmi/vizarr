@@ -7,8 +7,9 @@ import Viewer from './components/Viewer';
 import Menu from './components/Menu';
 
 import { version } from '../package.json';
+import { formatValidationErrors } from 'io-ts-reporters';
 import { pipe } from 'fp-ts/lib/function';
-import { fold } from 'fp-ts/lib/Either';
+import { fold, mapLeft } from 'fp-ts/lib/Either';
 
 function App() {
   const setSourceInfo = useUpdateAtom(sourceInfoAtom);
@@ -18,10 +19,10 @@ function App() {
     const { createSourceData } = await import('./io');
     const config = pipe(
       ImageLayerConfig.decode(userConfig),
+      mapLeft(formatValidationErrors),
       fold(
         (errs) => {
-          const msg = `User config contains ${errs.length} error(s).`;
-          console.warn(JSON.stringify(errs));
+          const msg = `User config contains ${errs.length} error(s).\n${errs.join('\n')}`;
           throw new Error(msg);
         },
         (v) => v

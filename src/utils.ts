@@ -151,9 +151,8 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
   return matrix;
 }
 
-const errMapper = mapLeft(formatValidationErrors);
 export async function decodeAttrs<A>(attrs: ZarrGroup['attrs'], type: { name?: string } & t.Decoder<unknown, A>) {
-  const ma = pipe(await attrs.asObject(), type.decode, errMapper);
+  const ma = pipe(type.decode(await attrs.asObject()), mapLeft(formatValidationErrors));
   if (isLeft(ma)) {
     throw new Error(`Failed to validate ${type.name}.\n${ma.left.join('\n')}`);
   }
