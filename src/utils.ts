@@ -4,9 +4,11 @@ import type { AsyncStore, Store } from 'zarr/types/storage/types';
 import { Matrix4 } from '@math.gl/core/dist/esm';
 // import { LRUCacheStore } from './lru-store';
 
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft, mapLeft } from 'fp-ts/lib/Either';
+import { formatValidationErrors } from 'io-ts-reporters';
 import type * as t from 'io-ts';
 import type * as Ome from './ome-types';
+import { pipe } from 'fp-ts/lib/function';
 
 export const MAX_CHANNELS = 6;
 
@@ -149,18 +151,11 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
   return matrix;
 }
 
+const errMapper = mapLeft(formatValidationErrors);
 export async function decodeAttrs<A>(attrs: ZarrGroup['attrs'], type: { name?: string } & t.Decoder<unknown, A>) {
-  const ma = type.decode(await attrs.asObject());
+  const ma = pipe(await attrs.asObject(), type.decode, errMapper);
   if (isLeft(ma)) {
-    const errs = ma.left
-      .filter((err) => err.value !== undefined)
-      .map((err) => {
-        const last = err.context[err.context.length - 1];
-        return `got ${JSON.stringify(last.actual)} for ${JSON.stringify(last.key)} for ${JSON.stringify(
-          last.type.name
-        )}`;
-      });
-    throw new Error(`Failed to validate ${type.name}.\n${errs.join('\n')}`);
+    throw new Error(`Failed to validate ${type.name}.\n${ma.left.join('\n')}`);
   }
   return ma.right;
 }
