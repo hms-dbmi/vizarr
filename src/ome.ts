@@ -8,12 +8,11 @@ import * as t from 'io-ts';
 import * as Ome from './ome-types';
 
 export async function loadWell(
-  config: ImageLayerConfig,
+  config: t.TypeOf<typeof ImageLayerConfig>,
   grp: ZarrGroup,
   wellAttrs: t.TypeOf<typeof Ome.Well>
 ): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
-  const acquisitionId: number | undefined = config.acquisition ? parseInt(config.acquisition) : undefined;
   let acquisitions: t.TypeOf<typeof Ome.Acquisition>[] = [];
 
   if (!wellAttrs?.images) {
@@ -39,8 +38,8 @@ export async function loadWell(
     acquisitions = plateAttrs.plate.acquisitions ?? [];
 
     // filter imagePaths by acquisition
-    if (acquisitionId && acqIds.includes(acquisitionId)) {
-      images = images.filter((img) => img.acquisition === acquisitionId);
+    if (config.acquisition && acqIds.includes(config.acquisition)) {
+      images = images.filter((img) => img.acquisition === config.acquisition);
     }
   }
 
@@ -87,7 +86,7 @@ export async function loadWell(
   if (acquisitions.length > 0) {
     // To show acquisition chooser in UI
     sourceData.acquisitions = acquisitions;
-    sourceData.acquisitionId = acquisitionId || -1;
+    sourceData.acquisitionId = config.acquisition || -1;
   }
 
   sourceData.rows = rows;
@@ -116,7 +115,7 @@ export async function loadWell(
 }
 
 export async function loadPlate(
-  config: ImageLayerConfig,
+  config: t.TypeOf<typeof ImageLayerConfig>,
   grp: ZarrGroup,
   plateAttrs: t.TypeOf<typeof Ome.Plate>
 ): Promise<SourceData> {
@@ -208,7 +207,7 @@ export async function loadPlate(
 }
 
 export async function loadOmeroMultiscales(
-  config: ImageLayerConfig,
+  config: t.TypeOf<typeof ImageLayerConfig>,
   grp: ZarrGroup,
   attrs: { multiscales: t.TypeOf<typeof Ome.Multiscale>[]; omero: t.TypeOf<typeof Ome.Omero> }
 ): Promise<SourceData> {
