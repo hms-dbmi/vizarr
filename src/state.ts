@@ -44,37 +44,34 @@ const ZarrStore = new t.Type<ZarrArray['store'], ZarrArray['store'], unknown>(
   t.identity
 );
 
-const OnClick = new t.Type<(info: any) => void, (info: any) => void, unknown>(
-  'OnClick',
-  (u): u is (info: any) => void => typeof u === 'function',
-  (u, c) => (typeof u === 'function' ? t.success(u as (info: any) => void) : t.failure(u, c)),
-  t.identity
-);
+const typeOrTypeFromJsonString = <A>(type: t.Type<A, any>) => t.union([type, t.string.pipe(JsonFromString.pipe(type))]);
 
 const BaseConfig = t.intersection([
   t.type({ source: t.union([t.string, ZarrStore]) }),
   t.partial({
-    axis_labels: t.union([t.array(t.string), t.string.pipe(JsonFromString.pipe(t.array(t.string)))]),
+    axis_labels: typeOrTypeFromJsonString(t.array(t.string)),
     name: t.string,
     colormap: t.string,
     opacity: t.union([t.number, NumberFromString]),
     acquisition: t.union([t.number, NumberFromString]),
     model_matrix: t.string,
-    onClick: OnClick,
+    onClick: new t.Type<(info: any) => void, (info: any) => void, unknown>(
+      'OnClick',
+      (u): u is (info: any) => void => typeof u === 'function',
+      (u, c) => (typeof u === 'function' ? t.success(u as (info: any) => void) : t.failure(u, c)),
+      t.identity
+    ),
   }),
 ]);
 
 export const MultiChannelConfig = t.intersection([
   BaseConfig,
   t.partial({
-    colors: t.union([t.array(t.string), t.string.pipe(JsonFromString.pipe(t.array(t.string)))]),
+    colors: typeOrTypeFromJsonString(t.array(t.string)),
     channel_axis: t.union([t.number, NumberFromString]),
-    contrast_limits: t.union([
-      t.array(t.array(t.number)),
-      t.string.pipe(JsonFromString.pipe(t.array(t.array(t.number)))),
-    ]),
-    names: t.union([t.array(t.string), t.string.pipe(JsonFromString.pipe(t.array(t.string)))]),
-    visibilities: t.union([t.array(t.boolean), t.string.pipe(JsonFromString.pipe(t.array(t.boolean)))]),
+    contrast_limits: typeOrTypeFromJsonString(t.array(t.array(t.number))),
+    names: typeOrTypeFromJsonString(t.array(t.string)),
+    visibilities: typeOrTypeFromJsonString(t.array(t.boolean)),
   }),
 ]);
 
@@ -82,7 +79,7 @@ export const SingleChannelConfig = t.intersection([
   BaseConfig,
   t.partial({
     color: t.string,
-    contrast_limits: t.union([t.array(t.number), t.string.pipe(JsonFromString.pipe(t.array(t.number)))]),
+    contrast_limits: typeOrTypeFromJsonString(t.array(t.number)),
     visibility: t.union([t.boolean, BooleanFromString]),
   }),
 ]);
