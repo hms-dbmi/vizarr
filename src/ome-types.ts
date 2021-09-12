@@ -15,7 +15,7 @@ const Channel = t.type(
   'Ome.Channel'
 );
 
-export const Omero = t.intersection(
+const Omero = t.intersection(
   [
     t.type({
       id: t.number,
@@ -31,13 +31,15 @@ export const Omero = t.intersection(
   ],
   'Ome.Omero'
 );
+type Omero = t.TypeOf<typeof Omero>;
 
-export const Multiscale = t.intersection(
+const Multiscale = t.intersection(
   [t.type({ datasets: t.array(t.type({ path: t.string })) }), t.partial({ version: Version, axes: t.array(t.string) })],
   'Ome.Multiscale'
 );
+type Multiscale = t.TypeOf<typeof Multiscale>;
 
-export const Acquisition = t.intersection(
+const Acquisition = t.intersection(
   [
     t.type({ id: t.number }),
     t.partial({
@@ -49,8 +51,9 @@ export const Acquisition = t.intersection(
   ],
   'Ome.Acquisition'
 );
+type Acquisition = t.TypeOf<typeof Acquisition>;
 
-export const Plate = t.intersection(
+const Plate = t.intersection(
   [
     t.type({
       columns: t.array(t.type({ name: t.string })),
@@ -64,21 +67,23 @@ export const Plate = t.intersection(
   ],
   'Ome.Plate'
 );
+type Plate = t.TypeOf<typeof Plate>;
 
-export const Well = t.type(
+const Well = t.type(
   {
     images: t.array(t.intersection([t.type({ path: t.string }), t.partial({ acquisition: t.number })])),
     version: Version,
   },
   'Ome.Well'
 );
+type Well = t.TypeOf<typeof Well>;
 
-export const Attrs = t.union(
-  [
-    t.type({ multiscales: t.array(Multiscale) }),
-    t.type({ omero: Omero, multiscales: t.array(Multiscale) }),
-    t.type({ plate: Plate }),
-    t.type({ well: Well }),
-  ],
-  'Ome.Attrs'
-);
+const WellAttrs = t.type({ well: Well });
+const MultiscalesAttrs = t.type({ multiscales: t.array(Multiscale) });
+const OmeroAttrs = t.intersection([t.type({ omero: Omero }), MultiscalesAttrs]);
+const PlateAttrs = t.type({ plate: Plate });
+
+const Attrs = t.union([WellAttrs, MultiscalesAttrs, OmeroAttrs, PlateAttrs], 'Ome.Attrs');
+type Attrs = t.TypeOf<typeof Attrs>;
+
+export { Omero, Well, Plate, Attrs, Acquisition, Multiscale, WellAttrs, MultiscalesAttrs, OmeroAttrs, PlateAttrs };

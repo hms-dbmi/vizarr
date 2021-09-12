@@ -4,20 +4,11 @@ import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
 import { join, loadMultiscales, guessTileSize, range, parseMatrix, decodeAttrs } from './utils';
 
-import * as t from 'io-ts';
 import * as Ome from './ome-types';
 
-export async function loadWell(
-  config: t.TypeOf<typeof ImageLayerConfig>,
-  grp: ZarrGroup,
-  wellAttrs: t.TypeOf<typeof Ome.Well>
-): Promise<SourceData> {
+export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, well: Ome.Well): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
-  let acquisitions: t.TypeOf<typeof Ome.Acquisition>[] = [];
-
-  if (!wellAttrs?.images) {
-    throw Error(`Well .zattrs missing images`);
-  }
+  let acquisitions: Ome.Acquisition[] = [];
 
   if (!(grp.store instanceof HTTPStore)) {
     throw Error('Store must be an HTTPStore to open well.');
@@ -25,7 +16,7 @@ export async function loadWell(
 
   const [row, col] = grp.store.url.split('/').filter(Boolean).slice(-2);
 
-  let { images } = wellAttrs;
+  let { images } = well;
 
   // Do we have more than 1 Acquisition?
   const acqIds = images.flatMap((img) => (img.acquisition ? [img.acquisition] : []));
@@ -34,7 +25,7 @@ export async function loadWell(
     // Need to get acquisitions metadata from parent Plate
     const plateUrl = grp.store.url.replace(`${row}/${col}`, '');
     const plate = await openGroup(new HTTPStore(plateUrl));
-    const plateAttrs = await decodeAttrs(plate.attrs, t.type({ plate: Ome.Plate }));
+    const plateAttrs = await decodeAttrs(plate.attrs, Ome.PlateAttrs);
     acquisitions = plateAttrs.plate.acquisitions ?? [];
 
     // filter imagePaths by acquisition
@@ -48,12 +39,9 @@ export async function loadWell(
   const rows = Math.ceil(imgPaths.length / cols);
 
   // Use first image for rendering settings, resolutions etc.
-  const imgAttrs = await decodeAttrs((await grp.getItem(imgPaths[0])).attrs, Ome.Attrs);
+  const imgAttrs = await decodeAttrs((await grp.getItem(imgPaths[0])).attrs, Ome.OmeroAttrs);
 
-  if (!('omero' in imgAttrs)) {
-    throw Error('Path for image is not valid.');
-  }
-  let resolution = imgAttrs.multiscales[0].datasets[0].path;
+  const resolution = imgAttrs.multiscales[0].datasets[0].path;
 
   // Create loader for every Image.
   const promises = imgPaths.map((p) => grp.getItem(join(p, resolution)));
@@ -114,34 +102,21 @@ export async function loadWell(
   return sourceData;
 }
 
-export async function loadPlate(
-  config: t.TypeOf<typeof ImageLayerConfig>,
-  grp: ZarrGroup,
-  plateAttrs: t.TypeOf<typeof Ome.Plate>
-): Promise<SourceData> {
-  if (!('columns' in plateAttrs) || !('rows' in plateAttrs)) {
-    throw Error(`Plate .zattrs missing columns or rows`);
-  }
-
-  const rows = plateAttrs.rows.map((row) => row.name);
-  const columns = plateAttrs.columns.map((row) => row.name);
+export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plate: Ome.Plate): Promise<SourceData> {
+  const rows = plate.rows.map((row) => row.name);
+  const columns = plate.columns.map((row) => row.name);
 
   // Fields are by index and we assume at least 1 per Well
-  const wellPaths = plateAttrs.wells.map((well) => well.path);
+  const wellPaths = plate.wells.map((well) => well.path);
 
   // Use first image as proxy for others.
-  const wellAttrs = await grp.getItem(wellPaths[0]).then((g) => decodeAttrs(g.attrs, Ome.Attrs));
+  const { well } = await grp.getItem(wellPaths[0]).then((g) => decodeAttrs(g.attrs, Ome.WellAttrs));
 
-  if (!('well' in wellAttrs)) {
-    throw Error('Path for image is not valid, not a well.');
-  }
+  const imgPath = well.images[0].path;
+  const imgAttrs = await grp
+    .getItem(join(wellPaths[0], imgPath))
+    .then((node) => decodeAttrs(node.attrs, Ome.OmeroAttrs));
 
-  const imgPath = wellAttrs.well.images[0].path;
-  const imgAttrs = await grp.getItem(join(wellPaths[0], imgPath)).then((node) => decodeAttrs(node.attrs, Ome.Attrs));
-
-  if (!('omero' in imgAttrs)) {
-    throw Error('Path for image is not valid.');
-  }
   // Lowest resolution is the 'path' of the last 'dataset' from the first multiscales
   const { datasets } = imgAttrs.multiscales[0];
   const resolution = datasets[datasets.length - 1].path;
@@ -179,7 +154,7 @@ export async function loadPlate(
       colormap: config.colormap ?? '',
       opacity: config.opacity ?? 1,
     },
-    name: plateAttrs.name || 'Plate',
+    name: plate.name || 'Plate',
     rows: rows.length,
     columns: columns.length,
   };
@@ -207,9 +182,9 @@ export async function loadPlate(
 }
 
 export async function loadOmeroMultiscales(
-  config: t.TypeOf<typeof ImageLayerConfig>,
+  config: ImageLayerConfig,
   grp: ZarrGroup,
-  attrs: { multiscales: t.TypeOf<typeof Ome.Multiscale>[]; omero: t.TypeOf<typeof Ome.Omero> }
+  attrs: { multiscales: Ome.Multiscale[]; omero: Ome.Omero }
 ): Promise<SourceData> {
   const { name, opacity = 1, colormap = '' } = config;
   const data = await loadMultiscales(grp, attrs.multiscales);
@@ -232,7 +207,7 @@ export async function loadOmeroMultiscales(
   };
 }
 
-function parseOmeroMeta({ rdefs, channels, name }: t.TypeOf<typeof Ome.Omero>, axis_labels: string[]) {
+function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axis_labels: string[]) {
   const t = rdefs.defaultT ?? 0;
   const z = rdefs.defaultZ ?? 0;
 
@@ -265,7 +240,7 @@ function parseOmeroMeta({ rdefs, channels, name }: t.TypeOf<typeof Ome.Omero>, a
   };
 }
 
-function getOmeAxisLabels(multiscales: t.TypeOf<typeof Ome.Multiscale>[]): [...string[], 'y', 'x'] {
+function getOmeAxisLabels(multiscales: Ome.Multiscale[]): [...string[], 'y', 'x'] {
   const default_axes = ['t', 'c', 'z', 'y', 'x']; // v0.1 & v0.2
   return (multiscales[0].axes || default_axes) as [...string[], 'y', 'x'];
 }

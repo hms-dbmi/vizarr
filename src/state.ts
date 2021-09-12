@@ -32,15 +32,13 @@ interface ViewState {
   default?: boolean;
 }
 
-const isStore = (u: any): u is ZarrArray['store'] => {
-  const isObject = typeof u === 'object' && u !== null;
-  return isObject && u.getItem === 'function' && u.containsItem === 'function';
-};
+// Imjoy objects aren't enumerable, so this type guard just ensures a primative isn't provided.
+const isObject = (u: unknown): u is ZarrArray['store'] => typeof u === 'object' && u !== null;
 
 const ZarrStore = new t.Type<ZarrArray['store'], ZarrArray['store'], unknown>(
   'ZarrStore',
-  isStore,
-  (input, context) => (isStore(input) ? t.success(input) : t.failure(input, context)),
+  isObject,
+  (u, c) => (isObject(u) ? t.success(u) : t.failure(u, c)),
   t.identity
 );
 
@@ -64,7 +62,7 @@ const BaseConfig = t.intersection([
   }),
 ]);
 
-export const MultiChannelConfig = t.intersection([
+const MultiChannelConfig = t.intersection([
   BaseConfig,
   t.partial({
     colors: typeOrTypeFromJsonString(t.array(t.string)),
@@ -74,8 +72,9 @@ export const MultiChannelConfig = t.intersection([
     visibilities: typeOrTypeFromJsonString(t.array(t.boolean)),
   }),
 ]);
+type MultiChannelConfig = t.TypeOf<typeof MultiChannelConfig>;
 
-export const SingleChannelConfig = t.intersection([
+const SingleChannelConfig = t.intersection([
   BaseConfig,
   t.partial({
     color: t.string,
@@ -83,8 +82,12 @@ export const SingleChannelConfig = t.intersection([
     visibility: t.union([t.boolean, BooleanFromString]),
   }),
 ]);
+type SingleChannelConfig = t.TypeOf<typeof SingleChannelConfig>;
 
-export const ImageLayerConfig = t.union([MultiChannelConfig, SingleChannelConfig]);
+const ImageLayerConfig = t.union([MultiChannelConfig, SingleChannelConfig]);
+type ImageLayerConfig = t.TypeOf<typeof ImageLayerConfig>;
+
+export { SingleChannelConfig, MultiChannelConfig, ImageLayerConfig };
 
 export interface GridLoader {
   loader: ZarrPixelSource<string[]>;

@@ -2,14 +2,8 @@ import { DTYPE_VALUES, ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from 
 import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
 import GridLayer from './gridLayer';
 import { loadOmeroMultiscales, loadPlate, loadWell } from './ome';
-import type {
-  ImageLayerConfig,
-  LayerState,
-  MultiChannelConfig,
-  SingleChannelConfig,
-  SourceData,
-  LayerCtr,
-} from './state';
+import { MultiChannelConfig, SingleChannelConfig } from './state';
+import type { ImageLayerConfig, LayerState, SourceData, LayerCtr } from './state';
 import {
   COLORS,
   CYMRGB,
@@ -26,14 +20,9 @@ import {
   decodeAttrs,
 } from './utils';
 
-import type * as t from 'io-ts';
 import * as Ome from './ome-types';
 
-function loadSingleChannel(
-  config: t.TypeOf<typeof SingleChannelConfig>,
-  data: ZarrPixelSource<string[]>[],
-  max: number
-): SourceData {
+function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<string[]>[], max: number): SourceData {
   const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
   return {
     loader: data,
@@ -53,11 +42,7 @@ function loadSingleChannel(
   };
 }
 
-function loadMultiChannel(
-  config: t.TypeOf<typeof MultiChannelConfig>,
-  data: ZarrPixelSource<string[]>[],
-  max: number
-): SourceData {
+function loadMultiChannel(config: MultiChannelConfig, data: ZarrPixelSource<string[]>[], max: number): SourceData {
   const { names, channel_axis, name, opacity = 1, colormap = '' } = config;
   let { contrast_limits, visibilities, colors } = config;
   const n = data[0].shape[channel_axis as number];
@@ -116,7 +101,7 @@ function loadMultiChannel(
   };
 }
 
-export async function createSourceData(config: t.TypeOf<typeof ImageLayerConfig>): Promise<SourceData> {
+export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
   const node = await open(config.source);
   let data: ZarrArray[];
 
@@ -170,14 +155,17 @@ export async function createSourceData(config: t.TypeOf<typeof ImageLayerConfig>
 
   // If explicit channel axis is provided, try to load as multichannel.
   if ('channel_axis' in config || labels.includes('c')) {
-    config = config as t.TypeOf<typeof MultiChannelConfig>;
-    config.channel_axis = config.channel_axis ?? labels.indexOf('c');
-    return loadMultiChannel(config, loader, max);
+    const newConfig = {
+      ...config,
+      channel_axis: 'channel_axis' in config ? config.channel_axis : labels.indexOf('c'),
+    };
+    if (MultiChannelConfig.is(newConfig)) {
+      return loadMultiChannel(newConfig, loader, max);
+    }
   }
 
-  const nDims = base.shape.length;
-  if (nDims === 2 || !('channel_axis' in config)) {
-    return loadSingleChannel(config as t.TypeOf<typeof SingleChannelConfig>, loader, max);
+  if (SingleChannelConfig.is(config)) {
+    return loadSingleChannel(config, loader, max);
   }
 
   throw Error('Failed to load image.');
