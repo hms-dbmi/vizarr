@@ -42,7 +42,7 @@ const ZarrStore = new t.Type<ZarrArray['store'], ZarrArray['store'], unknown>(
   t.identity
 );
 
-const typeOrTypeFromJsonString = <A>(type: t.Type<A, any>) => t.union([type, t.string.pipe(JsonFromString.pipe(type))]);
+const typeOrTypeFromJsonString = <A>(type: t.Type<A, any>) => t.union([type, t.string.pipe(JsonFromString).pipe(type)]);
 
 const BaseConfig = t.intersection([
   t.type({ source: t.union([t.string, ZarrStore]) }),
