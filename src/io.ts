@@ -1,5 +1,5 @@
 import { DTYPE_VALUES, ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
-import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
+import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
 import GridLayer from './gridLayer';
 import { loadOmeroMultiscales, loadPlate, loadWell } from './ome';
 import type {
@@ -123,11 +123,11 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
       return loadOmeroMultiscales(config, node, attrs);
     }
 
-    if (Object.keys(attrs).length === 0 && node.store instanceof HTTPStore) {
+    if (Object.keys(attrs).length === 0 && node.path) {
       // No rootAttrs in this group.
       // if url is to a plate/acquisition/ check parent dir for 'plate' zattrs
-      const parentUrl = node.store.url.slice(0, node.store.url.lastIndexOf('/'));
-      const parent = await openGroup(new HTTPStore(parentUrl));
+      const parentPath = node.path.slice(0, node.path.lastIndexOf('/'));
+      const parent = await openGroup(node.store, parentPath);
       const parentAttrs = (await parent.attrs.asObject()) as Ome.Attrs;
       if ('plate' in parentAttrs) {
         return loadPlate(config, parent, parentAttrs.plate);

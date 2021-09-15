@@ -2,7 +2,7 @@ import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray } from '
 import type { Group as ZarrGroup } from 'zarr';
 import type { AsyncStore, Store } from 'zarr/types/storage/types';
 import { Matrix4 } from '@math.gl/core/dist/esm';
-// import { LRUCacheStore } from './lru-store';
+import { LRUCacheStore } from './lru-store';
 
 export const MAX_CHANNELS = 6;
 
@@ -20,6 +20,7 @@ export const RGB = [COLORS.red, COLORS.green, COLORS.blue];
 export const CYMRGB = Object.values(COLORS).slice(0, -2);
 
 async function normalizeStore(source: string | Store) {
+  let path;
   if (typeof source === 'string') {
     let store: AsyncStore<ArrayBuffer>;
 
@@ -32,21 +33,21 @@ async function normalizeStore(source: string | Store) {
 
       store = ReferenceStore.fromJSON(json);
     } else {
-      store = new HTTPStore(source);
+      const url = new URL(source);
+      store = new HTTPStore(url.origin);
+      path = url.pathname.slice(1);
     }
 
     // Wrap remote stores in a cache
-    // see https://github.com/hms-dbmi/vizarr/pull/100#issuecomment-893493514
-    // return new LRUCacheStore(store);
-    return store;
+    return { store: new LRUCacheStore(store), path };
   }
 
-  return source;
+  return { store: source, path };
 }
 
 export async function open(source: string | Store) {
-  const store = await normalizeStore(source);
-  return openGroup(store).catch((err) => {
+  const { store, path } = await normalizeStore(source);
+  return openGroup(store, path).catch((err) => {
     if (err instanceof ContainsArrayError) {
       return openArray({ store });
     }
