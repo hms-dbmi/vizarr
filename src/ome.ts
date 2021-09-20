@@ -2,7 +2,14 @@ import { ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
 import { Group as ZarrGroup, HTTPStore, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
-import { join, loadMultiscales, guessTileSize, range, parseMatrix } from './utils';
+import {
+  getAttrsOnly,
+  guessTileSize,
+  join,
+  loadMultiscales,
+  parseMatrix,
+  range
+} from './utils';
 
 export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAttrs: Ome.Well): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
@@ -119,7 +126,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   const wellPaths = plateAttrs.wells.map((well) => well.path);
 
   // Use first image as proxy for others.
-  const wellAttrs = (await grp.getItem(wellPaths[0]).then((g) => g.attrs.asObject())) as Ome.Attrs;
+  const wellAttrs = await getAttrsOnly<{ well: Ome.Well }>(grp, wellPaths[0]);
   if (!('well' in wellAttrs)) {
     throw Error('Path for image is not valid, not a well.');
   }
@@ -134,8 +141,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   const resolution = datasets[datasets.length - 1].path;
 
   async function getImgPath(wellPath:string) {
-    // This loads .zattrs for each well but also tries to load .zarray (404) and .zgroup
-    const wellAttrs = await grp.getItem(wellPath).then((g) => g.attrs.asObject());
+    const wellAttrs = await getAttrsOnly<{ well: Ome.Well }>(grp, wellPath);
     return join(wellPath, wellAttrs.well.images[0].path);
   }
   const wellImagePaths = await Promise.all(wellPaths.map(getImgPath));
