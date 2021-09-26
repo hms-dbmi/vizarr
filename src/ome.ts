@@ -2,14 +2,7 @@ import { ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
 import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
-import {
-  getAttrsOnly,
-  guessTileSize,
-  join,
-  loadMultiscales,
-  parseMatrix,
-  range
-} from './utils';
+import { getAttrsOnly, guessTileSize, join, loadMultiscales, parseMatrix, range } from './utils';
 
 export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAttrs: Ome.Well): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
@@ -140,7 +133,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   const { datasets } = imgAttrs.multiscales[0];
   const resolution = datasets[datasets.length - 1].path;
 
-  async function getImgPath(wellPath:string) {
+  async function getImgPath(wellPath: string) {
     const wellAttrs = await getAttrsOnly<{ well: Ome.Well }>(grp, wellPath);
     return join(wellPath, wellAttrs.well.images[0].path);
   }

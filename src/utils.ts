@@ -58,7 +58,7 @@ export async function open(source: string | Store) {
 const decoder = new TextDecoder();
 export function getAttrsOnly<T = unknown>(grp: ZarrGroup, path: string) {
   return (grp.store as AsyncStore<ArrayBuffer>)
-    .getItem(join(grp.path, path, ".zattrs"))
+    .getItem(join(grp.path, path, '.zattrs'))
     .then((b) => decoder.decode(b))
     .then((text) => JSON.parse(text) as T);
 }
