@@ -55,6 +55,14 @@ export async function open(source: string | Store) {
   });
 }
 
+const decoder = new TextDecoder();
+export function getAttrsOnly<T = unknown>(grp: ZarrGroup, path: string) {
+  return (grp.store as AsyncStore<ArrayBuffer>)
+    .getItem(join(grp.path, path, ".zattrs"))
+    .then((b) => decoder.decode(b))
+    .then((text) => JSON.parse(text) as T);
+}
+
 export async function loadMultiscales(grp: ZarrGroup, multiscales: Ome.Multiscale[]) {
   const { datasets } = multiscales[0] || [{ path: '0' }];
   const nodes = await Promise.all(datasets.map(({ path }) => grp.getItem(path)));
