@@ -28,7 +28,7 @@ function Content({ sourceAtom, layerAtom }: ControllerProps) {
       <Grid container direction="column">
         <AcquisitionController sourceAtom={sourceAtom} layerAtom={layerAtom} />
         <Grid>
-          <Grid container justify="space-between">
+          <Grid container justifyContent="space-between">
             <Grid item xs={3}>
               <Typography variant="caption">opacity:</Typography>
             </Grid>
@@ -39,7 +39,7 @@ function Content({ sourceAtom, layerAtom }: ControllerProps) {
         </Grid>
         <Divider />
         <AxisSliders sourceAtom={sourceAtom} layerAtom={layerAtom} />
-        <Grid container justify="space-between">
+        <Grid container justifyContent="space-between">
           <Grid item xs={3}>
             <Typography variant="caption">channels:</Typography>
           </Grid>

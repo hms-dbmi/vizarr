@@ -213,7 +213,6 @@ export async function loadOmeroMultiscales(
   return {
     loader: loader,
     axis_labels,
-    name: meta.name ?? name,
     model_matrix: parseMatrix(config.model_matrix),
     defaults: {
       selection: meta.defaultSelection,
@@ -221,6 +220,7 @@ export async function loadOmeroMultiscales(
       opacity,
     },
     ...meta,
+    name: meta.name ?? name,
   };
 }
 
