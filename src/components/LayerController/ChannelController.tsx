@@ -45,7 +45,7 @@ function ChannelController({ sourceAtom, layerAtom, channelIndex }: ControllerPr
   const label = names[nameIndex];
   return (
     <>
-      <Grid container justify="space-between" wrap="nowrap">
+      <Grid container justifyContent="space-between" wrap="nowrap">
         <Grid item xs={10}>
           <div style={{ width: 165, overflow: 'hidden', textOverflow: 'ellipsis' }}>
             <Typography variant="caption" noWrap>
@@ -57,7 +57,7 @@ function ChannelController({ sourceAtom, layerAtom, channelIndex }: ControllerPr
           <ChannelOptions sourceAtom={sourceAtom} layerAtom={layerAtom} channelIndex={channelIndex} />
         </Grid>
       </Grid>
-      <Grid container justify="space-between">
+      <Grid container justifyContent="space-between">
         <Grid item xs={2}>
           <IconButton
             style={{

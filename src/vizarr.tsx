@@ -51,8 +51,8 @@ function App() {
 
   useEffect(() => {
     async function initImjoy() {
-      const { default: imjoy } = await import('imjoy-rpc');
-      const api = await imjoy.setupRPC({
+      const { imjoyRPC } = await import('imjoy-rpc');
+      const api = await imjoyRPC.setupRPC({
         name: 'vizarr',
         description: 'A minimal, purely client-side program for viewing Zarr-based images with Viv & ImJoy.',
         version: version,

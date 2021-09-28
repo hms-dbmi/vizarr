@@ -5,7 +5,8 @@ import DeckGL from 'deck.gl';
 import { OrthographicView } from '@deck.gl/core';
 import type { Layer } from '@deck.gl/core';
 
-import { layerAtoms, LayerState, viewStateAtom } from '../state';
+import type { LayerState } from '../state';
+import { layerAtoms, viewStateAtom } from '../state';
 import { isInterleaved, fitBounds } from '../utils';
 
 function getLayerSize(props: LayerState['layerProps']) {

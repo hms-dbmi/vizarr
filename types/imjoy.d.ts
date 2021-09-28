@@ -5,13 +5,11 @@ declare module 'imjoy-rpc' {
     version: string;
   };
 
-  interface ExportedFunctions {
-    [name: string]: (props: any) => void;
-  }
-
   interface ImJoyAPI {
-    export: (funcs: ExportedFunctions) => void;
+    export: (funcs: Record<string, (...args: any[]) => void>) => void;
   }
 
-  async function setupRPC(props: ImJoySetupRPCProps): ImJoyAPI;
+  export const imjoyRPC = {
+    setupRPC(props: ImJoySetupRPCProps): Promise<ImJoyAPI>;,
+  };
 }

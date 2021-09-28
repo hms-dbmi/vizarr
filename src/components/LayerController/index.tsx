@@ -5,7 +5,8 @@ import { withStyles } from '@material-ui/styles';
 
 import Header from './Header';
 import Content from './Content';
-import { ControllerProps, layerFamilyAtom } from '../../state';
+import type { ControllerProps } from '../../state';
+import { layerFamilyAtom } from '../../state';
 
 const Accordion = withStyles({
   root: {

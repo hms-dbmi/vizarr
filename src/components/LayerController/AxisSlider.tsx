@@ -61,7 +61,7 @@ function AxisSlider({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<P
   return (
     <>
       <Grid>
-        <Grid container justify="space-between">
+        <Grid container justifyContent="space-between">
           <Grid item xs={10}>
             <div style={{ width: 165, overflow: 'hidden', textOverflow: 'ellipsis' }}>
               <Typography variant="caption" noWrap>
@@ -73,7 +73,7 @@ function AxisSlider({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<P
             <DimensionOptions sourceAtom={sourceAtom} layerAtom={layerAtom} axisIndex={axisIndex} max={max} />
           </Grid>
         </Grid>
-        <Grid container justify="space-between">
+        <Grid container justifyContent="space-between">
           <Grid item xs={12}>
             <DenseSlider
               value={value}
