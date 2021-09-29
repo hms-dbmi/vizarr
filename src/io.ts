@@ -1,7 +1,7 @@
 import { DTYPE_VALUES, ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
 import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
 import GridLayer from './gridLayer';
-import { loadOmeroMultiscales, loadPlate, loadWell } from './ome';
+import { loadCollection, loadOmeroMultiscales, loadWell } from './ome';
 import type {
   ImageLayerConfig,
   LayerState,
@@ -111,8 +111,8 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   if (node instanceof ZarrGroup) {
     const attrs = (await node.attrs.asObject()) as Ome.Attrs;
 
-    if ('plate' in attrs) {
-      return loadPlate(config, node, attrs.plate);
+    if ('collection' in attrs || 'plate' in attrs) {
+      return loadCollection(config, node, attrs);
     }
 
     if ('well' in attrs) {

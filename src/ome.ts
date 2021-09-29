@@ -107,25 +107,78 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   return sourceData;
 }
 
-export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateAttrs: Ome.Plate): Promise<SourceData> {
-  if (!('columns' in plateAttrs) || !('rows' in plateAttrs)) {
-    throw Error(`Plate .zattrs missing columns or rows`);
+async function getImagePaths(grp: ZarrGroup, omeAttrs: Ome.Attrs): Promise<string[]> {
+  if ('collection' in omeAttrs) {
+    return Object.keys(omeAttrs.collection.images);
+  } else if ('plate' in omeAttrs) {
+    // Load each Well to get a path/to/image/
+    const wellPaths = omeAttrs.plate.wells.map((well) => well.path);
+    async function getImgPath(wellPath: string) {
+      const wellAttrs = await getAttrsOnly<{ well: Ome.Well }>(grp, wellPath);
+      // Fields are by index and we assume at least 1 per Well
+      return join(wellPath, wellAttrs.well.images[0].path);
+    }
+    const imgPaths = await Promise.all(wellPaths.map(getImgPath));
+    return imgPaths;
+  } else {
+    return [];
+  }
+}
+
+export async function loadCollection(
+  config: ImageLayerConfig,
+  grp: ZarrGroup,
+  omeAttrs: Ome.Attrs
+): Promise<SourceData> {
+  const imagePaths = await getImagePaths(grp, omeAttrs);
+
+  let displayName = 'Collection';
+  let rows: string[];
+  let columns: string[];
+  let colCount: number;
+  let rowCount: number;
+  if ('plate' in omeAttrs) {
+    const plateAttrs = omeAttrs.plate;
+    if (!('columns' in plateAttrs) || !('rows' in plateAttrs)) {
+      throw Error(`Plate .zattrs missing columns or rows`);
+    }
+    rows = plateAttrs.rows.map((row) => row.name);
+    columns = plateAttrs.columns.map((row) => row.name);
+    displayName = plateAttrs.name || 'Collection';
+    colCount = columns.length;
+    rowCount = rows.length;
+  } else {
+    const imgCount = imagePaths.length;
+    colCount = Math.ceil(Math.sqrt(imgCount));
+    rowCount = Math.ceil(imgCount / colCount);
   }
 
-  const rows = plateAttrs.rows.map((row) => row.name);
-  const columns = plateAttrs.columns.map((row) => row.name);
-
-  // Fields are by index and we assume at least 1 per Well
-  const wellPaths = plateAttrs.wells.map((well) => well.path);
-
-  // Use first image as proxy for others.
-  const wellAttrs = await getAttrsOnly<{ well: Ome.Well }>(grp, wellPaths[0]);
-  if (!('well' in wellAttrs)) {
-    throw Error('Path for image is not valid, not a well.');
+  function getImgSource(source: string, row: number, column: number) {
+    if (rows && columns) {
+      return join(source, rows[row], columns[column]);
+    } else {
+      return join(source, imagePaths[row * colCount + column]);
+    }
   }
 
-  const imgPath = wellAttrs.well.images[0].path;
-  const imgAttrs = (await grp.getItem(join(wellPaths[0], imgPath)).then((g) => g.attrs.asObject())) as Ome.Attrs;
+  function getGridCoord(imgPath: string) {
+    let row, col, name;
+    if (rows && columns) {
+      const [rowName, colName] = imgPath.split('/');
+      row = rows.indexOf(rowName);
+      col = columns.indexOf(colName);
+      name = `${rowName}${colName}`;
+    } else {
+      const imgIndex = imagePaths?.indexOf(imgPath);
+      row = Math.floor(imgIndex / colCount);
+      col = imgIndex - row * colCount;
+      name = imgPath;
+    }
+    return { row, col, name };
+  }
+
+  const imgPath = imagePaths[0];
+  const imgAttrs = (await grp.getItem(imgPath).then((g) => g.attrs.asObject())) as Ome.Attrs;
   if (!('omero' in imgAttrs)) {
     throw Error('Path for image is not valid.');
   }
@@ -133,16 +186,10 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   const { datasets } = imgAttrs.multiscales[0];
   const resolution = datasets[datasets.length - 1].path;
 
-  async function getImgPath(wellPath: string) {
-    const wellAttrs = await getAttrsOnly<{ well: Ome.Well }>(grp, wellPath);
-    return join(wellPath, wellAttrs.well.images[0].path);
-  }
-  const wellImagePaths = await Promise.all(wellPaths.map(getImgPath));
-
   // Create loader for every Well. Some loaders may be undefined if Wells are missing.
   const mapper = ([key, path]: string[]) => grp.getItem(path).then((arr) => [key, arr]) as Promise<[string, ZarrArray]>;
   const promises = await pMap(
-    wellImagePaths.map((p) => [p, join(p, resolution)]),
+    imagePaths.map((p) => [p, join(p, resolution)]),
     mapper,
     { concurrency: 10 }
   );
@@ -151,11 +198,11 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   const meta = parseOmeroMeta(imgAttrs.omero, axis_labels);
   const tileSize = guessTileSize(data[0][1]);
   const loaders = data.map((d) => {
-    const [row, col] = d[0].split('/');
+    const coord = getGridCoord(d[0]);
     return {
-      name: `${row}${col}`,
-      row: rows.indexOf(row),
-      col: columns.indexOf(col),
+      name: coord.name,
+      row: coord.row,
+      col: coord.col,
       loader: new ZarrPixelSource(d[1], axis_labels, tileSize),
     };
   });
@@ -172,9 +219,9 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
       colormap: config.colormap ?? '',
       opacity: config.opacity ?? 1,
     },
-    name: plateAttrs.name || 'Plate',
-    rows: rows.length,
-    columns: columns.length,
+    name: displayName,
+    rows: rowCount,
+    columns: colCount,
   };
   // Us onClick from image config or Open Well in new window
   sourceData.onClick = (info: any) => {
@@ -185,7 +232,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
     const { row, column } = gridCoord;
     let imgSource = undefined;
     if (typeof config.source === 'string' && grp.path && !isNaN(row) && !isNaN(column)) {
-      imgSource = join(config.source, rows[row], columns[column]);
+      imgSource = getImgSource(config.source, row, column);
     }
     if (config.onClick) {
       delete info.layer;
