@@ -123,17 +123,6 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
       return loadOmeroMultiscales(config, node, attrs);
     }
 
-    if (Object.keys(attrs).length === 0 && node.path) {
-      // No rootAttrs in this group.
-      // if url is to a plate/acquisition/ check parent dir for 'plate' zattrs
-      const parentPath = node.path.slice(0, node.path.lastIndexOf('/'));
-      const parent = await openGroup(node.store, parentPath);
-      const parentAttrs = (await parent.attrs.asObject()) as Ome.Attrs;
-      if ('plate' in parentAttrs) {
-        return loadPlate(config, parent, parentAttrs.plate);
-      }
-    }
-
     if (!('multiscales' in attrs)) {
       throw Error('Group is missing multiscales specification.');
     }
