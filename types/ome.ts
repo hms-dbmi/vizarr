@@ -65,10 +65,16 @@ declare module Ome {
     version: Version;
   }
 
+  interface Collection {
+    images: {};
+    version: Version;
+  }
+
   type Attrs =
     | { collection: Collection }
     | { multiscales: Multiscale[] }
     | { omero: Omero; multiscales: Multiscale[] }
     | { plate: Plate }
+    | { collection: Collection }
     | { well: Well };
 }

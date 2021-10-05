@@ -1,22 +1,30 @@
 import React, { useEffect } from 'react';
 import { useUpdateAtom } from 'jotai/utils';
 
-import { sourceInfoAtom, viewStateAtom } from './state';
+import { sourceInfoAtom, viewStateAtom, collectionAtom } from './state';
 import type { ImageLayerConfig } from './state';
 
 import Viewer from './components/Viewer';
 import Menu from './components/Menu';
+import Collection from './components/Collection';
 
 import { version } from '../package.json';
 
 function App() {
   const setSourceInfo = useUpdateAtom(sourceInfoAtom);
   const setViewState = useUpdateAtom(viewStateAtom);
+  const setCollectionState = useUpdateAtom(collectionAtom);
 
   async function addImage(config: ImageLayerConfig) {
     const { createSourceData } = await import('./io');
     const id = Math.random().toString(36).slice(2);
     const sourceData = await createSourceData(config);
+    console.log('sourceData', sourceData);
+    // TODO: better way of telling if we get a list of images...
+    if (sourceData.images) {
+      setCollectionState(sourceData);
+      return;
+    }
     setSourceInfo((prevSourceInfo) => {
       if (!sourceData.name) {
         sourceData.name = `image_${Object.keys(prevSourceInfo).length}`;
@@ -71,6 +79,7 @@ function App() {
     <>
       <Menu />
       <Viewer />
+      <Collection />
     </>
   );
 }

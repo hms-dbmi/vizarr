@@ -148,9 +148,10 @@ export async function loadCollection(
     colCount = columns.length;
     rowCount = rows.length;
   } else {
-    const imgCount = imagePaths.length;
-    colCount = Math.ceil(Math.sqrt(imgCount));
-    rowCount = Math.ceil(imgCount / colCount);
+    return { "images": imagePaths, 'group': grp};
+    // const imgCount = imagePaths.length;
+    // colCount = Math.ceil(Math.sqrt(imgCount));
+    // rowCount = Math.ceil(imgCount / colCount);
   }
 
   function getImgSource(source: string, row: number, column: number) {

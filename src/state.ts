@@ -27,6 +27,10 @@ interface ViewState {
   default?: boolean;
 }
 
+interface Collection {
+  images: string[];
+}
+
 interface BaseConfig {
   source: string | ZarrArray['store'];
   axis_labels?: string[];
@@ -108,6 +112,8 @@ export type ControllerProps<T = {}> = {
 export const sourceInfoAtom = atom<WithId<SourceData>[]>([]);
 
 export const viewStateAtom = atom<ViewState>(DEFAULT_VIEW_STATE);
+
+export const collectionAtom = atom<Collection>({"images":[]});
 
 export const sourceInfoAtomAtoms = splitAtom(sourceInfoAtom);
 
