@@ -56,12 +56,17 @@ declare module Ome {
     wells: { path: string }[];
   }
 
+  interface Collection {
+    images: {};
+  }
+
   interface Well {
     images: { path: string; acquisition?: number }[];
     version: Version;
   }
 
   type Attrs =
+    | { collection: Collection }
     | { multiscales: Multiscale[] }
     | { omero: Omero; multiscales: Multiscale[] }
     | { plate: Plate }
