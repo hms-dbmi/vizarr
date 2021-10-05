@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import DeckGL from 'deck.gl';
-import { ImageLayer } from '@hms-dbmi/viv';
+import { OrthographicView } from '@deck.gl/core';
+import { ImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
+
+import { guessTileSize } from '../../utils';
 
 
 
@@ -74,8 +77,8 @@ function ImageThumbnail({imgPath, zarrGroup}) {
             return chk;
         });
 
-        const dimensions = [0, 1, 2, 'y', 'x'].map((field) => ({ field }));
-        const loader = new ZarrLoader({ data:z_arr, dimensions });
+        // const dimensions = [0, 1, 2, 'y', 'x'].map((field) => ({ field }));
+        const loader = new ZarrPixelSource(z_arr, axes, guessTileSize(z_arr));
         const imageLayer = new ImageLayer({
             loader,  // ZarrLoader
             loaderSelection: chunks,
@@ -87,8 +90,9 @@ function ImageThumbnail({imgPath, zarrGroup}) {
         viewer = <DeckGL
             ref={deckRef}
             layers={[imageLayer]}
-            viewState={viewState}
-            onViewStateChange={(e) => setViewState(e.viewState)}
+            style={{'position': 'relative', 'width': 200, 'height': 150, 'border': 'solid white 1px'}}
+            // viewState={viewState}
+            // onViewStateChange={(e) => setViewState(e.viewState)}
             views={[new OrthographicView({ id: 'ortho', controller: true })]}
         />
     }
