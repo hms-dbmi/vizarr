@@ -15,6 +15,9 @@
     "importsNotUsedAsValues": "error",
     "paths": {
       "zarr": ["node_modules/zarr"]
-    }
+    },
+    "types": [
+      "vite-plugin-pwa/client"
+    ]
   }
 }

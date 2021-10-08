@@ -11,6 +11,9 @@ import { version } from '../package.json';
 
 console.log(`vizarr v${version}: https://github.com/hms-dbmi/vizarr`);
 
+import { registerSW } from 'virtual:pwa-register';
+registerSW();
+
 ReactDOM.render(
   <ThemeProvider theme={theme}>
     <Provider>
