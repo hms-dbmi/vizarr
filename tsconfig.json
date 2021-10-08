@@ -17,7 +17,8 @@
       "zarr": ["node_modules/zarr"]
     },
     "types": [
-      "vite-plugin-pwa/client"
+      "vite-plugin-pwa/client",
+      "@types/wicg-file-system-access"
     ]
   }
 }
