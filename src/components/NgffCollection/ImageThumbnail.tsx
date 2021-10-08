@@ -3,14 +3,19 @@ import DeckGL from 'deck.gl';
 import { OrthographicView } from '@deck.gl/core';
 import { ImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
 
-import { guessTileSize } from '../../utils';
+import { fitBounds, guessTileSize } from '../../utils';
 
-
+const THUMB = {WIDTH: 100, HEIGHT: 75}
+const thumbStyle = {
+    'position': 'relative',
+    'width': THUMB.WIDTH,
+    'height': THUMB.HEIGHT,
+    'border': 'solid grey 1px'
+}
 
 function ImageThumbnail({imgPath, zarrGroup}) {
 
     console.log('imgPath', imgPath, 'zarrGroup', zarrGroup);
-    const deckRef = useRef<DeckGL>(null);
 
     const [imgState, setImgState] = useState({});
 
@@ -77,22 +82,21 @@ function ImageThumbnail({imgPath, zarrGroup}) {
             return chk;
         });
 
-        // const dimensions = [0, 1, 2, 'y', 'x'].map((field) => ({ field }));
         const loader = new ZarrPixelSource(z_arr, axes, guessTileSize(z_arr));
         const imageLayer = new ImageLayer({
             loader,  // ZarrLoader
             loaderSelection: chunks,
-            colorValues: [[255, 0, 0], [0, 255, 0]],
+            colorValues: rgbColors,
             sliderValues: ranges,
             channelIsOn: [true, true],
         });
-            
+
+        const { zoom, target } = fitBounds([width, height], [THUMB.WIDTH, THUMB.HEIGHT], 1, 0);
+
         viewer = <DeckGL
-            ref={deckRef}
             layers={[imageLayer]}
-            style={{'position': 'relative', 'width': 200, 'height': 150, 'border': 'solid white 1px'}}
-            // viewState={viewState}
-            // onViewStateChange={(e) => setViewState(e.viewState)}
+            style={thumbStyle}
+            viewState={{ zoom, target }}
             views={[new OrthographicView({ id: 'ortho', controller: true })]}
         />
     }
