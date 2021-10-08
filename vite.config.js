@@ -9,7 +9,7 @@ const manifest = {
   name: 'vizarr',
   short_name: 'vizarr',
   lang: 'en-US',
-  start_url: '.',
+  start_url: '/?source=pwa',
   display: 'standalone',
   theme_color: '#000000',
   icons: [

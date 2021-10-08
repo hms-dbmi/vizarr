@@ -14,6 +14,10 @@ function App() {
   const setViewState = useUpdateAtom(viewStateAtom);
 
   async function addImage(config: ImageLayerConfig) {
+    if (config.source === 'pwa') {
+      console.warn('Vizarr launched in experimental PWA mode, looking for data at http://localhost:3000.');
+      config.source = 'http://localhost:3000';
+    }
     const { createSourceData } = await import('./io');
     const id = Math.random().toString(36).slice(2);
     const sourceData = await createSourceData(config);
