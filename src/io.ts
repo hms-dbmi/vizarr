@@ -1,8 +1,9 @@
 import { DTYPE_VALUES, ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
 import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
 import GridLayer from './gridLayer';
-import { loadCollection, loadOmeroMultiscales, loadWell } from './ome';
+import { loadCollection, loadOmeroMultiscales, loadWell, getImagePaths } from './ome';
 import type {
+  CollectionData,
   ImageLayerConfig,
   LayerState,
   MultichannelConfig,
@@ -104,15 +105,20 @@ function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<stri
   };
 }
 
-export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
+export async function createSourceData(config: ImageLayerConfig): Promise<SourceData | CollectionData> {
   const node = await open(config.source);
   let data: ZarrArray[];
 
   if (node instanceof ZarrGroup) {
     const attrs = (await node.attrs.asObject()) as Ome.Attrs;
 
-    if ('collection' in attrs || 'plate' in attrs) {
+    if ('plate' in attrs) {
       return loadCollection(config, node, attrs);
+    }
+
+    if ('collection' in attrs) {
+      const imagePaths = await getImagePaths(node, attrs);
+      return { images: imagePaths, group: node } as CollectionData;
     }
 
     if ('well' in attrs) {

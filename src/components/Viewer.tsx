@@ -21,7 +21,7 @@ function getLayerSize(props: LayerState['layerProps']) {
     height = (height + spacer) * rows;
     width = (width + spacer) * columns;
   }
-  return { height, width, maxZoom:1 };
+  return { height, width, maxZoom: 1 };
 }
 
 function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }) {
@@ -33,16 +33,16 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }) {
   if (deckRef.current && viewState?.default && layers[0]?.props?.loader) {
     const { deck } = deckRef.current;
     const { width, height, maxZoom } = getLayerSize(layers[0].props);
-    console.log("Viewer", { width, height, maxZoom });
+    console.log('Viewer', { width, height, maxZoom });
     const padding = deck.width < 400 ? 10 : deck.width < 600 ? 30 : 50; // Adjust depending on viewport width.
     const { zoom, target } = fitBounds([width, height], [deck.width, deck.height], maxZoom, padding);
-    console.log("FIT", { zoom, target });
+    console.log('FIT', { zoom, target });
     setViewState({ zoom, target });
   }
 
   return (
     <DeckGL
-      style={{ 'visibility': layers.length==0 ? 'hidden': 'visible'}}
+      style={{ visibility: layers.length == 0 ? 'hidden' : 'visible' }}
       ref={deckRef}
       layers={layers}
       viewState={viewState}

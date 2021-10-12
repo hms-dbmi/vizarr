@@ -21,7 +21,8 @@ function App() {
     const sourceData = await createSourceData(config);
     console.log('sourceData', sourceData);
     // TODO: better way of telling if we get a list of images...
-    if (sourceData.images) {
+    if ('images' in sourceData) {
+      // This is CollectionData
       setCollectionState(sourceData);
       return;
     }

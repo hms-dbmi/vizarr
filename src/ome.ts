@@ -107,7 +107,7 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   return sourceData;
 }
 
-async function getImagePaths(grp: ZarrGroup, omeAttrs: Ome.Attrs): Promise<string[]> {
+export async function getImagePaths(grp: ZarrGroup, omeAttrs: Ome.Attrs): Promise<string[]> {
   if ('collection' in omeAttrs) {
     return Object.keys(omeAttrs.collection.images);
   } else if ('plate' in omeAttrs) {
@@ -148,10 +148,7 @@ export async function loadCollection(
     colCount = columns.length;
     rowCount = rows.length;
   } else {
-    return { "images": imagePaths, 'group': grp};
-    // const imgCount = imagePaths.length;
-    // colCount = Math.ceil(Math.sqrt(imgCount));
-    // rowCount = Math.ceil(imgCount / colCount);
+    throw Error('No plate data');
   }
 
   function getImgSource(source: string, row: number, column: number) {

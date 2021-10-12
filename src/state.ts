@@ -4,7 +4,7 @@ import type { PrimitiveAtom, SetStateAction } from 'jotai';
 import { atom } from 'jotai';
 import { atomFamily, splitAtom, waitForAll } from 'jotai/utils';
 import type { VivLayerProps } from 'viv-layers';
-import type { ZarrArray } from 'zarr';
+import type { ZarrArray, Group } from 'zarr';
 import type GridLayer from './gridLayer';
 import { initLayerStateFromSource } from './io';
 
@@ -29,6 +29,7 @@ interface ViewState {
 
 interface Collection {
   images: string[];
+  group?: Group;
 }
 
 interface BaseConfig {
@@ -64,6 +65,11 @@ export interface GridLoader {
   col: number;
   name: string;
 }
+
+export type CollectionData = {
+  group: Group;
+  images: string[];
+};
 
 export type SourceData = {
   loader: ZarrPixelSource<string[]>[];
@@ -113,7 +119,7 @@ export const sourceInfoAtom = atom<WithId<SourceData>[]>([]);
 
 export const viewStateAtom = atom<ViewState>(DEFAULT_VIEW_STATE);
 
-export const collectionAtom = atom<Collection>({"images":[]});
+export const collectionAtom = atom<Collection>({ images: [], group: undefined });
 
 export const sourceInfoAtomAtoms = splitAtom(sourceInfoAtom);
 

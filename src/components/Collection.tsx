@@ -5,27 +5,20 @@ import { collectionAtom } from '../state';
 import ImageThumbnail from './NgffCollection/ImageThumbnail';
 
 function Collection() {
-    const ngffCollection = useAtomValue(collectionAtom);
+  const ngffCollection = useAtomValue(collectionAtom);
 
-    console.log('ngffCollection', ngffCollection);
-    if (!ngffCollection?.images.length) {
-        return null;
-    }
-    return (
-        <ul style={{"color": "white"}}>
-            Collection
-            {
-                ngffCollection.images.map(img => (
-                    <ImageThumbnail
-                        key={img}
-                        imgPath={img}
-                        zarrGroup={ngffCollection.group}
-                    >
-
-                    </ImageThumbnail>))
-            }
-        </ul>
-    );
+  console.log('ngffCollection', ngffCollection);
+  if (!ngffCollection?.images.length) {
+    return null;
+  }
+  return (
+    <ul style={{ color: 'white' }}>
+      Collection
+      {ngffCollection.images.map((img) => (
+        <ImageThumbnail key={img} imgPath={img} zarrGroup={ngffCollection.group}></ImageThumbnail>
+      ))}
+    </ul>
+  );
 }
 
 export default Collection;
