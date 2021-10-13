@@ -175,60 +175,44 @@ function getAxisLabelsAndChannelAxis(
   return { labels, channel_axis };
 }
 
-export function initLayerStateFromSource(sourceData: SourceData): LayerState {
-  const {
-    loader,
-    channel_axis,
-    colors,
-    visibilities,
-    contrast_limits,
-    model_matrix,
-    defaults,
-    // Grid
-    loaders,
-    rows,
-    columns,
-    onClick,
-  } = sourceData;
-  const { selection, opacity, colormap } = defaults;
+export function initLayerStateFromSource(source: SourceData): LayerState {
+  const { selection, opacity, colormap } = source.defaults;
 
-  const Layer = getLayer(sourceData);
-  const loaderSelection: number[][] = [];
-  const colorValues: number[][] = [];
+  const Layer = getLayer(source);
+  const selections: number[][] = [];
+  const colors: number[][] = [];
   const contrastLimits: number[][] = [];
-  const channelIsOn: boolean[] = [];
+  const channelsVisible: boolean[] = [];
 
-  const visibleIndices = visibilities.flatMap((bool, i) => (bool ? i : []));
+  const visibleIndices = source.visibilities.flatMap((bool, i) => (bool ? i : []));
   for (const index of visibleIndices) {
     const channelSelection = [...selection];
-    if (Number.isInteger(channel_axis)) {
-      channelSelection[channel_axis as number] = index;
+    if (Number.isInteger(source.channel_axis)) {
+      channelSelection[source.channel_axis as number] = index;
     }
-    loaderSelection.push(channelSelection);
-    colorValues.push(hexToRGB(colors[index]));
+    selections.push(channelSelection);
+    colors.push(hexToRGB(source.colors[index]));
     // TODO: should never be undefined
-    contrastLimits.push(contrast_limits[index] ?? [0, 255]);
-    channelIsOn.push(true);
+    contrastLimits.push(source.contrast_limits[index] ?? [0, 255]);
+    channelsVisible.push(true);
   }
-  // set initial slider values to contrast_limits
-  const sliderValues = [...contrastLimits];
 
   return {
     Layer,
     layerProps: {
-      loader: loader.length === 1 ? loader[0] : loader,
-      loaders,
-      rows,
-      columns,
-      loaderSelection,
-      colorValues,
-      sliderValues,
+      loader: source.loader.length === 1 ? source.loader[0] : source.loader,
+      loaders: source.loaders,
+      rows: source.rows,
+      columns: source.columns,
+      selections,
+      colors,
       contrastLimits,
-      channelIsOn,
+      contrastLimitsRange: [...contrastLimits],
+      channelsVisible,
       opacity,
       colormap,
-      modelMatrix: model_matrix,
-      onClick,
+      modelMatrix: source.model_matrix,
+      onClick: source.onClick,
     },
     on: true,
   };

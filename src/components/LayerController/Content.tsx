@@ -22,7 +22,7 @@ const Details = withStyles({
 
 function Content({ sourceAtom, layerAtom }: ControllerProps) {
   const layer = useAtomValue(layerAtom);
-  const nChannels = layer.layerProps.loaderSelection.length;
+  const nChannels = layer.layerProps.selections.length;
   return (
     <Details>
       <Grid container direction="column">

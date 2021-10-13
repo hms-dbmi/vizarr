@@ -5,10 +5,10 @@ declare module 'viv-layers' {
   import type { PixelSource } from '@hms-dbmi/viv';
 
   export interface VivLayerProps extends LayerProps<any> {
-    loaderSelection: number[][];
-    colorValues: number[][];
-    sliderValues: number[][];
-    channelIsOn: boolean[];
+    selections: number[][];
+    colors: number[][];
+    contrastLimits: number[][];
+    channelsVisible: boolean[];
     colormap: null | string;
     modelMatrix: Matrix4;
   }

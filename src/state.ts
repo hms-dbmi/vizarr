@@ -89,7 +89,7 @@ export type LayerState = {
   Layer: LayerCtr<typeof ImageLayer | typeof MultiscaleImageLayer | GridLayer>;
   layerProps: VivLayerProps & {
     loader: ZarrPixelSource<string[]> | ZarrPixelSource<string[]>[];
-    contrastLimits: number[][];
+    contrastLimitsRange: number[][];
     loaders?: GridLoader[];
     rows?: number;
     columns?: number;
