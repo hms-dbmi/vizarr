@@ -5,6 +5,9 @@ import type { ZarrPixelSource } from '@hms-dbmi/viv';
 import { Matrix4 } from '@math.gl/core/dist/esm';
 import { LRUCacheStore } from './lru-store';
 
+// TODO(2021-10-18): hack to ensure return-type of parseMatrix compatible with viv layers.
+import type { Matrix4 as Matrix4Type } from 'math.gl';
+
 export const MAX_CHANNELS = 6;
 
 export const COLORS = {
@@ -215,8 +218,8 @@ function isArray16(o: unknown): o is Array16 {
   return o.length === 16 && o.every((i) => typeof i === 'number');
 }
 
-export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
-  if (!model_matrix) return new Matrix4();
+export function parseMatrix(model_matrix?: string | number[]): Matrix4Type {
+  if (!model_matrix) return new Matrix4() as any;
   const matrix = new Matrix4();
   try {
     const arr = typeof model_matrix === 'string' ? JSON.parse(model_matrix) : model_matrix;
@@ -228,7 +231,7 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
     const msg = `Failed to parse modelMatrix. Got ${JSON.stringify(model_matrix)}, using identity.`;
     console.warn(msg);
   }
-  return matrix;
+  return matrix as any;
 }
 
 export async function calcDataRange<S extends string[]>(

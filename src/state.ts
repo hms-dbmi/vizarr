@@ -1,5 +1,5 @@
 import type { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
-import type { Matrix4 } from '@math.gl/core/dist/esm';
+import type { Matrix4 } from 'math.gl';
 import type { PrimitiveAtom, SetStateAction } from 'jotai';
 import { atom } from 'jotai';
 import { atomFamily, splitAtom, waitForAll } from 'jotai/utils';
