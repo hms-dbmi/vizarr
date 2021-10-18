@@ -73,7 +73,7 @@ export async function loadMultiscales(grp: ZarrGroup, multiscales: Ome.Multiscal
   throw Error('Multiscales metadata included a path to a group.');
 }
 
-export function hexToRGB(hex: string): number[] {
+export function hexToRGB(hex: string): [r: number, g: number, b: number] {
   if (hex.startsWith('#')) hex = hex.slice(1);
   const r = parseInt(hex.slice(0, 2), 16);
   const g = parseInt(hex.slice(2, 4), 16);

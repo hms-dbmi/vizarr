@@ -33,7 +33,7 @@ function ChannelOptions({ sourceAtom, layerAtom, channelIndex }: ControllerProps
     setAnchorEl(null);
   };
 
-  const handleColorChange = (rgb: number[]) => {
+  const handleColorChange = (rgb: [number, number, number]) => {
     setLayer((prev) => {
       const colors = [...prev.layerProps.colors];
       colors[channelIndex] = rgb;

@@ -272,7 +272,7 @@ function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axes: Ome.Axis[]) 
   const z = rdefs.defaultZ ?? 0;
 
   const colors: string[] = [];
-  const contrast_limits: number[][] = [];
+  const contrast_limits: [min: number, max: number][] = [];
   const visibilities: boolean[] = [];
   const names: string[] = [];
 

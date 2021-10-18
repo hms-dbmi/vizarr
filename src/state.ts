@@ -3,7 +3,6 @@ import type { Matrix4 } from '@math.gl/core/dist/esm';
 import type { PrimitiveAtom, SetStateAction } from 'jotai';
 import { atom } from 'jotai';
 import { atomFamily, splitAtom, waitForAll } from 'jotai/utils';
-import type { VivLayerProps } from 'viv-layers';
 import type { ZarrArray } from 'zarr';
 import type GridLayer from './gridLayer';
 import { initLayerStateFromSource } from './io';
@@ -41,14 +40,14 @@ interface BaseConfig {
 export interface MultichannelConfig extends BaseConfig {
   colors?: string[];
   channel_axis?: number;
-  contrast_limits?: number[][];
+  contrast_limits?: [min: number, max: number][];
   names?: string[];
   visibilities?: boolean[];
 }
 
 export interface SingleChannelConfig extends BaseConfig {
   color?: string;
-  contrast_limits?: number[];
+  contrast_limits?: [min: number, max: number];
   visibility?: boolean;
 }
 
@@ -72,7 +71,7 @@ export type SourceData = {
   channel_axis: number | null;
   colors: string[];
   names: string[];
-  contrast_limits: (number[] | undefined)[];
+  contrast_limits: ([min: number, max: number] | undefined)[];
   visibilities: boolean[];
   defaults: {
     selection: number[];
@@ -84,12 +83,15 @@ export type SourceData = {
   onClick?: (e: any) => void;
 };
 
+type VivProps = ConstructorParameters<typeof MultiscaleImageLayer>[0];
+
 export type LayerCtr<T> = new (...args: any[]) => T;
 export type LayerState = {
   Layer: LayerCtr<typeof ImageLayer | typeof MultiscaleImageLayer | GridLayer>;
-  layerProps: VivLayerProps & {
+  layerProps: Omit<VivProps, 'loader' | 'selections'> & {
     loader: ZarrPixelSource<string[]> | ZarrPixelSource<string[]>[];
-    contrastLimitsRange: number[][];
+    selections: number[][];
+    contrastLimitsRange: [min: number, max: number][];
     loaders?: GridLoader[];
     rows?: number;
     columns?: number;

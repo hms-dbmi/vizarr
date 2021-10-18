@@ -29,9 +29,9 @@ function AddChannelButton({ sourceAtom, layerAtom }: ControllerProps) {
     }
 
     // cacluate contrast limits if missing from source;
-    let lim: number[];
+    let lim: [min: number, max: number];
     if (source.contrast_limits[channelIndex]) {
-      lim = source.contrast_limits[channelIndex] as number[];
+      lim = source.contrast_limits[channelIndex] as [number, number];
     } else {
       const { loader } = layer.layerProps;
       const lowres = Array.isArray(loader) ? loader[loader.length - 1] : loader;

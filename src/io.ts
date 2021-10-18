@@ -180,8 +180,8 @@ export function initLayerStateFromSource(source: SourceData): LayerState {
 
   const Layer = getLayer(source);
   const selections: number[][] = [];
-  const colors: number[][] = [];
-  const contrastLimits: number[][] = [];
+  const colors: [number, number, number][] = [];
+  const contrastLimits: [start: number, end: number][] = [];
   const channelsVisible: boolean[] = [];
 
   const visibleIndices = source.visibilities.flatMap((bool, i) => (bool ? i : []));

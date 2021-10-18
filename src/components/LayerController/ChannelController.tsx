@@ -18,7 +18,7 @@ function ChannelController({ sourceAtom, layerAtom, channelIndex }: ControllerPr
   const handleContrastChange = (_: ChangeEvent<unknown>, v: number | number[]) => {
     setLayer((prev) => {
       const contrastLimits = [...prev.layerProps.contrastLimits];
-      contrastLimits[channelIndex] = v as number[];
+      contrastLimits[channelIndex] = v as [number, number];
       return { ...prev, layerProps: { ...prev.layerProps, contrastLimits } };
     });
   };
