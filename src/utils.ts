@@ -3,6 +3,7 @@ import type { Group as ZarrGroup } from 'zarr';
 import type { AsyncStore, Store } from 'zarr/types/storage/types';
 import { Matrix4 } from '@math.gl/core/dist/esm';
 import { LRUCacheStore } from './lru-store';
+import type { PolyGon } from './state';
 
 export const MAX_CHANNELS = 6;
 
@@ -157,4 +158,34 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
     console.warn(msg);
   }
   return matrix;
+}
+
+export function parsePolygons(polygonData?: string, strokeColor?: string): PolyGon[] {
+  if (!polygonData) return [];
+  try {
+    const polygons = JSON.parse(polygonData);
+    const rgb = strokeColor ? hexToRGB(strokeColor) : [255, 255, 0];
+
+    const polygonsObjects = polygons
+      .map((polygon: any) => {
+        // each point should be [x,y] coordinate
+        const coords = polygon
+          .map((point: any) => {
+            if (typeof point[0] == 'number' && typeof point[1] == 'number') {
+              return [point[0], point[1]];
+            } else {
+              console.log(`Point not valid. Expecting list of 2 numbers, got: ${point}`);
+            }
+          })
+          .filter(Boolean);
+        if (coords.length > 1) {
+          return { path: coords, strokeColor: rgb } as PolyGon;
+        }
+      })
+      .filter(Boolean);
+    return polygonsObjects;
+  } catch {
+    console.warn(`Failed to parse Polygons ${polygonData} or strokeColor ${strokeColor}`);
+    return [];
+  }
 }

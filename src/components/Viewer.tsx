@@ -2,11 +2,12 @@ import React, { useRef } from 'react';
 import { useAtom } from 'jotai';
 import { useAtomValue } from 'jotai/utils';
 import DeckGL from 'deck.gl';
-import { OrthographicView } from '@deck.gl/core';
+import { OrthographicView, Position, RGBAColor } from '@deck.gl/core';
 import type { Layer } from '@deck.gl/core';
+import { PolygonLayer } from '@deck.gl/layers';
 
-import type { LayerState } from '../state';
-import { layerAtoms, viewStateAtom } from '../state';
+import type { LayerState, PolyGon } from '../state';
+import { layerAtoms, viewStateAtom, polygonsAtom } from '../state';
 import { isInterleaved, fitBounds } from '../utils';
 
 function getLayerSize(props: LayerState['layerProps']) {
@@ -51,10 +52,25 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }) {
 
 function Viewer() {
   const layerConstructors = useAtomValue(layerAtoms);
+  const polygons: PolyGon[] = useAtomValue(polygonsAtom);
   const layers = layerConstructors.map((layer) => {
     return !layer.on ? null : new layer.Layer(layer.layerProps);
-  });
-  return <WrappedViewStateDeck layers={layers as Layer<any, any>[]} />;
+  }) as Layer<any, any>[];
+
+  if (polygons.length > 0) {
+    const polygonsLayer = new PolygonLayer({
+      id: 'polygon-layer',
+      data: polygons,
+      stroked: true,
+      filled: false,
+      wireframe: true,
+      getPolygon: (d) => (d as PolyGon)["path"] as Position[],
+      getLineColor: (d) => (d as PolyGon)["strokeColor"] as RGBAColor,
+      getLineWidth: 1,
+    });
+    layers.push(polygonsLayer);
+  }
+  return <WrappedViewStateDeck layers={layers} />;
 }
 
 export default Viewer;

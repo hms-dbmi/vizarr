@@ -122,3 +122,10 @@ export const layerAtoms = atom((get) => {
   const layers = atoms.map((a) => layerFamilyAtom(get(a)));
   return get(waitForAll(layers));
 });
+
+export type PolyGon = {
+  path: number[][];
+  strokeColor: number[];
+};
+
+export const polygonsAtom = atom<PolyGon[]>([]);

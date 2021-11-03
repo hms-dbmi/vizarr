@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { useUpdateAtom } from 'jotai/utils';
 
-import { sourceInfoAtom, viewStateAtom } from './state';
+import { sourceInfoAtom, viewStateAtom, polygonsAtom } from './state';
 import type { ImageLayerConfig } from './state';
+import { parsePolygons } from './utils';
 
 import Viewer from './components/Viewer';
 import Menu from './components/Menu';
@@ -12,6 +13,7 @@ import { version } from '../package.json';
 function App() {
   const setSourceInfo = useUpdateAtom(sourceInfoAtom);
   const setViewState = useUpdateAtom(viewStateAtom);
+  const setPolygons = useUpdateAtom(polygonsAtom);
 
   async function addImage(config: ImageLayerConfig) {
     const { createSourceData } = await import('./io');
@@ -32,6 +34,10 @@ function App() {
       const config = {} as any;
       for (const [key, value] of params) {
         config[key] = value;
+      }
+      const polygons = parsePolygons(config.polygons, config.strokeColor);
+      if (polygons) {
+        setPolygons(polygons);
       }
       // Make sure the source URL is decoded.
       config.source = decodeURIComponent(config.source);
