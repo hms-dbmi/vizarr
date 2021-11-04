@@ -5,7 +5,7 @@ import { ThemeProvider } from '@material-ui/styles';
 
 import Vizarr from './vizarr';
 import theme from './theme';
-import './register-codecs';
+import './codecs/register';
 
 import { version } from '../package.json';
 
