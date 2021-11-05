@@ -28,3 +28,4 @@ add('gzip', () => import('numcodecs/gzip'));
 add('zlib', () => import('numcodecs/zlib'));
 add('zstd', () => import('numcodecs/zstd'));
 add('blosc', () => import('numcodecs/blosc'));
+add('jpeg2k', () => import('./jpeg2k'));
