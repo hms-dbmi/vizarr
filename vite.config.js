@@ -18,5 +18,5 @@ export default defineConfig({
       geotiff: resolve(__dirname, 'src/empty:geotiff.js'),
     },
   },
-  server: { open: `?source=${source}` }
+  server: { open: `?source=${source}` },
 });
