@@ -109,6 +109,42 @@ export function getAxisLabels(arr: ZarrArray, axis_labels?: string[]): [...strin
   return axis_labels as [...string[], 'y', 'x'];
 }
 
+export function getDefaultVisibilities(n: number, visibilities?: boolean[]): boolean[] {
+  if (!visibilities) {
+    if (n <= MAX_CHANNELS) {
+      // Default to all on if visibilities not specified and less than 6 channels.
+      visibilities = Array(n).fill(true);
+    } else {
+      // If more than MAX_CHANNELS, only make first set on by default.
+      visibilities = [...Array(MAX_CHANNELS).fill(true), ...Array(n - MAX_CHANNELS).fill(false)];
+    }
+  }
+  return visibilities;
+}
+
+export function getDefaultColors(n: number, visibilities: boolean[]): string[] {
+  let colors = [];
+  if (n == 1) {
+    colors = [COLORS.white];
+  } else if (n == 2) {
+    colors = MAGENTA_GREEN;
+  } else if (n === 3) {
+    colors = RGB;
+  } else if (n <= MAX_CHANNELS) {
+    colors = CYMRGB.slice(0, n);
+  } else {
+    // Default color for non-visible is white
+    colors = Array(n).fill(COLORS.white);
+    // Get visible indices
+    const visibleIndices = visibilities.flatMap((bool, i) => (bool ? i : []));
+    // Set visible indices to CYMRGB colors. visibleIndices.length === MAX_CHANNELS from above.
+    for (const [i, visibleIndex] of visibleIndices.entries()) {
+      colors[visibleIndex] = CYMRGB[i];
+    }
+  }
+  return colors;
+}
+
 export function isInterleaved(shape: number[]) {
   const lastDimSize = shape[shape.length - 1];
   return lastDimSize === 3 || lastDimSize === 4;

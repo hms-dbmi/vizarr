@@ -1,8 +1,17 @@
-import { ZarrPixelSource } from '@hms-dbmi/viv';
+import { DTYPE_VALUES, ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
 import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
-import { getAttrsOnly, guessTileSize, join, loadMultiscales, parseMatrix, range } from './utils';
+import {
+  getAttrsOnly,
+  getDefaultColors,
+  getDefaultVisibilities,
+  guessTileSize,
+  join,
+  loadMultiscales,
+  parseMatrix,
+  range,
+} from './utils';
 
 export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAttrs: Ome.Well): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
@@ -43,7 +52,7 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
 
   // Use first image for rendering settings, resolutions etc.
   const imgAttrs = (await grp.getItem(imgPaths[0]).then((g) => g.attrs.asObject())) as Ome.Attrs;
-  if (!('omero' in imgAttrs)) {
+  if (!('multiscales' in imgAttrs)) {
     throw Error('Path for image is not valid.');
   }
   let resolution = imgAttrs.multiscales[0].datasets[0].path;
@@ -52,7 +61,6 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   const promises = imgPaths.map((p) => grp.getItem(join(p, resolution)));
   const data = (await Promise.all(promises)) as ZarrArray[];
   const axis_labels = getOmeAxisLabels(imgAttrs.multiscales);
-  const meta = parseOmeroMeta(imgAttrs.omero, axis_labels);
 
   const tileSize = guessTileSize(data[0]);
   const loaders = range(rows).flatMap((row) => {
@@ -61,6 +69,13 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
       return { name: String(offset), row, col, loader: new ZarrPixelSource(data[offset], axis_labels, tileSize) };
     });
   });
+
+  let meta;
+  if ('omero' in imgAttrs) {
+    meta = parseOmeroMeta(imgAttrs.omero, axis_labels);
+  } else {
+    meta = defaultMeta(loaders[0].loader, axis_labels);
+  }
 
   const sourceData: SourceData = {
     loaders,
@@ -126,7 +141,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
 
   const imgPath = wellAttrs.well.images[0].path;
   const imgAttrs = (await grp.getItem(join(wellPaths[0], imgPath)).then((g) => g.attrs.asObject())) as Ome.Attrs;
-  if (!('omero' in imgAttrs)) {
+  if (!('multiscales' in imgAttrs)) {
     throw Error('Path for image is not valid.');
   }
   // Lowest resolution is the 'path' of the last 'dataset' from the first multiscales
@@ -148,7 +163,6 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   );
   const data = await Promise.all(promises);
   const axis_labels = getOmeAxisLabels(imgAttrs.multiscales);
-  const meta = parseOmeroMeta(imgAttrs.omero, axis_labels);
   const tileSize = guessTileSize(data[0][1]);
   const loaders = data.map((d) => {
     const [row, col] = d[0].split('/');
@@ -159,6 +173,12 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
       loader: new ZarrPixelSource(d[1], axis_labels, tileSize),
     };
   });
+  let meta;
+  if ('omero' in imgAttrs) {
+    meta = parseOmeroMeta(imgAttrs.omero, axis_labels);
+  } else {
+    meta = defaultMeta(loaders[0].loader, axis_labels);
+  }
 
   // Load Image to use for channel names, rendering settings, sizeZ, sizeT etc.
   const sourceData: SourceData = {
@@ -221,6 +241,23 @@ export async function loadOmeroMultiscales(
     },
     ...meta,
     name: meta.name ?? name,
+  };
+}
+
+function defaultMeta(loader: ZarrPixelSource<string[]>, axis_labels: string[]) {
+  const channel_axis = axis_labels.indexOf('c');
+  const channel_count = loader.shape[channel_axis as number];
+  const max = loader.dtype === 'Float32' ? 1 : DTYPE_VALUES[loader.dtype].max;
+  const visibilities = getDefaultVisibilities(channel_count);
+  const colors = getDefaultColors(channel_count, visibilities);
+  return {
+    name: 'Image',
+    names: range(channel_count).map((i) => `channel_${i}`),
+    colors,
+    contrast_limits: Array(channel_count).fill([0, max]),
+    visibilities,
+    channel_axis: axis_labels.includes('c') ? axis_labels.indexOf('c') : null,
+    defaultSelection: axis_labels.map(() => 0),
   };
 }
 
