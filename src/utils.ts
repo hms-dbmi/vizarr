@@ -218,28 +218,22 @@ export async function calcDataRange<S extends string[]>(
 export async function calcConstrastLimits<S extends string[]>(
   source: ZarrPixelSource<S>,
   channelAxis: number,
+  visibilities: boolean[],
   defaultSelection?: number[]
-): Promise<[min: number, max: number][]> {
+): Promise<([min: number, max: number] | undefined)[]> {
   const def = defaultSelection ?? source.shape.map(() => 0);
   const csize = source.shape[channelAxis];
 
-  const calc = (cindex: number) => {
-    const selection = [...def];
-    selection[channelAxis] = cindex;
-    return calcDataRange(source, selection);
-  };
-
-  // TODO: perform this on-demand for visible channels, and cache result?
-  const maxCalc = 6;
-  if (csize <= maxCalc) {
-    return Promise.all(range(csize).map(calc));
+  if (csize !== visibilities.length) {
+    throw new Error("provided visibilities don't match number of channels");
   }
 
-  // Just compute first N channels and reuse the first result for rest
-  const calculatedLims = await Promise.all(range(maxCalc).map(calc));
-  const lims = Array(csize).fill(calculatedLims[0]);
-  calculatedLims.forEach((lim, i) => {
-    lims[i] = lim;
-  });
-  return lims;
+  return Promise.all(
+    visibilities.map(async (isVisible, i) => {
+      if (!isVisible) return undefined; // don't compute non-visible channels
+      const selection = [...def];
+      selection[channelAxis] = i;
+      return calcDataRange(source, selection);
+    })
+  );
 }

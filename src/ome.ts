@@ -248,8 +248,8 @@ export async function loadOmeroMultiscales(
 async function defaultMeta(loader: ZarrPixelSource<string[]>, axis_labels: string[]) {
   const channel_axis = axis_labels.indexOf('c');
   const channel_count = loader.shape[channel_axis];
-  const contrast_limits = await calcConstrastLimits(loader, channel_axis);
   const visibilities = getDefaultVisibilities(channel_count);
+  const contrast_limits = await calcConstrastLimits(loader, channel_axis, visibilities);
   const colors = getDefaultColors(channel_count, visibilities);
   return {
     name: 'Image',

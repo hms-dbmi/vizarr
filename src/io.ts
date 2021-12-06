@@ -63,7 +63,9 @@ async function loadMultiChannel(
 
   visibilities = visibilities || getDefaultVisibilities(n);
   colors = colors || getDefaultColors(n, visibilities);
-  const contrastLimits = contrast_limits ?? (await (() => calcConstrastLimits(data[data.length - 1], channelAxis))());
+
+  const contrastLimits =
+    contrast_limits ?? (await (() => calcConstrastLimits(data[data.length - 1], channelAxis, visibilities))());
 
   return {
     loader: data,
@@ -170,15 +172,14 @@ export function initLayerStateFromSource(sourceData: SourceData): LayerState {
 
   const visibleIndices = visibilities.flatMap((bool, i) => (bool ? i : []));
   for (const index of visibleIndices) {
+    const channelSelection = [...selection];
     if (Number.isInteger(channel_axis)) {
-      const channelSelection = [...selection];
       channelSelection[channel_axis as number] = index;
-      loaderSelection.push(channelSelection);
-    } else {
-      loaderSelection.push(selection);
     }
+    loaderSelection.push(channelSelection);
     colorValues.push(hexToRGB(colors[index]));
-    contrastLimits.push(contrast_limits[index]);
+    // TODO: should never be undefined
+    contrastLimits.push(contrast_limits[index] ?? [0, 255]);
     channelIsOn.push(true);
   }
   // set initial slider values to contrast_limits
