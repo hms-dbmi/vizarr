@@ -42,6 +42,7 @@ function AddChannelButton({ sourceAtom, layerAtom }: ControllerProps) {
       const { loader } = layer.layerProps;
       const lowres = Array.isArray(loader) ? loader[loader.length - 1] : loader;
       lim = await calcDataRange(lowres, channelSelection);
+      // Update source data with newly calculated limit
       setSourceData((prev) => {
         const clims = [...prev.contrast_limits];
         clims[channelIndex] = lim;
@@ -53,7 +54,7 @@ function AddChannelButton({ sourceAtom, layerAtom }: ControllerProps) {
       const { layerProps } = prev;
       const loaderSelection = [...layerProps.loaderSelection, channelSelection];
       const colorValues = [...layerProps.colorValues, hexToRGB(colors[channelIndex])];
-      const sliderValues = [...layerProps.sliderValues, lim as number[]];
+      const sliderValues = [...layerProps.sliderValues, lim];
       const contrastLimits = [...sliderValues];
       const channelIsOn = [...layerProps.channelIsOn, true];
       return {
