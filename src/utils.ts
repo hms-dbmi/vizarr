@@ -1,4 +1,4 @@
-import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray, slice } from 'zarr';
+import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray } from 'zarr';
 import type { Group as ZarrGroup } from 'zarr';
 import type { AsyncStore, Store } from 'zarr/types/storage/types';
 import type { ZarrPixelSource } from '@hms-dbmi/viv';
@@ -222,11 +222,24 @@ export async function calcConstrastLimits<S extends string[]>(
 ): Promise<[min: number, max: number][]> {
   const def = defaultSelection ?? source.shape.map(() => 0);
   const csize = source.shape[channelAxis];
-  return Promise.all(
-    range(csize).map((i) => {
-      const selection = [...def];
-      selection[channelAxis] = i;
-      return calcDataRange(source, selection);
-    })
-  );
+
+  const calc = (cindex: number) => {
+    const selection = [...def];
+    selection[channelAxis] = cindex;
+    return calcDataRange(source, selection);
+  };
+
+  // TODO: perform this on-demand for visible channels, and cache result?
+  const maxCalc = 6;
+  if (csize <= maxCalc) {
+    return Promise.all(range(csize).map(calc));
+  }
+
+  // Just compute first N channels and reuse the first result for rest
+  const calculatedLims = await Promise.all(range(maxCalc).map(calc));
+  const lims = Array(csize).fill(calculatedLims[0]);
+  calculatedLims.forEach((lim, i) => {
+    lims[i] = lim;
+  });
+  return lims;
 }
