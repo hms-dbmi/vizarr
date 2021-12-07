@@ -1,8 +1,9 @@
-import { DTYPE_VALUES, ZarrPixelSource } from '@hms-dbmi/viv';
+import { ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
 import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';
 import {
+  calcConstrastLimits,
   getAttrsOnly,
   getDefaultColors,
   getDefaultVisibilities,
@@ -74,7 +75,7 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   if ('omero' in imgAttrs) {
     meta = parseOmeroMeta(imgAttrs.omero, axis_labels);
   } else {
-    meta = defaultMeta(loaders[0].loader, axis_labels);
+    meta = await defaultMeta(loaders[0].loader, axis_labels);
   }
 
   const sourceData: SourceData = {
@@ -177,7 +178,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   if ('omero' in imgAttrs) {
     meta = parseOmeroMeta(imgAttrs.omero, axis_labels);
   } else {
-    meta = defaultMeta(loaders[0].loader, axis_labels);
+    meta = await defaultMeta(loaders[0].loader, axis_labels);
   }
 
   // Load Image to use for channel names, rendering settings, sizeZ, sizeT etc.
@@ -244,17 +245,17 @@ export async function loadOmeroMultiscales(
   };
 }
 
-function defaultMeta(loader: ZarrPixelSource<string[]>, axis_labels: string[]) {
+async function defaultMeta(loader: ZarrPixelSource<string[]>, axis_labels: string[]) {
   const channel_axis = axis_labels.indexOf('c');
-  const channel_count = loader.shape[channel_axis as number];
-  const max = loader.dtype === 'Float32' ? 1 : DTYPE_VALUES[loader.dtype].max;
+  const channel_count = loader.shape[channel_axis];
   const visibilities = getDefaultVisibilities(channel_count);
+  const contrast_limits = await calcConstrastLimits(loader, channel_axis, visibilities);
   const colors = getDefaultColors(channel_count, visibilities);
   return {
     name: 'Image',
     names: range(channel_count).map((i) => `channel_${i}`),
     colors,
-    contrast_limits: Array(channel_count).fill([0, max]),
+    contrast_limits,
     visibilities,
     channel_axis: axis_labels.includes('c') ? axis_labels.indexOf('c') : null,
     defaultSelection: axis_labels.map(() => 0),

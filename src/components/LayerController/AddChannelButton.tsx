@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import type { MouseEvent, ChangeEvent } from 'react';
 import { useAtom } from 'jotai';
-import { useAtomValue } from 'jotai/utils';
 import { IconButton, Popover, Paper, Typography, Divider, NativeSelect } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
 
-import { hexToRGB, MAX_CHANNELS } from '../../utils';
+import { calcDataRange, hexToRGB, MAX_CHANNELS } from '../../utils';
 import type { ControllerProps } from '../../state';
 
 function AddChannelButton({ sourceAtom, layerAtom }: ControllerProps) {
-  const sourceData = useAtomValue(sourceAtom);
+  const [sourceData, setSourceData] = useAtom(sourceAtom);
   const [layer, setLayer] = useAtom(layerAtom);
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);
 
@@ -21,7 +20,7 @@ function AddChannelButton({ sourceAtom, layerAtom }: ControllerProps) {
     setAnchorEl(null);
   };
 
-  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+  const handleChange = async (event: ChangeEvent<HTMLSelectElement>) => {
     const {
       defaults: { selection },
       channel_axis,
@@ -34,11 +33,28 @@ function AddChannelButton({ sourceAtom, layerAtom }: ControllerProps) {
     if (channel_axis) {
       channelSelection[channel_axis] = channelIndex;
     }
+
+    // cacluate contrast limits if missing from source;
+    let lim: number[];
+    if (contrast_limits[channelIndex]) {
+      lim = contrast_limits[channelIndex] as number[];
+    } else {
+      const { loader } = layer.layerProps;
+      const lowres = Array.isArray(loader) ? loader[loader.length - 1] : loader;
+      lim = await calcDataRange(lowres, channelSelection);
+      // Update source data with newly calculated limit
+      setSourceData((prev) => {
+        const clims = [...prev.contrast_limits];
+        clims[channelIndex] = lim;
+        return { ...prev, contrast_limits: clims };
+      });
+    }
+
     setLayer((prev) => {
       const { layerProps } = prev;
       const loaderSelection = [...layerProps.loaderSelection, channelSelection];
       const colorValues = [...layerProps.colorValues, hexToRGB(colors[channelIndex])];
-      const sliderValues = [...layerProps.sliderValues, contrast_limits[channelIndex]];
+      const sliderValues = [...layerProps.sliderValues, lim];
       const contrastLimits = [...sliderValues];
       const channelIsOn = [...layerProps.channelIsOn, true];
       return {

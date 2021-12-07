@@ -1,4 +1,4 @@
-import { DTYPE_VALUES, ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
+import { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
 import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
 import GridLayer from './gridLayer';
 import { loadOmeroMultiscales, loadPlate, loadWell } from './ome';
@@ -21,17 +21,20 @@ import {
   open,
   parseMatrix,
   range,
+  calcDataRange,
+  calcConstrastLimits,
 } from './utils';
 
-function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<string[]>[], max: number): SourceData {
+async function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<string[]>[]): Promise<SourceData> {
   const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
+  const limits = contrast_limits ?? (await (() => calcDataRange(data[data.length - 1], [0, 0, 0]))());
   return {
     loader: data,
     name,
     channel_axis: null,
     colors: [color ?? COLORS.white],
     names: ['channel_0'],
-    contrast_limits: [contrast_limits ?? [0, max]],
+    contrast_limits: [limits],
     visibilities: [visibility ?? true],
     model_matrix: parseMatrix(config.model_matrix),
     defaults: {
@@ -43,10 +46,14 @@ function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<st
   };
 }
 
-function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<string[]>[], max: number): SourceData {
-  const { names, channel_axis, name, model_matrix, opacity = 1, colormap = '' } = config;
-  let { contrast_limits, visibilities, colors } = config;
-  const n = data[0].shape[channel_axis as number];
+async function loadMultiChannel(
+  config: MultichannelConfig,
+  data: ZarrPixelSource<string[]>[],
+  channelAxis: number
+): Promise<SourceData> {
+  const { names, contrast_limits, name, model_matrix, opacity = 1, colormap = '' } = config;
+  let { visibilities, colors } = config;
+  const n = data[0].shape[channelAxis];
   for (const channelProp of [contrast_limits, visibilities, names, colors]) {
     if (channelProp && channelProp.length !== n) {
       const propertyName = Object.keys({ channelProp })[0];
@@ -57,15 +64,18 @@ function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<stri
   visibilities = visibilities || getDefaultVisibilities(n);
   colors = colors || getDefaultColors(n, visibilities);
 
+  const contrastLimits =
+    contrast_limits ?? (await (() => calcConstrastLimits(data[data.length - 1], channelAxis, visibilities))());
+
   return {
     loader: data,
     name,
-    channel_axis: Number(channel_axis as number),
+    channel_axis: channelAxis,
     colors,
     names: names ?? range(n).map((i) => `channel_${i}`),
-    contrast_limits: contrast_limits ?? Array(n).fill([0, max]),
+    contrast_limits: contrastLimits,
     visibilities,
-    model_matrix: parseMatrix(config.model_matrix),
+    model_matrix: parseMatrix(model_matrix),
     defaults: {
       selection: Array(data[0].shape.length).fill(0),
       colormap,
@@ -123,20 +133,15 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   const loader = data.map((d) => new ZarrPixelSource(d, labels, tileSize));
   const [base] = loader;
 
-  // If contrast_limits not provided or are missing from omero metadata.
-  const max = base.dtype === 'Float32' ? 1 : DTYPE_VALUES[base.dtype].max;
-  // Now that we have data, try to figure out how to render initially.
-
   // If explicit channel axis is provided, try to load as multichannel.
   if ('channel_axis' in config || labels.includes('c')) {
     config = config as MultichannelConfig;
-    config.channel_axis = config.channel_axis ?? labels.indexOf('c');
-    return loadMultiChannel(config, loader, max);
+    return loadMultiChannel(config, loader, Number(config.channel_axis ?? labels.indexOf('c')));
   }
 
   const nDims = base.shape.length;
   if (nDims === 2 || !('channel_axis' in config)) {
-    return loadSingleChannel(config as SingleChannelConfig, loader, max);
+    return loadSingleChannel(config as SingleChannelConfig, loader);
   }
 
   throw Error('Failed to load image.');
@@ -167,23 +172,18 @@ export function initLayerStateFromSource(sourceData: SourceData): LayerState {
 
   const visibleIndices = visibilities.flatMap((bool, i) => (bool ? i : []));
   for (const index of visibleIndices) {
+    const channelSelection = [...selection];
     if (Number.isInteger(channel_axis)) {
-      const channelSelection = [...selection];
       channelSelection[channel_axis as number] = index;
-      loaderSelection.push(channelSelection);
-    } else {
-      loaderSelection.push(selection);
     }
+    loaderSelection.push(channelSelection);
     colorValues.push(hexToRGB(colors[index]));
-    contrastLimits.push(contrast_limits[index]);
+    // TODO: should never be undefined
+    contrastLimits.push(contrast_limits[index] ?? [0, 255]);
     channelIsOn.push(true);
   }
   // set initial slider values to contrast_limits
   const sliderValues = [...contrastLimits];
-
-  if (!(loader[0].dtype in DTYPE_VALUES)) {
-    throw Error(`Dtype not supported, must be ${JSON.stringify(Object.keys(DTYPE_VALUES))}`);
-  }
 
   return {
     Layer,

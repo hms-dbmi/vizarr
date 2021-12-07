@@ -1,6 +1,7 @@
 import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray } from 'zarr';
 import type { Group as ZarrGroup } from 'zarr';
 import type { AsyncStore, Store } from 'zarr/types/storage/types';
+import type { ZarrPixelSource } from '@hms-dbmi/viv';
 import { Matrix4 } from '@math.gl/core/dist/esm';
 import { LRUCacheStore } from './lru-store';
 
@@ -193,4 +194,46 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
     console.warn(msg);
   }
   return matrix;
+}
+
+export async function calcDataRange<S extends string[]>(
+  source: ZarrPixelSource<S>,
+  selection: number[]
+): Promise<[min: number, max: number]> {
+  if (source.dtype === 'Uint8') return [0, 255];
+  const { data } = await source.getRaster({ selection });
+  let minVal = Infinity;
+  let maxVal = -Infinity;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] > maxVal) maxVal = data[i];
+    if (data[i] < minVal) minVal = data[i];
+  }
+  if (minVal === maxVal) {
+    minVal = 0;
+    maxVal = 1;
+  }
+  return [minVal, maxVal];
+}
+
+export async function calcConstrastLimits<S extends string[]>(
+  source: ZarrPixelSource<S>,
+  channelAxis: number,
+  visibilities: boolean[],
+  defaultSelection?: number[]
+): Promise<([min: number, max: number] | undefined)[]> {
+  const def = defaultSelection ?? source.shape.map(() => 0);
+  const csize = source.shape[channelAxis];
+
+  if (csize !== visibilities.length) {
+    throw new Error("provided visibilities don't match number of channels");
+  }
+
+  return Promise.all(
+    visibilities.map(async (isVisible, i) => {
+      if (!isVisible) return undefined; // don't compute non-visible channels
+      const selection = [...def];
+      selection[channelAxis] = i;
+      return calcDataRange(source, selection);
+    })
+  );
 }

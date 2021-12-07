@@ -72,7 +72,7 @@ export type SourceData = {
   channel_axis: number | null;
   colors: string[];
   names: string[];
-  contrast_limits: number[][];
+  contrast_limits: (number[] | undefined)[];
   visibilities: boolean[];
   defaults: {
     selection: number[];
