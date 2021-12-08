@@ -88,7 +88,11 @@ type VivProps = ConstructorParameters<typeof MultiscaleImageLayer>[0];
 export type LayerCtr<T> = new (...args: any[]) => T;
 export type LayerState = {
   Layer: LayerCtr<typeof ImageLayer | typeof MultiscaleImageLayer | GridLayer>;
-  layerProps: Omit<VivProps, 'loader' | 'selections'> & {
+  layerProps: {
+    contrastLimits: VivProps['contrastLimits'],
+    colors: NonNullable<VivProps['colors']>,
+    channelsVisible: NonNullable<VivProps['channelsVisible']>,
+    opacity: NonNullable<VivProps['opacity']>,
     loader: ZarrPixelSource<string[]> | ZarrPixelSource<string[]>[];
     selections: number[][];
     contrastLimitsRange: [min: number, max: number][];
