@@ -89,12 +89,14 @@ export type LayerCtr<T> = new (...args: any[]) => T;
 export type LayerState = {
   Layer: LayerCtr<typeof ImageLayer | typeof MultiscaleImageLayer | GridLayer>;
   layerProps: {
-    contrastLimits: VivProps['contrastLimits'],
-    colors: NonNullable<VivProps['colors']>,
-    channelsVisible: NonNullable<VivProps['channelsVisible']>,
-    opacity: NonNullable<VivProps['opacity']>,
+    contrastLimits: VivProps['contrastLimits'];
+    colors: [r: number, g: number, b: number][];
+    channelsVisible: NonNullable<VivProps['channelsVisible']>;
+    opacity: NonNullable<VivProps['opacity']>;
     loader: ZarrPixelSource<string[]> | ZarrPixelSource<string[]>[];
+    colormap: string; // TODO: more precise
     selections: number[][];
+    modelMatrix: Matrix4;
     contrastLimitsRange: [min: number, max: number][];
     loaders?: GridLoader[];
     rows?: number;
