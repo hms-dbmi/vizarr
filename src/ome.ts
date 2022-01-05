@@ -61,7 +61,7 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   // Create loader for every Image.
   const promises = imgPaths.map((p) => grp.getItem(join(p, resolution)));
   const data = (await Promise.all(promises)) as ZarrArray[];
-  const axes = getOmeAxes(imgAttrs.multiscales)
+  const axes = getOmeAxes(imgAttrs.multiscales);
   const axis_labels = getOmeAxisLabels(axes);
 
   const tileSize = guessTileSize(data[0]);
@@ -164,7 +164,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
     { concurrency: 10 }
   );
   const data = await Promise.all(promises);
-  const axes = getOmeAxes(imgAttrs.multiscales)
+  const axes = getOmeAxes(imgAttrs.multiscales);
   const axis_labels = getOmeAxisLabels(axes);
   const tileSize = guessTileSize(data[0][1]);
   const loaders = data.map((d) => {
@@ -228,7 +228,7 @@ export async function loadOmeroMultiscales(
 ): Promise<SourceData> {
   const { name, opacity = 1, colormap = '' } = config;
   const data = await loadMultiscales(grp, attrs.multiscales);
-  const axes = getOmeAxes(attrs.multiscales)
+  const axes = getOmeAxes(attrs.multiscales);
   const axis_labels = getOmeAxisLabels(axes);
   const meta = parseOmeroMeta(attrs.omero, axes);
   const tileSize = guessTileSize(data[0]);
@@ -286,8 +286,7 @@ function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axes: Ome.Axis[]) 
     if (axis.name == 'z') return z;
     return 0;
   });
-  console.log("AXES", axes);
-  const channel_axis = axes.findIndex(axis => axis.type === "channel");
+  const channel_axis = axes.findIndex((axis) => axis.type === 'channel');
 
   return {
     name,
@@ -304,29 +303,29 @@ function getOmeAxes(multiscales: Ome.Multiscale[]): Ome.Axis[] {
   // Returns axes in the latest v0.4+ format.
   // defaults for v0.1 & v0.2
   const default_axes = [
-    {type: 'time', name: 't'},
-    {type: 'channel', name: 'c'},
-    {type: 'space', name: 'z'},
-    {type: 'space', name: 'y'},
-    {type: 'space', name:'x'}
+    { type: 'time', name: 't' },
+    { type: 'channel', name: 'c' },
+    { type: 'space', name: 'z' },
+    { type: 'space', name: 'y' },
+    { type: 'space', name: 'x' },
   ];
   let axes = default_axes;
   // v0.3
-  const typesByName = { 'x': 'space', 'y': 'space', 'z': 'space', 'c': 'channel', 't': 'time'}
+  const typesByName = { x: 'space', y: 'space', z: 'space', c: 'channel', t: 'time' };
   if (multiscales[0].axes) {
-    axes = multiscales[0].axes.map(axis => {
-      let name: string = axis instanceof String ? axis as string : (axis as Ome.Axis).name;
+    axes = multiscales[0].axes.map((axis) => {
+      let name: string = axis instanceof String ? (axis as string) : (axis as Ome.Axis).name;
       let type = typesByName[name] as string;
       if (!(axis instanceof String) && (axis as Ome.Axis).type) {
         type = (axis as Ome.Axis).type as string;
       }
-      return {name, type}
+      return { name, type };
     });
   }
   return axes;
 }
 
 function getOmeAxisLabels(axes: Ome.Axis[]): [...string[], 'y', 'x'] {
-  const axes_names = axes.map(axis => axis.name);
+  const axes_names = axes.map((axis) => axis.name);
   return axes_names as [...string[], 'y', 'x'];
 }
