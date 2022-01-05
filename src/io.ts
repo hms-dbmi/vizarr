@@ -15,6 +15,8 @@ import {
   getDefaultColors,
   getDefaultVisibilities,
   getAxisLabels,
+  getNgffAxes,
+  getNgffAxisLabels,
   guessTileSize,
   hexToRGB,
   loadMultiscales,
@@ -88,6 +90,7 @@ async function loadMultiChannel(
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
   const node = await open(config.source);
   let data: ZarrArray[];
+  let multiscales;
 
   if (node instanceof ZarrGroup) {
     const attrs = (await node.attrs.asObject()) as Ome.Attrs;
@@ -120,23 +123,26 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
     }
 
     data = await loadMultiscales(node, attrs.multiscales);
-    if (!config.axis_labels) {
-      // Update config axis_labels if present in multiscales
-      config.axis_labels = attrs.multiscales[0].axes;
-    }
+    multiscales = attrs.multiscales;
   } else {
     data = [node];
   }
 
-  const labels = getAxisLabels(data[0], config.axis_labels);
+  let labels = getAxisLabels(data[0], config.axis_labels);
+  let channel_axis = labels.indexOf('c');
+  if (!config.axis_labels && multiscales && multiscales[0].axes) {
+    const axes = getNgffAxes(multiscales);
+    labels = getNgffAxisLabels(axes);
+    channel_axis = axes.findIndex((axis) => axis.type === 'channel');
+  }
   const tileSize = guessTileSize(data[0]);
   const loader = data.map((d) => new ZarrPixelSource(d, labels, tileSize));
   const [base] = loader;
 
   // If explicit channel axis is provided, try to load as multichannel.
-  if ('channel_axis' in config || labels.includes('c')) {
+  if ('channel_axis' in config || channel_axis > -1) {
     config = config as MultichannelConfig;
-    return loadMultiChannel(config, loader, Number(config.channel_axis ?? labels.indexOf('c')));
+    return loadMultiChannel(config, loader, Number(config.channel_axis ?? channel_axis));
   }
 
   const nDims = base.shape.length;
