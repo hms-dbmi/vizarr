@@ -130,12 +130,11 @@ export function getNgffAxes(multiscales: Ome.Multiscale[]): Ome.Axis[] {
   if (multiscales[0].axes) {
     axes = multiscales[0].axes.map((axis) => {
       // axis may be string 'x' (v0.3) or object
-      let name: string = axis instanceof String ? (axis as string) : (axis as Ome.Axis).name;
-      let type = getDefaultType(name);
-      if (!(axis instanceof String) && (axis as Ome.Axis).type) {
-        type = (axis as Ome.Axis).type as string;
+      if (typeof axis === 'string') {
+        return { name: axis, type: getDefaultType(axis) }
       }
-      return { name, type };
+      const { name, type } = axis;
+      return { name, type: type ?? getDefaultType(name) };
     });
   }
   return axes;

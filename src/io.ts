@@ -90,7 +90,8 @@ async function loadMultiChannel(
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
   const node = await open(config.source);
   let data: ZarrArray[];
-  let multiscales;
+  let labels: [...string[], 'y', 'x'];
+  let channel_axis: number = -1;
 
   if (node instanceof ZarrGroup) {
     const attrs = (await node.attrs.asObject()) as Ome.Attrs;
@@ -123,18 +124,22 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
     }
 
     data = await loadMultiscales(node, attrs.multiscales);
-    multiscales = attrs.multiscales;
+    if (attrs.multiscales[0].axes) {
+      const axes = getNgffAxes(attrs.multiscales);
+      labels = getNgffAxisLabels(axes);
+      channel_axis = axes.findIndex((axis) => axis.type === 'channel');
+    }
   } else {
     data = [node];
   }
 
-  let labels = getAxisLabels(data[0], config.axis_labels);
-  let channel_axis = labels.indexOf('c');
-  if (!config.axis_labels && multiscales && multiscales[0].axes) {
-    const axes = getNgffAxes(multiscales);
-    labels = getNgffAxisLabels(axes);
-    channel_axis = axes.findIndex((axis) => axis.type === 'channel');
-  }
+  // explicit override in config > ngff > guessed from data shape
+  // if (config.axis_labels) {
+  //   labels = config.axis_labels as [...string[], 'y', 'x'];
+  // }
+  labels = config.axis_labels ?? (labels ?? getAxisLabels(data[0]));
+  channel_axis = config.channel_axis ?? (channel_axis ?? labels.indexOf('c'));
+  
   const tileSize = guessTileSize(data[0]);
   const loader = data.map((d) => new ZarrPixelSource(d, labels, tileSize));
   const [base] = loader;
