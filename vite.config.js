@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 
 import { resolve } from 'path';
 
-const source = process.env.VIZARR_DATA || 'https://s3.embassy.ebi.ac.uk/idr/zarr/v0.1/6001253.zarr';
+const source = process.env.VIZARR_DATA || 'https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/6001253.zarr';
 
 export default defineConfig({
   plugins: [react()],
