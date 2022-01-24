@@ -110,6 +110,41 @@ export function getAxisLabels(arr: ZarrArray, axis_labels?: string[]): [...strin
   return axis_labels as [...string[], 'y', 'x'];
 }
 
+export function getNgffAxes(multiscales: Ome.Multiscale[]): Ome.Axis[] {
+  // Returns axes in the latest v0.4+ format.
+  // defaults for v0.1 & v0.2
+  const default_axes = [
+    { type: 'time', name: 't' },
+    { type: 'channel', name: 'c' },
+    { type: 'space', name: 'z' },
+    { type: 'space', name: 'y' },
+    { type: 'space', name: 'x' },
+  ];
+  function getDefaultType(name: string): string {
+    if (name === 't') return 'time';
+    if (name === 'c') return 'channel';
+    return 'space';
+  }
+  let axes = default_axes;
+  // v0.3 & v0.4+
+  if (multiscales[0].axes) {
+    axes = multiscales[0].axes.map((axis) => {
+      // axis may be string 'x' (v0.3) or object
+      if (typeof axis === 'string') {
+        return { name: axis, type: getDefaultType(axis) };
+      }
+      const { name, type } = axis;
+      return { name, type: type ?? getDefaultType(name) };
+    });
+  }
+  return axes;
+}
+
+export function getNgffAxisLabels(axes: Ome.Axis[]): [...string[], 'y', 'x'] {
+  const axes_names = axes.map((axis) => axis.name);
+  return axes_names as [...string[], 'y', 'x'];
+}
+
 export function getDefaultVisibilities(n: number, visibilities?: boolean[]): boolean[] {
   if (!visibilities) {
     if (n <= MAX_CHANNELS) {

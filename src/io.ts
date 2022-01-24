@@ -15,6 +15,8 @@ import {
   getDefaultColors,
   getDefaultVisibilities,
   getAxisLabels,
+  getNgffAxes,
+  getNgffAxisLabels,
   guessTileSize,
   hexToRGB,
   loadMultiscales,
@@ -88,6 +90,7 @@ async function loadMultiChannel(
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
   const node = await open(config.source);
   let data: ZarrArray[];
+  let axes: Ome.Axis[] | undefined;
 
   if (node instanceof ZarrGroup) {
     const attrs = (await node.attrs.asObject()) as Ome.Attrs;
@@ -120,23 +123,24 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
     }
 
     data = await loadMultiscales(node, attrs.multiscales);
-    if (!config.axis_labels) {
-      // Update config axis_labels if present in multiscales
-      config.axis_labels = attrs.multiscales[0].axes;
+    if (attrs.multiscales[0].axes) {
+      axes = getNgffAxes(attrs.multiscales);
     }
   } else {
     data = [node];
   }
 
-  const labels = getAxisLabels(data[0], config.axis_labels);
+  // explicit override in config > ngff > guessed from data shape
+  const { channel_axis, labels } = getAxisLabelsAndChannelAxis(config, axes, data[0]);
+
   const tileSize = guessTileSize(data[0]);
   const loader = data.map((d) => new ZarrPixelSource(d, labels, tileSize));
   const [base] = loader;
 
   // If explicit channel axis is provided, try to load as multichannel.
-  if ('channel_axis' in config || labels.includes('c')) {
+  if ('channel_axis' in config || channel_axis > -1) {
     config = config as MultichannelConfig;
-    return loadMultiChannel(config, loader, Number(config.channel_axis ?? labels.indexOf('c')));
+    return loadMultiChannel(config, loader, Number(config.channel_axis ?? channel_axis));
   }
 
   const nDims = base.shape.length;
@@ -145,6 +149,30 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   }
 
   throw Error('Failed to load image.');
+}
+
+type Labels = [...string[], 'y', 'x'];
+function getAxisLabelsAndChannelAxis(
+  config: ImageLayerConfig,
+  ngffAxes: Ome.Axis[] | undefined,
+  arr: ZarrArray
+): { labels: Labels; channel_axis: number } {
+  // type cast string[] to Labels
+  const maybeAxisLabels = config.axis_labels as undefined | Labels;
+  // ensure numeric if provided
+  const maybeChannelAxis = 'channel_axis' in config ? Number(config.channel_axis) : undefined;
+
+  // Use ngff axes metadata if labels or channel axis aren't explicitly provided
+  if (ngffAxes) {
+    const labels = maybeAxisLabels ?? getNgffAxisLabels(ngffAxes);
+    const channel_axis = maybeChannelAxis ?? ngffAxes.findIndex((axis) => axis.type === 'channel');
+    return { labels, channel_axis };
+  }
+
+  // create dummy axis labels if not provided and try to guess channel_axis if missing
+  const labels = maybeAxisLabels ?? getAxisLabels(arr);
+  const channel_axis = maybeChannelAxis ?? labels.indexOf('c');
+  return { labels, channel_axis };
 }
 
 export function initLayerStateFromSource(sourceData: SourceData): LayerState {

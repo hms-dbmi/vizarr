@@ -28,10 +28,15 @@ declare module Ome {
     };
   }
 
+  interface Axis {
+    name: string;
+    type?: string;
+  }
+
   interface Multiscale {
     datasets: { path: string }[];
     version?: string;
-    axes?: string[];
+    axes?: string[] | Axis[];
   }
 
   interface Acquisition {
