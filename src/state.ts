@@ -1,24 +1,13 @@
 import type { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
 import type { Matrix4 } from 'math.gl';
-import type { PrimitiveAtom, SetStateAction } from 'jotai';
+import type { PrimitiveAtom } from 'jotai';
 import { atom } from 'jotai';
 import { atomFamily, splitAtom, waitForAll } from 'jotai/utils';
 import type { ZarrArray } from 'zarr';
-import type GridLayer from './gridLayer';
+import type { default as GridLayer, GridLayerProps, GridLoader } from './gridLayer';
 import { initLayerStateFromSource } from './io';
 
 export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
-export const DEFAULT_LAYER_PROPS = {
-  loader: [],
-  colorValues: [],
-  sliderValues: [],
-  contrastLimits: [],
-  loaderSelection: [],
-  channelIsOn: [],
-  colormap: '',
-  opacity: 1,
-  excludeBackground: true,
-};
 
 interface ViewState {
   zoom: number;
@@ -53,13 +42,6 @@ export interface SingleChannelConfig extends BaseConfig {
 
 export type ImageLayerConfig = MultichannelConfig | SingleChannelConfig;
 
-export interface GridLoader {
-  loader: ZarrPixelSource<string[]>;
-  row: number;
-  col: number;
-  name: string;
-}
-
 export type SourceData = {
   loader: ZarrPixelSource<string[]>[];
   loaders?: GridLoader[]; // for OME plates
@@ -83,26 +65,38 @@ export type SourceData = {
   onClick?: (e: any) => void;
 };
 
-type VivProps = ConstructorParameters<typeof MultiscaleImageLayer>[0];
+export type VivProps = ConstructorParameters<typeof MultiscaleImageLayer>[0];
+
+export interface BaseLayerProps {
+  contrastLimits: VivProps['contrastLimits'];
+  colors: [r: number, g: number, b: number][];
+  channelsVisible: NonNullable<VivProps['channelsVisible']>;
+  opacity: NonNullable<VivProps['opacity']>;
+  colormap: string; // TODO: more precise
+  selections: number[][];
+  modelMatrix: Matrix4;
+  contrastLimitsRange: [min: number, max: number][];
+  onClick?: (e: any) => void;
+}
+
+interface MultiscaleImageLayerProps extends BaseLayerProps {
+  loader: ZarrPixelSource<string[]>[];
+}
+
+interface ImageLayerProps extends BaseLayerProps {
+  loader: ZarrPixelSource<string[]>;
+}
+
+type LayerMap = {
+  image: [typeof ImageLayer, ImageLayerProps];
+  multiscale: [typeof MultiscaleImageLayer, MultiscaleImageLayerProps];
+  grid: [GridLayer, { loader: ZarrPixelSource<string[]> | ZarrPixelSource<string[]>[] } & GridLayerProps];
+};
 
 export type LayerCtr<T> = new (...args: any[]) => T;
-export type LayerState = {
-  Layer: LayerCtr<typeof ImageLayer | typeof MultiscaleImageLayer | GridLayer>;
-  layerProps: {
-    contrastLimits: VivProps['contrastLimits'];
-    colors: [r: number, g: number, b: number][];
-    channelsVisible: NonNullable<VivProps['channelsVisible']>;
-    opacity: NonNullable<VivProps['opacity']>;
-    loader: ZarrPixelSource<string[]> | ZarrPixelSource<string[]>[];
-    colormap: string; // TODO: more precise
-    selections: number[][];
-    modelMatrix: Matrix4;
-    contrastLimitsRange: [min: number, max: number][];
-    loaders?: GridLoader[];
-    rows?: number;
-    columns?: number;
-    onClick?: (e: any) => void;
-  };
+export type LayerState<T extends 'image' | 'multiscale' | 'grid' = 'image' | 'multiscale' | 'grid'> = {
+  Layer: LayerCtr<LayerMap[T][0]>;
+  layerProps: LayerMap[T][1];
   on: boolean;
 };
 
@@ -119,8 +113,8 @@ export const viewStateAtom = atom<ViewState>(DEFAULT_VIEW_STATE);
 
 export const sourceInfoAtomAtoms = splitAtom(sourceInfoAtom);
 
-export const layerFamilyAtom = atomFamily<WithId<SourceData>, WithId<LayerState>, SetStateAction<WithId<LayerState>>>(
-  (param) => atom({ ...initLayerStateFromSource(param), id: param.id }),
+export const layerFamilyAtom = atomFamily(
+  (param: WithId<SourceData>) => atom({ ...initLayerStateFromSource(param), id: param.id }),
   (a, b) => a.id === b.id
 );
 

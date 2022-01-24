@@ -7,6 +7,7 @@ import { LRUCacheStore } from './lru-store';
 
 // TODO(2021-10-18): hack to ensure return-type of parseMatrix compatible with viv layers.
 import type { Matrix4 as Matrix4Type } from 'math.gl';
+import type { LayerState } from './state';
 
 export const MAX_CHANNELS = 6;
 
@@ -219,7 +220,9 @@ function isArray16(o: unknown): o is Array16 {
 }
 
 export function parseMatrix(model_matrix?: string | number[]): Matrix4Type {
-  if (!model_matrix) return new Matrix4() as any;
+  if (!model_matrix) {
+    return new Matrix4();
+  }
   const matrix = new Matrix4();
   try {
     const arr = typeof model_matrix === 'string' ? JSON.parse(model_matrix) : model_matrix;
@@ -231,7 +234,7 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4Type {
     const msg = `Failed to parse modelMatrix. Got ${JSON.stringify(model_matrix)}, using identity.`;
     console.warn(msg);
   }
-  return matrix as any;
+  return matrix;
 }
 
 export async function calcDataRange<S extends string[]>(

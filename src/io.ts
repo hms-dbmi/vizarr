@@ -2,14 +2,7 @@ import { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv
 import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
 import GridLayer from './gridLayer';
 import { loadOmeroMultiscales, loadPlate, loadWell } from './ome';
-import type {
-  ImageLayerConfig,
-  LayerState,
-  MultichannelConfig,
-  SingleChannelConfig,
-  SourceData,
-  LayerCtr,
-} from './state';
+import type { ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from './state';
 import {
   COLORS,
   getDefaultColors,
@@ -178,7 +171,6 @@ function getAxisLabelsAndChannelAxis(
 export function initLayerStateFromSource(source: SourceData): LayerState {
   const { selection, opacity, colormap } = source.defaults;
 
-  const Layer = getLayer(source);
   const selections: number[][] = [];
   const colors: [number, number, number][] = [];
   const contrastLimits: [start: number, end: number][] = [];
@@ -197,27 +189,49 @@ export function initLayerStateFromSource(source: SourceData): LayerState {
     channelsVisible.push(true);
   }
 
+  const layerProps = {
+    selections,
+    colors,
+    contrastLimits,
+    contrastLimitsRange: [...contrastLimits],
+    channelsVisible,
+    opacity,
+    colormap,
+    modelMatrix: source.model_matrix,
+    onClick: source.onClick,
+  };
+
+  if (source.loaders !== undefined) {
+    return {
+      Layer: GridLayer,
+      layerProps: {
+        ...layerProps,
+        loader: source.loader,
+        loaders: source.loaders,
+        columns: source.columns as number,
+        rows: source.rows as number,
+      },
+      on: true,
+    };
+  }
+
+  if (Array.isArray(source.loader)) {
+    return {
+      Layer: MultiscaleImageLayer,
+      layerProps: {
+        ...layerProps,
+        loader: source.loader,
+      },
+      on: true,
+    };
+  }
+
   return {
-    Layer,
+    Layer: ImageLayer,
     layerProps: {
-      loader: source.loader.length === 1 ? source.loader[0] : source.loader,
-      loaders: source.loaders,
-      rows: source.rows,
-      columns: source.columns,
-      selections,
-      colors,
-      contrastLimits,
-      contrastLimitsRange: [...contrastLimits],
-      channelsVisible,
-      opacity,
-      colormap,
-      modelMatrix: source.model_matrix,
-      onClick: source.onClick,
+      ...layerProps,
+      loader: source.loader[0],
     },
     on: true,
   };
-}
-
-function getLayer(sourceData: SourceData): LayerCtr<typeof ImageLayer | typeof MultiscaleImageLayer | GridLayer> {
-  return sourceData.loaders ? GridLayer : sourceData.loader.length > 1 ? MultiscaleImageLayer : ImageLayer;
 }
