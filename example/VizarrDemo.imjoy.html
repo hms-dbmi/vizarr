@@ -36,7 +36,7 @@ class ImJoyPlugin {
 
   async run(ctx) {
     const viewer = await api.createWindow({ src: 'https://hms-dbmi.github.io/vizarr' });
-    await viewer.add_image({ source: 'https://s3.embassy.ebi.ac.uk/idr/zarr/v0.1/6001240.zarr' });
+    await viewer.add_image({ source: 'https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/6001240.zarr' });
   }
 }
 
