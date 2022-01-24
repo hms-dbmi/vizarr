@@ -14,7 +14,8 @@
     "allowSyntheticDefaultImports": true,
     "importsNotUsedAsValues": "error",
     "paths": {
-      "zarr": ["node_modules/zarr"]
+      "zarr": ["node_modules/zarr"],
+      "*": ["*", "node_modules/@danmarshall/deckgl-typings/*"]
     }
   }
 }
