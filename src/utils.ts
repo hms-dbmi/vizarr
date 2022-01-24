@@ -221,7 +221,7 @@ function isArray16(o: unknown): o is Array16 {
 
 export function parseMatrix(model_matrix?: string | number[]): Matrix4Type {
   if (!model_matrix) {
-    return new Matrix4();
+    return new Matrix4() as Matrix4Type;
   }
   const matrix = new Matrix4();
   try {
@@ -234,7 +234,7 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4Type {
     const msg = `Failed to parse modelMatrix. Got ${JSON.stringify(model_matrix)}, using identity.`;
     console.warn(msg);
   }
-  return matrix;
+  return matrix as Matrix4Type;
 }
 
 export async function calcDataRange<S extends string[]>(
