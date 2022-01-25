@@ -14,8 +14,7 @@ function getLayerSize(props: LayerState['layerProps']) {
   const [base, maxZoom] = Array.isArray(loader) ? [loader[0], loader.length] : [loader, 0];
   const interleaved = isInterleaved(base.shape);
   let [height, width] = base.shape.slice(interleaved ? -3 : -2);
-  if ('loaders' in props) {
-    // is a grid layer
+  if ('loaders' in props && props.rows && props.columns) {
     // TODO: Don't hardcode spacer size. Probably best to inspect the deck.gl Layers rather than
     // the Layer Props.
     const spacer = 5;

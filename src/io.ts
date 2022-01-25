@@ -201,7 +201,7 @@ export function initLayerStateFromSource(source: SourceData): LayerState {
     onClick: source.onClick,
   };
 
-  if (source.loaders !== undefined) {
+  if ('loaders' in source) {
     return {
       Layer: GridLayer,
       layerProps: {
