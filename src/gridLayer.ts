@@ -14,7 +14,7 @@ export interface GridLoader {
 }
 
 export interface GridLayerProps
-  extends Omit<CompositeLayerProps<any>, 'modelMatrix' | 'opacity' | 'onClick'>,
+  extends Omit<CompositeLayerProps<any>, 'modelMatrix' | 'opacity' | 'onClick' | 'id'>,
     BaseLayerProps {
   loaders: GridLoader[];
   rows: number;

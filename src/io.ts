@@ -131,6 +131,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   const [base] = loader;
 
   // If explicit channel axis is provided, try to load as multichannel.
+
   if ('channel_axis' in config || channel_axis > -1) {
     config = config as MultichannelConfig;
     return loadMultiChannel(config, loader, Number(config.channel_axis ?? channel_axis));
@@ -138,7 +139,9 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 
   const nDims = base.shape.length;
   if (nDims === 2 || !('channel_axis' in config)) {
-    return loadSingleChannel(config as SingleChannelConfig, loader);
+    let c = loadSingleChannel(config as SingleChannelConfig, loader);
+	console.log(await c);return c;
+
   }
 
   throw Error('Failed to load image.');
@@ -168,7 +171,7 @@ function getAxisLabelsAndChannelAxis(
   return { labels, channel_axis };
 }
 
-export function initLayerStateFromSource(source: SourceData): LayerState {
+export function initLayerStateFromSource(source: SourceData & { id: string }): LayerState {
   const { selection, opacity, colormap } = source.defaults;
 
   const selections: number[][] = [];
@@ -190,6 +193,7 @@ export function initLayerStateFromSource(source: SourceData): LayerState {
   }
 
   const layerProps = {
+    id: source.id,
     selections,
     colors,
     contrastLimits,
