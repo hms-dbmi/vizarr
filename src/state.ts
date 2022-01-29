@@ -68,7 +68,7 @@ export type SourceData = {
 export type VivProps = ConstructorParameters<typeof MultiscaleImageLayer>[0];
 
 export interface BaseLayerProps {
-  id: string,
+  id: string;
   contrastLimits: VivProps['contrastLimits'];
   colors: [r: number, g: number, b: number][];
   channelsVisible: NonNullable<VivProps['channelsVisible']>;

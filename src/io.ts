@@ -22,7 +22,9 @@ import {
 
 async function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<string[]>[]): Promise<SourceData> {
   const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
-  const limits = contrast_limits ?? (await (() => calcDataRange(data[data.length - 1], [0, 0, 0]))());
+  const lowres = data[data.length - 1];
+  const selection = Array(data[0].shape.length).fill(0);
+  const limits = contrast_limits ?? (await (() => calcDataRange(lowres, selection))());
   return {
     loader: data,
     name,
@@ -33,7 +35,7 @@ async function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSou
     visibilities: [visibility ?? true],
     model_matrix: parseMatrix(config.model_matrix),
     defaults: {
-      selection: Array(data[0].shape.length).fill(0),
+      selection,
       colormap,
       opacity,
     },
@@ -139,9 +141,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 
   const nDims = base.shape.length;
   if (nDims === 2 || !('channel_axis' in config)) {
-    let c = loadSingleChannel(config as SingleChannelConfig, loader);
-	console.log(await c);return c;
-
+    return loadSingleChannel(config as SingleChannelConfig, loader);
   }
 
   throw Error('Failed to load image.');
@@ -157,7 +157,6 @@ function getAxisLabelsAndChannelAxis(
   const maybeAxisLabels = config.axis_labels as undefined | Labels;
   // ensure numeric if provided
   const maybeChannelAxis = 'channel_axis' in config ? Number(config.channel_axis) : undefined;
-
   // Use ngff axes metadata if labels or channel axis aren't explicitly provided
   if (ngffAxes) {
     const labels = maybeAxisLabels ?? getNgffAxisLabels(ngffAxes);
@@ -219,22 +218,22 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
     };
   }
 
-  if (Array.isArray(source.loader)) {
+  if (source.loader.length === 1) {
     return {
-      Layer: MultiscaleImageLayer,
+      Layer: ImageLayer,
       layerProps: {
         ...layerProps,
-        loader: source.loader,
+        loader: source.loader[0],
       },
       on: true,
     };
   }
 
   return {
-    Layer: ImageLayer,
+    Layer: MultiscaleImageLayer,
     layerProps: {
       ...layerProps,
-      loader: source.loader[0],
+      loader: source.loader,
     },
     on: true,
   };
