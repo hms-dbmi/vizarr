@@ -17,30 +17,30 @@ function ChannelController({ sourceAtom, layerAtom, channelIndex }: ControllerPr
 
   const handleContrastChange = (_: ChangeEvent<unknown>, v: number | number[]) => {
     setLayer((prev) => {
-      const sliderValues = [...prev.layerProps.sliderValues];
-      sliderValues[channelIndex] = v as number[];
-      return { ...prev, layerProps: { ...prev.layerProps, sliderValues } };
+      const contrastLimits = [...prev.layerProps.contrastLimits];
+      contrastLimits[channelIndex] = v as [number, number];
+      return { ...prev, layerProps: { ...prev.layerProps, contrastLimits } };
     });
   };
 
   const handleVisibilityChange = () => {
     setLayer((prev) => {
-      const channelIsOn = [...prev.layerProps.channelIsOn];
-      channelIsOn[channelIndex] = !channelIsOn[channelIndex];
-      return { ...prev, layerProps: { ...prev.layerProps, channelIsOn } };
+      const channelsVisible = [...prev.layerProps.channelsVisible];
+      channelsVisible[channelIndex] = !channelsVisible[channelIndex];
+      return { ...prev, layerProps: { ...prev.layerProps, channelsVisible } };
     });
   };
 
-  const { sliderValues, colorValues, contrastLimits, channelIsOn, colormap, loaderSelection } = layer.layerProps;
+  const lp = layer.layerProps;
 
   // Material slider tries to sort in place. Need to copy.
-  const value = [...sliderValues[channelIndex]];
-  const color = `rgb(${colormap ? [255, 255, 255] : colorValues[channelIndex]})`;
-  const on = channelIsOn[channelIndex];
-  const [min, max] = contrastLimits[channelIndex];
+  const value = [...lp.contrastLimits[channelIndex]];
+  const color = `rgb(${lp.colormap ? [255, 255, 255] : lp.colors[channelIndex]})`;
+  const on = lp.channelsVisible[channelIndex];
+  const [min, max] = lp.contrastLimitsRange[channelIndex];
 
   const { channel_axis, names } = sourceData;
-  const selection = loaderSelection[channelIndex];
+  const selection = lp.selections[channelIndex];
   const nameIndex = Number.isInteger(channel_axis) ? selection[channel_axis as number] : 0;
   const label = names[nameIndex];
   return (

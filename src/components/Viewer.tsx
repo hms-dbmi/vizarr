@@ -10,16 +10,16 @@ import { layerAtoms, viewStateAtom } from '../state';
 import { isInterleaved, fitBounds } from '../utils';
 
 function getLayerSize(props: LayerState['layerProps']) {
-  const { loader, rows, columns } = props;
+  const { loader } = props;
   const [base, maxZoom] = Array.isArray(loader) ? [loader[0], loader.length] : [loader, 0];
   const interleaved = isInterleaved(base.shape);
   let [height, width] = base.shape.slice(interleaved ? -3 : -2);
-  if (rows && columns) {
+  if ('loaders' in props && props.rows && props.columns) {
     // TODO: Don't hardcode spacer size. Probably best to inspect the deck.gl Layers rather than
     // the Layer Props.
     const spacer = 5;
-    height = (height + spacer) * rows;
-    width = (width + spacer) * columns;
+    height = (height + spacer) * props.rows;
+    width = (width + spacer) * props.columns;
   }
   return { height, width, maxZoom };
 }

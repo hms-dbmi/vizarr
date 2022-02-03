@@ -2,7 +2,7 @@ import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray } from '
 import type { Group as ZarrGroup } from 'zarr';
 import type { AsyncStore, Store } from 'zarr/types/storage/types';
 import type { ZarrPixelSource } from '@hms-dbmi/viv';
-import { Matrix4 } from '@math.gl/core/dist/esm';
+import { Matrix4 } from 'math.gl';
 import { LRUCacheStore } from './lru-store';
 
 export const MAX_CHANNELS = 6;
@@ -73,7 +73,7 @@ export async function loadMultiscales(grp: ZarrGroup, multiscales: Ome.Multiscal
   throw Error('Multiscales metadata included a path to a group.');
 }
 
-export function hexToRGB(hex: string): number[] {
+export function hexToRGB(hex: string): [r: number, g: number, b: number] {
   if (hex.startsWith('#')) hex = hex.slice(1);
   const r = parseInt(hex.slice(0, 2), 16);
   const g = parseInt(hex.slice(2, 4), 16);
@@ -216,7 +216,9 @@ function isArray16(o: unknown): o is Array16 {
 }
 
 export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
-  if (!model_matrix) return new Matrix4();
+  if (!model_matrix) {
+    return Matrix4.IDENTITY;
+  }
   const matrix = new Matrix4();
   try {
     const arr = typeof model_matrix === 'string' ? JSON.parse(model_matrix) : model_matrix;

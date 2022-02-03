@@ -3,20 +3,24 @@ import { SolidPolygonLayer, TextLayer } from '@deck.gl/layers';
 import type { CompositeLayerProps } from '@deck.gl/core/lib/composite-layer';
 import pMap from 'p-map';
 
-import { XRLayer } from '@hms-dbmi/viv';
-import type { GridLoader } from './state';
+import { XRLayer, ZarrPixelSource, ColorPaletteExtension } from '@hms-dbmi/viv';
+import type { BaseLayerProps } from './state';
 
-export interface GridLayerProps extends CompositeLayerProps<any> {
+export interface GridLoader {
+  loader: ZarrPixelSource<string[]>;
+  row: number;
+  col: number;
+  name: string;
+}
+
+export interface GridLayerProps
+  extends Omit<CompositeLayerProps<any>, 'modelMatrix' | 'opacity' | 'onClick' | 'id'>,
+    BaseLayerProps {
   loaders: GridLoader[];
   rows: number;
   columns: number;
   spacer?: number;
   text?: boolean;
-  sliderValues: number[][];
-  channelIsOn: boolean[];
-  colorValues: number[][];
-  loaderSelection: number[][];
-  colormap: string;
   concurrency?: number;
 }
 
@@ -54,16 +58,16 @@ function validateWidthHeight(d: { data: { width: number; height: number } }[]) {
   return { width, height };
 }
 
-function refreshGridData(props: { loaders: GridLoader[]; concurrency?: number; loaderSelection: number[][] }) {
-  const { loaders, loaderSelection = [] } = props;
+function refreshGridData(props: GridLayerProps) {
+  const { loaders, selections = [] } = props;
   let { concurrency } = props;
-  if (concurrency && loaderSelection.length > 0) {
+  if (concurrency && selections.length > 0) {
     // There are `loaderSelection.length` requests per loader. This block scales
     // the provided concurrency to map to the number of actual requests.
-    concurrency = Math.ceil(concurrency / loaderSelection.length);
+    concurrency = Math.ceil(concurrency / selections.length);
   }
   const mapper = async (d: GridLoader) => {
-    const promises = loaderSelection.map((selection) => d.loader.getRaster({ selection }));
+    const promises = selections.map((selection) => d.loader.getRaster({ selection }));
     const tiles = await Promise.all(promises);
     return {
       ...d,
@@ -89,7 +93,7 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
   updateState({ props, oldProps, changeFlags }: { props: GridLayerProps; oldProps: GridLayerProps; changeFlags: any }) {
     const { propsChanged } = changeFlags;
     const loaderChanged = typeof propsChanged === 'string' && propsChanged.includes('props.loaders');
-    const loaderSelectionChanged = props.loaderSelection !== oldProps.loaderSelection;
+    const loaderSelectionChanged = props.selections !== oldProps.selections;
     if (loaderChanged || loaderSelectionChanged) {
       // Only fetch new data to render if loader has changed
       refreshGridData(this.props).then((gridData) => {
@@ -126,6 +130,7 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
         id: `${id}-GridLayer-${d.row}-${d.col}`,
         dtype: d.loader.dtype || 'Uint16', // fallback if missing,
         pickable: false,
+        extensions: [new ColorPaletteExtension()],
       };
       return new (XRLayer as any)({ ...this.props, ...layerProps });
     });

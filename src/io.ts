@@ -2,14 +2,7 @@ import { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv
 import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
 import GridLayer from './gridLayer';
 import { loadOmeroMultiscales, loadPlate, loadWell } from './ome';
-import type {
-  ImageLayerConfig,
-  LayerState,
-  MultichannelConfig,
-  SingleChannelConfig,
-  SourceData,
-  LayerCtr,
-} from './state';
+import type { ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from './state';
 import {
   COLORS,
   getDefaultColors,
@@ -29,7 +22,9 @@ import {
 
 async function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<string[]>[]): Promise<SourceData> {
   const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
-  const limits = contrast_limits ?? (await (() => calcDataRange(data[data.length - 1], [0, 0, 0]))());
+  const lowres = data[data.length - 1];
+  const selection = Array(data[0].shape.length).fill(0);
+  const limits = contrast_limits ?? (await (() => calcDataRange(lowres, selection))());
   return {
     loader: data,
     name,
@@ -40,7 +35,7 @@ async function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSou
     visibilities: [visibility ?? true],
     model_matrix: parseMatrix(config.model_matrix),
     defaults: {
-      selection: Array(data[0].shape.length).fill(0),
+      selection,
       colormap,
       opacity,
     },
@@ -138,6 +133,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   const [base] = loader;
 
   // If explicit channel axis is provided, try to load as multichannel.
+
   if ('channel_axis' in config || channel_axis > -1) {
     config = config as MultichannelConfig;
     return loadMultiChannel(config, loader, Number(config.channel_axis ?? channel_axis));
@@ -161,7 +157,6 @@ function getAxisLabelsAndChannelAxis(
   const maybeAxisLabels = config.axis_labels as undefined | Labels;
   // ensure numeric if provided
   const maybeChannelAxis = 'channel_axis' in config ? Number(config.channel_axis) : undefined;
-
   // Use ngff axes metadata if labels or channel axis aren't explicitly provided
   if (ngffAxes) {
     const labels = maybeAxisLabels ?? getNgffAxisLabels(ngffAxes);
@@ -175,65 +170,71 @@ function getAxisLabelsAndChannelAxis(
   return { labels, channel_axis };
 }
 
-export function initLayerStateFromSource(sourceData: SourceData): LayerState {
-  const {
-    loader,
-    channel_axis,
-    colors,
-    visibilities,
-    contrast_limits,
-    model_matrix,
-    defaults,
-    // Grid
-    loaders,
-    rows,
-    columns,
-    onClick,
-  } = sourceData;
-  const { selection, opacity, colormap } = defaults;
+export function initLayerStateFromSource(source: SourceData & { id: string }): LayerState {
+  const { selection, opacity, colormap } = source.defaults;
 
-  const Layer = getLayer(sourceData);
-  const loaderSelection: number[][] = [];
-  const colorValues: number[][] = [];
-  const contrastLimits: number[][] = [];
-  const channelIsOn: boolean[] = [];
+  const selections: number[][] = [];
+  const colors: [number, number, number][] = [];
+  const contrastLimits: [start: number, end: number][] = [];
+  const channelsVisible: boolean[] = [];
 
-  const visibleIndices = visibilities.flatMap((bool, i) => (bool ? i : []));
+  const visibleIndices = source.visibilities.flatMap((bool, i) => (bool ? i : []));
   for (const index of visibleIndices) {
     const channelSelection = [...selection];
-    if (Number.isInteger(channel_axis)) {
-      channelSelection[channel_axis as number] = index;
+    if (Number.isInteger(source.channel_axis)) {
+      channelSelection[source.channel_axis as number] = index;
     }
-    loaderSelection.push(channelSelection);
-    colorValues.push(hexToRGB(colors[index]));
+    selections.push(channelSelection);
+    colors.push(hexToRGB(source.colors[index]));
     // TODO: should never be undefined
-    contrastLimits.push(contrast_limits[index] ?? [0, 255]);
-    channelIsOn.push(true);
+    contrastLimits.push(source.contrast_limits[index] ?? [0, 255]);
+    channelsVisible.push(true);
   }
-  // set initial slider values to contrast_limits
-  const sliderValues = [...contrastLimits];
+
+  const layerProps = {
+    id: source.id,
+    selections,
+    colors,
+    contrastLimits,
+    contrastLimitsRange: [...contrastLimits],
+    channelsVisible,
+    opacity,
+    colormap,
+    modelMatrix: source.model_matrix,
+    onClick: source.onClick,
+  };
+
+  if ('loaders' in source) {
+    return {
+      Layer: GridLayer,
+      layerProps: {
+        ...layerProps,
+        loader: source.loader,
+        loaders: source.loaders,
+        columns: source.columns as number,
+        rows: source.rows as number,
+      },
+      on: true,
+    };
+  }
+
+  if (source.loader.length === 1) {
+    return {
+      Layer: ImageLayer,
+      layerProps: {
+        ...layerProps,
+        loader: source.loader[0],
+      },
+      on: true,
+    };
+  }
 
   return {
-    Layer,
+    Layer: MultiscaleImageLayer,
     layerProps: {
-      loader: loader.length === 1 ? loader[0] : loader,
-      loaders,
-      rows,
-      columns,
-      loaderSelection,
-      colorValues,
-      sliderValues,
-      contrastLimits,
-      channelIsOn,
-      opacity,
-      colormap,
-      modelMatrix: model_matrix,
-      onClick,
+      ...layerProps,
+      loader: source.loader,
     },
     on: true,
   };
-}
-
-function getLayer(sourceData: SourceData): LayerCtr<typeof ImageLayer | typeof MultiscaleImageLayer | GridLayer> {
-  return sourceData.loaders ? GridLayer : sourceData.loader.length > 1 ? MultiscaleImageLayer : ImageLayer;
 }

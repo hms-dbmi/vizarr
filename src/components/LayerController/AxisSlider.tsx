@@ -38,14 +38,14 @@ function AxisSlider({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<P
   // If axis index change externally, need to update state
   useEffect(() => {
     // Use first channel to get initial value of slider - can be undefined on first render
-    setValue(layer.layerProps.loaderSelection[0] ? layer.layerProps.loaderSelection[0][axisIndex] : 1);
-  }, [layer.layerProps.loaderSelection]);
+    setValue(layer.layerProps.selections[0] ? layer.layerProps.selections[0][axisIndex] : 1);
+  }, [layer.layerProps.selections]);
 
   const handleRelease = () => {
     setLayer((prev) => {
       let layerProps = { ...prev.layerProps };
       // for each channel, update index of this axis
-      layerProps.loaderSelection = layerProps.loaderSelection.map((ch) => {
+      layerProps.selections = layerProps.selections.map((ch) => {
         let new_ch = [...ch];
         new_ch[axisIndex] = value;
         return new_ch;
