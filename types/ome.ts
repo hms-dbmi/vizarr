@@ -7,7 +7,7 @@ declare module Ome {
     color: string;
     family: string;
     inverted: boolean;
-    label: string;
+    label?: string;
     window: {
       end: number;
       max?: number;

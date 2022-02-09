@@ -280,7 +280,7 @@ function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axes: Ome.Axis[]) 
     colors.push(c.color);
     contrast_limits.push([c.window.start, c.window.end]);
     visibilities.push(c.active);
-    names.push(c.label || "" + index);
+    names.push(c.label || '' + index);
   });
 
   const defaultSelection = axes.map((axis) => {
