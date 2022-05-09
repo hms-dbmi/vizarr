@@ -63,8 +63,8 @@ function ChannelOptions({ sourceAtom, layerAtom, channelIndex }: ControllerProps
       if (umin > smin) contrastLimits[channelIndex] = [umin, smax];
       if (umax < smax) contrastLimits[channelIndex] = [smin, umax];
 
-      // Update channel constrast limits
-      contrastLimits[channelIndex] = [umin, umax];
+      // Update channel constrast limits range
+      contrastLimitsRange[channelIndex] = [umin, umax];
 
       return {
         ...prev,
