@@ -41,7 +41,7 @@ function AxisOptions({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<
     setLayer((prev) => {
       let layerProps = { ...prev.layerProps };
       // for each channel, update index
-      layerProps.loaderSelection = layerProps.loaderSelection.map((ch) => {
+      layerProps.selections = layerProps.selections.map((ch) => {
         let new_ch = [...ch];
         new_ch[axisIndex] = value;
         return new_ch;
@@ -53,7 +53,7 @@ function AxisOptions({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<
 
   const open = Boolean(anchorEl);
   const id = open ? `${axisIndex}-index-${sourceData.id}-options` : undefined;
-  const value = layer.layerProps.loaderSelection[0] ? layer.layerProps.loaderSelection[0][axisIndex] : 1;
+  const value = layer.layerProps.selections[0] ? layer.layerProps.selections[0][axisIndex] : 1;
 
   return (
     <>

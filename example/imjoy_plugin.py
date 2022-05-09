@@ -1,36 +1,7 @@
 from imjoy import api
-import zarr
+from imjoy_rpc import register_default_codecs
 
-
-def encode_zarr_store(zobj):
-    path_prefix = f"{zobj.path}/" if zobj.path else ""
-
-    def getItem(key, options = None):
-        return zobj.store[path_prefix + key]
-
-    def setItem(key, value):
-        zobj.store[path_prefix + key] = value
-
-    def containsItem(key, options = None):
-        if path_prefix + key in zobj.store:
-            return True
-
-    return {
-        "_rintf": True,
-        "_rtype": "zarr-array" if isinstance(zobj, zarr.Array) else "zarr-group",
-        "getItem": getItem,
-        "setItem": setItem,
-        "containsItem": containsItem,
-    }
-
-
-api.registerCodec(
-    {"name": "zarr-array", "type": zarr.Array, "encoder": encode_zarr_store}
-)
-api.registerCodec(
-    {"name": "zarr-group", "type": zarr.Group, "encoder": encode_zarr_store}
-)
-
+register_default_codecs()
 
 class Plugin:
     def __init__(self, images, view_state=None):

@@ -1,44 +1,41 @@
-import { DTYPE_VALUES, ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
+import { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
 import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
 import GridLayer from './gridLayer';
 import { loadCollection, loadOmeroMultiscales, loadWell, getImagePaths } from './ome';
-import type {
-  CollectionData,
-  ImageLayerConfig,
-  LayerState,
-  MultichannelConfig,
-  SingleChannelConfig,
-  SourceData,
-  LayerCtr,
-} from './state';
+import type { CollectionData, ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from './state';
 import {
   COLORS,
-  CYMRGB,
+  getDefaultColors,
+  getDefaultVisibilities,
   getAxisLabels,
+  getNgffAxes,
+  getNgffAxisLabels,
   guessTileSize,
   hexToRGB,
   loadMultiscales,
-  MAGENTA_GREEN,
-  MAX_CHANNELS,
   open,
   parseMatrix,
   range,
-  RGB,
+  calcDataRange,
+  calcConstrastLimits,
 } from './utils';
 
-function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<string[]>[], max: number): SourceData {
+async function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<string[]>[]): Promise<SourceData> {
   const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
+  const lowres = data[data.length - 1];
+  const selection = Array(data[0].shape.length).fill(0);
+  const limits = contrast_limits ?? (await (() => calcDataRange(lowres, selection))());
   return {
     loader: data,
     name,
     channel_axis: null,
     colors: [color ?? COLORS.white],
     names: ['channel_0'],
-    contrast_limits: [contrast_limits ?? [0, max]],
+    contrast_limits: [limits],
     visibilities: [visibility ?? true],
     model_matrix: parseMatrix(config.model_matrix),
     defaults: {
-      selection: Array(data[0].shape.length).fill(0),
+      selection,
       colormap,
       opacity,
     },
@@ -46,10 +43,14 @@ function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<st
   };
 }
 
-function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<string[]>[], max: number): SourceData {
-  const { names, channel_axis, name, model_matrix, opacity = 1, colormap = '' } = config;
-  let { contrast_limits, visibilities, colors } = config;
-  const n = data[0].shape[channel_axis as number];
+async function loadMultiChannel(
+  config: MultichannelConfig,
+  data: ZarrPixelSource<string[]>[],
+  channelAxis: number
+): Promise<SourceData> {
+  const { names, contrast_limits, name, model_matrix, opacity = 1, colormap = '' } = config;
+  let { visibilities, colors } = config;
+  const n = data[0].shape[channelAxis];
   for (const channelProp of [contrast_limits, visibilities, names, colors]) {
     if (channelProp && channelProp.length !== n) {
       const propertyName = Object.keys({ channelProp })[0];
@@ -57,45 +58,21 @@ function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<stri
     }
   }
 
-  if (!visibilities) {
-    if (n <= MAX_CHANNELS) {
-      // Default to all on if visibilities not specified and less than 6 channels.
-      visibilities = Array(n).fill(true);
-    } else {
-      // If more than MAX_CHANNELS, only make first set on by default.
-      visibilities = [...Array(MAX_CHANNELS).fill(true), ...Array(n - MAX_CHANNELS).fill(false)];
-    }
-  }
+  visibilities = visibilities || getDefaultVisibilities(n);
+  colors = colors || getDefaultColors(n, visibilities);
 
-  if (!colors) {
-    if (n == 1) {
-      colors = [COLORS.white];
-    } else if (n == 2) {
-      colors = MAGENTA_GREEN;
-    } else if (n === 3) {
-      colors = RGB;
-    } else if (n <= MAX_CHANNELS) {
-      colors = CYMRGB.slice(0, n);
-    } else {
-      // Default color for non-visible is white
-      colors = Array(n).fill(COLORS.white);
-      // Get visible indices
-      const visibleIndices = visibilities.flatMap((bool, i) => (bool ? i : []));
-      // Set visible indices to CYMRGB colors. visibleIndices.length === MAX_CHANNELS from above.
-      for (const [i, visibleIndex] of visibleIndices.entries()) {
-        colors[visibleIndex] = CYMRGB[i];
-      }
-    }
-  }
+  const contrastLimits =
+    contrast_limits ?? (await (() => calcConstrastLimits(data[data.length - 1], channelAxis, visibilities))());
+
   return {
     loader: data,
     name,
-    channel_axis: Number(channel_axis as number),
+    channel_axis: channelAxis,
     colors,
     names: names ?? range(n).map((i) => `channel_${i}`),
-    contrast_limits: contrast_limits ?? Array(n).fill([0, max]),
+    contrast_limits: contrastLimits,
     visibilities,
-    model_matrix: parseMatrix(config.model_matrix),
+    model_matrix: parseMatrix(model_matrix),
     defaults: {
       selection: Array(data[0].shape.length).fill(0),
       colormap,
@@ -108,6 +85,7 @@ function loadMultiChannel(config: MultichannelConfig, data: ZarrPixelSource<stri
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData | CollectionData> {
   const node = await open(config.source);
   let data: ZarrArray[];
+  let axes: Ome.Axis[] | undefined;
 
   if (node instanceof ZarrGroup) {
     const attrs = (await node.attrs.asObject()) as Ome.Attrs;
@@ -134,102 +112,123 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
     }
 
     data = await loadMultiscales(node, attrs.multiscales);
-    if (!config.axis_labels) {
-      // Update config axis_labels if present in multiscales
-      config.axis_labels = attrs.multiscales[0].axes;
+    if (attrs.multiscales[0].axes) {
+      axes = getNgffAxes(attrs.multiscales);
     }
   } else {
     data = [node];
   }
 
-  const labels = getAxisLabels(data[0], config.axis_labels);
+  // explicit override in config > ngff > guessed from data shape
+  const { channel_axis, labels } = getAxisLabelsAndChannelAxis(config, axes, data[0]);
+
   const tileSize = guessTileSize(data[0]);
   const loader = data.map((d) => new ZarrPixelSource(d, labels, tileSize));
   const [base] = loader;
 
-  // If contrast_limits not provided or are missing from omero metadata.
-  const max = base.dtype === 'Float32' ? 1 : DTYPE_VALUES[base.dtype].max;
-  // Now that we have data, try to figure out how to render initially.
-
   // If explicit channel axis is provided, try to load as multichannel.
-  if ('channel_axis' in config || labels.includes('c')) {
+
+  if ('channel_axis' in config || channel_axis > -1) {
     config = config as MultichannelConfig;
-    config.channel_axis = config.channel_axis ?? labels.indexOf('c');
-    return loadMultiChannel(config, loader, max);
+    return loadMultiChannel(config, loader, Number(config.channel_axis ?? channel_axis));
   }
 
   const nDims = base.shape.length;
   if (nDims === 2 || !('channel_axis' in config)) {
-    return loadSingleChannel(config as SingleChannelConfig, loader, max);
+    return loadSingleChannel(config as SingleChannelConfig, loader);
   }
 
   throw Error('Failed to load image.');
 }
 
-export function initLayerStateFromSource(sourceData: SourceData): LayerState {
-  const {
-    loader,
-    channel_axis,
-    colors,
-    visibilities,
-    contrast_limits,
-    model_matrix,
-    defaults,
-    // Grid
-    loaders,
-    rows,
-    columns,
-    onClick,
-  } = sourceData;
-  const { selection, opacity, colormap } = defaults;
-
-  const Layer = getLayer(sourceData);
-  const loaderSelection: number[][] = [];
-  const colorValues: number[][] = [];
-  const contrastLimits: number[][] = [];
-  const channelIsOn: boolean[] = [];
-
-  const visibleIndices = visibilities.flatMap((bool, i) => (bool ? i : []));
-  for (const index of visibleIndices) {
-    if (Number.isInteger(channel_axis)) {
-      const channelSelection = [...selection];
-      channelSelection[channel_axis as number] = index;
-      loaderSelection.push(channelSelection);
-    } else {
-      loaderSelection.push(selection);
-    }
-    colorValues.push(hexToRGB(colors[index]));
-    contrastLimits.push(contrast_limits[index]);
-    channelIsOn.push(true);
+type Labels = [...string[], 'y', 'x'];
+function getAxisLabelsAndChannelAxis(
+  config: ImageLayerConfig,
+  ngffAxes: Ome.Axis[] | undefined,
+  arr: ZarrArray
+): { labels: Labels; channel_axis: number } {
+  // type cast string[] to Labels
+  const maybeAxisLabels = config.axis_labels as undefined | Labels;
+  // ensure numeric if provided
+  const maybeChannelAxis = 'channel_axis' in config ? Number(config.channel_axis) : undefined;
+  // Use ngff axes metadata if labels or channel axis aren't explicitly provided
+  if (ngffAxes) {
+    const labels = maybeAxisLabels ?? getNgffAxisLabels(ngffAxes);
+    const channel_axis = maybeChannelAxis ?? ngffAxes.findIndex((axis) => axis.type === 'channel');
+    return { labels, channel_axis };
   }
-  // set initial slider values to contrast_limits
-  const sliderValues = [...contrastLimits];
 
-  if (!(loader[0].dtype in DTYPE_VALUES)) {
-    throw Error(`Dtype not supported, must be ${JSON.stringify(Object.keys(DTYPE_VALUES))}`);
+  // create dummy axis labels if not provided and try to guess channel_axis if missing
+  const labels = maybeAxisLabels ?? getAxisLabels(arr);
+  const channel_axis = maybeChannelAxis ?? labels.indexOf('c');
+  return { labels, channel_axis };
+}
+
+export function initLayerStateFromSource(source: SourceData & { id: string }): LayerState {
+  const { selection, opacity, colormap } = source.defaults;
+
+  const selections: number[][] = [];
+  const colors: [number, number, number][] = [];
+  const contrastLimits: [start: number, end: number][] = [];
+  const channelsVisible: boolean[] = [];
+
+  const visibleIndices = source.visibilities.flatMap((bool, i) => (bool ? i : []));
+  for (const index of visibleIndices) {
+    const channelSelection = [...selection];
+    if (Number.isInteger(source.channel_axis)) {
+      channelSelection[source.channel_axis as number] = index;
+    }
+    selections.push(channelSelection);
+    colors.push(hexToRGB(source.colors[index]));
+    // TODO: should never be undefined
+    contrastLimits.push(source.contrast_limits[index] ?? [0, 255]);
+    channelsVisible.push(true);
+  }
+
+  const layerProps = {
+    id: source.id,
+    selections,
+    colors,
+    contrastLimits,
+    contrastLimitsRange: [...contrastLimits],
+    channelsVisible,
+    opacity,
+    colormap,
+    modelMatrix: source.model_matrix,
+    onClick: source.onClick,
+  };
+
+  if ('loaders' in source) {
+    return {
+      Layer: GridLayer,
+      layerProps: {
+        ...layerProps,
+        loader: source.loader,
+        loaders: source.loaders,
+        columns: source.columns as number,
+        rows: source.rows as number,
+      },
+      on: true,
+    };
+  }
+
+  if (source.loader.length === 1) {
+    return {
+      Layer: ImageLayer,
+      layerProps: {
+        ...layerProps,
+        loader: source.loader[0],
+      },
+      on: true,
+    };
   }
 
   return {
-    Layer,
+    Layer: MultiscaleImageLayer,
     layerProps: {
-      loader: loader.length === 1 ? loader[0] : loader,
-      loaders,
-      rows,
-      columns,
-      loaderSelection,
-      colorValues,
-      sliderValues,
-      contrastLimits,
-      channelIsOn,
-      opacity,
-      colormap,
-      modelMatrix: model_matrix,
-      onClick,
+      ...layerProps,
+      loader: source.loader,
     },
     on: true,
   };
-}
-
-function getLayer(sourceData: SourceData): LayerCtr<typeof ImageLayer | typeof MultiscaleImageLayer | GridLayer> {
-  return sourceData.loaders ? GridLayer : sourceData.loader.length > 1 ? MultiscaleImageLayer : ImageLayer;
 }

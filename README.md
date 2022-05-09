@@ -3,7 +3,7 @@
 </p>
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/hms-dbmi/vizarr/main?filepath=example%2Fgetting_started.ipynb)
-[![launch ImJoy](https://imjoy.io/static/badge/launch-imjoy-badge.svg)](https://imjoy.io/#/app?workspace=vizarr&plugin=https://github.com/hms-dbmi/vizarr/blob/main/example/VizarrDemo.imjoy.html)
+[![launch ImJoy](https://imjoy.io/static/badge/launch-imjoy-badge.svg)](https://imjoy.io/lite?plugin=https://github.com/hms-dbmi/vizarr/blob/main/example/VizarrDemo.imjoy.html)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hms-dbmi/vizarr/blob/main/example/mandelbrot.ipynb)
 
 ![Multiscale OME-Zarr in Jupyter Notebook with Vizarr](./assets/screenshot.png)
@@ -23,8 +23,9 @@ We created Vizarr to enhance interactive multimodal image alignment using the
 comparison of registration methods as well as visual verification of alignnment can be assessed 
 remotely, leveraging high-performance computational resources for rapid image processing and 
 Viv for interactive web-based visualization in a laptop computer. The Jupyter Notebook containing 
-the workflow described in the manuscript can be found in [`multimodal_registration_vizarr.ipynb`](multimodal_registration_vizarr.ipynb).
-For more information, please read our preprint [doi:10.31219/osf.io/wd2gu](https://doi.org/10.31219/osf.io/wd2gu).
+the workflow described in the manuscript can be found in [`multimodal_registration_vizarr.ipynb`](multimodal_registration_vizarr.ipynb). For more information, please read our preprint [doi:10.31219/osf.io/wd2gu](https://doi.org/10.31219/osf.io/wd2gu).
+
+> Note: The data required to run this notebook is too large to include in this repository and can be made avaiable upon request.
 
 ### Data types
 Vizarr supports viewing 2D slices of n-Dimensional Zarr arrays, allowing users to choose 

@@ -1,7 +1,8 @@
 import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray } from 'zarr';
 import type { Group as ZarrGroup } from 'zarr';
 import type { AsyncStore, Store } from 'zarr/types/storage/types';
-import { Matrix4 } from '@math.gl/core/dist/esm';
+import type { ZarrPixelSource } from '@hms-dbmi/viv';
+import { Matrix4 } from 'math.gl';
 import { LRUCacheStore } from './lru-store';
 
 export const MAX_CHANNELS = 6;
@@ -72,7 +73,7 @@ export async function loadMultiscales(grp: ZarrGroup, multiscales: Ome.Multiscal
   throw Error('Multiscales metadata included a path to a group.');
 }
 
-export function hexToRGB(hex: string): number[] {
+export function hexToRGB(hex: string): [r: number, g: number, b: number] {
   if (hex.startsWith('#')) hex = hex.slice(1);
   const r = parseInt(hex.slice(0, 2), 16);
   const g = parseInt(hex.slice(2, 4), 16);
@@ -107,6 +108,77 @@ export function getAxisLabels(arr: ZarrArray, axis_labels?: string[]): [...strin
     axis_labels = nonXYaxisLabels.concat(['y', 'x']);
   }
   return axis_labels as [...string[], 'y', 'x'];
+}
+
+export function getNgffAxes(multiscales: Ome.Multiscale[]): Ome.Axis[] {
+  // Returns axes in the latest v0.4+ format.
+  // defaults for v0.1 & v0.2
+  const default_axes = [
+    { type: 'time', name: 't' },
+    { type: 'channel', name: 'c' },
+    { type: 'space', name: 'z' },
+    { type: 'space', name: 'y' },
+    { type: 'space', name: 'x' },
+  ];
+  function getDefaultType(name: string): string {
+    if (name === 't') return 'time';
+    if (name === 'c') return 'channel';
+    return 'space';
+  }
+  let axes = default_axes;
+  // v0.3 & v0.4+
+  if (multiscales[0].axes) {
+    axes = multiscales[0].axes.map((axis) => {
+      // axis may be string 'x' (v0.3) or object
+      if (typeof axis === 'string') {
+        return { name: axis, type: getDefaultType(axis) };
+      }
+      const { name, type } = axis;
+      return { name, type: type ?? getDefaultType(name) };
+    });
+  }
+  return axes;
+}
+
+export function getNgffAxisLabels(axes: Ome.Axis[]): [...string[], 'y', 'x'] {
+  const axes_names = axes.map((axis) => axis.name);
+  return axes_names as [...string[], 'y', 'x'];
+}
+
+export function getDefaultVisibilities(n: number, visibilities?: boolean[]): boolean[] {
+  if (!visibilities) {
+    if (n <= MAX_CHANNELS) {
+      // Default to all on if visibilities not specified and less than 6 channels.
+      visibilities = Array(n).fill(true);
+    } else {
+      // If more than MAX_CHANNELS, only make first set on by default.
+      visibilities = [...Array(MAX_CHANNELS).fill(true), ...Array(n - MAX_CHANNELS).fill(false)];
+    }
+  }
+  return visibilities;
+}
+
+export function getDefaultColors(n: number, visibilities: boolean[]): string[] {
+  let colors = [];
+  if (n == 1) {
+    colors = [COLORS.white];
+  } else if (n == 2) {
+    colors = MAGENTA_GREEN;
+  } else if (n === 3) {
+    colors = RGB;
+  } else if (n <= MAX_CHANNELS) {
+    colors = CYMRGB.slice(0, n);
+  } else {
+    // Default color for non-visible is white
+    colors = Array(n).fill(COLORS.white);
+    // Get visible indices
+    const visibleIndices = visibilities.flatMap((bool, i) => (bool ? i : []));
+    // Set visible indices to CYMRGB colors. visibleIndices.length === MAX_CHANNELS from above.
+    for (const [i, visibleIndex] of visibleIndices.entries()) {
+      colors[visibleIndex] = CYMRGB[i];
+    }
+  }
+  return colors;
 }
 
 export function isInterleaved(shape: number[]) {
@@ -144,7 +216,9 @@ function isArray16(o: unknown): o is Array16 {
 }
 
 export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
-  if (!model_matrix) return new Matrix4();
+  if (!model_matrix) {
+    return Matrix4.IDENTITY;
+  }
   const matrix = new Matrix4();
   try {
     const arr = typeof model_matrix === 'string' ? JSON.parse(model_matrix) : model_matrix;
@@ -157,4 +231,46 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
     console.warn(msg);
   }
   return matrix;
+}
+
+export async function calcDataRange<S extends string[]>(
+  source: ZarrPixelSource<S>,
+  selection: number[]
+): Promise<[min: number, max: number]> {
+  if (source.dtype === 'Uint8') return [0, 255];
+  const { data } = await source.getRaster({ selection });
+  let minVal = Infinity;
+  let maxVal = -Infinity;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] > maxVal) maxVal = data[i];
+    if (data[i] < minVal) minVal = data[i];
+  }
+  if (minVal === maxVal) {
+    minVal = 0;
+    maxVal = 1;
+  }
+  return [minVal, maxVal];
+}
+
+export async function calcConstrastLimits<S extends string[]>(
+  source: ZarrPixelSource<S>,
+  channelAxis: number,
+  visibilities: boolean[],
+  defaultSelection?: number[]
+): Promise<([min: number, max: number] | undefined)[]> {
+  const def = defaultSelection ?? source.shape.map(() => 0);
+  const csize = source.shape[channelAxis];
+
+  if (csize !== visibilities.length) {
+    throw new Error("provided visibilities don't match number of channels");
+  }
+
+  return Promise.all(
+    visibilities.map(async (isVisible, i) => {
+      if (!isVisible) return undefined; // don't compute non-visible channels
+      const selection = [...def];
+      selection[channelAxis] = i;
+      return calcDataRange(source, selection);
+    })
+  );
 }
