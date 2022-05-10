@@ -38,6 +38,11 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }) {
     setViewState({ zoom, target });
   }
 
+  // Enables screenshots of the canvas: https://github.com/visgl/deck.gl/issues/2200
+  const glOptions: WebGLContextAttributes = {
+    preserveDrawingBuffer: true,
+  };
+
   return (
     <DeckGL
       ref={deckRef}
@@ -45,6 +50,7 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }) {
       viewState={viewState}
       onViewStateChange={(e) => setViewState(e.viewState)}
       views={[new OrthographicView({ id: 'ortho', controller: true })]}
+      glOptions={glOptions}
     />
   );
 }
