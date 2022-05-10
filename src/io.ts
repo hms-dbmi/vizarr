@@ -96,7 +96,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 
     if ('collection' in attrs) {
       const imagePaths = await getImagePaths(node, attrs);
-      return { images: imagePaths, group: node } as CollectionData;
+      return { images: imagePaths.map(path => {return {path, group: node}}) } as CollectionData;
     }
 
     if ('well' in attrs) {

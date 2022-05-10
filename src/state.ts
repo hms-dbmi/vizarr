@@ -15,9 +15,8 @@ interface ViewState {
   default?: boolean;
 }
 
-interface Collection {
-  images: string[];
-  group?: Group;
+interface ImageCollection {
+  images: any[];
 }
 
 interface BaseConfig {
@@ -48,9 +47,9 @@ export interface SingleChannelConfig extends BaseConfig {
 export type ImageLayerConfig = MultichannelConfig | SingleChannelConfig;
 
 export type CollectionData = {
-  group: Group;
-  images: string[];
-};
+  name?: string;
+  images: any[];
+}
 
 export type SourceData = {
   loader: ZarrPixelSource<string[]>[];
@@ -122,7 +121,7 @@ export const sourceInfoAtom = atom<WithId<SourceData>[]>([]);
 
 export const viewStateAtom = atom<ViewState>(DEFAULT_VIEW_STATE);
 
-export const collectionAtom = atom<Collection>({ images: [], group: undefined });
+export const collectionAtom = atom<ImageCollection>({ images: [] });
 
 export const sourceInfoAtomAtoms = splitAtom(sourceInfoAtom);
 

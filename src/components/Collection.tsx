@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React from 'react';
 import { useAtomValue } from 'jotai/utils';
 
 import { collectionAtom } from '../state';
@@ -15,7 +15,7 @@ function Collection() {
     <ul style={{ color: 'white' }}>
       Collection
       {ngffCollection.images.map((img) => (
-        <ImageThumbnail key={img} imgPath={img} zarrGroup={ngffCollection.group}></ImageThumbnail>
+        <ImageThumbnail key={img.path} imgPath={img.path} zarrGroup={img.group}></ImageThumbnail>
       ))}
     </ul>
   );

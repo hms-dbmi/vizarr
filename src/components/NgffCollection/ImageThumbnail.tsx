@@ -81,19 +81,23 @@ function ImageThumbnail({ imgPath, zarrGroup }: ThumbProps) {
     // chunk is [t, c, z] (if we have those dimensions)
     const axes = imgAttrs.multiscales[0].axes || 'tczyx'.split('');
     const defaultChunk = axes.slice(0, -2).map((axis, index) => {
-      // thumbnail is T=0 and Z=midpoint
+      // thumbnail is T=0 and Zx=midpoint
       if (axis == 't' || axis == 'c') return 0;
       if (axis == 'z') return Math.floor(z_arr.shape[index] / 2);
     });
     console.log('defaultChunk', defaultChunk);
-    const channelIndex = axes.indexOf('c');
+    const channelIndex = axes.map(a => a.toString()).indexOf('c');
     const chunks = activeIndx.map((idx) => {
       let chk = [...defaultChunk];
       chk[channelIndex] = idx;
       return chk;
     });
 
-    const loader = new ZarrPixelSource(z_arr, axes, guessTileSize(z_arr));
+    console.log("guessTileSize(z_arr)", guessTileSize(z_arr));
+
+    const selections: number[][] = [];
+
+    const loader = new ZarrPixelSource(z_arr, axes as [...string[], 'y', 'x'], guessTileSize(z_arr));
     const imageLayer = new ImageLayer({
       loader, // ZarrLoader
       loaderSelection: chunks,
@@ -102,13 +106,13 @@ function ImageThumbnail({ imgPath, zarrGroup }: ThumbProps) {
       channelIsOn: [true, true],
     });
 
-    const { zoom, target } = fitBounds([width, height], [THUMB.WIDTH, THUMB.HEIGHT], 1, 0);
+    const { zoom } = fitBounds([width, height], [THUMB.WIDTH, THUMB.HEIGHT], 1, 0);
 
     viewer = (
       <DeckGL
         layers={[imageLayer]}
         style={thumbStyle}
-        viewState={{ zoom, target }}
+        viewState={{ zoom }}
         views={[new OrthographicView({ id: 'ortho', controller: true })]}
       />
     );
