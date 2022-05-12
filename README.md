@@ -44,6 +44,9 @@ are viewed within a Jupyter Notebook. Support for other Zarr arrays is supported
 More information regarding the viewing of generic Zarr arrays can be found in the example notebooks.
 
 ### Citation
-If you are using Vizarr in your work please cite our preprint:
+If you are using Vizarr in your research, please cite our paper:
 
-> Trevor Manz, Ilan Gold, Nathan Heath Patterson, Chuck McCallum, Mark S Keller, Bruce W Herr II, Katy Börner, Jeffrey M Spraggins, Nils Gehlenborg, "[Viv: Multiscale Visualization of High-resolution Multiplexed Bioimaging Data on the Web](https://osf.io/wd2gu/)." **OSF Preprints** (2020), [doi:10.31219/osf.io/wd2gu](https://doi.org/10.31219/osf.io/wd2gu)
+> Trevor Manz, Ilan Gold, Nathan Heath Patterson, Chuck McCallum, Mark S Keller, Bruce W Herr II, Katy Börner, Jeffrey M Spraggins, Nils Gehlenborg,
+> "[Viv: multiscale visualization of high-resolution multiplexed bioimaging data on the web](https://www.nature.com/articles/s41592-022-01482-7)."
+> **Nature Methods** (2022), [doi:10.31219/10.1038/s41592-022-01482-7](https://doi.org/10.1038/s41592-022-01482-7)
+
