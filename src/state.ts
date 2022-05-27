@@ -49,7 +49,7 @@ export type ImageLayerConfig = MultichannelConfig | SingleChannelConfig;
 export type CollectionData = {
   name?: string;
   images: any[];
-}
+};
 
 export type SourceData = {
   loader: ZarrPixelSource<string[]>[];

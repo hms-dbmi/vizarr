@@ -2,7 +2,14 @@ import { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv
 import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
 import GridLayer from './gridLayer';
 import { loadCollection, loadOmeroMultiscales, loadWell, getImagePaths } from './ome';
-import type { CollectionData, ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from './state';
+import type {
+  CollectionData,
+  ImageLayerConfig,
+  LayerState,
+  MultichannelConfig,
+  SingleChannelConfig,
+  SourceData,
+} from './state';
 import {
   COLORS,
   getDefaultColors,
@@ -96,7 +103,11 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 
     if ('collection' in attrs) {
       const imagePaths = await getImagePaths(node, attrs);
-      return { images: imagePaths.map(path => {return {path, group: node}}) } as CollectionData;
+      return {
+        images: imagePaths.map((path) => {
+          return { path, group: node };
+        }),
+      } as CollectionData;
     }
 
     if ('well' in attrs) {
