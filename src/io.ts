@@ -5,6 +5,7 @@ import { loadOmeroMultiscales, loadPlate, loadWell } from './ome';
 import type { ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from './state';
 import {
   COLORS,
+  MAX_CHANNELS,
   getDefaultColors,
   getDefaultVisibilities,
   getAxisLabels,
@@ -179,7 +180,8 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
   const channelsVisible: boolean[] = [];
 
   const visibleIndices = source.visibilities.flatMap((bool, i) => (bool ? i : []));
-  for (const index of visibleIndices) {
+  // Limit the number of initial channels to the max allowed
+  for (const index of visibleIndices.slice(0, MAX_CHANNELS)) {
     const channelSelection = [...selection];
     if (Number.isInteger(source.channel_axis)) {
       channelSelection[source.channel_axis as number] = index;
