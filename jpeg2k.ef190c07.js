@@ -1,0 +1,1 @@
+import{JpxImage as n}from"https://cdn.jsdelivr.net/gh/mozilla/pdf.js@30bd5f0/src/core/jpx.js";class t{static fromConfig(e){return new t}encode(e){throw new Error("encode not implemented")}async decode(e){const r=new n;return r.failOnCorruptedImage=!0,r.parse(e),r.tiles[0].items}}export{t as default};
