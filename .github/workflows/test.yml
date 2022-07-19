@@ -18,6 +18,6 @@ jobs:
         with:
           node-version: '18.x'
 
-      - run: npm ci --legacy-peer-deps
+      - run: npm ci
       - run: npm run check
       - run: npm run lint
