@@ -15,8 +15,11 @@ export default defineConfig({
   resolve: {
     alias: {
       zarr: 'zarr/core',
-      geotiff: resolve(__dirname, 'src/empty:geotiff.js'),
+      os: resolve(__dirname, 'src/os-browser.js'),
     },
   },
-  server: { open: `?source=${source}` },
+  server: {
+    port: 3000,
+    open: `?source=${source}`,
+  },
 });
