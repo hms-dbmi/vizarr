@@ -1,9 +1,11 @@
+import { XRLayer } from '@vivjs/layers';
+import { ColorPaletteExtension } from "@vivjs/extensions";
 import { CompositeLayer } from '@deck.gl/core';
 import { SolidPolygonLayer, TextLayer } from '@deck.gl/layers';
-import type { CompositeLayerProps } from '@deck.gl/core/lib/composite-layer';
 import pMap from 'p-map';
 
-import { XRLayer, ZarrPixelSource, ColorPaletteExtension } from '@hms-dbmi/viv';
+import type { CompositeLayerProps } from '@deck.gl/core/lib/composite-layer';
+import type { ZarrPixelSource } from '@vivjs/loaders';
 import type { BaseLayerProps } from './state';
 
 export interface GridLoader {

@@ -1,7 +1,7 @@
 import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray } from 'zarr';
 import type { Group as ZarrGroup } from 'zarr';
 import type { AsyncStore, Store } from 'zarr/types/storage/types';
-import type { ZarrPixelSource } from '@hms-dbmi/viv';
+import type { ZarrPixelSource } from '@vivjs/loaders';
 import { Matrix4 } from 'math.gl';
 import { LRUCacheStore } from './lru-store';
 

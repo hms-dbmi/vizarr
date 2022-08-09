@@ -2,9 +2,11 @@
   "name": "@hms-dbmi/vizarr",
   "version": "0.3.0",
   "dependencies": {
-    "@hms-dbmi/viv": "^0.13.0",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
+    "@vivjs/extensions": "^0.13.0",
+    "@vivjs/layers": "^0.13.0",
+    "@vivjs/loaders": "^0.13.0",
     "deck.gl": "^8.6.7",
     "imjoy-rpc": "^0.2.23",
     "jotai": "^1.0.0",

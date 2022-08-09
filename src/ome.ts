@@ -1,4 +1,4 @@
-import { ZarrPixelSource } from '@hms-dbmi/viv';
+import { ZarrPixelSource } from '@vivjs/loaders';
 import pMap from 'p-map';
 import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
 import type { ImageLayerConfig, SourceData } from './state';

@@ -1,4 +1,5 @@
-import type { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
+import type { ImageLayer, MultiscaleImageLayer } from '@vivjs/layers';
+import type { ZarrPixelSource } from '@vivjs/loaders';
 import type { Matrix4 } from 'math.gl';
 import type { PrimitiveAtom } from 'jotai';
 import { atom } from 'jotai';

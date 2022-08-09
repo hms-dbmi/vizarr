@@ -1,4 +1,5 @@
-import { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
+import { ImageLayer, MultiscaleImageLayer } from '@vivjs/layers';
+import { ZarrPixelSource } from '@vivjs/loaders';
 import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
 import GridLayer from './gridLayer';
 import { loadOmeroMultiscales, loadPlate, loadWell } from './ome';
