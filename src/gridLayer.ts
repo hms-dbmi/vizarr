@@ -1,5 +1,5 @@
 import { XRLayer } from '@vivjs/layers';
-import { ColorPaletteExtension } from "@vivjs/extensions";
+import { ColorPaletteExtension } from '@vivjs/extensions';
 import { CompositeLayer } from '@deck.gl/core';
 import { SolidPolygonLayer, TextLayer } from '@deck.gl/layers';
 import pMap from 'p-map';
