@@ -136,7 +136,7 @@ function atomWithQueryParam<T>(
     const url = new URL(window.location.href);
     url.searchParams.set(key, serialize(s));
     window.history.pushState({}, '', decodeURIComponent(url.href));
-  }, 600);
+  }, 200);
 
   const derivedAtom = atom<T | undefined, T>(
     (get) => get(baseAtom),
