@@ -6,8 +6,7 @@ import { atomFamily, splitAtom, waitForAll } from 'jotai/utils';
 import type { ZarrArray } from 'zarr';
 import type { default as GridLayer, GridLayerProps, GridLoader } from './gridLayer';
 import { initLayerStateFromSource } from './io';
-
-export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
+import debounce from 'just-debounce-it';
 
 interface ViewState {
   zoom: number;
@@ -110,8 +109,6 @@ export type ControllerProps<T = {}> = {
 
 export const sourceInfoAtom = atom<WithId<SourceData>[]>([]);
 
-export const viewStateAtom = atom<ViewState>(DEFAULT_VIEW_STATE);
-
 export const sourceInfoAtomAtoms = splitAtom(sourceInfoAtom);
 
 export const layerFamilyAtom = atomFamily(
@@ -125,3 +122,35 @@ export const layerAtoms = atom((get) => {
   const layers = atoms.map((a) => layerFamilyAtom(get(a)));
   return get(waitForAll(layers));
 });
+
+function atomWithQueryParam<T>(
+  key: string,
+  initialState: T | undefined,
+  serialize: (x: T) => string,
+  deserialize: (x: string) => T = JSON.parse
+) {
+  const initial = new URL(window.location.href).searchParams.get(key);
+  const baseAtom = atom(initial ? deserialize(initial) : initialState);
+
+  const pushStateDebounced = debounce((s: T) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set(key, serialize(s));
+    window.history.pushState({}, '', decodeURIComponent(url.href));
+  }, 600);
+
+  const derivedAtom = atom<T | undefined, T>(
+    (get) => get(baseAtom),
+    (_get, set, update) => {
+      set(baseAtom, update);
+      pushStateDebounced(update);
+    }
+  );
+
+  return derivedAtom;
+}
+
+export const viewStateAtom = atomWithQueryParam<{ zoom: number; target: number[] }>(
+  'viewState',
+  undefined,
+  ({ zoom, target }) => JSON.stringify({ zoom, target })
+);

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import * as React from 'react';
 import { useAtom } from 'jotai';
 import { useAtomValue } from 'jotai/utils';
 import DeckGL from 'deck.gl';
@@ -26,11 +26,11 @@ function getLayerSize(props: LayerState['layerProps']) {
 
 function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }) {
   const [viewState, setViewState] = useAtom(viewStateAtom);
-  const deckRef = useRef<DeckGL>(null);
+  const deckRef = React.useRef<DeckGL>(null);
 
   // If viewState hasn't been updated, use the first loader to guess viewState
   // TODO: There is probably a better place / way to set the intital view and this is a hack.
-  if (deckRef.current && viewState?.default && layers[0]?.props?.loader) {
+  if (deckRef.current && !viewState && layers[0]?.props?.loader) {
     const { deck } = deckRef.current;
     const { width, height, maxZoom } = getLayerSize(layers[0].props);
     const padding = deck.width < 400 ? 10 : deck.width < 600 ? 30 : 50; // Adjust depending on viewport width.
@@ -47,7 +47,7 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }) {
     <DeckGL
       ref={deckRef}
       layers={layers}
-      viewState={viewState}
+      viewState={viewState ?? { zoom: 0, target: [0, 0, 0] }}
       onViewStateChange={(e) => setViewState(e.viewState)}
       views={[new OrthographicView({ id: 'ortho', controller: true })]}
       glOptions={glOptions}
