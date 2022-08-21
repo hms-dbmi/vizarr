@@ -34,8 +34,8 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }) {
     const { deck } = deckRef.current;
     const { width, height, maxZoom } = getLayerSize(layers[0].props);
     const padding = deck.width < 400 ? 10 : deck.width < 600 ? 30 : 50; // Adjust depending on viewport width.
-    const { zoom, target } = fitBounds([width, height], [deck.width, deck.height], maxZoom, padding);
-    setViewState({ zoom, target });
+    const bounds = fitBounds([width, height], [deck.width, deck.height], maxZoom, padding);
+    setViewState(bounds);
   }
 
   // Enables screenshots of the canvas: https://github.com/visgl/deck.gl/issues/2200
@@ -47,7 +47,7 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }) {
     <DeckGL
       ref={deckRef}
       layers={layers}
-      viewState={viewState ?? { zoom: 0, target: [0, 0, 0] }}
+      viewState={viewState}
       onViewStateChange={(e) => setViewState(e.viewState)}
       views={[new OrthographicView({ id: 'ortho', controller: true })]}
       glOptions={glOptions}

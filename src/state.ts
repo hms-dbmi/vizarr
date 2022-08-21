@@ -1,18 +1,76 @@
 import type { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
 import type { Matrix4 } from 'math.gl';
-import type { PrimitiveAtom } from 'jotai';
+import type { PrimitiveAtom, WritableAtom } from 'jotai';
 import { atom } from 'jotai';
 import { atomFamily, splitAtom, waitForAll } from 'jotai/utils';
+import debounce from 'just-debounce-it';
 import type { ZarrArray } from 'zarr';
+
 import type { default as GridLayer, GridLayerProps, GridLoader } from './gridLayer';
 import { initLayerStateFromSource } from './io';
-import debounce from 'just-debounce-it';
 
-interface ViewState {
-  zoom: number;
-  target: number[];
-  default?: boolean;
+function atomWithQueryParam<T>(
+  key: string,
+  opts: {
+    debounce?: number;
+    serialize?: (x: T) => string;
+    deserialize?: (x: string) => T;
+  }
+): WritableAtom<T | undefined, T>;
+function atomWithQueryParam<T>(
+  key: string,
+  opts: {
+    defaultValue: T;
+    debounce?: number;
+    serialize?: (x: T) => string;
+    deserialize?: (x: string) => T;
+  }
+): WritableAtom<T, T>;
+function atomWithQueryParam<T>(
+  key: string,
+  {
+    defaultValue,
+    debounce: debounceTime = 0,
+    serialize = JSON.stringify,
+    deserialize = JSON.parse,
+  }: {
+    defaultValue?: T;
+    debounce?: number;
+    serialize?: (x: T) => string;
+    deserialize?: (x: string) => T;
+  }
+) {
+  const maybeValue = new URL(window.location.href).searchParams.get(key);
+  const baseAtom = atom(maybeValue ? deserialize(maybeValue) : defaultValue);
+
+  // Pushing history too frequently can cause issues.
+  // Better to debounce for state which may change rapidly.
+  const pushStateDebounced = debounce((update: T) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set(key, serialize(update));
+    window.history.pushState({}, '', decodeURIComponent(url.href));
+  }, debounceTime);
+
+  const derivedAtom = atom<T | undefined, T>(
+    (get) => get(baseAtom),
+    (_get, set, update) => {
+      set(baseAtom, update);
+      pushStateDebounced(update);
+    }
+  );
+
+  return derivedAtom;
 }
+
+export interface ViewState {
+  zoom: number;
+  target: [number, number];
+}
+
+export const viewStateAtom = atomWithQueryParam<ViewState>('viewState', {
+  serialize: ({ zoom, target }) => JSON.stringify({ zoom, target }),
+  debounce: 200,
+});
 
 interface BaseConfig {
   source: string | ZarrArray['store'];
@@ -122,35 +180,3 @@ export const layerAtoms = atom((get) => {
   const layers = atoms.map((a) => layerFamilyAtom(get(a)));
   return get(waitForAll(layers));
 });
-
-function atomWithQueryParam<T>(
-  key: string,
-  initialState: T | undefined,
-  serialize: (x: T) => string,
-  deserialize: (x: string) => T = JSON.parse
-) {
-  const initial = new URL(window.location.href).searchParams.get(key);
-  const baseAtom = atom(initial ? deserialize(initial) : initialState);
-
-  const pushStateDebounced = debounce((s: T) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set(key, serialize(s));
-    window.history.pushState({}, '', decodeURIComponent(url.href));
-  }, 200);
-
-  const derivedAtom = atom<T | undefined, T>(
-    (get) => get(baseAtom),
-    (_get, set, update) => {
-      set(baseAtom, update);
-      pushStateDebounced(update);
-    }
-  );
-
-  return derivedAtom;
-}
-
-export const viewStateAtom = atomWithQueryParam<{ zoom: number; target: number[] }>(
-  'viewState',
-  undefined,
-  ({ zoom, target }) => JSON.stringify({ zoom, target })
-);
