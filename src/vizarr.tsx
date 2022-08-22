@@ -57,9 +57,7 @@ function App() {
         description: 'A minimal, purely client-side program for viewing Zarr-based images with Viv & ImJoy.',
         version: version,
       });
-      const add_image = async (props: ImageLayerConfig) => addImage(props);
-      const set_view_state = async (vs: { zoom: number; target: number[] }) => setViewState(vs);
-      api.export({ add_image, set_view_state });
+      api.export({ add_image: addImage, set_view_state: setViewState });
     }
     // enable imjoy api when loaded as an iframe
     if (window.self !== window.top) {
