@@ -29,8 +29,6 @@ export function atomWithEffect<Value, Update extends object, Result extends void
   return derivedAtom;
 }
 
-export const viewStateAtom = atom<ViewState | undefined>(undefined);
-
 interface BaseConfig {
   source: string | ZarrArray['store'];
   axis_labels?: string[];

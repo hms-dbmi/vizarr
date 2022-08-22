@@ -8,7 +8,7 @@ import mitt from 'mitt';
 import Menu from './components/Menu';
 import Viewer from './components/Viewer';
 import './codecs/register';
-import { addImageAtom, ImageLayerConfig, ViewState, viewStateAtom, atomWithEffect } from './state';
+import { addImageAtom, ImageLayerConfig, ViewState, atomWithEffect } from './state';
 import theme from './theme';
 
 export { version } from '../package.json';
@@ -28,7 +28,7 @@ export interface VizarrViewer {
 export function createViewer(element: HTMLElement): VizarrViewer {
   const ref = React.createRef<VizarrViewer>();
   const emitter = mitt<Events>();
-  const viewStateAtomWithEmitter = atomWithEffect<ViewState | undefined, ViewState>(
+  const viewStateAtom = atomWithEffect<ViewState | undefined, ViewState>(
     atom<ViewState | undefined>(undefined),
     ({ zoom, target }) => emitter.emit('viewStateChange', { zoom, target })
   );
@@ -40,7 +40,7 @@ export function createViewer(element: HTMLElement): VizarrViewer {
     return (
       <>
         <Menu />
-        <Viewer viewStateAtom={viewStateAtomWithEmitter} />
+        <Viewer viewStateAtom={viewStateAtom} />
       </>
     );
   }
