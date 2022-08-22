@@ -16,6 +16,7 @@ export default defineConfig({
     alias: {
       zarr: 'zarr/core',
       os: resolve(__dirname, 'src/os-browser.js'),
+      '@hms-dbmi/vizarr': resolve(__dirname, 'src/index.tsx'),
     },
   },
   server: {

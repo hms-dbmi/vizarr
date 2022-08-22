@@ -3,74 +3,27 @@ import type { Matrix4 } from 'math.gl';
 import type { PrimitiveAtom, WritableAtom } from 'jotai';
 import { atom } from 'jotai';
 import { atomFamily, splitAtom, waitForAll } from 'jotai/utils';
-import debounce from 'just-debounce-it';
 import type { ZarrArray } from 'zarr';
 
 import type { default as GridLayer, GridLayerProps, GridLoader } from './gridLayer';
 import { initLayerStateFromSource } from './io';
-
-function atomWithQueryParam<T>(
-  key: string,
-  opts: {
-    debounce?: number;
-    serialize?: (x: T) => string;
-    deserialize?: (x: string) => T;
-  }
-): WritableAtom<T | undefined, T>;
-function atomWithQueryParam<T>(
-  key: string,
-  opts: {
-    defaultValue: T;
-    debounce?: number;
-    serialize?: (x: T) => string;
-    deserialize?: (x: string) => T;
-  }
-): WritableAtom<T, T>;
-function atomWithQueryParam<T>(
-  key: string,
-  {
-    defaultValue,
-    debounce: debounceTime = 0,
-    serialize = JSON.stringify,
-    deserialize = JSON.parse,
-  }: {
-    defaultValue?: T;
-    debounce?: number;
-    serialize?: (x: T) => string;
-    deserialize?: (x: string) => T;
-  }
-) {
-  const maybeValue = new URL(window.location.href).searchParams.get(key);
-  const baseAtom = atom(maybeValue ? deserialize(maybeValue) : defaultValue);
-
-  // Pushing history too frequently can cause issues.
-  // Better to debounce for state which may change rapidly.
-  const pushStateDebounced = debounce((update: T) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set(key, serialize(update));
-    window.history.pushState({}, '', decodeURIComponent(url.href));
-  }, debounceTime);
-
-  const derivedAtom = atom<T | undefined, T>(
-    (get) => get(baseAtom),
-    (_get, set, update) => {
-      set(baseAtom, update);
-      pushStateDebounced(update);
-    }
-  );
-
-  return derivedAtom;
-}
 
 export interface ViewState {
   zoom: number;
   target: [number, number];
 }
 
-export const viewStateAtom = atomWithQueryParam<ViewState>('viewState', {
-  serialize: ({ zoom, target }) => JSON.stringify({ zoom, target }),
-  debounce: 200,
-});
+export function atomWithEffect<Value, Update>(baseAtom: WritableAtom<Value, Update>, callback: (data: Update) => void) {
+  return atom(
+    (get) => get(baseAtom),
+    (_get, set, update: Update) => {
+      set(baseAtom, update);
+      callback(update);
+    }
+  );
+}
+
+export const viewStateAtom = atom<ViewState | undefined>(undefined);
 
 interface BaseConfig {
   source: string | ZarrArray['store'];
@@ -166,6 +119,17 @@ export type ControllerProps<T = {}> = {
 } & T;
 
 export const sourceInfoAtom = atom<WithId<SourceData>[]>([]);
+
+export const addImageAtom = atom(null, async (get, set, config: ImageLayerConfig) => {
+  const { createSourceData } = await import('./io');
+  const id = Math.random().toString(36).slice(2);
+  const sourceData = await createSourceData(config);
+  const prevSourceInfo = get(sourceInfoAtom);
+  if (!sourceData.name) {
+    sourceData.name = `image_${Object.keys(prevSourceInfo).length}`;
+  }
+  set(sourceInfoAtom, [...prevSourceInfo, { id, ...sourceData }]);
+});
 
 export const sourceInfoAtomAtoms = splitAtom(sourceInfoAtom);
 

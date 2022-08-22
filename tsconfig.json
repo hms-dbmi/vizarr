@@ -1,5 +1,5 @@
 {
-  "include": ["src", "types"],
+  "include": ["src", "types", "main.ts"],
   "compilerOptions": {
     "module": "esnext",
     "target": "esnext",
@@ -14,7 +14,8 @@
     "allowSyntheticDefaultImports": true,
     "importsNotUsedAsValues": "error",
     "paths": {
-      "*": ["*", "node_modules/@danmarshall/deckgl-typings/*"]
+      "*": ["*", "node_modules/@danmarshall/deckgl-typings/*"],
+      "@hms-dbmi/vizarr": ["*", "./src/index.tsx"],
     }
   }
 }
