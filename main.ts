@@ -14,25 +14,31 @@ async function initImjoy(viewer: vizarr.VizarrViewer) {
   });
 }
 
-function initStandaloneApp(url: URL, viewer: vizarr.VizarrViewer) {
-  // setup viewstate stuff
-  {
-    if (url.searchParams.has('viewState')) {
-      const viewState = JSON.parse(url.searchParams.get('viewState')!);
-      viewer.setViewState(viewState);
-    }
+function initStandaloneApp(viewer: vizarr.VizarrViewer) {
+  const url = new URL(window.location.href);
 
-    function handleViewChange(update: vizarr.ViewState) {
+  if (!url.searchParams.has('source')) {
+    return;
+  }
+
+  // see if we have initial viewState
+  if (url.searchParams.has('viewState')) {
+    const viewState = JSON.parse(url.searchParams.get('viewState')!);
+    viewer.setViewState(viewState);
+  }
+
+  // Add event listener to sync viewState as query param.
+  // Debounce to limit how quickly we are pushing to browser history
+  viewer.on(
+    'viewStateChange',
+    debounce((update: vizarr.ViewState) => {
       const url = new URL(window.location.href);
       url.searchParams.set('viewState', JSON.stringify(update));
       window.history.pushState({}, '', decodeURIComponent(url.href));
-    }
+    }, 200)
+  );
 
-    // Pushing history too frequently can cause issues.
-    // Better to debounce for state which may change rapidly.
-    viewer.on('viewStateChange', debounce(handleViewChange, 200));
-  }
-
+  // parse image config
   const config: any = {};
 
   for (const [key, value] of url.searchParams) {
@@ -61,11 +67,7 @@ function main() {
     return;
   }
 
-  const url = new URL(window.location.href);
-
-  if (url.searchParams.has('source')) {
-    initStandaloneApp(url, viewer);
-  }
+  initStandaloneApp(viewer);
 }
 
 main();

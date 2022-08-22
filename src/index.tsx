@@ -1,6 +1,6 @@
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'jotai';
+import { Provider, atom } from 'jotai';
 import { useUpdateAtom } from 'jotai/utils';
 import { ThemeProvider } from '@material-ui/styles';
 import mitt from 'mitt';
@@ -25,12 +25,12 @@ export interface VizarrViewer {
   on<E extends keyof Events>(event: E, cb: (data: Events[E]) => void): void;
 }
 
-export function createViewer(element: HTMLElement) {
+export function createViewer(element: HTMLElement): VizarrViewer {
   const ref = React.createRef<VizarrViewer>();
-
   const emitter = mitt<Events>();
-  const viewStateAtomWithEmitter = atomWithEffect<ViewState | undefined, ViewState>(viewStateAtom, ({ zoom, target }) =>
-    emitter.emit('viewStateChange', { zoom, target })
+  const viewStateAtomWithEmitter = atomWithEffect<ViewState | undefined, ViewState>(
+    atom<ViewState | undefined>(undefined),
+    ({ zoom, target }) => emitter.emit('viewStateChange', { zoom, target })
   );
 
   function App() {

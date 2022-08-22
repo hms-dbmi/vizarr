@@ -13,14 +13,20 @@ export interface ViewState {
   target: [number, number];
 }
 
-export function atomWithEffect<Value, Update>(baseAtom: WritableAtom<Value, Update>, callback: (data: Update) => void) {
-  return atom(
+export function atomWithEffect<Value, Update extends object, Result extends void | Promise<void> = void>(
+  baseAtom: WritableAtom<Value, Update | ((prev: Value) => Update), Result>,
+  callback: (data: Update) => void
+) {
+  const derivedAtom: typeof baseAtom = atom(
     (get) => get(baseAtom),
-    (_get, set, update: Update) => {
-      set(baseAtom, update);
-      callback(update);
+    (get, set, update) => {
+      const next = typeof update === 'function' ? update(get(baseAtom)) : update;
+      const result = set(baseAtom, next);
+      callback(next);
+      return result;
     }
   );
+  return derivedAtom;
 }
 
 export const viewStateAtom = atom<ViewState | undefined>(undefined);
