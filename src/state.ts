@@ -1,18 +1,32 @@
 import type { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
 import type { Matrix4 } from 'math.gl';
-import type { PrimitiveAtom } from 'jotai';
+import type { PrimitiveAtom, WritableAtom } from 'jotai';
 import { atom } from 'jotai';
 import { atomFamily, splitAtom, waitForAll } from 'jotai/utils';
 import type { ZarrArray } from 'zarr';
+
 import type { default as GridLayer, GridLayerProps, GridLoader } from './gridLayer';
 import { initLayerStateFromSource } from './io';
 
-export const DEFAULT_VIEW_STATE = { zoom: 0, target: [0, 0, 0], default: true };
-
-interface ViewState {
+export interface ViewState {
   zoom: number;
-  target: number[];
-  default?: boolean;
+  target: [number, number];
+}
+
+export function atomWithEffect<Value, Update extends object, Result extends void | Promise<void> = void>(
+  baseAtom: WritableAtom<Value, Update | ((prev: Value) => Update), Result>,
+  callback: (data: Update) => void
+) {
+  const derivedAtom: typeof baseAtom = atom(
+    (get) => get(baseAtom),
+    (get, set, update) => {
+      const next = typeof update === 'function' ? update(get(baseAtom)) : update;
+      const result = set(baseAtom, next);
+      callback(next);
+      return result;
+    }
+  );
+  return derivedAtom;
 }
 
 interface BaseConfig {
@@ -110,7 +124,16 @@ export type ControllerProps<T = {}> = {
 
 export const sourceInfoAtom = atom<WithId<SourceData>[]>([]);
 
-export const viewStateAtom = atom<ViewState>(DEFAULT_VIEW_STATE);
+export const addImageAtom = atom(null, async (get, set, config: ImageLayerConfig) => {
+  const { createSourceData } = await import('./io');
+  const id = Math.random().toString(36).slice(2);
+  const sourceData = await createSourceData(config);
+  const prevSourceInfo = get(sourceInfoAtom);
+  if (!sourceData.name) {
+    sourceData.name = `image_${Object.keys(prevSourceInfo).length}`;
+  }
+  set(sourceInfoAtom, [...prevSourceInfo, { id, ...sourceData }]);
+});
 
 export const sourceInfoAtomAtoms = splitAtom(sourceInfoAtom);
 

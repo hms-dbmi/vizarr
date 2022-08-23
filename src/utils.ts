@@ -4,6 +4,7 @@ import type { AsyncStore, Store } from 'zarr/types/storage/types';
 import type { ZarrPixelSource } from '@hms-dbmi/viv';
 import { Matrix4 } from 'math.gl';
 import { LRUCacheStore } from './lru-store';
+import type { ViewState } from './state';
 
 export const MAX_CHANNELS = 6;
 
@@ -200,11 +201,11 @@ export function fitBounds(
   [targetWidth, targetHeight]: [targetWidth: number, targetHeight: number],
   maxZoom: number,
   padding: number
-) {
+): ViewState {
   const scaleX = (targetWidth - padding * 2) / width;
   const scaleY = (targetHeight - padding * 2) / height;
   const zoom = Math.min(maxZoom, Math.log2(Math.min(scaleX, scaleY)));
-  return { zoom, target: [width / 2, height / 2, 0] };
+  return { zoom, target: [width / 2, height / 2] };
 }
 
 // prettier-ignore

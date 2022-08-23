@@ -1,12 +1,12 @@
-import React, { useRef } from 'react';
-import { useAtom } from 'jotai';
+import * as React from 'react';
+import { useAtom, WritableAtom } from 'jotai';
 import { useAtomValue } from 'jotai/utils';
 import DeckGL from 'deck.gl';
 import { OrthographicView } from '@deck.gl/core';
 import type { Layer } from '@deck.gl/core';
 
-import type { LayerState } from '../state';
-import { layerAtoms, viewStateAtom } from '../state';
+import type { LayerState, ViewState } from '../state';
+import { layerAtoms } from '../state';
 import { isInterleaved, fitBounds } from '../utils';
 
 function getLayerSize(props: LayerState['layerProps']) {
@@ -24,18 +24,21 @@ function getLayerSize(props: LayerState['layerProps']) {
   return { height, width, maxZoom };
 }
 
-function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }) {
-  const [viewState, setViewState] = useAtom(viewStateAtom);
-  const deckRef = useRef<DeckGL>(null);
+function WrappedViewStateDeck(props: {
+  layers: Layer<any, any>[];
+  viewStateAtom: WritableAtom<ViewState | undefined, ViewState>;
+}) {
+  const [viewState, setViewState] = useAtom(props.viewStateAtom);
+  const deckRef = React.useRef<DeckGL>(null);
 
   // If viewState hasn't been updated, use the first loader to guess viewState
   // TODO: There is probably a better place / way to set the intital view and this is a hack.
-  if (deckRef.current && viewState?.default && layers[0]?.props?.loader) {
+  if (deckRef.current && !viewState && props.layers[0]?.props?.loader) {
     const { deck } = deckRef.current;
-    const { width, height, maxZoom } = getLayerSize(layers[0].props);
+    const { width, height, maxZoom } = getLayerSize(props.layers[0].props);
     const padding = deck.width < 400 ? 10 : deck.width < 600 ? 30 : 50; // Adjust depending on viewport width.
-    const { zoom, target } = fitBounds([width, height], [deck.width, deck.height], maxZoom, padding);
-    setViewState({ zoom, target });
+    const bounds = fitBounds([width, height], [deck.width, deck.height], maxZoom, padding);
+    setViewState(bounds);
   }
 
   // Enables screenshots of the canvas: https://github.com/visgl/deck.gl/issues/2200
@@ -46,7 +49,7 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }) {
   return (
     <DeckGL
       ref={deckRef}
-      layers={layers}
+      layers={props.layers}
       viewState={viewState}
       onViewStateChange={(e) => setViewState(e.viewState)}
       views={[new OrthographicView({ id: 'ortho', controller: true })]}
@@ -55,12 +58,12 @@ function WrappedViewStateDeck({ layers }: { layers: Layer<any, any>[] }) {
   );
 }
 
-function Viewer() {
+function Viewer({ viewStateAtom }: { viewStateAtom: WritableAtom<ViewState | undefined, ViewState> }) {
   const layerConstructors = useAtomValue(layerAtoms);
   const layers = layerConstructors.map((layer) => {
     return !layer.on ? null : new layer.Layer(layer.layerProps);
   });
-  return <WrappedViewStateDeck layers={layers as Layer<any, any>[]} />;
+  return <WrappedViewStateDeck viewStateAtom={viewStateAtom} layers={layers as Layer<any, any>[]} />;
 }
 
 export default Viewer;

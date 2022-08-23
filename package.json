@@ -8,6 +8,8 @@
     "deck.gl": "^8.6.7",
     "imjoy-rpc": "^0.2.23",
     "jotai": "^1.0.0",
+    "just-debounce-it": "^3.1.1",
+    "mitt": "^3.0.0",
     "p-map": "^4.0.0",
     "quick-lru": "^6.0.0",
     "react": "^17.0.1",
@@ -20,8 +22,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "export": "npm run check && npm run build",
-    "format": "prettier --write \"{src,types}/**/*.{js,jsx,ts,tsx}\" vite.config.js",
-    "lint": "prettier --check \"{src,types}/**/*.{js,jsx,ts,tsx}\" vite.config.js",
+    "format": "prettier --write \"{src,types}/**/*.{js,jsx,ts,tsx}\" vite.config.js main.ts",
+    "lint": "prettier --check \"{src,types}/**/*.{js,jsx,ts,tsx}\" vite.config.js main.ts",
     "check": "tsc"
   },
   "prettier": {
@@ -37,6 +39,6 @@
     "@vitejs/plugin-react": "^1.0.1",
     "prettier": "^2.2.0",
     "typescript": "^4.5.5",
-    "vite": "^3.0.2"
+    "vite": "^3.0.9"
   }
 }
