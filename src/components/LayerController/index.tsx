@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai';
 import MuiAccordion from '@material-ui/core/Accordion';
 import { withStyles } from '@material-ui/styles';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Divider } from '@material-ui/core';
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai';
 import AxisSlider from './AxisSlider';
 import type { ControllerProps } from '../../state';
 

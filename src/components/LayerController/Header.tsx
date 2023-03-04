@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai';
 import { AccordionSummary, Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import LayerVisibilityButton from './LayerVisibilityButton';

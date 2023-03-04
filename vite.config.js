@@ -1,7 +1,7 @@
+import * as path from 'node:path';
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-
-import { resolve } from 'path';
 
 const source = process.env.VIZARR_DATA || 'https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/6001253.zarr';
 
@@ -15,12 +15,10 @@ export default defineConfig({
   resolve: {
     alias: {
       zarr: 'zarr/core',
-      os: resolve(__dirname, 'src/os-browser.js'),
-      '@hms-dbmi/vizarr': resolve(__dirname, 'src/index.tsx'),
+      '@hms-dbmi/vizarr': path.resolve(__dirname, 'src/index.tsx'),
     },
   },
   server: {
-    port: 3000,
     open: `?source=${source}`,
   },
 });

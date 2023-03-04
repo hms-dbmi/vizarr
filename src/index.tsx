@@ -1,7 +1,7 @@
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider, atom } from 'jotai';
-import { useUpdateAtom } from 'jotai/utils';
+import { useSetAtom } from 'jotai';
 import { ThemeProvider } from '@material-ui/styles';
 import mitt from 'mitt';
 
@@ -34,8 +34,8 @@ export function createViewer(element: HTMLElement): VizarrViewer {
   );
 
   function App() {
-    const addImage = useUpdateAtom(addImageAtom);
-    const setViewState = useUpdateAtom(viewStateAtom);
+    const addImage = useSetAtom(addImageAtom);
+    const setViewState = useSetAtom(viewStateAtom);
     React.useImperativeHandle(ref, () => ({ addImage, setViewState, on: emitter.on }), []);
     return (
       <>

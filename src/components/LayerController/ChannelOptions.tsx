@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { MouseEvent, ChangeEvent } from 'react';
 import { useAtom } from 'jotai';
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai';
 import { IconButton, Popover, Paper, Typography, Divider, Input, NativeSelect } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import { MoreHoriz, Remove } from '@material-ui/icons';

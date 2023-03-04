@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAtom } from 'jotai';
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai';
 import type { ChangeEvent } from 'react';
 import { Slider, Typography, Grid, IconButton } from '@material-ui/core';
 import { RadioButtonChecked, RadioButtonUnchecked } from '@material-ui/icons';

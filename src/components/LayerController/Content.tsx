@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai';
 import { AccordionDetails, Grid, Typography, Divider } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 
