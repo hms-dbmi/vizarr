@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, NativeSelect } from '@material-ui/core';
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai';
 import type { ChangeEvent } from 'react';
 import type { ControllerProps } from '../../state';
 

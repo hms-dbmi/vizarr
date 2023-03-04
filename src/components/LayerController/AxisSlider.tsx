@@ -1,6 +1,5 @@
 import { Grid, Typography, Divider } from '@material-ui/core';
-import { useAtom } from 'jotai';
-import { useAtomValue } from 'jotai/utils';
+import { useAtom, useAtomValue } from 'jotai';
 import type { ChangeEvent } from 'react';
 import React, { useState, useEffect } from 'react';
 import { Slider } from '@material-ui/core';
