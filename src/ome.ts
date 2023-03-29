@@ -268,8 +268,8 @@ async function defaultMeta(loader: ZarrPixelSource<string[]>, axis_labels: strin
 }
 
 function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axes: Ome.Axis[]) {
-  const t = rdefs.defaultT ?? 0;
-  const z = rdefs.defaultZ ?? 0;
+  const t = rdefs?.defaultT ?? 0;
+  const z = rdefs?.defaultZ ?? 0;
 
   const colors: string[] = [];
   const contrast_limits: [min: number, max: number][] = [];
