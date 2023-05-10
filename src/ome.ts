@@ -68,10 +68,13 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
 
   const tileSize = guessTileSize(data[0]);
   const loaders = range(rows).flatMap((row) => {
-    return range(cols).map((col) => {
-      const offset = col + row * cols;
-      return { name: String(offset), row, col, loader: new ZarrPixelSource(data[offset], axis_labels, tileSize) };
-    });
+    // filter to remove any empty row/col position
+    return range(cols)
+      .filter((col) => col + row * cols < data.length)
+      .map((col) => {
+        const offset = col + row * cols;
+        return { name: String(offset), row, col, loader: new ZarrPixelSource(data[offset], axis_labels, tileSize) };
+      });
   });
 
   let meta;
