@@ -1,11 +1,12 @@
 import type { ZarrPixelSource } from '@hms-dbmi/viv';
-import { Matrix4 } from 'math.gl';
-import { LRUCacheStore } from './lru-store';
-import type { ViewState } from './state';
-
+import type { Slice } from '@zarrita/indexing';
 import * as zarr from '@zarrita/core';
-import { slice, get, type Slice } from '@zarrita/indexing';
+import { slice, get } from '@zarrita/indexing';
 import { FetchStore, Readable } from '@zarrita/storage';
+import { Matrix4 } from 'math.gl';
+
+import { lru } from './lru-store';
+import type { ViewState } from './state';
 
 export const MAX_CHANNELS = 6;
 
@@ -38,7 +39,7 @@ async function normalizeStore(source: string | Readable): Promise<zarr.Location<
     }
 
     // Wrap remote stores in a cache
-    return zarr.root(new LRUCacheStore(store));
+    return zarr.root(lru(store));
   }
 
   return zarr.root(source);
