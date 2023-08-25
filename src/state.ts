@@ -4,7 +4,7 @@ import type { PrimitiveAtom, WritableAtom } from 'jotai';
 import { atom } from 'jotai';
 import { atomFamily, splitAtom, waitForAll } from 'jotai/utils';
 
-import type { Readable } from "@zarrita/storage";
+import type { Readable } from '@zarrita/storage';
 import type { default as GridLayer, GridLayerProps, GridLoader } from './gridLayer';
 import { initLayerStateFromSource } from './io';
 

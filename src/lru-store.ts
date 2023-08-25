@@ -1,7 +1,7 @@
-import type { AsyncReadable } from '@zarrita/storage';
+import type { Readable } from '@zarrita/storage';
 import QuickLRU from 'quick-lru';
 
-export class LRUCacheStore<S extends AsyncReadable> {
+export class LRUCacheStore<S extends Readable> {
   cache: QuickLRU<string, Promise<Uint8Array | undefined>>;
   constructor(public store: S, maxSize: number = 100) {
     this.cache = new QuickLRU({ maxSize });
@@ -11,7 +11,7 @@ export class LRUCacheStore<S extends AsyncReadable> {
     if (this.cache.has(key)) {
       return this.cache.get(key)!;
     }
-    const value = this.store.get(key, opts).catch((err) => {
+    const value = Promise.resolve(this.store.get(key, opts)).catch((err) => {
       this.cache.delete(key);
       throw err;
     });

@@ -185,9 +185,9 @@ export async function loadPlate(
 
   // Create loader for every Well. Some loaders may be undefined if Wells are missing.
   const mapper = async ([key, path]: string[]) => {
-    let arr = await zarr.open(grp.resolve(path), { kind: "array" });
+    let arr = await zarr.open(grp.resolve(path), { kind: 'array' });
     return [key, arr] as const;
-  }
+  };
 
   const promises = await pMap(
     wellImagePaths.map((p) => [p, join(p, resolution)]),

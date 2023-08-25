@@ -86,19 +86,19 @@ async function loadMultiChannel(
 }
 
 function isOmePlate(attrs: zarr.Attributes): attrs is { plate: Ome.Plate } {
-  return "plate" in attrs;
+  return 'plate' in attrs;
 }
 
 function isOmeWell(attrs: zarr.Attributes): attrs is { well: Ome.Well } {
-  return "well" in attrs;
+  return 'well' in attrs;
 }
 
 function isOmeroMultiscales(attrs: zarr.Attributes): attrs is { omero: Ome.Omero; multiscales: Ome.Multiscale[] } {
-  return "omero" in attrs && "multiscales" in attrs;
+  return 'omero' in attrs && 'multiscales' in attrs;
 }
 
 function isMultiscales(attrs: zarr.Attributes): attrs is { multiscales: Ome.Multiscale[] } {
-  return "multiscales" in attrs;
+  return 'multiscales' in attrs;
 }
 
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
@@ -118,10 +118,14 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
     }
 
     if (isOmeroMultiscales(attrs)) {
-      return loadOmeroMultiscales(config, node, attrs as {
-        omero: Ome.Omero;
-        multiscales: Ome.Multiscale[];
-      });
+      return loadOmeroMultiscales(
+        config,
+        node,
+        attrs as {
+          omero: Ome.Omero;
+          multiscales: Ome.Multiscale[];
+        }
+      );
     }
 
     if (Object.keys(attrs).length === 0 && node.path) {
@@ -170,7 +174,7 @@ type Labels = [...string[], 'y', 'x'];
 function getAxisLabelsAndChannelAxis(
   config: ImageLayerConfig,
   ngffAxes: Ome.Axis[] | undefined,
-  arr: zarr.Array<zarr.DataType, Readable> 
+  arr: zarr.Array<zarr.DataType, Readable>
 ): { labels: Labels; channel_axis: number } {
   // type cast string[] to Labels
   const maybeAxisLabels = config.axis_labels as undefined | Labels;

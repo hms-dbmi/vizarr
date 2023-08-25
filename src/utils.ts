@@ -4,7 +4,7 @@ import { LRUCacheStore } from './lru-store';
 import type { ViewState } from './state';
 
 import * as zarr from '@zarrita/core';
-import { slice, get, type Slice } from "@zarrita/indexing";
+import { slice, get, type Slice } from '@zarrita/indexing';
 import { FetchStore, Readable } from '@zarrita/storage';
 
 export const MAX_CHANNELS = 6;
@@ -328,16 +328,16 @@ export function typedEmitter<T>() {
 
 function getV2DataType(dtype: string) {
   const mapping: Record<string, string> = {
-    "int8": "|i1",
-    "uint8": "|u1",
-    "int16": "<i2",
-    "uint16": "<u2",
-    "int32": "<i4",
-    "uint32": "<u4",
-    "int64": "<i8",
-    "uint64": "<u8",
-    "float32": "<f4",
-    "float64": "<f8",
+    int8: '|i1',
+    uint8: '|u1',
+    int16: '<i2',
+    uint16: '<u2',
+    int32: '<i4',
+    uint32: '<u4',
+    int64: '<i8',
+    uint64: '<u8',
+    float32: '<f4',
+    float64: '<f8',
   };
   if (!(dtype in mapping)) {
     throw new Error(`Unsupported dtype ${dtype}`);
@@ -345,33 +345,33 @@ function getV2DataType(dtype: string) {
   return mapping[dtype];
 }
 
-type Selection = (number | Omit<Slice, "indices"> | null)[];
+type Selection = (number | Omit<Slice, 'indices'> | null)[];
 
 export function createZarrArrayAdapter(arr: zarr.Array<zarr.DataType>): any {
   return new Proxy(arr, {
     get(target, prop) {
-      if (prop === "getRaw") {
+      if (prop === 'getRaw') {
         return (selection: Selection) => {
-          return get(target, selection.map(s => {
-            if (typeof s === "object" && s !== null) {
-              return slice(s.start, s.stop, s.step);
-            }
-            return s;
-          }));
-        }
+          return get(
+            target,
+            selection.map((s) => {
+              if (typeof s === 'object' && s !== null) {
+                return slice(s.start, s.stop, s.step);
+              }
+              return s;
+            })
+          );
+        };
       }
-      if (prop === "getRawChunk") {
-        return (
-          selection: number[],
-          options: { storeOptions: RequestInit }
-        ) => {
+      if (prop === 'getRawChunk') {
+        return (selection: number[], options: { storeOptions: RequestInit }) => {
           return target.getChunk(selection, options.storeOptions);
-        }
+        };
       }
-      if (prop === "dtype") {
+      if (prop === 'dtype') {
         return getV2DataType(target.dtype);
       }
       return Reflect.get(target, prop);
-    }
-  })
+    },
+  });
 }
