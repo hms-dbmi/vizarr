@@ -32,12 +32,13 @@ export function lru<S extends Readable>(store: S, maxSize: number = 100) {
     return result;
   }
   if (getRange) {
+    const _getRange = getRange;
     getRange = (...args: Parameters<NonNullable<S['getRange']>>) => {
       const [key, range, opts] = args;
       const cacheKey = normalizeKey(key, range);
       const cached = cache.get(cacheKey);
       if (cached) return cached;
-      const result = Promise.resolve(getRange!(key, range, opts)).catch((err) => {
+      const result = Promise.resolve(_getRange!(key, range, opts)).catch((err) => {
         cache.delete(cacheKey);
         throw err;
       });
