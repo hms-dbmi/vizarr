@@ -262,7 +262,7 @@ export async function calcConstrastLimits<S extends string[]>(
   const def = defaultSelection ?? source.shape.map(() => 0);
   const csize = source.shape[channelAxis];
 
-  if (csize !== visibilities.length) {
+  if (csize !== visibilities.length && channelAxis > -1) {
     throw new Error("provided visibilities don't match number of channels");
   }
 
