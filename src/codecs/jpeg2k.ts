@@ -9,11 +9,9 @@ export default class Jpeg2k {
   static fromConfig(_: Record<string, any>): Jpeg2k {
     return new Jpeg2k();
   }
-
   encode(_: Uint8Array): never {
     throw new Error('encode not implemented');
   }
-
   async decode(data: Uint8Array): Promise<Uint8Array> {
     const img = new JpxImage();
     img.failOnCorruptedImage = true;

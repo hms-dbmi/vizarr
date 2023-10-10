@@ -14,7 +14,6 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      zarr: 'zarr/core',
       '@hms-dbmi/vizarr': path.resolve(__dirname, 'src/index.tsx'),
     },
   },

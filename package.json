@@ -5,6 +5,9 @@
     "@hms-dbmi/viv": "^0.13.0",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
+    "@zarrita/core": "^0.0.3",
+    "@zarrita/indexing": "^0.0.3",
+    "@zarrita/storage": "^0.0.2",
     "deck.gl": "^8.6.7",
     "imjoy-rpc": "^0.2.23",
     "jotai": "^1.0.0",
@@ -13,9 +16,7 @@
     "p-map": "^5.5.0",
     "quick-lru": "^6.0.0",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "reference-spec-reader": "^0.1.1",
-    "zarr": "^0.5.2"
+    "react-dom": "^17.0.1"
   },
   "scripts": {
     "start": "vite",

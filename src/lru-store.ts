@@ -1,39 +1,56 @@
-import type { AsyncStore } from 'zarr/types/storage/types';
+import type { Readable } from '@zarrita/storage';
 import QuickLRU from 'quick-lru';
 
-export class LRUCacheStore<S extends AsyncStore<ArrayBuffer>> {
-  cache: QuickLRU<string, Promise<ArrayBuffer>>;
-
-  constructor(public store: S, maxSize: number = 100) {
-    this.cache = new QuickLRU({ maxSize });
-  }
-
-  getItem(...args: Parameters<S['getItem']>) {
-    const [key, opts] = args;
-    if (this.cache.has(key)) {
-      return this.cache.get(key)!;
+type RangeQuery =
+  | {
+      offset: number;
+      length: number;
     }
-    const value = this.store.getItem(key, opts).catch((err) => {
-      this.cache.delete(key);
+  | {
+      suffixLength: number;
+    };
+
+function normalizeKey(key: string, range?: RangeQuery) {
+  if (!range) return key;
+  if ('suffixLength' in range) return `${key}:-${range.suffixLength}`;
+  return `${key}:${range.offset}:${range.offset + range.length - 1}`;
+}
+
+export function lru<S extends Readable>(store: S, maxSize: number = 100) {
+  const cache = new QuickLRU<string, Promise<Uint8Array | undefined>>({ maxSize });
+  let getRange = store.getRange ? store.getRange.bind(store) : undefined;
+  function get(...args: Parameters<S['get']>) {
+    const [key, opts] = args;
+    const cacheKey = normalizeKey(key);
+    const cached = cache.get(cacheKey);
+    if (cached) return cached;
+    const result = Promise.resolve(store.get(key, opts)).catch((err) => {
+      cache.delete(cacheKey);
       throw err;
     });
-    this.cache.set(key, value);
-    return value;
+    cache.set(cacheKey, result);
+    return result;
   }
-
-  async containsItem(key: string) {
-    return this.cache.has(key) || this.store.containsItem(key);
+  if (getRange) {
+    const _getRange = getRange;
+    getRange = (...args: Parameters<NonNullable<S['getRange']>>) => {
+      const [key, range, opts] = args;
+      const cacheKey = normalizeKey(key, range);
+      const cached = cache.get(cacheKey);
+      if (cached) return cached;
+      const result = Promise.resolve(_getRange!(key, range, opts)).catch((err) => {
+        cache.delete(cacheKey);
+        throw err;
+      });
+      cache.set(cacheKey, result);
+      return result;
+    };
   }
-
-  keys() {
-    return this.store.keys();
-  }
-
-  deleteItem(key: string): never {
-    throw new Error('deleteItem not implemented');
-  }
-
-  setItem(key: string, value: ArrayBuffer): never {
-    throw new Error('setItem not implemented');
-  }
+  return new Proxy(store, {
+    get(target, prop, receiver) {
+      if (prop === 'get') return get;
+      if (prop === 'getRange' && getRange) return getRange;
+      return Reflect.get(target, prop, receiver);
+    },
+  });
 }
