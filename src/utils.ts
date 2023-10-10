@@ -259,10 +259,11 @@ export async function calcConstrastLimits<S extends string[]>(
   visibilities: boolean[],
   defaultSelection?: number[]
 ): Promise<([min: number, max: number] | undefined)[]> {
+  // channelAxis can be -1 if there is no 'c' dimension
   const def = defaultSelection ?? source.shape.map(() => 0);
   const csize = source.shape[channelAxis];
 
-  if (csize !== visibilities.length) {
+  if (csize !== visibilities.length && channelAxis > -1) {
     throw new Error("provided visibilities don't match number of channels");
   }
 
@@ -270,7 +271,9 @@ export async function calcConstrastLimits<S extends string[]>(
     visibilities.map(async (isVisible, i) => {
       if (!isVisible) return undefined; // don't compute non-visible channels
       const selection = [...def];
-      selection[channelAxis] = i;
+      if (channelAxis > -1) {
+        selection[channelAxis] = i;
+      }
       return calcDataRange(source, selection);
     })
   );
