@@ -1,0 +1,2 @@
+var c=Object.defineProperty;var s=(r,e,t)=>e in r?c(r,e,{enumerable:!0,configurable:!0,writable:!0,value:t}):r[e]=t;var n=(r,e,t)=>(s(r,typeof e!="symbol"?e+"":e,t),t);import{JpxImage as d}from"https://cdn.jsdelivr.net/gh/mozilla/pdf.js@30bd5f0/src/core/jpx.js";const o=class o{static fromConfig(e){return new o}encode(e){throw new Error("encode not implemented")}async decode(e){const t=new d;return t.failOnCorruptedImage=!0,t.parse(e),t.tiles[0].items}};n(o,"codecId");let a=o;export{a as default};
+//# sourceMappingURL=jpeg2k-baa1f47e.js.map
