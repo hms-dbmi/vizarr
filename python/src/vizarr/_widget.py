@@ -26,17 +26,15 @@ def _store_keyprefix(obj):
 
 class Viewer(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "_widget.js"
-    _source = traitlets.Any().tag(sync=True)
+    _configs = traitlets.List().tag(sync=True)
     view_state = traitlets.Dict().tag(sync=True)
     height = traitlets.Unicode("500px").tag(sync=True);
 
-    def __init__(self, source, **kwargs):
+    def __init__(self, source=None, **kwargs):
+        super().__init__(**kwargs)
         self._store_paths = []
-        if not isinstance(source, str):
-            store, key_prefix = _store_keyprefix(source)
-            source = { "id": len(self._store_paths) }
-            self._store_paths.append((store, key_prefix))
-        super().__init__(_source=source, **kwargs)
+        if source is not None:
+            self.add_image(source=source)
         self.on_msg(self._handle_custom_msg)
 
     def _handle_custom_msg(self, msg, buffers):
@@ -45,7 +43,6 @@ class Viewer(anywidget.AnyWidget):
 
         if msg["payload"]["type"] == "has":
             self.send({ "uuid": msg["uuid"], "payload": key in store })
-            print(store)
             return
 
         if msg["payload"]["type"] == "get":
@@ -55,3 +52,11 @@ class Viewer(anywidget.AnyWidget):
                 buffers = []
             self.send({ "uuid": msg["uuid"], "payload": { "success": len(buffers) == 1 } }, buffers)
             return
+
+    def add_image(self, source, **config):
+        if not isinstance(source, str):
+            store, key_prefix = _store_keyprefix(source)
+            source = { "id": len(self._store_paths) }
+            self._store_paths.append((store, key_prefix))
+        config["source"] = source
+        self._configs = self._configs + [config]

@@ -30,9 +30,11 @@ function send(model, payload, { timeout = 3000 } = {}) {
 	});
 }
 
-/** @param {import("npm:@anywidget/types").AnyModel} model */
-function get_source(model) {
-	let source = model.get("_source");
+/**
+ * @param {import("npm:@anywidget/types").AnyModel} model
+ * @param {string | { id: string }} source
+ */
+function get_source(model, source) {
 	if (typeof source === "string") {
 		return source;
 	}
@@ -70,9 +72,9 @@ function get_source(model) {
 
 /**
  * @typedef Model
- * @property {string | { id: string }} _source
  * @property {string} height
  * @property {ViewState=} view_state
+ * @property {{ source: string | { id: string }}[]} _configs
  */
 
 /**
@@ -104,6 +106,18 @@ export function render({ model, el }) {
 			}, 200),
 		);
 	}
-	viewer.addImage({ source: get_source(model) });
+	{
+		// sources are append-only now
+		for (const config of model.get("_configs")) {
+			const source = get_source(model, config.source);
+			viewer.addImage({ ...config, source });
+		}
+		model.on("change:_configs", () => {
+			const last = model.get("_configs").at(-1);
+			if (!last) return;
+			const source = get_source(model, last.source);
+			viewer.addImage({ ...last, source });
+		});
+	}
 	el.appendChild(div);
 }
