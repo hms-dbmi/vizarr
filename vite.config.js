@@ -12,28 +12,23 @@ const source = process.env.VIZARR_DATA || 'https://uk1s3.embassy.ebi.ac.uk/idr/z
  */
 function writeEntryPoint(entryPointName, chunkName) {
   return {
-    name: "write-entry-point",
+    name: 'write-entry-point',
     async generateBundle(_, bundle) {
-      const chunk = Object
-        .keys(bundle)
-        .find((key) => key.match(chunkName));
+      const chunk = Object.keys(bundle).find((key) => key.match(chunkName));
       if (!chunk) {
         throw new Error(`Could not find chunk matching ${chunkName}`);
       }
       bundle[entryPointName] = {
         fileName: entryPointName,
-        type: "chunk",
+        type: 'chunk',
         code: `export * from './${chunk}';`,
-      }
-    }
-  }
+      };
+    },
+  };
 }
 
 export default defineConfig({
-  plugins: [
-    react(),
-    writeEntryPoint('index.js', /^vizarr-/),
-  ],
+  plugins: [react(), writeEntryPoint('index.js', /^vizarr-/)],
   base: process.env.VIZARR_PREFIX || './',
   build: {
     assetsDir: '',
