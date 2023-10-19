@@ -1,4 +1,4 @@
-import * as vizarr from '@hms-dbmi/vizarr';
+import * as vizarr from './src/index';
 import debounce from 'just-debounce-it';
 
 async function initImjoy(viewer: vizarr.VizarrViewer) {
