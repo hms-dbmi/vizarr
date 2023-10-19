@@ -11,6 +11,14 @@ export default defineConfig({
   build: {
     outDir: 'out',
     assetsDir: '',
+    minify: false,
+    lib: {
+      entry: {
+        main: path.resolve(__dirname, 'index.html'),
+        index: path.resolve(__dirname, 'src/index.tsx'),
+      },
+      formats: ['es'],
+    }
   },
   resolve: {
     alias: {
