@@ -29,3 +29,7 @@ example/*.zarr
 example/.ipynb_checkpoints/*
 example/data/**
 __pycache__
+
+.venv
+.ipynb_checkpoints
+dist/
