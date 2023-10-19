@@ -22,8 +22,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-.next/*
-out/*
+dist/
 
 example/*.zarr
 example/.ipynb_checkpoints/*
