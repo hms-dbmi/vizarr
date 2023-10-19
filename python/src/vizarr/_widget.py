@@ -7,6 +7,7 @@ import numpy as np
 
 __all__ = ["Viewer"]
 
+
 def _store_keyprefix(obj):
     # Just grab the store and key_prefix from zarr.Array and zarr.Group objects
     if isinstance(obj, (zarr.Array, zarr.Group)):
@@ -15,7 +16,9 @@ def _store_keyprefix(obj):
     if isinstance(obj, np.ndarray):
         # Create an in-memory store, and write array as as single chunk
         store = {}
-        arr = zarr.create(store=store, shape=obj.shape, chunks=obj.shape, dtype=obj.dtype)
+        arr = zarr.create(
+            store=store, shape=obj.shape, chunks=obj.shape, dtype=obj.dtype
+        )
         arr[:] = obj
         return store, ""
 
@@ -24,17 +27,16 @@ def _store_keyprefix(obj):
 
     raise TypeError("Cannot normalize store path")
 
+
 class Viewer(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "_widget.js"
     _configs = traitlets.List().tag(sync=True)
     view_state = traitlets.Dict().tag(sync=True)
-    height = traitlets.Unicode("500px").tag(sync=True);
+    height = traitlets.Unicode("500px").tag(sync=True)
 
-    def __init__(self, source=None, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._store_paths = []
-        if source is not None:
-            self.add_image(source=source)
         self.on_msg(self._handle_custom_msg)
 
     def _handle_custom_msg(self, msg, buffers):
@@ -42,7 +44,7 @@ class Viewer(anywidget.AnyWidget):
         key = key_prefix + msg["payload"]["key"].lstrip("/")
 
         if msg["payload"]["type"] == "has":
-            self.send({ "uuid": msg["uuid"], "payload": key in store })
+            self.send({"uuid": msg["uuid"], "payload": key in store})
             return
 
         if msg["payload"]["type"] == "get":
@@ -50,13 +52,16 @@ class Viewer(anywidget.AnyWidget):
                 buffers = [store[key]]
             except KeyError:
                 buffers = []
-            self.send({ "uuid": msg["uuid"], "payload": { "success": len(buffers) == 1 } }, buffers)
+            self.send(
+                {"uuid": msg["uuid"], "payload": {"success": len(buffers) == 1}},
+                buffers,
+            )
             return
 
     def add_image(self, source, **config):
         if not isinstance(source, str):
             store, key_prefix = _store_keyprefix(source)
-            source = { "id": len(self._store_paths) }
+            source = {"id": len(self._store_paths)}
             self._store_paths.append((store, key_prefix))
         config["source"] = source
         self._configs = self._configs + [config]
