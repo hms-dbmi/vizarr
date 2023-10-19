@@ -31,7 +31,9 @@ export default defineConfig({
   plugins: [react(), writeEntryPoint('index.js', /^vizarr-/)],
   base: process.env.VIZARR_PREFIX || './',
   build: {
+    outDir: 'out',
     assetsDir: '',
+    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: {
