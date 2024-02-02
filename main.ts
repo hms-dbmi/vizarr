@@ -56,10 +56,10 @@ function initStandaloneApp(viewer: vizarr.VizarrViewer) {
   }
 }
 
-function main() {
+async function main() {
   console.log(`vizarr v${vizarr.version}: https://github.com/hms-dbmi/vizarr`);
 
-  const viewer = vizarr.createViewer(document.querySelector('#root')!);
+  const viewer = await vizarr.createViewer(document.querySelector('#root')!);
 
   // enable imjoy api when loaded as an iframe
   if (window.self !== window.top) {
