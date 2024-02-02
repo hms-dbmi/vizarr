@@ -84,7 +84,7 @@ function get_source(model, source) {
  */
 
 /** @type {import("npm:@anywidget/types").Render<Model>} */
-export function render({ model, el }) {
+export async function render({ model, el }) {
 	let div = document.createElement("div");
 	{
 		div.style.height = model.get("height");
@@ -93,7 +93,7 @@ export function render({ model, el }) {
 			div.style.height = model.get("height");
 		});
 	}
-	let viewer = vizarr.createViewer(div);
+	let viewer = await vizarr.createViewer(div);
 	{
 		model.on("change:view_state", () => {
 			viewer.setViewState(model.get("view_state"));
