@@ -67,7 +67,7 @@ export function createViewer(element: HTMLElement): Promise<VizarrViewer> {
       <Provider>
         <App />
       </Provider>
-    </ThemeProvider>,
+    </ThemeProvider>
   );
 
   return promise;
