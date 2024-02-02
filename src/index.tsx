@@ -1,5 +1,5 @@
 import * as React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import { Provider, atom } from 'jotai';
 import { useSetAtom } from 'jotai';
 import { ThemeProvider } from '@material-ui/styles';
@@ -25,18 +25,36 @@ export interface VizarrViewer {
   on<E extends keyof Events>(event: E, cb: (data: Events[E]) => void): void;
 }
 
-export function createViewer(element: HTMLElement): VizarrViewer {
+/** switch to Promise.withResolvers when it's available */
+function defer<T>() {
+  let resolve: (value: T | PromiseLike<T>) => void;
+  let reject: (reason?: any) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  // @ts-expect-error - resolve and reject are OK
+  return { promise, resolve, reject };
+}
+
+export function createViewer(element: HTMLElement): Promise<VizarrViewer> {
   const ref = React.createRef<VizarrViewer>();
   const emitter = mitt<Events>();
   const viewStateAtom = atomWithEffect<ViewState | undefined, ViewState>(
     atom<ViewState | undefined>(undefined),
     ({ zoom, target }) => emitter.emit('viewStateChange', { zoom, target })
   );
+  let { promise, resolve } = defer<VizarrViewer>();
 
   function App() {
     const addImage = useSetAtom(addImageAtom);
     const setViewState = useSetAtom(viewStateAtom);
     React.useImperativeHandle(ref, () => ({ addImage, setViewState, on: emitter.on }), []);
+    React.useEffect(() => {
+      if (ref.current) {
+        resolve(ref.current);
+      }
+    }, []);
     return (
       <>
         <Menu />
@@ -44,15 +62,13 @@ export function createViewer(element: HTMLElement): VizarrViewer {
       </>
     );
   }
-
-  ReactDOM.render(
+  ReactDOM.createRoot(element).render(
     <ThemeProvider theme={theme}>
       <Provider>
         <App />
       </Provider>
-    </ThemeProvider>,
-    element
+    </ThemeProvider>
   );
 
-  return ref.current!;
+  return promise;
 }
