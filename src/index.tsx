@@ -23,6 +23,7 @@ export interface VizarrViewer {
   addImage(config: ImageLayerConfig): void;
   setViewState(viewState: ViewState): void;
   on<E extends keyof Events>(event: E, cb: (data: Events[E]) => void): void;
+  destroy(): void;
 }
 
 /** switch to Promise.withResolvers when it's available */
@@ -44,12 +45,21 @@ export function createViewer(element: HTMLElement): Promise<VizarrViewer> {
     atom<ViewState | undefined>(undefined),
     ({ zoom, target }) => emitter.emit('viewStateChange', { zoom, target })
   );
-  let { promise, resolve } = defer<VizarrViewer>();
+  const { promise, resolve } = defer<VizarrViewer>();
 
   function App() {
     const addImage = useSetAtom(addImageAtom);
     const setViewState = useSetAtom(viewStateAtom);
-    React.useImperativeHandle(ref, () => ({ addImage, setViewState, on: emitter.on }), []);
+    React.useImperativeHandle(
+      ref,
+      () => ({
+        addImage,
+        setViewState,
+        on: emitter.on,
+        destroy: () => root.unmount(),
+      }),
+      []
+    );
     React.useEffect(() => {
       if (ref.current) {
         resolve(ref.current);
@@ -62,13 +72,13 @@ export function createViewer(element: HTMLElement): Promise<VizarrViewer> {
       </>
     );
   }
-  ReactDOM.createRoot(element).render(
+  let root = ReactDOM.createRoot(element);
+  root.render(
     <ThemeProvider theme={theme}>
       <Provider>
         <App />
       </Provider>
     </ThemeProvider>
   );
-
   return promise;
 }
