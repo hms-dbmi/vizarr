@@ -50,12 +50,16 @@ export function createViewer(element: HTMLElement): Promise<VizarrViewer> {
   function App() {
     const addImage = useSetAtom(addImageAtom);
     const setViewState = useSetAtom(viewStateAtom);
-    React.useImperativeHandle(ref, () => ({
-      addImage,
-      setViewState,
-      on: emitter.on,
-      destroy: () => root.unmount()
-    }), []);
+    React.useImperativeHandle(
+      ref,
+      () => ({
+        addImage,
+        setViewState,
+        on: emitter.on,
+        destroy: () => root.unmount(),
+      }),
+      []
+    );
     React.useEffect(() => {
       if (ref.current) {
         resolve(ref.current);
