@@ -1,9 +1,9 @@
-import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray } from 'zarr';
-import type { Group as ZarrGroup } from 'zarr';
-import type { AsyncStore, Store } from 'zarr/types/storage/types';
-import type { ZarrPixelSource } from '@hms-dbmi/viv';
+import * as zarr from 'zarrita';
+import type { Readable } from '@zarrita/storage';
 import { Matrix4 } from 'math.gl';
-import { LRUCacheStore } from './lru-store';
+
+import type { ZarrPixelSource } from './ZarrPixelSource';
+import { lru } from './lru-store';
 import type { ViewState } from './state';
 
 export const MAX_CHANNELS = 6;
@@ -21,57 +21,73 @@ export const MAGENTA_GREEN = [COLORS.magenta, COLORS.green];
 export const RGB = [COLORS.red, COLORS.green, COLORS.blue];
 export const CYMRGB = Object.values(COLORS).slice(0, -2);
 
-async function normalizeStore(source: string | Store) {
-  let path;
+async function normalizeStore(source: string | Readable): Promise<zarr.Location<Readable>> {
   if (typeof source === 'string') {
-    let store: AsyncStore<ArrayBuffer>;
-
+    let store: Readable;
+    let path: `/${string}` = '/';
     if (source.endsWith('.json')) {
       // import custom store implementation
-      const [{ ReferenceStore }, json] = await Promise.all([
-        import('reference-spec-reader'),
+      const [{ default: ReferenceStore }, json] = await Promise.all([
+        // @ts-expect-error
+        import('@zarrita/storage/ref'),
         fetch(source).then((res) => res.json()),
       ]);
-
-      store = ReferenceStore.fromJSON(json);
+      store = ReferenceStore.fromSpec(json);
     } else {
       const url = new URL(source);
-      store = new HTTPStore(url.origin);
-      path = url.pathname.slice(1);
+      // @ts-expect-error - pathname always starts with '/'
+      path = url.pathname;
+      url.pathname = '/';
+      store = new zarr.FetchStore(url.href);
     }
 
     // Wrap remote stores in a cache
-    return { store: new LRUCacheStore(store), path };
+    return new zarr.Location(lru(store), path);
   }
 
-  return { store: source, path };
+  return zarr.root(source);
 }
 
-export async function open(source: string | Store) {
-  const { store, path } = await normalizeStore(source);
-  return openGroup(store, path).catch((err) => {
-    if (err instanceof ContainsArrayError) {
-      return openArray({ store });
-    }
-    throw err;
-  });
+export async function open(source: string | Readable) {
+  const location = await normalizeStore(source);
+  console.log(location);
+  return zarr.open(location);
 }
 
-const decoder = new TextDecoder();
-export function getAttrsOnly<T = unknown>(grp: ZarrGroup, path: string) {
-  return (grp.store as AsyncStore<ArrayBuffer>)
-    .getItem(join(grp.path, path, '.zattrs'))
-    .then((b) => decoder.decode(b))
-    .then((text) => JSON.parse(text) as T);
+export async function getAttrsOnly<T = unknown>(
+  location: zarr.Location<Readable>,
+  options: { path?: string; zarrVersion: 2 | 3 }
+) {
+  const decoder = new TextDecoder();
+  if (options.path) {
+    location = location.resolve(options.path);
+  }
+  if (options.zarrVersion === 3) {
+    const attrs = await zarr.open.v3(location).then((node) => node.attrs);
+    return resolveAttrs(attrs) as T;
+  }
+  const v2AttrsLocation = location.resolve('.zattrs');
+  const maybeBytes = await location.store.get(v2AttrsLocation.path);
+  const attrs = maybeBytes ? JSON.parse(decoder.decode(maybeBytes)) : {};
+  return resolveAttrs(attrs) as T;
 }
 
-export async function loadMultiscales(grp: ZarrGroup, multiscales: Ome.Multiscale[]) {
+/**
+ * Loads the multiscales from a group and returns the datasets.
+ *
+ * NOTE: We avoid loading the attributes here because we don't need them.
+ */
+export async function loadMultiscales(
+  grp: zarr.Group<Readable>,
+  multiscales: Ome.Multiscale[]
+): Promise<Array<zarr.Array<zarr.DataType, Readable>>> {
   const { datasets } = multiscales[0] || [{ path: '0' }];
-  const nodes = await Promise.all(datasets.map(({ path }) => grp.getItem(path)));
-  if (nodes.every((node): node is ZarrArray => node instanceof ZarrArray)) {
-    return nodes;
-  }
-  throw Error('Multiscales metadata included a path to a group.');
+  return Promise.all(
+    // TODO(Trevor): TS is not happy about { attrs: false }.
+    // This is just missing from zarrita types, but it is ok and
+    // avoids making unecessary requests for v2 (see: https://github.com/manzt/zarrita.js/blob/7edffbeefb0eb877df48f54c7e8def4219c69c59/packages/zarrita/CHANGELOG.md?plain=1#L214)
+    datasets.map(({ path }) => zarr.open(grp.resolve(path), { kind: 'array', attrs: false } as { kind: 'array' }))
+  );
 }
 
 export function hexToRGB(hex: string): [r: number, g: number, b: number] {
@@ -102,7 +118,10 @@ export function join(...args: (string | undefined)[]) {
     .join('/');
 }
 
-export function getAxisLabels(arr: ZarrArray, axis_labels?: string[]): [...string[], 'y', 'x'] {
+export function getAxisLabels(
+  arr: zarr.Array<zarr.DataType, Readable>,
+  axis_labels?: string[]
+): [...string[], 'y', 'x'] {
   if (!axis_labels || axis_labels.length != arr.shape.length) {
     // default axis_labels are e.g. ['0', '1', 'y', 'x']
     const nonXYaxisLabels = arr.shape.slice(0, -2).map((_, i) => '' + i);
@@ -187,7 +206,7 @@ export function isInterleaved(shape: number[]) {
   return lastDimSize === 3 || lastDimSize === 4;
 }
 
-export function guessTileSize(arr: ZarrArray) {
+export function guessTileSize(arr: zarr.Array<zarr.DataType, Readable>) {
   const interleaved = isInterleaved(arr.shape);
   const [ySize, xSize] = arr.chunks.slice(interleaved ? -3 : -2);
   const size = Math.min(ySize, xSize);
@@ -209,7 +228,24 @@ export function fitBounds(
 }
 
 // prettier-ignore
-type Array16 = [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number];
+type Array16 = [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+];
 
 function isArray16(o: unknown): o is Array16 {
   if (!Array.isArray(o)) return false;
@@ -223,9 +259,7 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
   const matrix = new Matrix4();
   try {
     const arr = typeof model_matrix === 'string' ? JSON.parse(model_matrix) : model_matrix;
-    if (!isArray16(arr)) {
-      throw Error('Invalid modelMatrix size. Must be 16.');
-    }
+    assert(isArray16(arr), 'Invalid modelMatrix size. Must be 16.');
     matrix.setRowMajor(...arr);
   } catch {
     const msg = `Failed to parse modelMatrix. Got ${JSON.stringify(model_matrix)}, using identity.`;
@@ -234,9 +268,9 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
   return matrix;
 }
 
-export async function calcDataRange<S extends string[]>(
-  source: ZarrPixelSource<S>,
-  selection: number[]
+export async function calcDataRange(
+  source: ZarrPixelSource,
+  selection: Array<number>
 ): Promise<[min: number, max: number]> {
   if (source.dtype === 'Uint8') return [0, 255];
   const { data } = await source.getRaster({ selection });
@@ -259,12 +293,12 @@ export async function calcConstrastLimits<S extends string[]>(
   visibilities: boolean[],
   defaultSelection?: number[]
 ): Promise<([min: number, max: number] | undefined)[]> {
-  // channelAxis can be -1 if there is no 'c' dimension
   const def = defaultSelection ?? source.shape.map(() => 0);
   const csize = source.shape[channelAxis];
 
-  if (csize !== visibilities.length && channelAxis > -1) {
-    throw new Error("provided visibilities don't match number of channels");
+  // channelAxis can be -1 if there is no 'c' dimension
+  if (channelAxis !== -1) {
+    assert(csize === visibilities.length, 'visibilities do not match number of channels');
   }
 
   return Promise.all(
@@ -317,4 +351,74 @@ export function typedEmitter<T>() {
       target.dispatchEvent(new CustomEvent(event, { detail: data }));
     },
   };
+}
+
+/**
+ * Extracts the OME metadata from the zarr attributes
+ *
+ * TODO: We should use zod to handle this
+ */
+export function resolveAttrs(attrs: zarr.Attributes): zarr.Attributes {
+  if ('ome' in attrs) {
+    // @ts-expect-error - handles v0.5
+    return attrs.ome;
+  }
+  return attrs;
+}
+
+/**
+ * Error thrown when an assertion fails.
+ */
+export class AssertionError extends Error {
+  /** @param message The error message. */
+  constructor(message: string) {
+    super(message);
+    this.name = 'AssertionError';
+  }
+}
+
+/**
+ * Make an assertion. An error is thrown if `expr` does not have truthy value.
+ *
+ * @param expr The expression to test.
+ * @param msg The message to display if the assertion fails.
+ */
+export function assert(expr: unknown, msg = ''): asserts expr {
+  if (!expr) {
+    throw new AssertionError(msg);
+  }
+}
+
+/**
+ * Guess the zarr version of a store.
+ */
+export async function guessZarrVersion(location: zarr.Location<Readable>): Promise<2 | 3> {
+  try {
+    await zarr.open.v3(location);
+    return 3;
+  } catch (err) {
+    if (!(err instanceof zarr.NodeNotFoundError)) {
+      // rethrow if not a NodeNotFoundError
+      throw err;
+    }
+    return 2;
+  }
+}
+
+export function isOmePlate(attrs: zarr.Attributes): attrs is { plate: Ome.Plate } {
+  return 'plate' in attrs;
+}
+
+export function isOmeWell(attrs: zarr.Attributes): attrs is { well: Ome.Well } {
+  return 'well' in attrs;
+}
+
+export function isOmeroMultiscales(
+  attrs: zarr.Attributes
+): attrs is { omero: Ome.Omero; multiscales: Ome.Multiscale[] } {
+  return 'omero' in attrs && 'multiscales' in attrs;
+}
+
+export function isMultiscales(attrs: zarr.Attributes): attrs is { multiscales: Ome.Multiscale[] } {
+  return 'multiscales' in attrs;
 }

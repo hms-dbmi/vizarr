@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useAtom, WritableAtom } from 'jotai';
+import { useAtom, type WritableAtom } from 'jotai';
 import { useAtomValue } from 'jotai';
 import DeckGL from 'deck.gl';
 import { OrthographicView } from '@deck.gl/core';
