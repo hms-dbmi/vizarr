@@ -316,6 +316,5 @@ export function typedEmitter<T>() {
     emit: <E extends keyof T & string>(event: E, data: T[E]) => {
       target.dispatchEvent(new CustomEvent(event, { detail: data }));
     },
-  }
+  };
 }
-

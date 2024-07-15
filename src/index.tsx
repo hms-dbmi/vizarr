@@ -31,7 +31,7 @@ export function createViewer(element: HTMLElement): Promise<VizarrViewer> {
   const emitter = typedEmitter<Events>();
   const viewStateAtom = atomWithEffect<ViewState | undefined, ViewState>(
     atom<ViewState | undefined>(undefined),
-    ({ zoom, target }) => emitter.emit('viewStateChange', { zoom, target }),
+    ({ zoom, target }) => emitter.emit('viewStateChange', { zoom, target })
   );
   const { promise, resolve } = defer<VizarrViewer>();
 
