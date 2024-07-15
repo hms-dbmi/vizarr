@@ -2,21 +2,8 @@ import pMap from 'p-map';
 import * as zarr from '@zarrita/core';
 import type { Readable } from '@zarrita/storage';
 import type { ImageLayerConfig, SourceData } from './state';
-import {
-  assert,
-  calcConstrastLimits,
-  getAttrsOnly,
-  getDefaultColors,
-  getDefaultVisibilities,
-  getNgffAxes,
-  getNgffAxisLabels,
-  guessTileSize,
-  join,
-  loadMultiscales,
-  parseMatrix,
-  range,
-  resolveAttrs,
-} from './utils';
+
+import * as utils from './utils';
 import { ZarrPixelSource } from './ZarrPixelSource';
 
 export async function loadWell(
@@ -28,8 +15,8 @@ export async function loadWell(
   const acquisitionId: number | undefined = config.acquisition ? parseInt(config.acquisition) : undefined;
   let acquisitions: Ome.Acquisition[] = [];
 
-  assert(wellAttrs?.images, 'Well .zattrs missing images');
-  assert(grp.path, 'Cannot inspect zarr path to open well.');
+  utils.assert(wellAttrs?.images, 'Well .zattrs missing images');
+  utils.assert(grp.path, 'Cannot inspect zarr path to open well.');
 
   const [row, col] = grp.path.split('/').filter(Boolean).slice(-2);
 
@@ -42,9 +29,8 @@ export async function loadWell(
     // Need to get acquisitions metadata from parent Plate
     const platePath = grp.path.replace(`${row}/${col}`, '');
     const plate = await zarr.open(grp.resolve(platePath));
-    const plateAttrs = resolveAttrs(plate.attrs) as { plate: Ome.Plate };
-    acquisitions = plateAttrs?.plate?.acquisitions ?? [];
-
+    const plateAttrs = utils.resolveAttrs(plate.attrs) as { plate: Ome.Plate };
+    acquisitions = plateAttrs.plate.acquisitions ?? [];
     // filter imagePaths by acquisition
     if (acquisitionId && acqIds.includes(acquisitionId)) {
       images = images.filter((img) => img.acquisition === acquisitionId);
@@ -56,21 +42,23 @@ export async function loadWell(
   const rows = Math.ceil(imgPaths.length / cols);
 
   // Use first image for rendering settings, resolutions etc.
-  const imgAttrs = await getAttrsOnly<Ome.Attrs>(grp.resolve(imgPaths[0]));
+  const first = await zarr.open(grp.resolve(imgPaths[0]), { kind: 'array' });
+  const imgAttrs = utils.resolveAttrs(first.attrs);
 
-  assert('multiscales' in imgAttrs, 'Path for image is not valid.');
+  utils.assert(utils.isMultiscales(imgAttrs), 'Path for image is not valid.');
   let resolution = imgAttrs.multiscales[0].datasets[0].path;
 
   // Create loader for every Image.
-  const promises = imgPaths.map((p) => zarr.open(grp.resolve(join(p, resolution)), { kind: 'array' }));
+  const promises = imgPaths.map((p) => zarr.open(grp.resolve(utils.join(p, resolution)), { kind: 'array' }));
   const data = await Promise.all(promises);
-  const axes = getNgffAxes(imgAttrs.multiscales);
-  const axis_labels = getNgffAxisLabels(axes);
+  const axes = utils.getNgffAxes(imgAttrs.multiscales);
+  const axis_labels = utils.getNgffAxisLabels(axes);
 
-  const tileSize = guessTileSize(data[0]);
-  const loaders = range(rows).flatMap((row) => {
+  const tileSize = utils.guessTileSize(data[0]);
+  const loaders = utils.range(rows).flatMap((row) => {
     // filter to remove any empty row/col position
-    return range(cols)
+    return utils
+      .range(cols)
       .filter((col) => col + row * cols < data.length)
       .map((col) => {
         const offset = col + row * cols;
@@ -84,7 +72,7 @@ export async function loadWell(
   });
 
   let meta;
-  if ('omero' in imgAttrs) {
+  if (utils.isOmeroMultiscales(imgAttrs)) {
     meta = parseOmeroMeta(imgAttrs.omero, axes);
   } else {
     meta = await defaultMeta(loaders[0].loader, axis_labels);
@@ -95,7 +83,7 @@ export async function loadWell(
     ...meta,
     axis_labels,
     loader: [loaders[0].loader],
-    model_matrix: parseMatrix(config.model_matrix),
+    model_matrix: utils.parseMatrix(config.model_matrix),
     defaults: {
       selection: meta.defaultSelection,
       colormap: config.colormap ?? '',
@@ -121,7 +109,7 @@ export async function loadWell(
     let imgSource = undefined;
     if (typeof config.source === 'string' && grp.path && !isNaN(row) && !isNaN(column)) {
       const field = row * cols + column;
-      imgSource = join(config.source, imgPaths[field]);
+      imgSource = utils.join(config.source, imgPaths[field]);
     }
     if (config.onClick) {
       delete info.layer;
@@ -140,49 +128,62 @@ export async function loadPlate(
   grp: zarr.Group<Readable>,
   plateAttrs: Ome.Plate
 ): Promise<SourceData> {
-  assert(plateAttrs?.rows || plateAttrs?.columns, 'Plate .zattrs missing rows, columns or wells');
+  utils.assert(plateAttrs?.rows || plateAttrs?.columns, 'Plate .zattrs missing rows, columns or wells');
 
   const rows = plateAttrs.rows.map((row) => row.name);
   const columns = plateAttrs.columns.map((row) => row.name);
 
   // Fields are by index and we assume at least 1 per Well
   const wellPaths = plateAttrs.wells.map((well) => well.path);
+  const zarrVersion = await utils.guessZarrVersion(grp);
 
   // Use first image as proxy for others.
-  const wellAttrs = await getAttrsOnly<{ well: Ome.Well }>(grp, wellPaths[0]);
-  assert('well' in wellAttrs, 'Path for image is not valid, not a well.');
+  const wellAttrs = await utils.getAttrsOnly<{ well: Ome.Well }>(grp, {
+    path: wellPaths[0],
+    zarrVersion,
+  });
+  utils.assert('well' in wellAttrs, 'Path for image is not valid, not a well.');
 
   const imgPath = wellAttrs.well.images[0].path;
-  const imgAttrs = await getAttrsOnly<Ome.Attrs>(grp, join(wellPaths[0], imgPath));
-
-  assert('multiscales' in imgAttrs, 'Path for image is not valid.');
+  const imgAttrs = await utils.getAttrsOnly<Ome.Attrs>(grp, {
+    path: utils.join(wellPaths[0], imgPath),
+    zarrVersion,
+  });
+  utils.assert('multiscales' in imgAttrs, 'Path for image is not valid.');
 
   // Lowest resolution is the 'path' of the last 'dataset' from the first multiscales
   const { datasets } = imgAttrs.multiscales[0];
   const resolution = datasets[datasets.length - 1].path;
 
   async function getImgPath(wellPath: string) {
-    const wellAttrs = await getAttrsOnly<{ well: Ome.Well }>(grp, wellPath);
-    assert('well' in wellAttrs, 'Path for image is not valid, not a well.');
-    return join(wellPath, wellAttrs.well.images[0].path);
+    const wellAttrs = await utils.getAttrsOnly<{ well: Ome.Well }>(grp, {
+      path: wellPath,
+      zarrVersion,
+    });
+    utils.assert('well' in wellAttrs, 'Path for image is not valid, not a well.');
+    return utils.join(wellPath, wellAttrs.well.images[0].path);
   }
   const wellImagePaths = await Promise.all(wellPaths.map(getImgPath));
 
   // Create loader for every Well. Some loaders may be undefined if Wells are missing.
   const mapper = async ([key, path]: string[]) => {
-    let arr = await zarr.open(grp.resolve(path), { kind: 'array' });
+    // @ts-expect-error - we don't need the meta for these arrays
+    let arr: zarr.Array<zarr.DataType, Readable> = await zarr.open(grp.resolve(path), {
+      kind: 'array',
+      attrs: false,
+    });
     return [key, arr] as const;
   };
 
   const promises = await pMap(
-    wellImagePaths.map((p) => [p, join(p, resolution)]),
+    wellImagePaths.map((p) => [p, utils.join(p, resolution)]),
     mapper,
     { concurrency: 10 }
   );
   const data = await Promise.all(promises);
-  const axes = getNgffAxes(imgAttrs.multiscales);
-  const axis_labels = getNgffAxisLabels(axes);
-  const tileSize = guessTileSize(data[0][1]);
+  const axes = utils.getNgffAxes(imgAttrs.multiscales);
+  const axis_labels = utils.getNgffAxisLabels(axes);
+  const tileSize = utils.guessTileSize(data[0][1]);
   const loaders = data.map((d) => {
     const [row, col] = d[0].split('/');
     return {
@@ -205,7 +206,7 @@ export async function loadPlate(
     ...meta,
     axis_labels,
     loader: [loaders[0].loader],
-    model_matrix: parseMatrix(config.model_matrix),
+    model_matrix: utils.parseMatrix(config.model_matrix),
     defaults: {
       selection: meta.defaultSelection,
       colormap: config.colormap ?? '',
@@ -224,7 +225,7 @@ export async function loadPlate(
     const { row, column } = gridCoord;
     let imgSource = undefined;
     if (typeof config.source === 'string' && grp.path && !isNaN(row) && !isNaN(column)) {
-      imgSource = join(config.source, rows[row], columns[column]);
+      imgSource = utils.join(config.source, rows[row], columns[column]);
     }
     if (config.onClick) {
       delete info.layer;
@@ -243,17 +244,17 @@ export async function loadOmeroMultiscales(
   attrs: { multiscales: Ome.Multiscale[]; omero: Ome.Omero }
 ): Promise<SourceData> {
   const { name, opacity = 1, colormap = '' } = config;
-  const data = await loadMultiscales(grp, attrs.multiscales);
-  const axes = getNgffAxes(attrs.multiscales);
-  const axis_labels = getNgffAxisLabels(axes);
+  const data = await utils.loadMultiscales(grp, attrs.multiscales);
+  const axes = utils.getNgffAxes(attrs.multiscales);
+  const axis_labels = utils.getNgffAxisLabels(axes);
   const meta = parseOmeroMeta(attrs.omero, axes);
-  const tileSize = guessTileSize(data[0]);
+  const tileSize = utils.guessTileSize(data[0]);
 
   const loader = data.map((arr) => new ZarrPixelSource(arr, { labels: axis_labels, tileSize }));
   return {
     loader: loader,
     axis_labels,
-    model_matrix: parseMatrix(config.model_matrix),
+    model_matrix: utils.parseMatrix(config.model_matrix),
     defaults: {
       selection: meta.defaultSelection,
       colormap,
@@ -267,12 +268,12 @@ export async function loadOmeroMultiscales(
 async function defaultMeta(loader: ZarrPixelSource<string[]>, axis_labels: string[]) {
   const channel_axis = axis_labels.indexOf('c');
   const channel_count = channel_axis == -1 ? 1 : loader.shape[channel_axis];
-  const visibilities = getDefaultVisibilities(channel_count);
-  const contrast_limits = await calcConstrastLimits(loader, channel_axis, visibilities);
-  const colors = getDefaultColors(channel_count, visibilities);
+  const visibilities = utils.getDefaultVisibilities(channel_count);
+  const contrast_limits = await utils.calcConstrastLimits(loader, channel_axis, visibilities);
+  const colors = utils.getDefaultColors(channel_count, visibilities);
   return {
     name: 'Image',
-    names: range(channel_count).map((i) => `channel_${i}`),
+    names: utils.range(channel_count).map((i) => `channel_${i}`),
     colors,
     contrast_limits,
     visibilities,

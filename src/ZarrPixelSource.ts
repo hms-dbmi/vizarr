@@ -1,5 +1,4 @@
 import * as zarr from 'zarrita';
-import { DTYPE_VALUES } from '@vivjs/constants';
 
 import type * as viv from '@vivjs/types';
 import type { Readable } from '@zarrita/storage';
@@ -10,9 +9,10 @@ import { getImageSize } from '@hms-dbmi/viv';
 // TODO: Export from top-level zarrita
 type Slice = ReturnType<typeof zarr.slice>;
 
-const xKey = 'x';
-const yKey = 'y';
-const rgbaChannelKey = '_c';
+const X_AXIS_NAME = 'x';
+const Y_AXIS_NAME = 'y';
+const RGBA_CHANNEL_AXIS_NAME = '_c';
+const SUPPORTED_DTYPES = ['Uint8', 'Uint16', 'Uint32', 'Float32', 'Int8', 'Int16', 'Int32', 'Float64'] as const;
 
 export class ZarrPixelSource<S extends Array<string> = Array<string>> implements viv.PixelSource<S> {
   #arr: zarr.Array<zarr.DataType, Readable>;
@@ -31,7 +31,7 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
     this.labels = options.labels;
     this.tileSize = options.tileSize;
     const vivDtype = capitalize(arr.dtype);
-    assert(isSupportedDtype(vivDtype), `Unsupported dtype: ${vivDtype}`);
+    assert(isSupportedDtype(vivDtype), `Unsupported viv dtype: ${vivDtype}`);
     this.dtype = vivDtype;
   }
 
@@ -70,8 +70,8 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
       throw new BoundsCheckError('Tile slice is out of bounds.');
     }
 
-    sel[this.labels.indexOf(xKey)] = zarr.slice(xStart, xStop);
-    sel[this.labels.indexOf(yKey)] = zarr.slice(yStart, yStop);
+    sel[this.labels.indexOf(X_AXIS_NAME)] = zarr.slice(xStart, xStop);
+    sel[this.labels.indexOf(Y_AXIS_NAME)] = zarr.slice(yStart, yStop);
     return this.#fetchData(sel, { signal });
   }
 
@@ -107,20 +107,22 @@ function buildZarrQuery(labels: string[], selection: Record<string, number> | Ar
       sel[labels.indexOf(key)] = idx;
     }
   }
-  sel[labels.indexOf(xKey)] = zarr.slice(null);
-  sel[labels.indexOf(xKey)] = zarr.slice(null);
-  if (rgbaChannelKey in labels) {
-    sel[labels.indexOf(rgbaChannelKey)] = zarr.slice(null);
+  sel[labels.indexOf(X_AXIS_NAME)] = zarr.slice(null);
+  sel[labels.indexOf(X_AXIS_NAME)] = zarr.slice(null);
+  if (RGBA_CHANNEL_AXIS_NAME in labels) {
+    sel[labels.indexOf(RGBA_CHANNEL_AXIS_NAME)] = zarr.slice(null);
   }
   return sel;
 }
 
-function capitalize(s: string) {
+function capitalize<T extends string>(s: T): Capitalize<T> {
+  // @ts-expect-error - TypeScript can't verify that the return type is correct
   return s[0].toUpperCase() + s.slice(1);
 }
 
 function isSupportedDtype(dtype: string): dtype is viv.SupportedDtype {
-  return dtype in DTYPE_VALUES;
+  // @ts-expect-error - TypeScript can't verify that the return type is correct
+  return SUPPORTED_DTYPES.includes(dtype);
 }
 
 class BoundsCheckError extends Error {

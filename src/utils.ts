@@ -48,25 +48,21 @@ export async function open(source: string | Readable) {
   return zarr.open(location);
 }
 
-export async function getAttrsOnly<T = unknown>(location: zarr.Location<Readable>, path?: string) {
+export async function getAttrsOnly<T = unknown>(
+  location: zarr.Location<Readable>,
+  options: { path?: string; zarrVersion: 2 | 3 }
+) {
   const decoder = new TextDecoder();
-  if (path) location = location.resolve(path);
-
-  // zarr meta and attrs are stored in the same file for v3,
-  // so first we can just open the node and get the attrs,
-  // otherwise we need to open the .zattrs file for v2.
-  let attrs = await zarr.open
-    .v3(location)
-    .then((node) => node.attrs)
-    .catch(async (err) => {
-      if (!(err instanceof zarr.NodeNotFoundError)) {
-        throw err;
-      }
-      const v2AttrsLocation = location.resolve('.zattrs');
-      const maybeBytes = await location.store.get(v2AttrsLocation.path);
-      return maybeBytes ? JSON.parse(decoder.decode(maybeBytes)) : {};
-    });
-
+  if (options.path) {
+    location = location.resolve(options.path);
+  }
+  if (options.zarrVersion === 3) {
+    const attrs = await zarr.open.v3(location).then((node) => node.attrs);
+    return resolveAttrs(attrs) as T;
+  }
+  const v2AttrsLocation = location.resolve('.zattrs');
+  const maybeBytes = await location.store.get(v2AttrsLocation.path);
+  const attrs = maybeBytes ? JSON.parse(decoder.decode(maybeBytes)) : {};
   return resolveAttrs(attrs) as T;
 }
 
@@ -385,4 +381,38 @@ export function assert(expr: unknown, msg = ''): asserts expr {
   if (!expr) {
     throw new AssertionError(msg);
   }
+}
+
+/**
+ * Guess the zarr version of a store.
+ */
+export async function guessZarrVersion(location: zarr.Location<Readable>): Promise<2 | 3> {
+  try {
+    await zarr.open.v3(location);
+    return 3;
+  } catch (err) {
+    if (!(err instanceof zarr.NodeNotFoundError)) {
+      // rethrow if not a NodeNotFoundError
+      throw err;
+    }
+    return 2;
+  }
+}
+
+export function isOmePlate(attrs: zarr.Attributes): attrs is { plate: Ome.Plate } {
+  return 'plate' in attrs;
+}
+
+export function isOmeWell(attrs: zarr.Attributes): attrs is { well: Ome.Well } {
+  return 'well' in attrs;
+}
+
+export function isOmeroMultiscales(
+  attrs: zarr.Attributes
+): attrs is { omero: Ome.Omero; multiscales: Ome.Multiscale[] } {
+  return 'omero' in attrs && 'multiscales' in attrs;
+}
+
+export function isMultiscales(attrs: zarr.Attributes): attrs is { multiscales: Ome.Multiscale[] } {
+  return 'multiscales' in attrs;
 }
