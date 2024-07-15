@@ -246,9 +246,7 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
   const matrix = new Matrix4();
   try {
     const arr = typeof model_matrix === 'string' ? JSON.parse(model_matrix) : model_matrix;
-    if (!isArray16(arr)) {
-      throw Error('Invalid modelMatrix size. Must be 16.');
-    }
+    assert(isArray16(arr), 'Invalid modelMatrix size. Must be 16.');
     matrix.setRowMajor(...arr);
   } catch {
     const msg = `Failed to parse modelMatrix. Got ${JSON.stringify(model_matrix)}, using identity.`;
@@ -282,12 +280,12 @@ export async function calcConstrastLimits<S extends string[]>(
   visibilities: boolean[],
   defaultSelection?: number[]
 ): Promise<([min: number, max: number] | undefined)[]> {
-  // channelAxis can be -1 if there is no 'c' dimension
   const def = defaultSelection ?? source.shape.map(() => 0);
   const csize = source.shape[channelAxis];
 
-  if (csize !== visibilities.length && channelAxis > -1) {
-    throw new Error("provided visibilities don't match number of channels");
+  // channelAxis can be -1 if there is no 'c' dimension
+  if (channelAxis !== -1) {
+    assert(csize === visibilities.length, 'visibilities do not match number of channels');
   }
 
   return Promise.all(
@@ -355,9 +353,7 @@ function getV2DataType(dtype: string) {
     float32: '<f4',
     float64: '<f8',
   };
-  if (!(dtype in mapping)) {
-    throw new Error(`Unsupported dtype ${dtype}`);
-  }
+  assert(dtype in mapping, `Unsupported dtype ${dtype}`);
   return mapping[dtype];
 }
 
@@ -406,4 +402,27 @@ export function resolveAttrs(attrs: zarr.Attributes): zarr.Attributes {
     return attrs.ome;
   }
   return attrs;
+}
+
+/**
+ * Error thrown when an assertion fails.
+ */
+export class AssertionError extends Error {
+  /** @param message The error message. */
+  constructor(message: string) {
+    super(message);
+    this.name = 'AssertionError';
+  }
+}
+
+/**
+ * Make an assertion. An error is thrown if `expr` does not have truthy value.
+ *
+ * @param expr The expression to test.
+ * @param msg The message to display if the assertion fails.
+ */
+export function assert(expr: unknown, msg = ''): asserts expr {
+  if (!expr) {
+    throw new AssertionError(msg);
+  }
 }

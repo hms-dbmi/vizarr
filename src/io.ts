@@ -21,6 +21,8 @@ import {
   calcDataRange,
   calcConstrastLimits,
   createZarrArrayAdapter,
+  resolveAttrs,
+  assert,
 } from './utils';
 
 async function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<string[]>[]): Promise<SourceData> {
@@ -54,10 +56,14 @@ async function loadMultiChannel(
   const { names, contrast_limits, name, model_matrix, opacity = 1, colormap = '' } = config;
   let { visibilities, colors } = config;
   const n = data[0].shape[channelAxis];
+
   for (const channelProp of [contrast_limits, visibilities, names, colors]) {
-    if (channelProp && channelProp.length !== n) {
+    if (channelProp) {
       const propertyName = Object.keys({ channelProp })[0];
-      throw Error(`channel_axis is length ${n} and provided channel_axis property ${propertyName} is different size.`);
+      assert(
+        channelProp.length === n,
+        `channel_axis is length ${n} and provided channel_axis property ${propertyName} is different size.`
+      );
     }
   }
 
@@ -102,9 +108,7 @@ function isMultiscales(attrs: zarr.Attributes): attrs is { multiscales: Ome.Mult
 }
 
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
-  console.log('createSourceData', config);
   const node = await open(config.source);
-  console.log('node', node);
   let data: zarr.Array<zarr.DataType, Readable>[];
   let axes: Ome.Axis[] | undefined;
 
@@ -138,9 +142,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
       }
     }
 
-    if (!isMultiscales(attrs)) {
-      throw Error('Group is missing multiscales specification.');
-    }
+    assert(isMultiscales(attrs), 'Group is missing multiscales specification.');
 
     data = await loadMultiscales(node, attrs.multiscales);
     if (attrs.multiscales[0].axes) {

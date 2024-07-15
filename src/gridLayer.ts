@@ -5,6 +5,7 @@ import pMap from 'p-map';
 
 import { XRLayer, ZarrPixelSource, ColorPaletteExtension } from '@hms-dbmi/viv';
 import type { BaseLayerProps } from './state';
+import { assert } from './utils';
 
 export interface GridLoader {
   loader: ZarrPixelSource<string[]>;
@@ -51,9 +52,8 @@ function validateWidthHeight(d: { data: { width: number; height: number } }[]) {
   const { width, height } = first.data;
   // Verify that all grid data is same shape (ignoring undefined)
   d.forEach(({ data }) => {
-    if (data?.width !== width || data?.height !== height) {
-      throw new Error('Grid data is not same shape.');
-    }
+    if (!data) return;
+    assert(data.width === width && data.height === height, 'Grid data is not same shape.');
   });
   return { width, height };
 }

@@ -4,6 +4,7 @@ import * as zarr from '@zarrita/core';
 import type { Readable } from '@zarrita/storage';
 import type { ImageLayerConfig, SourceData } from './state';
 import {
+  assert,
   calcConstrastLimits,
   createZarrArrayAdapter,
   getAttrsOnly,
@@ -28,13 +29,8 @@ export async function loadWell(
   const acquisitionId: number | undefined = config.acquisition ? parseInt(config.acquisition) : undefined;
   let acquisitions: Ome.Acquisition[] = [];
 
-  if (!wellAttrs?.images) {
-    throw Error(`Well .zattrs missing images`);
-  }
-
-  if (!grp.path) {
-    throw Error('Cannot inspect zarr path to open well.');
-  }
+  assert(wellAttrs?.images, 'Well .zattrs missing images');
+  assert(grp.path, 'Cannot inspect zarr path to open well.');
 
   const [row, col] = grp.path.split('/').filter(Boolean).slice(-2);
 
@@ -63,10 +59,7 @@ export async function loadWell(
   // Use first image for rendering settings, resolutions etc.
   const imgAttrs = await getAttrsOnly<Ome.Attrs>(grp.resolve(imgPaths[0]));
 
-  if (!('multiscales' in imgAttrs)) {
-    throw Error('Path for image is not valid.');
-  }
-
+  assert('multiscales' in imgAttrs, 'Path for image is not valid.');
   let resolution = imgAttrs.multiscales[0].datasets[0].path;
 
   // Create loader for every Image.
@@ -148,9 +141,7 @@ export async function loadPlate(
   grp: zarr.Group<Readable>,
   plateAttrs: Ome.Plate
 ): Promise<SourceData> {
-  if (!('columns' in plateAttrs) || !('rows' in plateAttrs)) {
-    throw Error(`Plate .zattrs missing columns or rows`);
-  }
+  assert(plateAttrs?.rows || plateAttrs?.columns, 'Plate .zattrs missing rows, columns or wells');
 
   const rows = plateAttrs.rows.map((row) => row.name);
   const columns = plateAttrs.columns.map((row) => row.name);
@@ -160,16 +151,12 @@ export async function loadPlate(
 
   // Use first image as proxy for others.
   const wellAttrs = await getAttrsOnly<{ well: Ome.Well }>(grp, wellPaths[0]);
-  if (!('well' in wellAttrs)) {
-    throw Error('Path for image is not valid, not a well.');
-  }
+  assert('well' in wellAttrs, 'Path for image is not valid, not a well.');
 
   const imgPath = wellAttrs.well.images[0].path;
   const imgAttrs = await getAttrsOnly<Ome.Attrs>(grp, join(wellPaths[0], imgPath));
 
-  if (!('multiscales' in imgAttrs)) {
-    throw Error('Path for image is not valid.');
-  }
+  assert('multiscales' in imgAttrs, 'Path for image is not valid.');
 
   // Lowest resolution is the 'path' of the last 'dataset' from the first multiscales
   const { datasets } = imgAttrs.multiscales[0];
@@ -177,9 +164,7 @@ export async function loadPlate(
 
   async function getImgPath(wellPath: string) {
     const wellAttrs = await getAttrsOnly<{ well: Ome.Well }>(grp, wellPath);
-    if (!('well' in wellAttrs)) {
-      throw Error('Path for image is not valid, not a well.');
-    }
+    assert('well' in wellAttrs, 'Path for image is not valid, not a well.');
     return join(wellPath, wellAttrs.well.images[0].path);
   }
   const wellImagePaths = await Promise.all(wellPaths.map(getImgPath));
