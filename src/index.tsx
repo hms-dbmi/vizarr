@@ -7,7 +7,7 @@ import { ThemeProvider } from '@material-ui/styles';
 import Menu from './components/Menu';
 import Viewer from './components/Viewer';
 import './codecs/register';
-import { addImageAtom, ImageLayerConfig, ViewState, atomWithEffect } from './state';
+import { addImageAtom, type ImageLayerConfig, type ViewState, atomWithEffect } from './state';
 import { defer, typedEmitter } from './utils';
 import theme from './theme';
 

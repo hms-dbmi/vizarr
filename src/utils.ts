@@ -1,5 +1,5 @@
-import * as zarr from '@zarrita/core';
-import { FetchStore, Readable } from '@zarrita/storage';
+import * as zarr from 'zarrita';
+import type { Readable } from '@zarrita/storage';
 import { Matrix4 } from 'math.gl';
 
 import type { ZarrPixelSource } from './ZarrPixelSource';
@@ -38,7 +38,7 @@ async function normalizeStore(source: string | Readable): Promise<zarr.Location<
       // @ts-expect-error - pathname always starts with '/'
       path = url.pathname;
       url.pathname = '/';
-      store = new FetchStore(url.href);
+      store = new zarr.FetchStore(url.href);
     }
 
     // Wrap remote stores in a cache

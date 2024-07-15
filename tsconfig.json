@@ -12,10 +12,10 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "importsNotUsedAsValues": "error",
+    "verbatimModuleSyntax": true,
     "paths": {
       "*": ["*", "node_modules/@danmarshall/deckgl-typings/*"],
-      "@hms-dbmi/vizarr": ["*", "./src/index.tsx"],
+      "@hms-dbmi/vizarr": ["*", "./src/index.tsx"]
     }
   }
 }
