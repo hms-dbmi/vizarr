@@ -3,12 +3,12 @@ import ReactDOM from 'react-dom/client';
 import { Provider, atom } from 'jotai';
 import { useSetAtom } from 'jotai';
 import { ThemeProvider } from '@material-ui/styles';
-import mitt from 'mitt';
 
 import Menu from './components/Menu';
 import Viewer from './components/Viewer';
 import './codecs/register';
 import { addImageAtom, ImageLayerConfig, ViewState, atomWithEffect } from './state';
+import { defer, typedEmitter } from './utils';
 import theme from './theme';
 
 export { version } from '../package.json';
@@ -26,21 +26,9 @@ export interface VizarrViewer {
   destroy(): void;
 }
 
-/** switch to Promise.withResolvers when it's available */
-function defer<T>() {
-  let resolve: (value: T | PromiseLike<T>) => void;
-  let reject: (reason?: any) => void;
-  const promise = new Promise<T>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  // @ts-expect-error - resolve and reject are OK
-  return { promise, resolve, reject };
-}
-
 export function createViewer(element: HTMLElement): Promise<VizarrViewer> {
   const ref = React.createRef<VizarrViewer>();
-  const emitter = mitt<Events>();
+  const emitter = typedEmitter<Events>();
   const viewStateAtom = atomWithEffect<ViewState | undefined, ViewState>(
     atom<ViewState | undefined>(undefined),
     ({ zoom, target }) => emitter.emit('viewStateChange', { zoom, target })
@@ -55,7 +43,7 @@ export function createViewer(element: HTMLElement): Promise<VizarrViewer> {
       () => ({
         addImage,
         setViewState,
-        on: emitter.on,
+        on: emitter.on.bind(emitter),
         destroy: () => root.unmount(),
       }),
       []

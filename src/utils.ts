@@ -278,3 +278,43 @@ export async function calcConstrastLimits<S extends string[]>(
     })
   );
 }
+
+/**
+ * Create a promise that can be resolved or rejected externally.
+ *
+ * TODO: Switch to Promise.withResolvers when it's available
+ */
+export function defer<T>() {
+  let resolve: (value: T | PromiseLike<T>) => void;
+  let reject: (reason?: any) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  // @ts-expect-error - resolve and reject are OK
+  return { promise, resolve, reject };
+}
+
+/**
+ * A simple event emitter that allows for typed events.
+ *
+ * @example
+ * ```ts
+ * const emitter = typedEmitter<{ foo: string, bar: number }>();
+ * emitter.on('foo', (data) => console.log(data));
+ * emitter.emit('foo', 'hello');
+ * ```
+ *
+ * TODO: Add support for removing listeners.
+ */
+export function typedEmitter<T>() {
+  let target = new EventTarget();
+  return {
+    on: <E extends keyof T & string>(event: E, cb: (data: T[E]) => void) => {
+      target.addEventListener(event, (e) => cb((e as CustomEvent).detail));
+    },
+    emit: <E extends keyof T & string>(event: E, data: T[E]) => {
+      target.dispatchEvent(new CustomEvent(event, { detail: data }));
+    },
+  };
+}
