@@ -70,7 +70,7 @@ function refreshGridData(props: GridLayerProps) {
   const mapper = async (d: GridLoader) => {
     const promises = selections.map((selection) => d.loader.getRaster({ selection }));
     const tiles = await Promise.all(promises);
-    const result = {
+    return {
       ...d,
       data: {
         data: tiles.map((d) => d.data),
@@ -78,7 +78,6 @@ function refreshGridData(props: GridLayerProps) {
         height: tiles[0].height,
       },
     };
-    return result;
   };
   return pMap(loaders, mapper, { concurrency });
 }

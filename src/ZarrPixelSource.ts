@@ -108,7 +108,7 @@ function buildZarrQuery(labels: string[], selection: Record<string, number> | Ar
     }
   }
   sel[labels.indexOf(X_AXIS_NAME)] = zarr.slice(null);
-  sel[labels.indexOf(X_AXIS_NAME)] = zarr.slice(null);
+  sel[labels.indexOf(Y_AXIS_NAME)] = zarr.slice(null);
   if (RGBA_CHANNEL_AXIS_NAME in labels) {
     sel[labels.indexOf(RGBA_CHANNEL_AXIS_NAME)] = zarr.slice(null);
   }
