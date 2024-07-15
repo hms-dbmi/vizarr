@@ -42,14 +42,19 @@ export async function loadWell(
   const rows = Math.ceil(imgPaths.length / cols);
 
   // Use first image for rendering settings, resolutions etc.
-  const first = await zarr.open(grp.resolve(imgPaths[0]), { kind: 'array' });
+  const first = await zarr.open(grp.resolve(imgPaths[0]), { kind: 'group' });
   const imgAttrs = utils.resolveAttrs(first.attrs);
 
   utils.assert(utils.isMultiscales(imgAttrs), 'Path for image is not valid.');
   let resolution = imgAttrs.multiscales[0].datasets[0].path;
 
   // Create loader for every Image.
-  const promises = imgPaths.map((p) => zarr.open(grp.resolve(utils.join(p, resolution)), { kind: 'array' }));
+  const promises = imgPaths.map((p) => {
+    const loc = grp.resolve(utils.join(p, resolution));
+    // @ts-expect-error - ok flag to avoid loading unused attrs
+    const arr: zarr.Array<zarr.DataType, Readable> = zarr.open(loc, { kind: 'array', attrs: false });
+    return arr;
+  });
   const data = await Promise.all(promises);
   const axes = utils.getNgffAxes(imgAttrs.multiscales);
   const axis_labels = utils.getNgffAxisLabels(axes);

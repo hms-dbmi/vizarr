@@ -24,6 +24,7 @@ export const CYMRGB = Object.values(COLORS).slice(0, -2);
 async function normalizeStore(source: string | Readable): Promise<zarr.Location<Readable>> {
   if (typeof source === 'string') {
     let store: Readable;
+    let path: `/${string}` = '/';
     if (source.endsWith('.json')) {
       // import custom store implementation
       const [{ default: ReferenceStore }, json] = await Promise.all([
@@ -33,11 +34,15 @@ async function normalizeStore(source: string | Readable): Promise<zarr.Location<
       ]);
       store = ReferenceStore.fromSpec(json);
     } else {
-      store = new FetchStore(source);
+      const url = new URL(source);
+      // @ts-expect-error - pathname always starts with '/'
+      path = url.pathname;
+      url.pathname = '/';
+      store = new FetchStore(url.href);
     }
 
     // Wrap remote stores in a cache
-    return zarr.root(lru(store));
+    return new zarr.Location(lru(store), path);
   }
 
   return zarr.root(source);
@@ -45,6 +50,7 @@ async function normalizeStore(source: string | Readable): Promise<zarr.Location<
 
 export async function open(source: string | Readable) {
   const location = await normalizeStore(source);
+  console.log(location);
   return zarr.open(location);
 }
 
