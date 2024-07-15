@@ -16,6 +16,7 @@ import {
   loadMultiscales,
   parseMatrix,
   range,
+  resolveAttrs,
 } from './utils';
 
 export async function loadWell(
@@ -46,7 +47,7 @@ export async function loadWell(
     // Need to get acquisitions metadata from parent Plate
     const platePath = grp.path.replace(`${row}/${col}`, '');
     const plate = await zarr.open(grp.resolve(platePath));
-    const plateAttrs = plate.attrs as { plate: Ome.Plate };
+    const plateAttrs = resolveAttrs(plate.attrs) as { plate: Ome.Plate };
     acquisitions = plateAttrs?.plate?.acquisitions ?? [];
 
     // filter imagePaths by acquisition

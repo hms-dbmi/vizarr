@@ -102,12 +102,14 @@ function isMultiscales(attrs: zarr.Attributes): attrs is { multiscales: Ome.Mult
 }
 
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
+  console.log('createSourceData', config);
   const node = await open(config.source);
+  console.log('node', node);
   let data: zarr.Array<zarr.DataType, Readable>[];
   let axes: Ome.Axis[] | undefined;
 
   if (node instanceof zarr.Group) {
-    const attrs = node.attrs;
+    let attrs = resolveAttrs(node.attrs);
 
     if (isOmePlate(attrs)) {
       return loadPlate(config, node, attrs.plate);

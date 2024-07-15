@@ -53,8 +53,23 @@ export async function open(source: string | Readable) {
 export async function getAttrsOnly<T = unknown>(location: zarr.Location<Readable>, path?: string) {
   const decoder = new TextDecoder();
   if (path) location = location.resolve(path);
-  const bytes = await location.store.get(location.resolve('.zattrs').path);
-  return bytes ? (JSON.parse(decoder.decode(bytes)) as T) : {};
+
+  // zarr meta and attrs are stored in the same file for v3,
+  // so first we can just open the node and get the attrs,
+  // otherwise we need to open the .zattrs file for v2.
+  let attrs = await zarr.open
+    .v3(location)
+    .then((node) => node.attrs)
+    .catch(async (err) => {
+      if (!(err instanceof zarr.NodeNotFoundError)) {
+        throw err;
+      }
+      const v2AttrsLocation = location.resolve('.zattrs');
+      const maybeBytes = await location.store.get(v2AttrsLocation.path);
+      return maybeBytes ? JSON.parse(decoder.decode(maybeBytes)) : {};
+    });
+
+  return resolveAttrs(attrs) as T;
 }
 
 export async function loadMultiscales(grp: zarr.Group<Readable>, multiscales: Ome.Multiscale[]) {
@@ -348,6 +363,9 @@ function getV2DataType(dtype: string) {
 
 type Selection = (number | Omit<Slice, 'indices'> | null)[];
 
+/**
+ * This is needed by @hms-dbmi/viv to get raw data from a Zarr.js style interface.
+ */
 export function createZarrArrayAdapter(arr: zarr.Array<zarr.DataType>): any {
   return new Proxy(arr, {
     get(target, prop) {
@@ -375,4 +393,17 @@ export function createZarrArrayAdapter(arr: zarr.Array<zarr.DataType>): any {
       return Reflect.get(target, prop);
     },
   });
+}
+
+/**
+ * Extracts the OME metadata from the zarr attributes
+ *
+ * TODO: We should use zod to handle this
+ */
+export function resolveAttrs(attrs: zarr.Attributes): zarr.Attributes {
+  if ('ome' in attrs) {
+    // @ts-expect-error - handles v0.5
+    return attrs.ome;
+  }
+  return attrs;
 }
