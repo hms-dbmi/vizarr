@@ -72,9 +72,18 @@ export async function getAttrsOnly<T = unknown>(location: zarr.Location<Readable
   return resolveAttrs(attrs) as T;
 }
 
+/**
+ * Loads the multiscales from a group and returns the datasets.
+ *
+ * NOTE: We avoid loading the attributes here because we don't need them.
+ */
 export async function loadMultiscales(grp: zarr.Group<Readable>, multiscales: Ome.Multiscale[]) {
   const { datasets } = multiscales[0] || [{ path: '0' }];
-  return Promise.all(datasets.map(({ path }) => zarr.open(grp.resolve(path), { kind: 'array' })));
+  return Promise.all(
+    // @ts-expect-error - attrs: false is not in the types but it is ok and avoids making unecessary requests for v2
+    // @see {@link https://github.com/manzt/zarrita.js/blob/7edffbeefb0eb877df48f54c7e8def4219c69c59/packages/zarrita/CHANGELOG.md?plain=1#L214}
+    datasets.map(({ path }) => zarr.open(grp.resolve(path), { kind: 'array', attrs: false }))
+  );
 }
 
 export function hexToRGB(hex: string): [r: number, g: number, b: number] {
