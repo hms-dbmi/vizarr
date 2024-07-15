@@ -1,10 +1,8 @@
-import type { ZarrPixelSource } from '@hms-dbmi/viv';
-import type { Slice } from '@zarrita/indexing';
 import * as zarr from '@zarrita/core';
-import { slice, get } from '@zarrita/indexing';
 import { FetchStore, Readable } from '@zarrita/storage';
 import { Matrix4 } from 'math.gl';
 
+import type { ZarrPixelSource } from './ZarrPixelSource';
 import { lru } from './lru-store';
 import type { ViewState } from './state';
 
@@ -268,9 +266,9 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
   return matrix;
 }
 
-export async function calcDataRange<S extends string[]>(
-  source: ZarrPixelSource<S>,
-  selection: number[]
+export async function calcDataRange(
+  source: ZarrPixelSource,
+  selection: Array<number>
 ): Promise<[min: number, max: number]> {
   if (source.dtype === 'Uint8') return [0, 255];
   const { data } = await source.getRaster({ selection });
@@ -351,57 +349,6 @@ export function typedEmitter<T>() {
       target.dispatchEvent(new CustomEvent(event, { detail: data }));
     },
   };
-}
-
-function getV2DataType(dtype: string) {
-  const mapping: Record<string, string> = {
-    int8: '|i1',
-    uint8: '|u1',
-    int16: '<i2',
-    uint16: '<u2',
-    int32: '<i4',
-    uint32: '<u4',
-    int64: '<i8',
-    uint64: '<u8',
-    float32: '<f4',
-    float64: '<f8',
-  };
-  assert(dtype in mapping, `Unsupported dtype ${dtype}`);
-  return mapping[dtype];
-}
-
-type Selection = (number | Omit<Slice, 'indices'> | null)[];
-
-/**
- * This is needed by @hms-dbmi/viv to get raw data from a Zarr.js style interface.
- */
-export function createZarrArrayAdapter(arr: zarr.Array<zarr.DataType>): any {
-  return new Proxy(arr, {
-    get(target, prop) {
-      if (prop === 'getRaw') {
-        return (selection: Selection) => {
-          return get(
-            target,
-            selection.map((s) => {
-              if (typeof s === 'object' && s !== null) {
-                return slice(s.start, s.stop, s.step);
-              }
-              return s;
-            })
-          );
-        };
-      }
-      if (prop === 'getRawChunk') {
-        return (selection: number[], options: { storeOptions: RequestInit }) => {
-          return target.getChunk(selection, options.storeOptions);
-        };
-      }
-      if (prop === 'dtype') {
-        return getV2DataType(target.dtype);
-      }
-      return Reflect.get(target, prop);
-    },
-  });
 }
 
 /**

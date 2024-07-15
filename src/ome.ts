@@ -1,4 +1,3 @@
-import { ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
 import * as zarr from '@zarrita/core';
 import type { Readable } from '@zarrita/storage';
@@ -6,7 +5,6 @@ import type { ImageLayerConfig, SourceData } from './state';
 import {
   assert,
   calcConstrastLimits,
-  createZarrArrayAdapter,
   getAttrsOnly,
   getDefaultColors,
   getDefaultVisibilities,
@@ -19,6 +17,7 @@ import {
   range,
   resolveAttrs,
 } from './utils';
+import { ZarrPixelSource } from './ZarrPixelSource';
 
 export async function loadWell(
   config: ImageLayerConfig,
@@ -79,7 +78,7 @@ export async function loadWell(
           name: String(offset),
           row,
           col,
-          loader: new ZarrPixelSource(createZarrArrayAdapter(data[offset]), axis_labels, tileSize),
+          loader: new ZarrPixelSource(data[offset], { labels: axis_labels, tileSize }),
         };
       });
   });
@@ -190,7 +189,7 @@ export async function loadPlate(
       name: `${row}${col}`,
       row: rows.indexOf(row),
       col: columns.indexOf(col),
-      loader: new ZarrPixelSource(createZarrArrayAdapter(d[1]), axis_labels, tileSize),
+      loader: new ZarrPixelSource(d[1], { labels: axis_labels, tileSize }),
     };
   });
   let meta;
@@ -250,7 +249,7 @@ export async function loadOmeroMultiscales(
   const meta = parseOmeroMeta(attrs.omero, axes);
   const tileSize = guessTileSize(data[0]);
 
-  const loader = data.map((arr) => new ZarrPixelSource(createZarrArrayAdapter(arr), axis_labels, tileSize));
+  const loader = data.map((arr) => new ZarrPixelSource(arr, { labels: axis_labels, tileSize }));
   return {
     loader: loader,
     axis_labels,

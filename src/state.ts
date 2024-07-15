@@ -1,4 +1,4 @@
-import type { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
+import type { ImageLayer, MultiscaleImageLayer } from '@hms-dbmi/viv';
 import type { Matrix4 } from 'math.gl';
 import type { PrimitiveAtom, WritableAtom } from 'jotai';
 import { atom } from 'jotai';
@@ -6,6 +6,7 @@ import { atomFamily, splitAtom, waitForAll } from 'jotai/utils';
 
 import type { Readable } from '@zarrita/storage';
 import type { default as GridLayer, GridLayerProps, GridLoader } from './gridLayer';
+import type { ZarrPixelSource } from './ZarrPixelSource';
 import { initLayerStateFromSource } from './io';
 
 export interface ViewState {
@@ -57,7 +58,7 @@ export interface SingleChannelConfig extends BaseConfig {
 export type ImageLayerConfig = MultichannelConfig | SingleChannelConfig;
 
 export type SourceData = {
-  loader: ZarrPixelSource<string[]>[];
+  loader: ZarrPixelSource[];
   loaders?: GridLoader[]; // for OME plates
   rows?: number;
   columns?: number;

@@ -3,8 +3,9 @@ import { SolidPolygonLayer, TextLayer } from '@deck.gl/layers';
 import type { CompositeLayerProps } from '@deck.gl/core/lib/composite-layer';
 import pMap from 'p-map';
 
-import { XRLayer, ZarrPixelSource, ColorPaletteExtension } from '@hms-dbmi/viv';
+import { XRLayer, ColorPaletteExtension } from '@hms-dbmi/viv';
 import type { BaseLayerProps } from './state';
+import type { ZarrPixelSource } from './ZarrPixelSource';
 import { assert } from './utils';
 
 export interface GridLoader {

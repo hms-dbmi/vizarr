@@ -1,8 +1,9 @@
-import { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
+import { ImageLayer, MultiscaleImageLayer } from '@hms-dbmi/viv';
 import * as zarr from '@zarrita/core';
 import type { Readable } from '@zarrita/storage';
 import GridLayer from './gridLayer';
 import { loadOmeroMultiscales, loadPlate, loadWell } from './ome';
+import { ZarrPixelSource } from './ZarrPixelSource';
 import type { ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from './state';
 import {
   COLORS,
@@ -20,12 +21,14 @@ import {
   range,
   calcDataRange,
   calcConstrastLimits,
-  createZarrArrayAdapter,
   resolveAttrs,
   assert,
 } from './utils';
 
-async function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<string[]>[]): Promise<SourceData> {
+async function loadSingleChannel(
+  config: SingleChannelConfig,
+  data: Array<ZarrPixelSource<string[]>>
+): Promise<SourceData> {
   const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
   const lowres = data[data.length - 1];
   const selection = Array(data[0].shape.length).fill(0);
@@ -156,7 +159,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   const { channel_axis, labels } = getAxisLabelsAndChannelAxis(config, axes, data[0]);
 
   const tileSize = guessTileSize(data[0]);
-  const loader = data.map((d) => new ZarrPixelSource(createZarrArrayAdapter(d), labels, tileSize));
+  const loader = data.map((d) => new ZarrPixelSource(d, { labels, tileSize }));
   const [base] = loader;
 
   // If explicit channel axis is provided, try to load as multichannel.
