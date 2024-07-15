@@ -77,12 +77,16 @@ export async function getAttrsOnly<T = unknown>(location: zarr.Location<Readable
  *
  * NOTE: We avoid loading the attributes here because we don't need them.
  */
-export async function loadMultiscales(grp: zarr.Group<Readable>, multiscales: Ome.Multiscale[]) {
+export async function loadMultiscales(
+  grp: zarr.Group<Readable>,
+  multiscales: Ome.Multiscale[]
+): Promise<Array<zarr.Array<zarr.DataType, Readable>>> {
   const { datasets } = multiscales[0] || [{ path: '0' }];
   return Promise.all(
-    // @ts-expect-error - attrs: false is not in the types but it is ok and avoids making unecessary requests for v2
-    // @see {@link https://github.com/manzt/zarrita.js/blob/7edffbeefb0eb877df48f54c7e8def4219c69c59/packages/zarrita/CHANGELOG.md?plain=1#L214}
-    datasets.map(({ path }) => zarr.open(grp.resolve(path), { kind: 'array', attrs: false }))
+    // TODO(Trevor): TS is not happy about { attrs: false }.
+    // This is just missing from zarrita types, but it is ok and
+    // avoids making unecessary requests for v2 (see: https://github.com/manzt/zarrita.js/blob/7edffbeefb0eb877df48f54c7e8def4219c69c59/packages/zarrita/CHANGELOG.md?plain=1#L214)
+    datasets.map(({ path }) => zarr.open(grp.resolve(path), { kind: 'array', attrs: false } as { kind: 'array' }))
   );
 }
 
