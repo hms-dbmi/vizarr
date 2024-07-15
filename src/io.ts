@@ -1,5 +1,6 @@
 import { ImageLayer, MultiscaleImageLayer, ZarrPixelSource } from '@hms-dbmi/viv';
-import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
+import * as zarr from '@zarrita/core';
+import type { Readable } from '@zarrita/storage';
 import GridLayer from './gridLayer';
 import { loadOmeroMultiscales, loadPlate, loadWell } from './ome';
 import type { ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from './state';
@@ -19,6 +20,7 @@ import {
   range,
   calcDataRange,
   calcConstrastLimits,
+  createZarrArrayAdapter,
 } from './utils';
 
 async function loadSingleChannel(config: SingleChannelConfig, data: ZarrPixelSource<string[]>[]): Promise<SourceData> {
@@ -83,38 +85,54 @@ async function loadMultiChannel(
   };
 }
 
+function isOmePlate(attrs: zarr.Attributes): attrs is { plate: Ome.Plate } {
+  return "plate" in attrs;
+}
+
+function isOmeWell(attrs: zarr.Attributes): attrs is { well: Ome.Well } {
+  return "well" in attrs;
+}
+
+function isOmeroMultiscales(attrs: zarr.Attributes): attrs is { omero: Ome.Omero; multiscales: Ome.Multiscale[] } {
+  return "omero" in attrs && "multiscales" in attrs;
+}
+
+function isMultiscales(attrs: zarr.Attributes): attrs is { multiscales: Ome.Multiscale[] } {
+  return "multiscales" in attrs;
+}
+
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
   const node = await open(config.source);
-  let data: ZarrArray[];
+  let data: zarr.Array<zarr.DataType, Readable>[];
   let axes: Ome.Axis[] | undefined;
 
-  if (node instanceof ZarrGroup) {
-    const attrs = (await node.attrs.asObject()) as Ome.Attrs;
+  if (node instanceof zarr.Group) {
+    const attrs = node.attrs;
 
-    if ('plate' in attrs) {
+    if (isOmePlate(attrs)) {
       return loadPlate(config, node, attrs.plate);
     }
 
-    if ('well' in attrs) {
-      return loadWell(config, node, attrs.well);
+    if (isOmeWell(attrs)) {
+      return loadWell(config, node, attrs.well as Ome.Well);
     }
 
-    if ('omero' in attrs) {
-      return loadOmeroMultiscales(config, node, attrs);
+    if (isOmeroMultiscales(attrs)) {
+      return loadOmeroMultiscales(config, node, attrs as {
+        omero: Ome.Omero;
+        multiscales: Ome.Multiscale[];
+      });
     }
 
     if (Object.keys(attrs).length === 0 && node.path) {
       // No rootAttrs in this group.
-      // if url is to a plate/acquisition/ check parent dir for 'plate' zattrs
-      const parentPath = node.path.slice(0, node.path.lastIndexOf('/'));
-      const parent = await openGroup(node.store, parentPath);
-      const parentAttrs = (await parent.attrs.asObject()) as Ome.Attrs;
-      if ('plate' in parentAttrs) {
-        return loadPlate(config, parent, parentAttrs.plate);
+      const parent = await zarr.open(node.resolve('..'), { kind: 'group' });
+      if ('plate' in parent.attrs) {
+        return loadPlate(config, parent, parent.attrs.plate as Ome.Plate);
       }
     }
 
-    if (!('multiscales' in attrs)) {
+    if (!isMultiscales(attrs)) {
       throw Error('Group is missing multiscales specification.');
     }
 
@@ -130,7 +148,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
   const { channel_axis, labels } = getAxisLabelsAndChannelAxis(config, axes, data[0]);
 
   const tileSize = guessTileSize(data[0]);
-  const loader = data.map((d) => new ZarrPixelSource(d, labels, tileSize));
+  const loader = data.map((d) => new ZarrPixelSource(createZarrArrayAdapter(d), labels, tileSize));
   const [base] = loader;
 
   // If explicit channel axis is provided, try to load as multichannel.
@@ -152,7 +170,7 @@ type Labels = [...string[], 'y', 'x'];
 function getAxisLabelsAndChannelAxis(
   config: ImageLayerConfig,
   ngffAxes: Ome.Axis[] | undefined,
-  arr: ZarrArray
+  arr: zarr.Array<zarr.DataType, Readable> 
 ): { labels: Labels; channel_axis: number } {
   // type cast string[] to Labels
   const maybeAxisLabels = config.axis_labels as undefined | Labels;

@@ -1,10 +1,11 @@
-import { ContainsArrayError, HTTPStore, openArray, openGroup, ZarrArray } from 'zarr';
-import type { Group as ZarrGroup } from 'zarr';
-import type { AsyncStore, Store } from 'zarr/types/storage/types';
 import type { ZarrPixelSource } from '@hms-dbmi/viv';
 import { Matrix4 } from 'math.gl';
 import { LRUCacheStore } from './lru-store';
 import type { ViewState } from './state';
+
+import * as zarr from '@zarrita/core';
+import { slice, get, type Slice } from "@zarrita/indexing";
+import { FetchStore, Readable } from '@zarrita/storage';
 
 export const MAX_CHANNELS = 6;
 
@@ -21,57 +22,43 @@ export const MAGENTA_GREEN = [COLORS.magenta, COLORS.green];
 export const RGB = [COLORS.red, COLORS.green, COLORS.blue];
 export const CYMRGB = Object.values(COLORS).slice(0, -2);
 
-async function normalizeStore(source: string | Store) {
-  let path;
+async function normalizeStore(source: string | Readable): Promise<zarr.Location<Readable>> {
   if (typeof source === 'string') {
-    let store: AsyncStore<ArrayBuffer>;
-
+    let store: Readable;
     if (source.endsWith('.json')) {
       // import custom store implementation
-      const [{ ReferenceStore }, json] = await Promise.all([
-        import('reference-spec-reader'),
+      const [{ default: ReferenceStore }, json] = await Promise.all([
+        // @ts-expect-error
+        import('@zarrita/storage/ref'),
         fetch(source).then((res) => res.json()),
       ]);
-
-      store = ReferenceStore.fromJSON(json);
+      store = ReferenceStore.fromSpec(json);
     } else {
-      const url = new URL(source);
-      store = new HTTPStore(url.origin);
-      path = url.pathname.slice(1);
+      store = new FetchStore(source);
     }
 
     // Wrap remote stores in a cache
-    return { store: new LRUCacheStore(store), path };
+    return zarr.root(new LRUCacheStore(store));
   }
 
-  return { store: source, path };
+  return zarr.root(source);
 }
 
-export async function open(source: string | Store) {
-  const { store, path } = await normalizeStore(source);
-  return openGroup(store, path).catch((err) => {
-    if (err instanceof ContainsArrayError) {
-      return openArray({ store });
-    }
-    throw err;
-  });
+export async function open(source: string | Readable) {
+  const location = await normalizeStore(source);
+  return zarr.open(location);
 }
 
-const decoder = new TextDecoder();
-export function getAttrsOnly<T = unknown>(grp: ZarrGroup, path: string) {
-  return (grp.store as AsyncStore<ArrayBuffer>)
-    .getItem(join(grp.path, path, '.zattrs'))
-    .then((b) => decoder.decode(b))
-    .then((text) => JSON.parse(text) as T);
+export async function getAttrsOnly<T = unknown>(location: zarr.Location<Readable>, path?: string) {
+  const decoder = new TextDecoder();
+  if (path) location = location.resolve(path);
+  const bytes = await location.store.get(location.resolve('.zattrs').path);
+  return bytes ? (JSON.parse(decoder.decode(bytes)) as T) : {};
 }
 
-export async function loadMultiscales(grp: ZarrGroup, multiscales: Ome.Multiscale[]) {
+export async function loadMultiscales(grp: zarr.Group<Readable>, multiscales: Ome.Multiscale[]) {
   const { datasets } = multiscales[0] || [{ path: '0' }];
-  const nodes = await Promise.all(datasets.map(({ path }) => grp.getItem(path)));
-  if (nodes.every((node): node is ZarrArray => node instanceof ZarrArray)) {
-    return nodes;
-  }
-  throw Error('Multiscales metadata included a path to a group.');
+  return Promise.all(datasets.map(({ path }) => zarr.open(grp.resolve(path), { kind: 'array' })));
 }
 
 export function hexToRGB(hex: string): [r: number, g: number, b: number] {
@@ -102,7 +89,10 @@ export function join(...args: (string | undefined)[]) {
     .join('/');
 }
 
-export function getAxisLabels(arr: ZarrArray, axis_labels?: string[]): [...string[], 'y', 'x'] {
+export function getAxisLabels(
+  arr: zarr.Array<zarr.DataType, Readable>,
+  axis_labels?: string[]
+): [...string[], 'y', 'x'] {
   if (!axis_labels || axis_labels.length != arr.shape.length) {
     // default axis_labels are e.g. ['0', '1', 'y', 'x']
     const nonXYaxisLabels = arr.shape.slice(0, -2).map((_, i) => '' + i);
@@ -187,7 +177,7 @@ export function isInterleaved(shape: number[]) {
   return lastDimSize === 3 || lastDimSize === 4;
 }
 
-export function guessTileSize(arr: ZarrArray) {
+export function guessTileSize(arr: zarr.Array<zarr.DataType, Readable>) {
   const interleaved = isInterleaved(arr.shape);
   const [ySize, xSize] = arr.chunks.slice(interleaved ? -3 : -2);
   const size = Math.min(ySize, xSize);
@@ -209,7 +199,24 @@ export function fitBounds(
 }
 
 // prettier-ignore
-type Array16 = [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number];
+type Array16 = [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+];
 
 function isArray16(o: unknown): o is Array16 {
   if (!Array.isArray(o)) return false;
@@ -317,4 +324,54 @@ export function typedEmitter<T>() {
       target.dispatchEvent(new CustomEvent(event, { detail: data }));
     },
   };
+}
+
+function getV2DataType(dtype: string) {
+  const mapping: Record<string, string> = {
+    "int8": "|i1",
+    "uint8": "|u1",
+    "int16": "<i2",
+    "uint16": "<u2",
+    "int32": "<i4",
+    "uint32": "<u4",
+    "int64": "<i8",
+    "uint64": "<u8",
+    "float32": "<f4",
+    "float64": "<f8",
+  };
+  if (!(dtype in mapping)) {
+    throw new Error(`Unsupported dtype ${dtype}`);
+  }
+  return mapping[dtype];
+}
+
+type Selection = (number | Omit<Slice, "indices"> | null)[];
+
+export function createZarrArrayAdapter(arr: zarr.Array<zarr.DataType>): any {
+  return new Proxy(arr, {
+    get(target, prop) {
+      if (prop === "getRaw") {
+        return (selection: Selection) => {
+          return get(target, selection.map(s => {
+            if (typeof s === "object" && s !== null) {
+              return slice(s.start, s.stop, s.step);
+            }
+            return s;
+          }));
+        }
+      }
+      if (prop === "getRawChunk") {
+        return (
+          selection: number[],
+          options: { storeOptions: RequestInit }
+        ) => {
+          return target.getChunk(selection, options.storeOptions);
+        }
+      }
+      if (prop === "dtype") {
+        return getV2DataType(target.dtype);
+      }
+      return Reflect.get(target, prop);
+    }
+  })
 }

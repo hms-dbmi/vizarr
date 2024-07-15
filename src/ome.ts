@@ -1,9 +1,11 @@
 import { ZarrPixelSource } from '@hms-dbmi/viv';
 import pMap from 'p-map';
-import { Group as ZarrGroup, openGroup, ZarrArray } from 'zarr';
+import * as zarr from '@zarrita/core';
+import type { Readable } from '@zarrita/storage';
 import type { ImageLayerConfig, SourceData } from './state';
 import {
   calcConstrastLimits,
+  createZarrArrayAdapter,
   getAttrsOnly,
   getDefaultColors,
   getDefaultVisibilities,
@@ -16,7 +18,11 @@ import {
   range,
 } from './utils';
 
-export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAttrs: Ome.Well): Promise<SourceData> {
+export async function loadWell(
+  config: ImageLayerConfig,
+  grp: zarr.Group<Readable>,
+  wellAttrs: Ome.Well
+): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
   const acquisitionId: number | undefined = config.acquisition ? parseInt(config.acquisition) : undefined;
   let acquisitions: Ome.Acquisition[] = [];
@@ -39,8 +45,8 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   if (acqIds.length > 1) {
     // Need to get acquisitions metadata from parent Plate
     const platePath = grp.path.replace(`${row}/${col}`, '');
-    const plate = await openGroup(grp.store, platePath);
-    const plateAttrs = (await plate.attrs.asObject()) as { plate: Ome.Plate };
+    const plate = await zarr.open(grp.resolve(platePath));
+    const plateAttrs = plate.attrs as { plate: Ome.Plate };
     acquisitions = plateAttrs?.plate?.acquisitions ?? [];
 
     // filter imagePaths by acquisition
@@ -54,15 +60,17 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   const rows = Math.ceil(imgPaths.length / cols);
 
   // Use first image for rendering settings, resolutions etc.
-  const imgAttrs = (await grp.getItem(imgPaths[0]).then((g) => g.attrs.asObject())) as Ome.Attrs;
+  const imgAttrs = await getAttrsOnly<Ome.Attrs>(grp.resolve(imgPaths[0]));
+
   if (!('multiscales' in imgAttrs)) {
     throw Error('Path for image is not valid.');
   }
+
   let resolution = imgAttrs.multiscales[0].datasets[0].path;
 
   // Create loader for every Image.
-  const promises = imgPaths.map((p) => grp.getItem(join(p, resolution)));
-  const data = (await Promise.all(promises)) as ZarrArray[];
+  const promises = imgPaths.map((p) => zarr.open(grp.resolve(join(p, resolution)), { kind: 'array' }));
+  const data = await Promise.all(promises);
   const axes = getNgffAxes(imgAttrs.multiscales);
   const axis_labels = getNgffAxisLabels(axes);
 
@@ -73,7 +81,12 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
       .filter((col) => col + row * cols < data.length)
       .map((col) => {
         const offset = col + row * cols;
-        return { name: String(offset), row, col, loader: new ZarrPixelSource(data[offset], axis_labels, tileSize) };
+        return {
+          name: String(offset),
+          row,
+          col,
+          loader: new ZarrPixelSource(createZarrArrayAdapter(data[offset]), axis_labels, tileSize),
+        };
       });
   });
 
@@ -129,7 +142,11 @@ export async function loadWell(config: ImageLayerConfig, grp: ZarrGroup, wellAtt
   return sourceData;
 }
 
-export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateAttrs: Ome.Plate): Promise<SourceData> {
+export async function loadPlate(
+  config: ImageLayerConfig,
+  grp: zarr.Group<Readable>,
+  plateAttrs: Ome.Plate
+): Promise<SourceData> {
   if (!('columns' in plateAttrs) || !('rows' in plateAttrs)) {
     throw Error(`Plate .zattrs missing columns or rows`);
   }
@@ -147,22 +164,31 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
   }
 
   const imgPath = wellAttrs.well.images[0].path;
-  const imgAttrs = (await grp.getItem(join(wellPaths[0], imgPath)).then((g) => g.attrs.asObject())) as Ome.Attrs;
+  const imgAttrs = await getAttrsOnly<Ome.Attrs>(grp, join(wellPaths[0], imgPath));
+
   if (!('multiscales' in imgAttrs)) {
     throw Error('Path for image is not valid.');
   }
+
   // Lowest resolution is the 'path' of the last 'dataset' from the first multiscales
   const { datasets } = imgAttrs.multiscales[0];
   const resolution = datasets[datasets.length - 1].path;
 
   async function getImgPath(wellPath: string) {
     const wellAttrs = await getAttrsOnly<{ well: Ome.Well }>(grp, wellPath);
+    if (!('well' in wellAttrs)) {
+      throw Error('Path for image is not valid, not a well.');
+    }
     return join(wellPath, wellAttrs.well.images[0].path);
   }
   const wellImagePaths = await Promise.all(wellPaths.map(getImgPath));
 
   // Create loader for every Well. Some loaders may be undefined if Wells are missing.
-  const mapper = ([key, path]: string[]) => grp.getItem(path).then((arr) => [key, arr]) as Promise<[string, ZarrArray]>;
+  const mapper = async ([key, path]: string[]) => {
+    let arr = await zarr.open(grp.resolve(path), { kind: "array" });
+    return [key, arr] as const;
+  }
+
   const promises = await pMap(
     wellImagePaths.map((p) => [p, join(p, resolution)]),
     mapper,
@@ -178,7 +204,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
       name: `${row}${col}`,
       row: rows.indexOf(row),
       col: columns.indexOf(col),
-      loader: new ZarrPixelSource(d[1], axis_labels, tileSize),
+      loader: new ZarrPixelSource(createZarrArrayAdapter(d[1]), axis_labels, tileSize),
     };
   });
   let meta;
@@ -228,7 +254,7 @@ export async function loadPlate(config: ImageLayerConfig, grp: ZarrGroup, plateA
 
 export async function loadOmeroMultiscales(
   config: ImageLayerConfig,
-  grp: ZarrGroup,
+  grp: zarr.Group<Readable>,
   attrs: { multiscales: Ome.Multiscale[]; omero: Ome.Omero }
 ): Promise<SourceData> {
   const { name, opacity = 1, colormap = '' } = config;
@@ -238,7 +264,7 @@ export async function loadOmeroMultiscales(
   const meta = parseOmeroMeta(attrs.omero, axes);
   const tileSize = guessTileSize(data[0]);
 
-  const loader = data.map((arr) => new ZarrPixelSource(arr, axis_labels, tileSize));
+  const loader = data.map((arr) => new ZarrPixelSource(createZarrArrayAdapter(arr), axis_labels, tileSize));
   return {
     loader: loader,
     axis_labels,
