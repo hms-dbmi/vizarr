@@ -50,7 +50,6 @@ async function normalizeStore(source: string | Readable): Promise<zarr.Location<
 
 export async function open(source: string | Readable) {
   const location = await normalizeStore(source);
-  console.log(location);
   return zarr.open(location);
 }
 
