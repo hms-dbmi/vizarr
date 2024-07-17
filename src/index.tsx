@@ -26,7 +26,7 @@ export interface VizarrViewer {
   destroy(): void;
 }
 
-export function createViewer(element: HTMLElement): Promise<VizarrViewer> {
+export function createViewer(element: HTMLElement, options: { menuOpen?: boolean } = {}): Promise<VizarrViewer> {
   const ref = React.createRef<VizarrViewer>();
   const emitter = typedEmitter<Events>();
   const viewStateAtom = atomWithEffect<ViewState | undefined, ViewState>(
@@ -55,7 +55,7 @@ export function createViewer(element: HTMLElement): Promise<VizarrViewer> {
     }, []);
     return (
       <>
-        <Menu />
+        <Menu open={options.menuOpen ?? true} />
         <Viewer viewStateAtom={viewStateAtom} />
       </>
     );

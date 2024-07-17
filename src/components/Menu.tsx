@@ -29,9 +29,9 @@ const useStyles = makeStyles({
   },
 });
 
-function Menu() {
+function Menu(props: { open?: boolean }) {
   const sourceAtoms = useAtomValue(sourceInfoAtomAtoms);
-  const [hidden, toggle] = useReducer((v) => !v, false);
+  const [hidden, toggle] = useReducer((v) => !v, !(props.open ?? true));
   const classes = useStyles();
   return (
     <div className={classes.root} style={{ padding: `0px 5px ${hidden ? 0 : 5}px 5px` }}>
