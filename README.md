@@ -32,21 +32,21 @@
 
 ## Getting started
 
-Copy and paste a URL to a Zarr store as the `?source` query parameter in the
-**[web app](https://hms-dbmi.github.io/vizarr/)**. For example, to view the
-[example data](https://minio-dev.openmicroscopy.org/idr/v0.3/idr0062-blin-nuclearsegmentation/6001240.zarr)
-from the IDR, you can use the following URL:
+**Vizarr**  provides two primary interfaces for interacting with the core viewer:
+
+### 1. Standalone Web App
+
+You can use the standalone web app by copying and pasting a URL to a Zarr store as the `?source` query parameter in the [web app](https://hms-dbmi.github.io/vizarr).
+
+For example, to view [this dataset](https://minio-dev.openmicroscopy.org/idr/v0.3/idr0062-blin-nuclearsegmentation/6001240.zarr) from the IDR, navigate to the following URL:
 
 ```
 https://hms-dbmi.github.io/vizarr/?source=https://minio-dev.openmicroscopy.org/idr/v0.3/idr0062-blin-nuclearsegmentation/6001240.zarr
 ```
 
-Otherwise you can try out the Python API in a Jupyter Notebook, following [the
-examples](./python/notebooks/getting_started.ipynb).
+### 2. Python API
 
-```sh
-pip install vizarr
-```
+The Python API is an [anywidget](https://github.com/manzt/anywidget), allowing programatic control of the viewer in computational notebooks like Jupyter, JupyterLab, Colab, and VS Code. The easiest way to get started is to open a Zarr store and load it into the viewer.
 
 ```python
 import vizarr
@@ -57,6 +57,8 @@ viewer = vizarr.Viewer()
 viewer.add_image(store)
 viewer
 ```
+
+To learn more, see the [getting started](./python/notebooks/getting_started.ipynb) notebook.
 
 ## Data types
 
