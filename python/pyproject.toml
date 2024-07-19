@@ -8,7 +8,7 @@ version = "0.1.0"
 dependencies = ["anywidget", "zarr"]
 
 [project.optional-dependencies]
-dev = ["watchfiles", "jupyterlab"]
+dev = ["watchfiles", "jupyterlab", "zarr", "fsspec"]
 
 # automatically add the dev feature to the default env (e.g., hatch shell)
 [tool.hatch.envs.default]
