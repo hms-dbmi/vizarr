@@ -1,19 +1,6 @@
 import * as vizarr from './src/index';
 import debounce from 'just-debounce-it';
 
-async function initImjoy(viewer: vizarr.VizarrViewer) {
-  const { imjoyRPC } = await import('imjoy-rpc');
-  const api = await imjoyRPC.setupRPC({
-    name: 'vizarr',
-    description: 'A minimal, purely client-side program for viewing Zarr-based images with Viv & ImJoy.',
-    version: vizarr.version,
-  });
-  api.export({
-    add_image: viewer.addImage,
-    set_view_state: viewer.setViewState,
-  });
-}
-
 function initStandaloneApp(viewer: vizarr.VizarrViewer) {
   const url = new URL(window.location.href);
 
@@ -58,15 +45,7 @@ function initStandaloneApp(viewer: vizarr.VizarrViewer) {
 
 async function main() {
   console.log(`vizarr v${vizarr.version}: https://github.com/hms-dbmi/vizarr`);
-
   const viewer = await vizarr.createViewer(document.querySelector('#root')!);
-
-  // enable imjoy api when loaded as an iframe
-  if (window.self !== window.top) {
-    initImjoy(viewer);
-    return;
-  }
-
   initStandaloneApp(viewer);
 }
 
