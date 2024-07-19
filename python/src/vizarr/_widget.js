@@ -42,30 +42,18 @@ function get_source(model, source) {
 	return {
 		/**
 		 * @param {string} key
-		 * @return {Promise<ArrayBuffer>}
+		 * @return {Promise<Uint8Array | undefined>}
 		 */
-		async getItem(key) {
+		async get(key) {
 			const { data, buffers } = await send(model, {
 				type: "get",
 				source_id: source.id,
 				key,
 			});
 			if (!data.success) {
-				throw { __zarr__: "KeyError" };
+				return undefined;
 			}
-			return buffers[0].buffer;
-		},
-		/**
-		 * @param {string} key
-		 * @return {Promise<boolean>}
-		 */
-		async containsItem(key) {
-			const { data } = await send(model, {
-				type: "has",
-				source_id: source.id,
-				key,
-			});
-			return data;
+			return new Uint8Array(buffers[0].buffer);
 		},
 	};
 }
