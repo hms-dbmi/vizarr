@@ -11,7 +11,7 @@ from skimage.transform import pyramid_gaussian
 def create_ome_zarr(zarr_directory, dtype="f4"):
 
     base = np.tile(data.astronaut(), (4, 4, 1))
-    gaussian = list(pyramid_gaussian(base, downscale=2, max_layer=3, multichannel=True))
+    gaussian = list(pyramid_gaussian(base, downscale=2, max_layer=3, channel_axis=-1))
 
     pyramid = []
     # convert each level of pyramid into 5D image (t, c, z, y, x)
