@@ -7,17 +7,14 @@
     <span>view multiscale zarr images online and in notebooks</span>
       <br>
       <br>
-      <a href="https://hms-dbmi.github.io/vizarr/?source=https://minio-dev.openmicroscopy.org/idr/v0.3/idr0062-blin-nuclearsegmentation/6001240.zarr">app</a> .
-      <a href="./python/notebooks/getting_started.ipynb">getting started</a>
+      <a href="https://hms-dbmi.github.io/vizarr/?source=https://minio-dev.openmicroscopy.org/idr/v0.3/idr0062-blin-nuclearsegmentation/6001240.zarr">standalone app</a> .
+      <a href="./python/notebooks/getting_started.ipynb">python api</a> .
+      <a href="https://colab.research.google.com/github/hms-dbmi/vizarr/blob/main/python/notebooks/mandelbrot.ipynb">open in colab</a>
   </p>
 </samp>
 </p>
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hms-dbmi/vizarr/blob/main/python/notebooks/mandelbrot.ipynb)
-
-<center>
-  <img src="./assets/screenshot.png" alt="Multiscale OME-Zarr in Jupyter Notebook with Vizarr" width="400">
-</center>
+## About 
 
 **Vizarr** is a minimal, purely client-side program for viewing zarr-based images.
 
@@ -29,16 +26,11 @@
 - 📦 Supports any `zarr-python` [store](https://zarr.readthedocs.io/en/stable/api/storage.html)
   as a backend.
 
-### Data types
+<p align="center">
+  <img src="./assets/screenshot.png" alt="Multiscale OME-Zarr in Jupyter Notebook with Vizarr" width="500">
+</p>
 
-**Vizarr** supports viewing 2D slices of n-Dimensional Zarr arrays, allowing
-users to choose a single channel or blended composites of multiple channels
-during analysis. It has special support for the developing OME-NGFF format for
-multiscale and multimodal images. Currently, Viv supports `int8`, `int16`,
-`int32`, `uint8`, `uint16`, `uint32`, `float32`, `float64` arrays, but
-contributions are welcome to support more np.dtypes!
-
-### Getting started
+## Getting started
 
 Copy and paste a URL to a Zarr store as the `?source` query parameter in the
 **[web app](https://hms-dbmi.github.io/vizarr/)**. For example, to view the
@@ -66,13 +58,22 @@ viewer.add_image(store)
 viewer
 ```
 
-### Limitations
+## Data types
+
+**Vizarr** supports viewing 2D slices of n-Dimensional Zarr arrays, allowing
+users to choose a single channel or blended composites of multiple channels
+during analysis. It has special support for the developing OME-NGFF format for
+multiscale and multimodal images. Currently, Viv supports `int8`, `int16`,
+`int32`, `uint8`, `uint16`, `uint32`, `float32`, `float64` arrays, but
+contributions are welcome to support more np.dtypes!
+
+## Limitations
 
 `vizarr` was built to support the registration use case above where multiple, pyramidal OME-Zarr images
 are viewed within a Jupyter Notebook. Support for other Zarr arrays is supported but not as well tested. 
 More information regarding the viewing of generic Zarr arrays can be found in the example notebooks.
 
-### Citation
+## Citation
 
 If you are using Vizarr in your research, please cite our paper:
 
