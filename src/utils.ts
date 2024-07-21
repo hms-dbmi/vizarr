@@ -1,35 +1,35 @@
-import * as zarr from 'zarrita';
-import type { Readable } from '@zarrita/storage';
-import { Matrix4 } from 'math.gl';
+import type { Readable } from "@zarrita/storage";
+import { Matrix4 } from "math.gl";
+import * as zarr from "zarrita";
 
-import type { ZarrPixelSource } from './ZarrPixelSource';
-import { lru } from './lru-store';
-import type { ViewState } from './state';
+import type { ZarrPixelSource } from "./ZarrPixelSource";
+import { lru } from "./lru-store";
+import type { ViewState } from "./state";
 
 export const MAX_CHANNELS = 6;
 
 export const COLORS = {
-  cyan: '#00FFFF',
-  yellow: '#FFFF00',
-  magenta: '#FF00FF',
-  red: '#FF0000',
-  green: '#00FF00',
-  blue: '#0000FF',
-  white: '#FFFFFF',
+  cyan: "#00FFFF",
+  yellow: "#FFFF00",
+  magenta: "#FF00FF",
+  red: "#FF0000",
+  green: "#00FF00",
+  blue: "#0000FF",
+  white: "#FFFFFF",
 };
 export const MAGENTA_GREEN = [COLORS.magenta, COLORS.green];
 export const RGB = [COLORS.red, COLORS.green, COLORS.blue];
 export const CYMRGB = Object.values(COLORS).slice(0, -2);
 
 async function normalizeStore(source: string | Readable): Promise<zarr.Location<Readable>> {
-  if (typeof source === 'string') {
+  if (typeof source === "string") {
     let store: Readable;
-    let path: `/${string}` = '/';
-    if (source.endsWith('.json')) {
+    let path: `/${string}` = "/";
+    if (source.endsWith(".json")) {
       // import custom store implementation
       const [{ default: ReferenceStore }, json] = await Promise.all([
         // @ts-expect-error
-        import('@zarrita/storage/ref'),
+        import("@zarrita/storage/ref"),
         fetch(source).then((res) => res.json()),
       ]);
       store = ReferenceStore.fromSpec(json);
@@ -37,7 +37,7 @@ async function normalizeStore(source: string | Readable): Promise<zarr.Location<
       const url = new URL(source);
       // @ts-expect-error - pathname always starts with '/'
       path = url.pathname;
-      url.pathname = '/';
+      url.pathname = "/";
       store = new zarr.FetchStore(url.href);
     }
 
@@ -55,7 +55,7 @@ export async function open(source: string | Readable) {
 
 export async function getAttrsOnly<T = unknown>(
   location: zarr.Location<Readable>,
-  options: { path?: string; zarrVersion: 2 | 3 }
+  options: { path?: string; zarrVersion: 2 | 3 },
 ) {
   const decoder = new TextDecoder();
   if (options.path) {
@@ -65,7 +65,7 @@ export async function getAttrsOnly<T = unknown>(
     const attrs = await zarr.open.v3(location).then((node) => node.attrs);
     return resolveAttrs(attrs) as T;
   }
-  const v2AttrsLocation = location.resolve('.zattrs');
+  const v2AttrsLocation = location.resolve(".zattrs");
   const maybeBytes = await location.store.get(v2AttrsLocation.path);
   const attrs = maybeBytes ? JSON.parse(decoder.decode(maybeBytes)) : {};
   return resolveAttrs(attrs) as T;
@@ -78,22 +78,22 @@ export async function getAttrsOnly<T = unknown>(
  */
 export async function loadMultiscales(
   grp: zarr.Group<Readable>,
-  multiscales: Ome.Multiscale[]
+  multiscales: Ome.Multiscale[],
 ): Promise<Array<zarr.Array<zarr.DataType, Readable>>> {
-  const { datasets } = multiscales[0] || [{ path: '0' }];
+  const { datasets } = multiscales[0] || [{ path: "0" }];
   return Promise.all(
     // TODO(Trevor): TS is not happy about { attrs: false }.
     // This is just missing from zarrita types, but it is ok and
     // avoids making unecessary requests for v2 (see: https://github.com/manzt/zarrita.js/blob/7edffbeefb0eb877df48f54c7e8def4219c69c59/packages/zarrita/CHANGELOG.md?plain=1#L214)
-    datasets.map(({ path }) => zarr.open(grp.resolve(path), { kind: 'array', attrs: false } as { kind: 'array' }))
+    datasets.map(({ path }) => zarr.open(grp.resolve(path), { kind: "array", attrs: false } as { kind: "array" })),
   );
 }
 
 export function hexToRGB(hex: string): [r: number, g: number, b: number] {
-  if (hex.startsWith('#')) hex = hex.slice(1);
-  const r = parseInt(hex.slice(0, 2), 16);
-  const g = parseInt(hex.slice(2, 4), 16);
-  const b = parseInt(hex.slice(4, 6), 16);
+  if (hex.startsWith("#")) hex = hex.slice(1);
+  const r = Number.parseInt(hex.slice(0, 2), 16);
+  const g = Number.parseInt(hex.slice(2, 4), 16);
+  const b = Number.parseInt(hex.slice(4, 6), 16);
   return [r, g, b];
 }
 
@@ -102,7 +102,7 @@ export function range(length: number): number[] {
 }
 
 // similar to Python's rstrip
-export function rstrip(str: string, remove: string = ' '): string {
+export function rstrip(str: string, remove = " "): string {
   // if the last character is in 'remove', truncate
   while (str.length > 0 && remove.includes(str.charAt(str.length - 1))) {
     str = str.substr(0, str.length - 1);
@@ -113,43 +113,43 @@ export function rstrip(str: string, remove: string = ' '): string {
 export function join(...args: (string | undefined)[]) {
   return args
     .filter(Boolean)
-    .map((s: any) => rstrip(s as string, '/'))
-    .join('/');
+    .map((s: any) => rstrip(s as string, "/"))
+    .join("/");
 }
 
 export function getAxisLabels(
   arr: zarr.Array<zarr.DataType, Readable>,
-  axis_labels?: string[]
-): [...string[], 'y', 'x'] {
-  if (!axis_labels || axis_labels.length != arr.shape.length) {
+  axis_labels?: string[],
+): [...string[], "y", "x"] {
+  if (!axis_labels || axis_labels.length !== arr.shape.length) {
     // default axis_labels are e.g. ['0', '1', 'y', 'x']
-    const nonXYaxisLabels = arr.shape.slice(0, -2).map((_, i) => '' + i);
-    axis_labels = nonXYaxisLabels.concat(['y', 'x']);
+    const nonXYaxisLabels = arr.shape.slice(0, -2).map((_, i) => `${i}`);
+    axis_labels = nonXYaxisLabels.concat(["y", "x"]);
   }
-  return axis_labels as [...string[], 'y', 'x'];
+  return axis_labels as [...string[], "y", "x"];
 }
 
 export function getNgffAxes(multiscales: Ome.Multiscale[]): Ome.Axis[] {
   // Returns axes in the latest v0.4+ format.
   // defaults for v0.1 & v0.2
   const default_axes = [
-    { type: 'time', name: 't' },
-    { type: 'channel', name: 'c' },
-    { type: 'space', name: 'z' },
-    { type: 'space', name: 'y' },
-    { type: 'space', name: 'x' },
+    { type: "time", name: "t" },
+    { type: "channel", name: "c" },
+    { type: "space", name: "z" },
+    { type: "space", name: "y" },
+    { type: "space", name: "x" },
   ];
   function getDefaultType(name: string): string {
-    if (name === 't') return 'time';
-    if (name === 'c') return 'channel';
-    return 'space';
+    if (name === "t") return "time";
+    if (name === "c") return "channel";
+    return "space";
   }
   let axes = default_axes;
   // v0.3 & v0.4+
   if (multiscales[0].axes) {
     axes = multiscales[0].axes.map((axis) => {
       // axis may be string 'x' (v0.3) or object
-      if (typeof axis === 'string') {
+      if (typeof axis === "string") {
         return { name: axis, type: getDefaultType(axis) };
       }
       const { name, type } = axis;
@@ -159,9 +159,9 @@ export function getNgffAxes(multiscales: Ome.Multiscale[]): Ome.Axis[] {
   return axes;
 }
 
-export function getNgffAxisLabels(axes: Ome.Axis[]): [...string[], 'y', 'x'] {
+export function getNgffAxisLabels(axes: Ome.Axis[]): [...string[], "y", "x"] {
   const axes_names = axes.map((axis) => axis.name);
-  return axes_names as [...string[], 'y', 'x'];
+  return axes_names as [...string[], "y", "x"];
 }
 
 export function getDefaultVisibilities(n: number, visibilities?: boolean[]): boolean[] {
@@ -179,9 +179,9 @@ export function getDefaultVisibilities(n: number, visibilities?: boolean[]): boo
 
 export function getDefaultColors(n: number, visibilities: boolean[]): string[] {
   let colors = [];
-  if (n == 1) {
+  if (n === 1) {
     colors = [COLORS.white];
-  } else if (n == 2) {
+  } else if (n === 2) {
     colors = MAGENTA_GREEN;
   } else if (n === 3) {
     colors = RGB;
@@ -218,7 +218,7 @@ export function fitBounds(
   [width, height]: [width: number, height: number],
   [targetWidth, targetHeight]: [targetWidth: number, targetHeight: number],
   maxZoom: number,
-  padding: number
+  padding: number,
 ): ViewState {
   const scaleX = (targetWidth - padding * 2) / width;
   const scaleY = (targetHeight - padding * 2) / height;
@@ -248,7 +248,7 @@ type Array16 = [
 
 function isArray16(o: unknown): o is Array16 {
   if (!Array.isArray(o)) return false;
-  return o.length === 16 && o.every((i) => typeof i === 'number');
+  return o.length === 16 && o.every((i) => typeof i === "number");
 }
 
 export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
@@ -257,8 +257,8 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
   }
   const matrix = new Matrix4();
   try {
-    const arr = typeof model_matrix === 'string' ? JSON.parse(model_matrix) : model_matrix;
-    assert(isArray16(arr), 'Invalid modelMatrix size. Must be 16.');
+    const arr = typeof model_matrix === "string" ? JSON.parse(model_matrix) : model_matrix;
+    assert(isArray16(arr), "Invalid modelMatrix size. Must be 16.");
     matrix.setRowMajor(...arr);
   } catch {
     const msg = `Failed to parse modelMatrix. Got ${JSON.stringify(model_matrix)}, using identity.`;
@@ -269,12 +269,12 @@ export function parseMatrix(model_matrix?: string | number[]): Matrix4 {
 
 export async function calcDataRange(
   source: ZarrPixelSource,
-  selection: Array<number>
+  selection: Array<number>,
 ): Promise<[min: number, max: number]> {
-  if (source.dtype === 'Uint8') return [0, 255];
+  if (source.dtype === "Uint8") return [0, 255];
   const { data } = await source.getRaster({ selection });
-  let minVal = Infinity;
-  let maxVal = -Infinity;
+  let minVal = Number.POSITIVE_INFINITY;
+  let maxVal = Number.NEGATIVE_INFINITY;
   for (let i = 0; i < data.length; i++) {
     if (data[i] > maxVal) maxVal = data[i];
     if (data[i] < minVal) minVal = data[i];
@@ -290,14 +290,14 @@ export async function calcConstrastLimits<S extends string[]>(
   source: ZarrPixelSource<S>,
   channelAxis: number,
   visibilities: boolean[],
-  defaultSelection?: number[]
+  defaultSelection?: number[],
 ): Promise<([min: number, max: number] | undefined)[]> {
   const def = defaultSelection ?? source.shape.map(() => 0);
   const csize = source.shape[channelAxis];
 
   // channelAxis can be -1 if there is no 'c' dimension
   if (channelAxis !== -1) {
-    assert(csize === visibilities.length, 'visibilities do not match number of channels');
+    assert(csize === visibilities.length, "visibilities do not match number of channels");
   }
 
   return Promise.all(
@@ -308,7 +308,7 @@ export async function calcConstrastLimits<S extends string[]>(
         selection[channelAxis] = i;
       }
       return calcDataRange(source, selection);
-    })
+    }),
   );
 }
 
@@ -358,7 +358,7 @@ export function typedEmitter<T>() {
  * TODO: We should use zod to handle this
  */
 export function resolveAttrs(attrs: zarr.Attributes): zarr.Attributes {
-  if ('ome' in attrs) {
+  if ("ome" in attrs) {
     // @ts-expect-error - handles v0.5
     return attrs.ome;
   }
@@ -372,7 +372,7 @@ export class AssertionError extends Error {
   /** @param message The error message. */
   constructor(message: string) {
     super(message);
-    this.name = 'AssertionError';
+    this.name = "AssertionError";
   }
 }
 
@@ -382,7 +382,7 @@ export class AssertionError extends Error {
  * @param expr The expression to test.
  * @param msg The message to display if the assertion fails.
  */
-export function assert(expr: unknown, msg = ''): asserts expr {
+export function assert(expr: unknown, msg = ""): asserts expr {
   if (!expr) {
     throw new AssertionError(msg);
   }
@@ -405,19 +405,19 @@ export async function guessZarrVersion(location: zarr.Location<Readable>): Promi
 }
 
 export function isOmePlate(attrs: zarr.Attributes): attrs is { plate: Ome.Plate } {
-  return 'plate' in attrs;
+  return "plate" in attrs;
 }
 
 export function isOmeWell(attrs: zarr.Attributes): attrs is { well: Ome.Well } {
-  return 'well' in attrs;
+  return "well" in attrs;
 }
 
 export function isOmeroMultiscales(
-  attrs: zarr.Attributes
+  attrs: zarr.Attributes,
 ): attrs is { omero: Ome.Omero; multiscales: Ome.Multiscale[] } {
-  return 'omero' in attrs && 'multiscales' in attrs;
+  return "omero" in attrs && "multiscales" in attrs;
 }
 
 export function isMultiscales(attrs: zarr.Attributes): attrs is { multiscales: Ome.Multiscale[] } {
-  return 'multiscales' in attrs;
+  return "multiscales" in attrs;
 }

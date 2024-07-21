@@ -1,18 +1,18 @@
-import * as zarr from 'zarrita';
+import * as zarr from "zarrita";
 
-import type * as viv from '@vivjs/types';
-import type { Readable } from '@zarrita/storage';
+import type * as viv from "@vivjs/types";
+import type { Readable } from "@zarrita/storage";
 
-import { assert } from './utils';
-import { getImageSize } from '@hms-dbmi/viv';
+import { getImageSize } from "@hms-dbmi/viv";
+import { assert } from "./utils";
 
 // TODO: Export from top-level zarrita
 type Slice = ReturnType<typeof zarr.slice>;
 
-const X_AXIS_NAME = 'x';
-const Y_AXIS_NAME = 'y';
-const RGBA_CHANNEL_AXIS_NAME = '_c';
-const SUPPORTED_DTYPES = ['Uint8', 'Uint16', 'Uint32', 'Float32', 'Int8', 'Int16', 'Int32', 'Float64'] as const;
+const X_AXIS_NAME = "x";
+const Y_AXIS_NAME = "y";
+const RGBA_CHANNEL_AXIS_NAME = "_c";
+const SUPPORTED_DTYPES = ["Uint8", "Uint16", "Uint32", "Float32", "Int8", "Int16", "Int32", "Float64"] as const;
 
 export class ZarrPixelSource<S extends Array<string> = Array<string>> implements viv.PixelSource<S> {
   #arr: zarr.Array<zarr.DataType, Readable>;
@@ -25,7 +25,7 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
     options: {
       labels: viv.Labels<S>;
       tileSize: number;
-    }
+    },
   ) {
     this.#arr = arr;
     this.labels = options.labels;
@@ -64,10 +64,10 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
     // a BoundsCheckError which is picked up in `ZarrPixelSource.onTileError`
     // and ignored by deck.gl.
     if (xStart === xStop || yStart === yStop) {
-      throw new BoundsCheckError('Tile slice is zero-sized.');
+      throw new BoundsCheckError("Tile slice is zero-sized.");
     }
     if (xStart < 0 || yStart < 0 || xStop > width || yStop > height) {
-      throw new BoundsCheckError('Tile slice is out of bounds.');
+      throw new BoundsCheckError("Tile slice is out of bounds.");
     }
 
     sel[this.labels.indexOf(X_AXIS_NAME)] = zarr.slice(xStart, xStop);
@@ -126,8 +126,5 @@ function isSupportedDtype(dtype: string): dtype is viv.SupportedDtype {
 }
 
 class BoundsCheckError extends Error {
-  name = 'BoundsCheckError';
-  constructor(message?: string) {
-    super(message);
-  }
+  name = "BoundsCheckError";
 }

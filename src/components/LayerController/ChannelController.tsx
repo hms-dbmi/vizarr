@@ -1,11 +1,11 @@
-import React from 'react';
-import { useAtom } from 'jotai';
-import { useAtomValue } from 'jotai';
-import type { ChangeEvent } from 'react';
-import { Slider, Typography, Grid, IconButton } from '@material-ui/core';
-import { RadioButtonChecked, RadioButtonUnchecked } from '@material-ui/icons';
-import ChannelOptions from './ChannelOptions';
-import type { ControllerProps } from '../../state';
+import { Grid, IconButton, Slider, Typography } from "@material-ui/core";
+import { RadioButtonChecked, RadioButtonUnchecked } from "@material-ui/icons";
+import { useAtom } from "jotai";
+import { useAtomValue } from "jotai";
+import React from "react";
+import type { ChangeEvent } from "react";
+import type { ControllerProps } from "../../state";
+import ChannelOptions from "./ChannelOptions";
 
 interface ChannelConfig {
   channelIndex: number;
@@ -47,7 +47,7 @@ function ChannelController({ sourceAtom, layerAtom, channelIndex }: ControllerPr
     <>
       <Grid container justifyContent="space-between" wrap="nowrap">
         <Grid item xs={10}>
-          <div style={{ width: 165, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <div style={{ width: 165, overflow: "hidden", textOverflow: "ellipsis" }}>
             <Typography variant="caption" noWrap>
               {label}
             </Typography>
@@ -62,7 +62,7 @@ function ChannelController({ sourceAtom, layerAtom, channelIndex }: ControllerPr
           <IconButton
             style={{
               color,
-              backgroundColor: 'transparent',
+              backgroundColor: "transparent",
               padding: 0,
               zIndex: 2,
             }}
@@ -79,7 +79,7 @@ function ChannelController({ sourceAtom, layerAtom, channelIndex }: ControllerPr
             max={max}
             step={0.01}
             style={{
-              padding: '10px 0px 5px 0px',
+              padding: "10px 0px 5px 0px",
               color,
             }}
           />

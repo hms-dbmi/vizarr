@@ -1,13 +1,13 @@
-import type { ImageLayer, MultiscaleImageLayer } from '@hms-dbmi/viv';
-import type { Matrix4 } from 'math.gl';
-import type { PrimitiveAtom, WritableAtom } from 'jotai';
-import { atom } from 'jotai';
-import { atomFamily, splitAtom, waitForAll } from 'jotai/utils';
+import type { ImageLayer, MultiscaleImageLayer } from "@hms-dbmi/viv";
+import type { PrimitiveAtom, WritableAtom } from "jotai";
+import { atom } from "jotai";
+import { atomFamily, splitAtom, waitForAll } from "jotai/utils";
+import type { Matrix4 } from "math.gl";
 
-import type { Readable } from '@zarrita/storage';
-import type { default as GridLayer, GridLayerProps, GridLoader } from './gridLayer';
-import type { ZarrPixelSource } from './ZarrPixelSource';
-import { initLayerStateFromSource } from './io';
+import type { Readable } from "@zarrita/storage";
+import type { ZarrPixelSource } from "./ZarrPixelSource";
+import type { default as GridLayer, GridLayerProps, GridLoader } from "./gridLayer";
+import { initLayerStateFromSource } from "./io";
 
 export interface ViewState {
   zoom: number;
@@ -16,16 +16,16 @@ export interface ViewState {
 
 export function atomWithEffect<Value, Update extends object, Result extends void | Promise<void> = void>(
   baseAtom: WritableAtom<Value, Update | ((prev: Value) => Update), Result>,
-  callback: (data: Update) => void
+  callback: (data: Update) => void,
 ) {
   const derivedAtom: typeof baseAtom = atom(
     (get) => get(baseAtom),
     (get, set, update) => {
-      const next = typeof update === 'function' ? update(get(baseAtom)) : update;
+      const next = typeof update === "function" ? update(get(baseAtom)) : update;
       const result = set(baseAtom, next);
       callback(next);
       return result;
-    }
+    },
   );
   return derivedAtom;
 }
@@ -84,10 +84,10 @@ export type VivProps = ConstructorParameters<typeof MultiscaleImageLayer>[0];
 
 export interface BaseLayerProps {
   id: string;
-  contrastLimits: VivProps['contrastLimits'];
+  contrastLimits: VivProps["contrastLimits"];
   colors: [r: number, g: number, b: number][];
-  channelsVisible: NonNullable<VivProps['channelsVisible']>;
-  opacity: NonNullable<VivProps['opacity']>;
+  channelsVisible: NonNullable<VivProps["channelsVisible"]>;
+  opacity: NonNullable<VivProps["opacity"]>;
   colormap: string; // TODO: more precise
   selections: number[][];
   modelMatrix: Matrix4;
@@ -110,7 +110,7 @@ type LayerMap = {
 };
 
 export type LayerCtr<T> = new (...args: any[]) => T;
-export type LayerState<T extends 'image' | 'multiscale' | 'grid' = 'image' | 'multiscale' | 'grid'> = {
+export type LayerState<T extends "image" | "multiscale" | "grid" = "image" | "multiscale" | "grid"> = {
   Layer: LayerCtr<LayerMap[T][0]>;
   layerProps: LayerMap[T][1];
   on: boolean;
@@ -126,7 +126,7 @@ export type ControllerProps<T = {}> = {
 export const sourceInfoAtom = atom<WithId<SourceData>[]>([]);
 
 export const addImageAtom = atom(null, async (get, set, config: ImageLayerConfig) => {
-  const { createSourceData } = await import('./io');
+  const { createSourceData } = await import("./io");
   const id = Math.random().toString(36).slice(2);
   const sourceData = await createSourceData(config);
   const prevSourceInfo = get(sourceInfoAtom);
@@ -140,7 +140,7 @@ export const sourceInfoAtomAtoms = splitAtom(sourceInfoAtom);
 
 export const layerFamilyAtom = atomFamily(
   (param: WithId<SourceData>) => atom({ ...initLayerStateFromSource(param), id: param.id }),
-  (a, b) => a.id === b.id
+  (a, b) => a.id === b.id,
 );
 
 export const layerAtoms = atom((get) => {

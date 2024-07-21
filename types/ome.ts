@@ -1,5 +1,5 @@
-declare module Ome {
-  type Version = '0.1';
+declare namespace Ome {
+  type Version = "0.1";
 
   interface Channel {
     active: boolean;
@@ -24,7 +24,7 @@ declare module Ome {
     rdefs: {
       defaultT?: number;
       defaultZ?: number;
-      model: 'color' | 'greyscale';
+      model: "color" | "greyscale";
     };
   }
 

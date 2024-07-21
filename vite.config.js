@@ -1,9 +1,9 @@
-import * as path from 'node:path';
+import * as path from "node:path";
 
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 
-const source = process.env.VIZARR_DATA || 'https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/6001253.zarr';
+const source = process.env.VIZARR_DATA || "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/6001253.zarr";
 
 /**
  * Writes a new entry point that exports contents of an existing chunk.
@@ -12,7 +12,7 @@ const source = process.env.VIZARR_DATA || 'https://uk1s3.embassy.ebi.ac.uk/idr/z
  */
 function writeEntryPoint(entryPointName, chunkName) {
   return {
-    name: 'write-entry-point',
+    name: "write-entry-point",
     async generateBundle(_, bundle) {
       const chunk = Object.keys(bundle).find((key) => key.match(chunkName));
       if (!chunk) {
@@ -20,7 +20,7 @@ function writeEntryPoint(entryPointName, chunkName) {
       }
       bundle[entryPointName] = {
         fileName: entryPointName,
-        type: 'chunk',
+        type: "chunk",
         code: `export * from './${chunk}';`,
       };
     },
@@ -28,23 +28,18 @@ function writeEntryPoint(entryPointName, chunkName) {
 }
 
 export default defineConfig({
-  plugins: [react(), writeEntryPoint('index.js', /^vizarr-/)],
-  base: process.env.VIZARR_PREFIX || './',
+  plugins: [react(), writeEntryPoint("index.js", /^vizarr-/)],
+  base: process.env.VIZARR_PREFIX || "./",
   build: {
-    assetsDir: '',
+    assetsDir: "",
     sourcemap: true,
     rollupOptions: {
       output: {
         minifyInternalExports: false,
         manualChunks: {
-          vizarr: [path.resolve(__dirname, 'src/index.tsx')],
+          vizarr: [path.resolve(__dirname, "src/index.tsx")],
         },
       },
-    },
-  },
-  resolve: {
-    alias: {
-      '@hms-dbmi/vizarr': path.resolve(__dirname, 'src/index.tsx'),
     },
   },
   server: {

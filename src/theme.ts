@@ -1,69 +1,69 @@
-import { createTheme } from '@material-ui/core/styles';
-import grey from '@material-ui/core/colors/grey';
+import grey from "@material-ui/core/colors/grey";
+import { createTheme } from "@material-ui/core/styles";
 
 export default createTheme({
   palette: {
-    type: 'dark',
+    type: "dark",
     primary: grey,
     secondary: grey,
   },
   props: {
     MuiButton: {
-      size: 'small',
+      size: "small",
     },
     MuiButtonBase: {
       disableRipple: true,
     },
     MuiFilledInput: {
-      margin: 'dense',
+      margin: "dense",
     },
     MuiFormControl: {
-      margin: 'dense',
+      margin: "dense",
     },
     MuiFormHelperText: {
-      margin: 'dense',
+      margin: "dense",
     },
     MuiIconButton: {
-      size: 'small',
+      size: "small",
     },
     MuiInputBase: {
-      margin: 'dense',
+      margin: "dense",
     },
     MuiInputLabel: {
-      margin: 'dense',
+      margin: "dense",
     },
     MuiOutlinedInput: {
-      margin: 'dense',
+      margin: "dense",
     },
   },
   overrides: {
     MuiSlider: {
       thumb: {
-        '&:focus, &:hover': {
-          boxShadow: 'none',
+        "&:focus, &:hover": {
+          boxShadow: "none",
         },
         height: 11,
         width: 5,
-        borderRadius: '15%',
+        borderRadius: "15%",
         marginLeft: -1,
       },
     },
     MuiInput: {
       underline: {
-        '&&&&:hover:before': {
-          borderBottom: '1px solid #fff',
+        "&&&&:hover:before": {
+          borderBottom: "1px solid #fff",
         },
       },
     },
     MuiPaper: {
       root: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
       },
     },
     MuiSvgIcon: {
       root: {
-        width: '0.7em',
-        height: '0.7em',
+        width: "0.7em",
+        height: "0.7em",
       },
     },
   },

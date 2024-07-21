@@ -1,22 +1,22 @@
-import React from 'react';
-import { useAtomValue } from 'jotai';
-import { AccordionDetails, Grid, Typography, Divider } from '@material-ui/core';
-import { withStyles } from '@material-ui/styles';
+import { AccordionDetails, Divider, Grid, Typography } from "@material-ui/core";
+import { withStyles } from "@material-ui/styles";
+import { useAtomValue } from "jotai";
+import React from "react";
 
-import AcquisitionController from './AcquisitionController';
-import AddChannelButton from './AddChannelButton';
-import OpacitySlider from './OpacitySlider';
-import AxisSliders from './AxisSliders';
-import ChannelController from './ChannelController';
+import AcquisitionController from "./AcquisitionController";
+import AddChannelButton from "./AddChannelButton";
+import AxisSliders from "./AxisSliders";
+import ChannelController from "./ChannelController";
+import OpacitySlider from "./OpacitySlider";
 
-import { range } from '../../utils';
-import type { ControllerProps } from '../../state';
+import type { ControllerProps } from "../../state";
+import { range } from "../../utils";
 
 const Details = withStyles({
   root: {
-    padding: '2px 5px',
-    borderLeft: '1px solid rgba(150, 150, 150, .2)',
-    borderRight: '1px solid rgba(150, 150, 150, .2)',
+    padding: "2px 5px",
+    borderLeft: "1px solid rgba(150, 150, 150, .2)",
+    borderRight: "1px solid rgba(150, 150, 150, .2)",
   },
 })(AccordionDetails);
 
