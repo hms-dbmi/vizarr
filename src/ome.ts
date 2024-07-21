@@ -1,5 +1,5 @@
 import pMap from 'p-map';
-import * as zarr from '@zarrita/core';
+import * as zarr from 'zarrita';
 import type { Readable } from '@zarrita/storage';
 import type { ImageLayerConfig, SourceData } from './state';
 

@@ -2,27 +2,32 @@
   "name": "@hms-dbmi/vizarr",
   "version": "0.3.0",
   "type": "module",
-  "dependencies": {
-    "@hms-dbmi/viv": "^0.16.0",
-    "@material-ui/core": "^4.11.0",
-    "@material-ui/icons": "^4.9.1",
-    "deck.gl": "^8.9.34",
-    "jotai": "^1.0.0",
-    "just-debounce-it": "^3.1.1",
-    "p-map": "^5.5.0",
-    "quick-lru": "^6.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "zarrita": "^0.4.0-next.14"
-  },
   "scripts": {
-    "start": "vite",
+    "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "export": "npm run check && npm run build",
     "format": "prettier --write \"{src,types}/**/*.{js,jsx,ts,tsx}\" vite.config.js main.ts",
     "lint": "prettier --check \"{src,types}/**/*.{js,jsx,ts,tsx}\" vite.config.js main.ts",
     "check": "tsc"
+  },
+  "dependencies": {
+    "@hms-dbmi/viv": "^0.16.0",
+    "@hms-dbmi/vizarr": "link:",
+    "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.9.1",
+    "@material-ui/styles": "^4.11.5",
+    "@vivjs/types": "^0.16.1",
+    "@zarrita/storage": "^0.0.2",
+    "deck.gl": "^8.9.34",
+    "jotai": "^1.0.0",
+    "just-debounce-it": "^3.1.1",
+    "math.gl": "^4.0.1",
+    "p-map": "^5.5.0",
+    "quick-lru": "^6.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "zarrita": "^0.4.0-next.14"
   },
   "prettier": {
     "trailingComma": "es5",
@@ -39,5 +44,6 @@
     "prettier": "^2.2.0",
     "typescript": "^5.5.3",
     "vite": "^5.3.3"
-  }
+  },
+  "packageManager": "pnpm@9.5.0"
 }
