@@ -127,7 +127,4 @@ function isSupportedDtype(dtype: string): dtype is viv.SupportedDtype {
 
 class BoundsCheckError extends Error {
   name = "BoundsCheckError";
-  constructor(message?: string) {
-    super(message);
-  }
 }

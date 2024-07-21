@@ -1,4 +1,4 @@
-declare module Ome {
+declare namespace Ome {
   type Version = "0.1";
 
   interface Channel {

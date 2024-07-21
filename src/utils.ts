@@ -91,9 +91,9 @@ export async function loadMultiscales(
 
 export function hexToRGB(hex: string): [r: number, g: number, b: number] {
   if (hex.startsWith("#")) hex = hex.slice(1);
-  const r = parseInt(hex.slice(0, 2), 16);
-  const g = parseInt(hex.slice(2, 4), 16);
-  const b = parseInt(hex.slice(4, 6), 16);
+  const r = Number.parseInt(hex.slice(0, 2), 16);
+  const g = Number.parseInt(hex.slice(2, 4), 16);
+  const b = Number.parseInt(hex.slice(4, 6), 16);
   return [r, g, b];
 }
 
@@ -102,7 +102,7 @@ export function range(length: number): number[] {
 }
 
 // similar to Python's rstrip
-export function rstrip(str: string, remove: string = " "): string {
+export function rstrip(str: string, remove = " "): string {
   // if the last character is in 'remove', truncate
   while (str.length > 0 && remove.includes(str.charAt(str.length - 1))) {
     str = str.substr(0, str.length - 1);
@@ -121,9 +121,9 @@ export function getAxisLabels(
   arr: zarr.Array<zarr.DataType, Readable>,
   axis_labels?: string[],
 ): [...string[], "y", "x"] {
-  if (!axis_labels || axis_labels.length != arr.shape.length) {
+  if (!axis_labels || axis_labels.length !== arr.shape.length) {
     // default axis_labels are e.g. ['0', '1', 'y', 'x']
-    const nonXYaxisLabels = arr.shape.slice(0, -2).map((_, i) => "" + i);
+    const nonXYaxisLabels = arr.shape.slice(0, -2).map((_, i) => `${i}`);
     axis_labels = nonXYaxisLabels.concat(["y", "x"]);
   }
   return axis_labels as [...string[], "y", "x"];
@@ -179,9 +179,9 @@ export function getDefaultVisibilities(n: number, visibilities?: boolean[]): boo
 
 export function getDefaultColors(n: number, visibilities: boolean[]): string[] {
   let colors = [];
-  if (n == 1) {
+  if (n === 1) {
     colors = [COLORS.white];
-  } else if (n == 2) {
+  } else if (n === 2) {
     colors = MAGENTA_GREEN;
   } else if (n === 3) {
     colors = RGB;
@@ -273,8 +273,8 @@ export async function calcDataRange(
 ): Promise<[min: number, max: number]> {
   if (source.dtype === "Uint8") return [0, 255];
   const { data } = await source.getRaster({ selection });
-  let minVal = Infinity;
-  let maxVal = -Infinity;
+  let minVal = Number.POSITIVE_INFINITY;
+  let maxVal = Number.NEGATIVE_INFINITY;
   for (let i = 0; i < data.length; i++) {
     if (data[i] > maxVal) maxVal = data[i];
     if (data[i] < minVal) minVal = data[i];

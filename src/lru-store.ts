@@ -16,7 +16,7 @@ function normalizeKey(key: string, range?: RangeQuery) {
   return `${key}:${range.offset}:${range.offset + range.length - 1}`;
 }
 
-export function lru<S extends Readable>(store: S, maxSize: number = 100) {
+export function lru<S extends Readable>(store: S, maxSize = 100) {
   const cache = new QuickLRU<string, Promise<Uint8Array | undefined>>({ maxSize });
   let getRange = store.getRange ? store.getRange.bind(store) : undefined;
   function get(...args: Parameters<S["get"]>) {
@@ -38,7 +38,7 @@ export function lru<S extends Readable>(store: S, maxSize: number = 100) {
       const cacheKey = normalizeKey(key, range);
       const cached = cache.get(cacheKey);
       if (cached) return cached;
-      const result = Promise.resolve(_getRange!(key, range, opts)).catch((err) => {
+      const result = Promise.resolve(_getRange?.(key, range, opts)).catch((err) => {
         cache.delete(cacheKey);
         throw err;
       });

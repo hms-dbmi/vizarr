@@ -12,7 +12,7 @@ export async function loadWell(
   wellAttrs: Ome.Well,
 ): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
-  const acquisitionId: number | undefined = config.acquisition ? parseInt(config.acquisition) : undefined;
+  const acquisitionId: number | undefined = config.acquisition ? Number.parseInt(config.acquisition) : undefined;
   let acquisitions: Ome.Acquisition[] = [];
 
   utils.assert(wellAttrs?.images, "Well .zattrs missing images");
@@ -112,16 +112,16 @@ export async function loadWell(
     }
     const { row, column } = gridCoord;
     let imgSource = undefined;
-    if (typeof config.source === "string" && grp.path && !isNaN(row) && !isNaN(column)) {
+    if (typeof config.source === "string" && grp.path && !Number.isNaN(row) && !Number.isNaN(column)) {
       const field = row * cols + column;
       imgSource = utils.join(config.source, imgPaths[field]);
     }
     if (config.onClick) {
-      delete info.layer;
+      info.layer = undefined;
       info.imageSource = imgSource;
       config.onClick(info);
     } else if (imgSource) {
-      window.open(window.location.origin + window.location.pathname + "?source=" + imgSource);
+      window.open(`${window.location.origin + window.location.pathname}?source=${imgSource}`);
     }
   };
 
@@ -229,15 +229,15 @@ export async function loadPlate(
     }
     const { row, column } = gridCoord;
     let imgSource = undefined;
-    if (typeof config.source === "string" && grp.path && !isNaN(row) && !isNaN(column)) {
+    if (typeof config.source === "string" && grp.path && !Number.isNaN(row) && !Number.isNaN(column)) {
       imgSource = utils.join(config.source, rows[row], columns[column]);
     }
     if (config.onClick) {
-      delete info.layer;
+      info.layer = undefined;
       info.imageSource = imgSource;
       config.onClick(info);
     } else if (imgSource) {
-      window.open(window.location.origin + window.location.pathname + "?source=" + imgSource);
+      window.open(`${window.location.origin + window.location.pathname}?source=${imgSource}`);
     }
   };
   return sourceData;
@@ -272,7 +272,7 @@ export async function loadOmeroMultiscales(
 
 async function defaultMeta(loader: ZarrPixelSource<string[]>, axis_labels: string[]) {
   const channel_axis = axis_labels.indexOf("c");
-  const channel_count = channel_axis == -1 ? 1 : loader.shape[channel_axis];
+  const channel_count = channel_axis === -1 ? 1 : loader.shape[channel_axis];
   const visibilities = utils.getDefaultVisibilities(channel_count);
   const contrast_limits = await utils.calcConstrastLimits(loader, channel_axis, visibilities);
   const colors = utils.getDefaultColors(channel_count, visibilities);
@@ -300,12 +300,12 @@ function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axes: Ome.Axis[]) 
     colors.push(c.color);
     contrast_limits.push([c.window.start, c.window.end]);
     visibilities.push(c.active);
-    names.push(c.label || "" + index);
+    names.push(c.label || `${index}`);
   });
 
   const defaultSelection = axes.map((axis) => {
-    if (axis.type == "time") return t;
-    if (axis.name == "z") return z;
+    if (axis.type === "time") return t;
+    if (axis.name === "z") return z;
     return 0;
   });
   const channel_axis = axes.findIndex((axis) => axis.type === "channel");
