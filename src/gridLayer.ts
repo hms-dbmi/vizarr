@@ -20,7 +20,7 @@ type Polygon = Array<[number, number]>;
 
 export interface GridLayerProps
   extends Omit<CompositeLayerProps<unknown>, "modelMatrix" | "opacity" | "onClick" | "id">,
-  BaseLayerProps {
+    BaseLayerProps {
   loaders: GridLoader[];
   rows: number;
   columns: number;
