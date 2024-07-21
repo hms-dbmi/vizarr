@@ -23,6 +23,9 @@ importers:
       '@material-ui/styles':
         specifier: ^4.11.5
         version: 4.11.5(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@vivjs/types':
+        specifier: ^0.16.1
+        version: 0.16.1
       '@zarrita/storage':
         specifier: ^0.0.2
         version: 0.0.2
