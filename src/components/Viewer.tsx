@@ -2,8 +2,7 @@ import * as React from 'react';
 import { useAtom, type WritableAtom } from 'jotai';
 import { useAtomValue } from 'jotai';
 import DeckGL from 'deck.gl';
-import { OrthographicView } from '@deck.gl/core';
-import type { Layer } from '@deck.gl/core';
+import { OrthographicView, type Layer } from 'deck.gl';
 
 import type { LayerState, ViewState } from '../state';
 import { layerAtoms } from '../state';

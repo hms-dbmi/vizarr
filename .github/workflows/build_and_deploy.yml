@@ -3,23 +3,27 @@ on:
   push:
     branches:
       - main
+
+permissions:
+  contents: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v4
         with:
-          node-version: '18.x'
-
-      - run: npm ci
-      - run: npm run export && touch out/.nojekyll
+          run_install: true
+      - run: |
+          pnpm build
+          touch dist/.nojekyll
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
-          FOLDER: out
+          FOLDER: dist
           CLEAN: true
           CLEAN_EXCLUDE: '["v0.1", "v0.2", "v0.3"]' # Manually add endpoints to keep

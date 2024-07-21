@@ -1,5 +1,4 @@
-import { CompositeLayer } from '@deck.gl/core';
-import { SolidPolygonLayer, TextLayer } from '@deck.gl/layers';
+import { CompositeLayer, SolidPolygonLayer, TextLayer } from 'deck.gl';
 import type { CompositeLayerProps } from '@deck.gl/core/lib/composite-layer';
 import pMap from 'p-map';
 
