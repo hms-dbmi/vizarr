@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@hms-dbmi/viv": "^0.16.0",
-    "@hms-dbmi/vizarr": "link:",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/styles": "^4.11.5",
@@ -27,12 +26,6 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "zarrita": "^0.4.0-next.14"
-  },
-  "prettier": {
-    "trailingComma": "es5",
-    "printWidth": 120,
-    "semi": true,
-    "singleQuote": true
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",

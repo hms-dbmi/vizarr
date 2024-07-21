@@ -14,8 +14,7 @@
     "allowSyntheticDefaultImports": true,
     "verbatimModuleSyntax": true,
     "paths": {
-      "*": ["*", "node_modules/@danmarshall/deckgl-typings/*"],
-      "@hms-dbmi/vizarr": ["*", "./src/index.tsx"]
+      "*": ["*", "node_modules/@danmarshall/deckgl-typings/*"]
     }
   }
 }

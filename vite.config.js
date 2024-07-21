@@ -42,11 +42,6 @@ export default defineConfig({
       },
     },
   },
-  resolve: {
-    alias: {
-      "@hms-dbmi/vizarr": path.resolve(__dirname, "src/index.tsx"),
-    },
-  },
   server: {
     open: `?source=${source}`,
   },

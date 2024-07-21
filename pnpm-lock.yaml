@@ -11,9 +11,6 @@ importers:
       '@hms-dbmi/viv':
         specifier: ^0.16.0
         version: 0.16.1(ivym5kozhaht7xh26fph2oljpq)
-      '@hms-dbmi/vizarr':
-        specifier: 'link:'
-        version: 'link:'
       '@material-ui/core':
         specifier: ^4.11.0
         version: 4.12.4(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
