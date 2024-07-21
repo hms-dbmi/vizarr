@@ -61,8 +61,8 @@ importers:
         specifier: ^4.3.10
         version: 4.9.28
       '@types/node':
-        specifier: ^14.14.5
-        version: 14.18.63
+        specifier: ^20.14.11
+        version: 20.14.11
       '@types/react':
         specifier: ^18.2.51
         version: 18.3.3
@@ -71,7 +71,7 @@ importers:
         version: 18.3.0
       '@vitejs/plugin-react':
         specifier: ^4.3.1
-        version: 4.3.1(vite@5.3.4(@types/node@14.18.63))
+        version: 4.3.1(vite@5.3.4(@types/node@20.14.11))
       prettier:
         specifier: ^2.2.0
         version: 2.8.8
@@ -80,7 +80,7 @@ importers:
         version: 5.5.3
       vite:
         specifier: ^5.3.3
-        version: 5.3.4(@types/node@14.18.63)
+        version: 5.3.4(@types/node@20.14.11)
 
 packages:
 
@@ -757,8 +757,8 @@ packages:
   '@types/mapbox-gl@2.7.21':
     resolution: {integrity: sha512-Dx9MuF2kKgT/N22LsMUB4b3acFZh9clVqz9zv1fomoiPoBrJolwYxpWA/9LPO/2N0xWbKi4V+pkjTaFkkx/4wA==}
 
-  '@types/node@14.18.63':
-    resolution: {integrity: sha512-fAtCfv4jJg+ExtXhvCkCqUKZ+4ok/JQk01qDKhL5BDDoS3AxKXhV5/MAVUZyQnSEd2GT92fkgZl0pz0Q0AzcIQ==}
+  '@types/node@20.14.11':
+    resolution: {integrity: sha512-kprQpL8MMeszbz6ojB5/tU8PLN4kesnN8Gjzw349rDlNgsSzg90lAVj3llK99Dh7JON+t9AuscPPFW6mPbTnSA==}
 
   '@types/offscreencanvas@2019.7.3':
     resolution: {integrity: sha512-ieXiYmgSRXUDeOntE1InxjWyvEelZGP63M+cGuquuRLuIKKT1osnkXjxev9B7d1nXSug5vpunx+gNlbVxMlC9A==}
@@ -1364,6 +1364,9 @@ packages:
     resolution: {integrity: sha512-/hreyEujaB0w76zKo6717l3L0o/qEUtRgdvUBvlkhoWeOVMjMuHNHk0BRBzikzuGDqNmPQbg5ifMEqsHLiIUcQ==}
     engines: {node: '>=14.17'}
     hasBin: true
+
+  undici-types@5.26.5:
+    resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
   universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
@@ -2284,7 +2287,9 @@ snapshots:
     dependencies:
       '@types/geojson': 7946.0.14
 
-  '@types/node@14.18.63': {}
+  '@types/node@20.14.11':
+    dependencies:
+      undici-types: 5.26.5
 
   '@types/offscreencanvas@2019.7.3': {}
 
@@ -2303,14 +2308,14 @@ snapshots:
       '@types/prop-types': 15.7.12
       csstype: 3.1.3
 
-  '@vitejs/plugin-react@4.3.1(vite@5.3.4(@types/node@14.18.63))':
+  '@vitejs/plugin-react@4.3.1(vite@5.3.4(@types/node@20.14.11))':
     dependencies:
       '@babel/core': 7.24.9
       '@babel/plugin-transform-react-jsx-self': 7.24.7(@babel/core@7.24.9)
       '@babel/plugin-transform-react-jsx-source': 7.24.7(@babel/core@7.24.9)
       '@types/babel__core': 7.20.5
       react-refresh: 0.14.2
-      vite: 5.3.4(@types/node@14.18.63)
+      vite: 5.3.4(@types/node@20.14.11)
     transitivePeerDependencies:
       - supports-color
 
@@ -2926,6 +2931,8 @@ snapshots:
 
   typescript@5.5.3: {}
 
+  undici-types@5.26.5: {}
+
   universalify@0.1.2: {}
 
   unzipit@1.4.3:
@@ -2940,13 +2947,13 @@ snapshots:
 
   uzip-module@1.0.3: {}
 
-  vite@5.3.4(@types/node@14.18.63):
+  vite@5.3.4(@types/node@20.14.11):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.39
       rollup: 4.19.0
     optionalDependencies:
-      '@types/node': 14.18.63
+      '@types/node': 20.14.11
       fsevents: 2.3.3
 
   web-worker@1.3.0: {}
