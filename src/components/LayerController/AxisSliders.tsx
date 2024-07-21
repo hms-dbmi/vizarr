@@ -1,8 +1,8 @@
-import React from 'react';
-import { Grid, Divider } from '@material-ui/core';
-import { useAtomValue } from 'jotai';
-import AxisSlider from './AxisSlider';
-import type { ControllerProps } from '../../state';
+import { Divider, Grid } from "@material-ui/core";
+import { useAtomValue } from "jotai";
+import React from "react";
+import type { ControllerProps } from "../../state";
+import AxisSlider from "./AxisSlider";
 
 function AxisSliders({ sourceAtom, layerAtom }: ControllerProps) {
   const sourceData = useAtomValue(sourceAtom);

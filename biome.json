@@ -23,6 +23,9 @@
       }
     }
   },
+  "files": {
+    "ignore": ["python"]
+  },
   "vcs": {
     "enabled": true,
     "clientKind": "git",

@@ -1,20 +1,20 @@
-import { Grid, Typography, Divider } from '@material-ui/core';
-import { useAtom, useAtomValue } from 'jotai';
-import type { ChangeEvent } from 'react';
-import React, { useState, useEffect } from 'react';
-import { Slider } from '@material-ui/core';
-import { withStyles } from '@material-ui/styles';
-import DimensionOptions from './AxisOptions';
-import type { ControllerProps } from '../../state';
+import { Divider, Grid, Typography } from "@material-ui/core";
+import { Slider } from "@material-ui/core";
+import { withStyles } from "@material-ui/styles";
+import { useAtom, useAtomValue } from "jotai";
+import type { ChangeEvent } from "react";
+import React, { useState, useEffect } from "react";
+import type { ControllerProps } from "../../state";
+import DimensionOptions from "./AxisOptions";
 
 const DenseSlider = withStyles({
   root: {
-    color: 'white',
-    padding: '10px 0px 5px 0px',
-    marginRight: '5px',
+    color: "white",
+    padding: "10px 0px 5px 0px",
+    marginRight: "5px",
   },
   active: {
-    boxshadow: '0px 0px 0px 8px rgba(158, 158, 158, 0.16)',
+    boxshadow: "0px 0px 0px 8px rgba(158, 158, 158, 0.16)",
   },
 })(Slider);
 
@@ -28,7 +28,7 @@ function AxisSlider({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<P
   const sourceData = useAtomValue(sourceAtom);
   const { axis_labels } = sourceData;
   let axisLabel = axis_labels[axisIndex];
-  if (axisLabel === 't' || axisLabel === 'z') {
+  if (axisLabel === "t" || axisLabel === "z") {
     axisLabel = axisLabel.toUpperCase();
   }
   // state of the slider to update UI while dragging
@@ -62,7 +62,7 @@ function AxisSlider({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<P
       <Grid>
         <Grid container justifyContent="space-between">
           <Grid item xs={10}>
-            <div style={{ width: 165, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <div style={{ width: 165, overflow: "hidden", textOverflow: "ellipsis" }}>
               <Typography variant="caption" noWrap>
                 {axisLabel}: {value}/{max}
               </Typography>

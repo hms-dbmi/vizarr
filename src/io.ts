@@ -1,18 +1,18 @@
-import { ImageLayer, MultiscaleImageLayer } from '@hms-dbmi/viv';
-import * as zarr from 'zarrita';
-import type { Readable } from '@zarrita/storage';
+import { ImageLayer, MultiscaleImageLayer } from "@hms-dbmi/viv";
+import type { Readable } from "@zarrita/storage";
+import * as zarr from "zarrita";
 
-import GridLayer from './gridLayer';
-import { loadOmeroMultiscales, loadPlate, loadWell } from './ome';
-import { ZarrPixelSource } from './ZarrPixelSource';
-import type { ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from './state';
-import * as utils from './utils';
+import { ZarrPixelSource } from "./ZarrPixelSource";
+import GridLayer from "./gridLayer";
+import { loadOmeroMultiscales, loadPlate, loadWell } from "./ome";
+import type { ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from "./state";
+import * as utils from "./utils";
 
 async function loadSingleChannel(
   config: SingleChannelConfig,
-  data: Array<ZarrPixelSource<string[]>>
+  data: Array<ZarrPixelSource<string[]>>,
 ): Promise<SourceData> {
-  const { color, contrast_limits, visibility, name, colormap = '', opacity = 1 } = config;
+  const { color, contrast_limits, visibility, name, colormap = "", opacity = 1 } = config;
   const lowres = data[data.length - 1];
   const selection = Array(data[0].shape.length).fill(0);
   const limits = contrast_limits ?? (await (() => utils.calcDataRange(lowres, selection))());
@@ -21,7 +21,7 @@ async function loadSingleChannel(
     name,
     channel_axis: null,
     colors: [color ?? utils.COLORS.white],
-    names: ['channel_0'],
+    names: ["channel_0"],
     contrast_limits: [limits],
     visibilities: [visibility ?? true],
     model_matrix: utils.parseMatrix(config.model_matrix),
@@ -37,9 +37,9 @@ async function loadSingleChannel(
 async function loadMultiChannel(
   config: MultichannelConfig,
   data: ZarrPixelSource<string[]>[],
-  channelAxis: number
+  channelAxis: number,
 ): Promise<SourceData> {
-  const { names, contrast_limits, name, model_matrix, opacity = 1, colormap = '' } = config;
+  const { names, contrast_limits, name, model_matrix, opacity = 1, colormap = "" } = config;
   let { visibilities, colors } = config;
   const n = data[0].shape[channelAxis];
 
@@ -48,7 +48,7 @@ async function loadMultiChannel(
       const propertyName = Object.keys({ channelProp })[0];
       utils.assert(
         channelProp.length === n,
-        `channel_axis is length ${n} and provided channel_axis property ${propertyName} is different size.`
+        `channel_axis is length ${n} and provided channel_axis property ${propertyName} is different size.`,
       );
     }
   }
@@ -99,14 +99,14 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 
     if (Object.keys(attrs).length === 0 && node.path) {
       // No rootAttrs in this group.
-      const parent = await zarr.open(node.resolve('..'), { kind: 'group' });
+      const parent = await zarr.open(node.resolve(".."), { kind: "group" });
       const parentAttrs = utils.resolveAttrs(parent.attrs);
       if (utils.isOmePlate(parentAttrs)) {
         return loadPlate(config, parent, parentAttrs.plate);
       }
     }
 
-    utils.assert(utils.isMultiscales(attrs), 'Group is missing multiscales specification.');
+    utils.assert(utils.isMultiscales(attrs), "Group is missing multiscales specification.");
     data = await utils.loadMultiscales(node, attrs.multiscales);
     if (attrs.multiscales[0].axes) {
       axes = utils.getNgffAxes(attrs.multiscales);
@@ -124,39 +124,39 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 
   // If explicit channel axis is provided, try to load as multichannel.
 
-  if ('channel_axis' in config || channel_axis > -1) {
+  if ("channel_axis" in config || channel_axis > -1) {
     config = config as MultichannelConfig;
     return loadMultiChannel(config, loader, Number(config.channel_axis ?? channel_axis));
   }
 
   const nDims = base.shape.length;
-  if (nDims === 2 || !('channel_axis' in config)) {
+  if (nDims === 2 || !("channel_axis" in config)) {
     return loadSingleChannel(config as SingleChannelConfig, loader);
   }
 
-  throw Error('Failed to load image.');
+  throw Error("Failed to load image.");
 }
 
-type Labels = [...string[], 'y', 'x'];
+type Labels = [...string[], "y", "x"];
 function getAxisLabelsAndChannelAxis(
   config: ImageLayerConfig,
   ngffAxes: Ome.Axis[] | undefined,
-  arr: zarr.Array<zarr.DataType, Readable>
+  arr: zarr.Array<zarr.DataType, Readable>,
 ): { labels: Labels; channel_axis: number } {
   // type cast string[] to Labels
   const maybeAxisLabels = config.axis_labels as undefined | Labels;
   // ensure numeric if provided
-  const maybeChannelAxis = 'channel_axis' in config ? Number(config.channel_axis) : undefined;
+  const maybeChannelAxis = "channel_axis" in config ? Number(config.channel_axis) : undefined;
   // Use ngff axes metadata if labels or channel axis aren't explicitly provided
   if (ngffAxes) {
     const labels = maybeAxisLabels ?? utils.getNgffAxisLabels(ngffAxes);
-    const channel_axis = maybeChannelAxis ?? ngffAxes.findIndex((axis) => axis.type === 'channel');
+    const channel_axis = maybeChannelAxis ?? ngffAxes.findIndex((axis) => axis.type === "channel");
     return { labels, channel_axis };
   }
 
   // create dummy axis labels if not provided and try to guess channel_axis if missing
   const labels = maybeAxisLabels ?? utils.getAxisLabels(arr);
-  const channel_axis = maybeChannelAxis ?? labels.indexOf('c');
+  const channel_axis = maybeChannelAxis ?? labels.indexOf("c");
   return { labels, channel_axis };
 }
 
@@ -195,7 +195,7 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
     onClick: source.onClick,
   };
 
-  if ('loaders' in source) {
+  if ("loaders" in source) {
     return {
       Layer: GridLayer,
       layerProps: {

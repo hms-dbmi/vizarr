@@ -1,20 +1,20 @@
-import React from 'react';
-import { IconButton } from '@material-ui/core';
-import { Lens } from '@material-ui/icons';
-import { makeStyles } from '@material-ui/styles';
-import { COLORS, hexToRGB } from '../../utils';
+import { IconButton } from "@material-ui/core";
+import { Lens } from "@material-ui/icons";
+import { makeStyles } from "@material-ui/styles";
+import React from "react";
+import { COLORS, hexToRGB } from "../../utils";
 
 const useStyles = makeStyles(() => ({
   container: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '2px',
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "2px",
   },
   button: {
-    padding: '3px',
-    width: '16px',
-    height: '16px',
+    padding: "3px",
+    width: "16px",
+    height: "16px",
   },
 }));
 

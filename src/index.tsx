@@ -1,17 +1,17 @@
-import * as React from 'react';
-import ReactDOM from 'react-dom/client';
-import { Provider, atom } from 'jotai';
-import { useSetAtom } from 'jotai';
-import { ThemeProvider } from '@material-ui/styles';
+import { ThemeProvider } from "@material-ui/styles";
+import { Provider, atom } from "jotai";
+import { useSetAtom } from "jotai";
+import * as React from "react";
+import ReactDOM from "react-dom/client";
 
-import Menu from './components/Menu';
-import Viewer from './components/Viewer';
-import './codecs/register';
-import { addImageAtom, type ImageLayerConfig, type ViewState, atomWithEffect } from './state';
-import { defer, typedEmitter } from './utils';
-import theme from './theme';
+import Menu from "./components/Menu";
+import Viewer from "./components/Viewer";
+import "./codecs/register";
+import { type ImageLayerConfig, type ViewState, addImageAtom, atomWithEffect } from "./state";
+import theme from "./theme";
+import { defer, typedEmitter } from "./utils";
 
-export { version } from '../package.json';
+export { version } from "../package.json";
 
 type Events = {
   viewStateChange: ViewState;
@@ -31,7 +31,7 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
   const emitter = typedEmitter<Events>();
   const viewStateAtom = atomWithEffect<ViewState | undefined, ViewState>(
     atom<ViewState | undefined>(undefined),
-    ({ zoom, target }) => emitter.emit('viewStateChange', { zoom, target })
+    ({ zoom, target }) => emitter.emit("viewStateChange", { zoom, target }),
   );
   const { promise, resolve } = defer<VizarrViewer>();
 
@@ -46,7 +46,7 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
         on: emitter.on.bind(emitter),
         destroy: () => root.unmount(),
       }),
-      []
+      [],
     );
     React.useEffect(() => {
       if (ref.current) {
@@ -66,7 +66,7 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
       <Provider>
         <App />
       </Provider>
-    </ThemeProvider>
+    </ThemeProvider>,
   );
   return promise;
 }

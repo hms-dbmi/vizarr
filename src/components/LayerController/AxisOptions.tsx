@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import type { MouseEvent, ChangeEvent } from 'react';
-import { useAtom, useAtomValue } from 'jotai';
-import { IconButton, Popover, Paper, Typography, Divider, Input } from '@material-ui/core';
-import { withStyles } from '@material-ui/styles';
-import { MoreHoriz } from '@material-ui/icons';
-import type { ControllerProps } from '../../state';
+import { Divider, IconButton, Input, Paper, Popover, Typography } from "@material-ui/core";
+import { MoreHoriz } from "@material-ui/icons";
+import { withStyles } from "@material-ui/styles";
+import { useAtom, useAtomValue } from "jotai";
+import React, { useState } from "react";
+import type { ChangeEvent, MouseEvent } from "react";
+import type { ControllerProps } from "../../state";
 
 const DenseInput = withStyles({
   root: {
-    width: '5.5em',
-    fontSize: '0.7em',
+    width: "5.5em",
+    fontSize: "0.7em",
   },
 })(Input);
 
@@ -60,10 +60,10 @@ function AxisOptions({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<
         onClick={handleClick}
         aria-describedby={id}
         style={{
-          backgroundColor: 'transparent',
+          backgroundColor: "transparent",
           padding: 0,
           zIndex: 2,
-          cursor: 'pointer',
+          cursor: "pointer",
         }}
       >
         <MoreHoriz />
@@ -74,15 +74,15 @@ function AxisOptions({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<
         anchorEl={anchorEl}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
+          vertical: "bottom",
+          horizontal: "left",
         }}
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
+          vertical: "top",
+          horizontal: "left",
         }}
       >
-        <Paper style={{ padding: '0px 4px', marginBottom: 4 }}>
+        <Paper style={{ padding: "0px 4px", marginBottom: 4 }}>
           <Typography variant="caption">Index:</Typography>
           <Divider />
           <DenseInput value={value} onChange={handleIndexChange} type="number" id="max" fullWidth={false} />

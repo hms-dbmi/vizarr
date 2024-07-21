@@ -1,11 +1,11 @@
-import { CompositeLayer, SolidPolygonLayer, TextLayer } from 'deck.gl';
-import type { CompositeLayerProps } from '@deck.gl/core/lib/composite-layer';
-import pMap from 'p-map';
+import type { CompositeLayerProps } from "@deck.gl/core/lib/composite-layer";
+import { CompositeLayer, SolidPolygonLayer, TextLayer } from "deck.gl";
+import pMap from "p-map";
 
-import { XRLayer, ColorPaletteExtension } from '@hms-dbmi/viv';
-import type { BaseLayerProps } from './state';
-import type { ZarrPixelSource } from './ZarrPixelSource';
-import { assert } from './utils';
+import { ColorPaletteExtension, XRLayer } from "@hms-dbmi/viv";
+import type { ZarrPixelSource } from "./ZarrPixelSource";
+import type { BaseLayerProps } from "./state";
+import { assert } from "./utils";
 
 export interface GridLoader {
   loader: ZarrPixelSource<string[]>;
@@ -15,7 +15,7 @@ export interface GridLoader {
 }
 
 export interface GridLayerProps
-  extends Omit<CompositeLayerProps<any>, 'modelMatrix' | 'opacity' | 'onClick' | 'id'>,
+  extends Omit<CompositeLayerProps<any>, "modelMatrix" | "opacity" | "onClick" | "id">,
     BaseLayerProps {
   loaders: GridLoader[];
   rows: number;
@@ -28,15 +28,15 @@ export interface GridLayerProps
 const defaultProps = {
   ...(XRLayer as any).defaultProps,
   // Special grid props
-  loaders: { type: 'array', value: [], compare: true },
-  spacer: { type: 'number', value: 5, compare: true },
-  rows: { type: 'number', value: 0, compare: true },
-  columns: { type: 'number', value: 0, compare: true },
-  concurrency: { type: 'number', value: 10, compare: false }, // set concurrency for queue
-  text: { type: 'boolean', value: false, compare: true },
+  loaders: { type: "array", value: [], compare: true },
+  spacer: { type: "number", value: 5, compare: true },
+  rows: { type: "number", value: 0, compare: true },
+  columns: { type: "number", value: 0, compare: true },
+  concurrency: { type: "number", value: 10, compare: false }, // set concurrency for queue
+  text: { type: "boolean", value: false, compare: true },
   // Deck.gl
-  onClick: { type: 'function', value: null, compare: true },
-  onHover: { type: 'function', value: null, compare: true },
+  onClick: { type: "function", value: null, compare: true },
+  onHover: { type: "function", value: null, compare: true },
 };
 
 function scaleBounds(width: number, height: number, translate = [0, 0], scale = 1) {
@@ -53,7 +53,7 @@ function validateWidthHeight(d: { data: { width: number; height: number } }[]) {
   // Verify that all grid data is same shape (ignoring undefined)
   d.forEach(({ data }) => {
     if (!data) return;
-    assert(data.width === width && data.height === height, 'Grid data is not same shape.');
+    assert(data.width === width && data.height === height, "Grid data is not same shape.");
   });
   return { width, height };
 }
@@ -92,7 +92,7 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
 
   updateState({ props, oldProps, changeFlags }: { props: GridLayerProps; oldProps: GridLayerProps; changeFlags: any }) {
     const { propsChanged } = changeFlags;
-    const loaderChanged = typeof propsChanged === 'string' && propsChanged.includes('props.loaders');
+    const loaderChanged = typeof propsChanged === "string" && propsChanged.includes("props.loaders");
     const loaderSelectionChanged = props.selections !== oldProps.selections;
     if (loaderChanged || loaderSelectionChanged) {
       // Only fetch new data to render if loader has changed
@@ -120,7 +120,7 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
     const { gridData, width, height } = this.state;
     if (width === 0 || height === 0) return null; // early return if no data
 
-    const { rows, columns, spacer = 0, id = '' } = this.props;
+    const { rows, columns, spacer = 0, id = "" } = this.props;
     const layers = gridData.map((d: any) => {
       const y = d.row * (height + spacer);
       const x = d.col * (width + spacer);
@@ -128,7 +128,7 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
         channelData: d.data, // coerce to null if no data
         bounds: scaleBounds(width, height, [x, y]),
         id: `${id}-GridLayer-${d.row}-${d.col}`,
-        dtype: d.loader.dtype || 'Uint16', // fallback if missing,
+        dtype: d.loader.dtype || "Uint16", // fallback if missing,
         pickable: false,
         extensions: [new ColorPaletteExtension()],
       };
@@ -166,8 +166,8 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
         getColor: [255, 255, 255, 255],
         getSize: 16,
         getAngle: 0,
-        getTextAnchor: 'start',
-        getAlignmentBaseline: 'top',
+        getTextAnchor: "start",
+        getAlignmentBaseline: "top",
       });
       layers.push(textLayer);
     }
@@ -176,5 +176,5 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
   }
 }
 
-GridLayer.layerName = 'GridLayer';
+GridLayer.layerName = "GridLayer";
 GridLayer.defaultProps = defaultProps;

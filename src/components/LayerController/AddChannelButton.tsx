@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import type { MouseEvent, ChangeEvent } from 'react';
-import { useAtom } from 'jotai';
-import { IconButton, Popover, Paper, Typography, Divider, NativeSelect } from '@material-ui/core';
-import { Add } from '@material-ui/icons';
+import { Divider, IconButton, NativeSelect, Paper, Popover, Typography } from "@material-ui/core";
+import { Add } from "@material-ui/icons";
+import { useAtom } from "jotai";
+import React, { useState } from "react";
+import type { ChangeEvent, MouseEvent } from "react";
 
-import { calcDataRange, hexToRGB, MAX_CHANNELS } from '../../utils';
-import type { ControllerProps } from '../../state';
+import type { ControllerProps } from "../../state";
+import { MAX_CHANNELS, calcDataRange, hexToRGB } from "../../utils";
 
 function AddChannelButton({ sourceAtom, layerAtom }: ControllerProps) {
   const [source, setSource] = useAtom(sourceAtom);
@@ -73,10 +73,10 @@ function AddChannelButton({ sourceAtom, layerAtom }: ControllerProps) {
         onClick={handleClick}
         aria-describedby={id}
         style={{
-          backgroundColor: 'transparent',
+          backgroundColor: "transparent",
           padding: 0,
           zIndex: 2,
-          cursor: 'pointer',
+          cursor: "pointer",
         }}
         disabled={layer.layerProps.selections.length === MAX_CHANNELS}
       >
@@ -88,20 +88,20 @@ function AddChannelButton({ sourceAtom, layerAtom }: ControllerProps) {
         anchorEl={anchorEl}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
+          vertical: "bottom",
+          horizontal: "left",
         }}
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
+          vertical: "top",
+          horizontal: "left",
         }}
       >
-        <Paper style={{ padding: '0px 4px', marginBottom: 4, width: '8em' }}>
+        <Paper style={{ padding: "0px 4px", marginBottom: 4, width: "8em" }}>
           <Typography variant="caption">selection: </Typography>
           <Divider />
           <NativeSelect
             fullWidth
-            style={{ fontSize: '0.7em' }}
+            style={{ fontSize: "0.7em" }}
             id={`layer-${source.id}-channel-select`}
             onChange={handleChange}
           >
