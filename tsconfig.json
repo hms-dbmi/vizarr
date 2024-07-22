@@ -1,5 +1,4 @@
 {
-  "include": ["src", "main.ts"],
   "compilerOptions": {
     "module": "esnext",
     "target": "esnext",
