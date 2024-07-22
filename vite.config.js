@@ -1,6 +1,7 @@
 import * as path from "node:path";
 
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 
 const source = process.env.VIZARR_DATA || "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/6001253.zarr";
@@ -28,7 +29,7 @@ function writeEntryPoint(entryPointName, chunkName) {
 }
 
 export default defineConfig({
-  plugins: [react(), writeEntryPoint("index.js", /^vizarr-/)],
+  plugins: [react(), tailwindcss(), writeEntryPoint("index.js", /^vizarr-/)],
   base: process.env.VIZARR_PREFIX || "./",
   build: {
     assetsDir: "",
