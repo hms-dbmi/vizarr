@@ -13,6 +13,8 @@ import { defer, typedEmitter } from "./utils";
 
 export { version } from "../package.json";
 
+import "./index.css";
+
 type Events = {
   viewStateChange: ViewState;
 };

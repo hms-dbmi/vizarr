@@ -9,8 +9,10 @@
     "forceConsistentCasingInFileNames": true,
     "verbatimModuleSyntax": true,
     "jsx": "preserve",
+    "baseUrl": ".",
     "paths": {
-      "*": ["./node_modules/@danmarshall/deckgl-typings/*"]
+      "*": ["./node_modules/@danmarshall/deckgl-typings/*"],
+      "@/*": ["./src/*"]
     },
     "types": ["vite/client"]
   }

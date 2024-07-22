@@ -37,9 +37,14 @@ export default defineConfig({
       output: {
         minifyInternalExports: false,
         manualChunks: {
-          vizarr: [path.resolve(__dirname, "src/index.tsx")],
+          vizarr: [path.resolve(__dirname, "./src/index.tsx")],
         },
       },
+    },
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   server: {
