@@ -1,12 +1,14 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import AcquisitionController from "./AcquisitionController";
+import { EyeOpenIcon, EyeNoneIcon } from "@radix-ui/react-icons";
+
+import AcquisitionSelect from "./AcquisitionController";
 import AddChannelButton from "./AddChannelButton";
 import ChannelController from "./ChannelController";
-import { useLayer, useSourceValue } from "@/hooks";
 import AxisSlider from "./AxisSlider";
-import { EyeOpenIcon, EyeNoneIcon } from "@radix-ui/react-icons";
+
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Slider } from "@/components/ui/slider";
+import { Separator } from "@/components/ui/separator";
+import { useLayer, useSourceValue } from "@/hooks";
 
 function LayerController() {
   const sourceInfo = useSourceValue();
@@ -27,27 +29,45 @@ function LayerController() {
       <AccordionItem value={name} className="border-none">
         <AccordionTrigger className="flex py-0 pr-1 bg-border hover:no-underline">
           <div className="flex items-center">
-            <Button
+            <label
               className="cursor-pointer"
               aria-label={`toggle visibility of ${name}`}
-              onClick={(event) => {
-                event.stopPropagation(); // prevent accordion from toggling
-                setLayer((prev) => {
-                  const on = !prev.on;
-                  return { ...prev, on };
-                });
+              onKeyUp={(event) => {
+                if (event.key === "Enter") {
+                  event.stopPropagation();
+                }
               }}
-              variant="ghost"
-              size="icon-sm"
+              onClick={(event) => {
+                // prevent accordion from toggling
+                event.stopPropagation();
+              }}
             >
               {layer.on ? <EyeOpenIcon /> : <EyeNoneIcon />}
-            </Button>
-            <span className="ml-2">{name}</span>
+              <input
+                type="checkbox"
+                onChange={(event) => {
+                  setLayer((prev) => {
+                    const on = event.currentTarget.checked;
+                    return { ...prev, on };
+                  });
+                }}
+                checked={layer.on}
+                className="hidden"
+              />
+            </label>
+            <span className="ml-2 font-normal text-">{name}</span>
           </div>
         </AccordionTrigger>
         <AccordionContent className="flex flex-col">
-          <hr className="border-t-1 border-accent" />
-          <AcquisitionController />
+          {true ? (
+            <>
+              <AcquisitionSelect
+                acquisitions={sourceInfo.acquisitions}
+                acquisitionId={layer.layerProps.acquisitionId}
+              />
+              <Separator />
+            </>
+          ) : null}
           <div className="flex items-center my-0.5">
             <label className="text-xs">opacity:</label>
             <Slider
@@ -62,18 +82,18 @@ function LayerController() {
               step={0.01}
             />
           </div>
-          <hr className="border-t-1 border-accent" />
+          <Separator />
           <div>
             {sliders.map(([name, axisIndex, max]) => (
               <AxisSlider key={name} axisIndex={axisIndex} max={max} />
             ))}
           </div>
-          <hr className="border-t-1 border-accent" />
+          <Separator />
           <div className="flex justify-between items-center">
-            <label>channels:</label>
+            <label className="text-xs">channels:</label>
             <AddChannelButton />
           </div>
-          <hr className="border-t-1 border-accent" />
+          <Separator />
           <div>
             {Array.from({ length: nChannels }).map((_, i) => (
               <ChannelController channelIndex={i} key={`${name}-${i}`} />

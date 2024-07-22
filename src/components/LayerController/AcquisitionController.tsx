@@ -1,45 +1,38 @@
-import { Grid, NativeSelect } from "@material-ui/core";
 import React from "react";
-import type { ChangeEvent } from "react";
-import { useSourceValue } from "@/hooks";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-function AcquisitionController() {
-  const sourceData = useSourceValue();
-  const { acquisitionId, acquisitions } = sourceData;
-
-  if (!acquisitions) {
-    return null;
-  }
-
-  const handleSelectionChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    let value = event.target.value;
-    const url = new URL(window.location.href);
-    if (value === "-1") {
-      url.searchParams.delete("acquisition");
-    } else {
-      url.searchParams.set("acquisition", value);
-    }
-    window.location.href = decodeURIComponent(url.href);
-  };
-
+function AcquisitionController(props: {
+  acquisitionId: string | number | undefined;
+  acquisitions: Array<Ome.Acquisition>;
+}) {
+  const {
+    acquisitionId,
+    acquisitions = [
+      { id: "1", name: "testring a" },
+      { id: 2, name: "testing 1,2,3" },
+    ],
+  } = props;
+  const id = acquisitionId ? String(acquisitionId) : undefined;
   return (
-    <>
-      <Grid>
-        <NativeSelect fullWidth style={{ fontSize: "0.7em" }} onChange={handleSelectionChange} value={acquisitionId}>
-          <option value="-1" key="-1">
-            Filter by Acquisition
-          </option>
-          {acquisitions.map((acq) => {
-            acq = acq as Ome.Acquisition;
-            return (
-              <option value={acq.id} key={acq.id}>
-                Acquisition: {acq.name}
-              </option>
-            );
-          })}
-        </NativeSelect>
-      </Grid>
-    </>
+    <Select
+      value={id}
+      onValueChange={(value: string) => {
+        const url = new URL(window.location.href);
+        url.searchParams.set("acquisition", value);
+        window.location.href = decodeURIComponent(url.href);
+      }}
+    >
+      <SelectTrigger className="w-full focus:ring-0 p-0 h-7 border-none text-xs">
+        <SelectValue placeholder="Filter by Acquisition" />
+      </SelectTrigger>
+      <SelectContent className="focus:ring-0 border-none">
+        {acquisitions.map((acq) => (
+          <SelectItem className="text-xs" value={String(acq.id)} key={acq.id}>
+            Acquisition: {acq.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
 
