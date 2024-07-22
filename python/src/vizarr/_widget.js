@@ -1,5 +1,5 @@
 import * as vizarr from "https://hms-dbmi.github.io/vizarr/index.js";
-import debounce from "https://esm.sh/just-debounce-it@3";
+import debounce from "https://esm.sh/just-debounce-it@3.2.0";
 
 /**
  * @template T
@@ -9,24 +9,24 @@ import debounce from "https://esm.sh/just-debounce-it@3";
  * @returns {Promise<{ data: T, buffers: DataView[] }>}
  */
 function send(model, payload, { timeout = 3000 } = {}) {
-	let uuid = globalThis.crypto.randomUUID();
+	let id = Math.random().toString(36).substring(7);
 	return new Promise((resolve, reject) => {
 		let timer = setTimeout(() => {
 			reject(new Error(`Promise timed out after ${timeout} ms`));
 			model.off("msg:custom", handler);
 		}, timeout);
 		/**
-		 * @param {{ uuid: string, payload: T }} msg
+		 * @param {{ id: string, payload: T }} msg
 		 * @param {DataView[]} buffers
 		 */
 		function handler(msg, buffers) {
-			if (!(msg.uuid === uuid)) return;
+			if (!(msg.id === id)) return;
 			clearTimeout(timer);
 			resolve({ data: msg.payload, buffers });
 			model.off("msg:custom", handler);
 		}
 		model.on("msg:custom", handler);
-		model.send({ payload, uuid });
+		model.send({ payload, id });
 	});
 }
 
@@ -71,41 +71,43 @@ function get_source(model, source) {
  * @property {[x: number, y: number]} target
  */
 
-/** @type {import("npm:@anywidget/types").Render<Model>} */
-export async function render({ model, el }) {
-	let div = document.createElement("div");
-	{
-		div.style.height = model.get("height");
-		div.style.backgroundColor = "black";
-		model.on("change:height", () => {
+export default {
+	/** @type {import("npm:@anywidget/types").Render<Model>} */
+	async render({ model, el }) {
+		let div = document.createElement("div");
+		{
 			div.style.height = model.get("height");
-		});
-	}
-	let viewer = await vizarr.createViewer(div);
-	{
-		model.on("change:view_state", () => {
-			viewer.setViewState(model.get("view_state"));
-		});
-		viewer.on(
-			"viewStateChange",
-			debounce((/** @type {ViewState} */ update) => {
-				model.set("view_state", update);
-				model.save_changes();
-			}, 200),
-		);
-	}
-	{
-		// sources are append-only now
-		for (const config of model.get("_configs")) {
-			const source = get_source(model, config.source);
-			viewer.addImage({ ...config, source });
+			div.style.backgroundColor = "black";
+			model.on("change:height", () => {
+				div.style.height = model.get("height");
+			});
 		}
-		model.on("change:_configs", () => {
-			const last = model.get("_configs").at(-1);
-			if (!last) return;
-			const source = get_source(model, last.source);
-			viewer.addImage({ ...last, source });
-		});
-	}
-	el.appendChild(div);
-}
+		let viewer = await vizarr.createViewer(div);
+		{
+			model.on("change:view_state", () => {
+				viewer.setViewState(model.get("view_state"));
+			});
+			viewer.on(
+				"viewStateChange",
+				debounce((/** @type {ViewState} */ update) => {
+					model.set("view_state", update);
+					model.save_changes();
+				}, 200),
+			);
+		}
+		{
+			// sources are append-only now
+			for (const config of model.get("_configs")) {
+				const source = get_source(model, config.source);
+				viewer.addImage({ ...config, source });
+			}
+			model.on("change:_configs", () => {
+				const last = model.get("_configs").at(-1);
+				if (!last) return;
+				const source = get_source(model, last.source);
+				viewer.addImage({ ...last, source });
+			});
+		}
+		el.appendChild(div);
+	},
+};
