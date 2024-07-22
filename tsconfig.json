@@ -1,5 +1,4 @@
 {
-  "include": ["src", "types", "main.ts"],
   "compilerOptions": {
     "module": "esnext",
     "target": "esnext",
@@ -12,6 +11,7 @@
     "jsx": "preserve",
     "paths": {
       "*": ["./node_modules/@danmarshall/deckgl-typings/*"]
-    }
+    },
+    "types": ["vite/client"]
   }
 }
