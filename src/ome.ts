@@ -1,7 +1,7 @@
 import type { Readable } from "@zarrita/storage";
 import pMap from "p-map";
 import * as zarr from "zarrita";
-import type { ImageLayerConfig, SourceData } from "./state";
+import type { ImageLayerConfig, OnClickData, SourceData } from "./state";
 
 import { ZarrPixelSource } from "./ZarrPixelSource";
 import * as utils from "./utils";
@@ -105,7 +105,7 @@ export async function loadWell(
 
   sourceData.rows = rows;
   sourceData.columns = cols;
-  sourceData.onClick = (info: Record<string, unknown> & { gridCoord?: { row: number; column: number } }) => {
+  sourceData.onClick = (info: OnClickData) => {
     let gridCoord = info.gridCoord;
     if (!gridCoord) {
       return;
@@ -222,7 +222,7 @@ export async function loadPlate(
     columns: columns.length,
   };
   // Us onClick from image config or Open Well in new window
-  sourceData.onClick = (info: Record<string, unknown> & { gridCoord?: { row: number; column: number } }) => {
+  sourceData.onClick = (info: OnClickData) => {
     let gridCoord = info.gridCoord;
     if (!gridCoord) {
       return;

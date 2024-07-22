@@ -2,8 +2,8 @@ import { Divider, Grid, Typography } from "@material-ui/core";
 import { Slider } from "@material-ui/core";
 import { withStyles } from "@material-ui/styles";
 import { useAtom, useAtomValue } from "jotai";
+import * as React from "react";
 import type { ChangeEvent } from "react";
-import React, { useState, useEffect } from "react";
 import type { ControllerProps } from "../../state";
 import DimensionOptions from "./AxisOptions";
 
@@ -32,13 +32,13 @@ function AxisSlider({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<P
     axisLabel = axisLabel.toUpperCase();
   }
   // state of the slider to update UI while dragging
-  const [value, setValue] = useState(0);
+  const [value, setValue] = React.useState(0);
 
   // If axis index change externally, need to update state
-  useEffect(() => {
+  React.useEffect(() => {
     // Use first channel to get initial value of slider - can be undefined on first render
     setValue(layer.layerProps.selections[0] ? layer.layerProps.selections[0][axisIndex] : 1);
-  }, [layer.layerProps.selections]);
+  }, [layer.layerProps.selections, axisIndex]);
 
   const handleRelease = () => {
     setLayer((prev) => {

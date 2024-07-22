@@ -46,7 +46,7 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
         on: emitter.on.bind(emitter),
         destroy: () => root.unmount(),
       }),
-      [],
+      [setViewState, addImage],
     );
     React.useEffect(() => {
       if (ref.current) {

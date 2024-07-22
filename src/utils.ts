@@ -28,15 +28,14 @@ async function normalizeStore(source: string | Readable): Promise<zarr.Location<
     if (source.endsWith(".json")) {
       // import custom store implementation
       const [{ default: ReferenceStore }, json] = await Promise.all([
-        // @ts-expect-error
         import("@zarrita/storage/ref"),
         fetch(source).then((res) => res.json()),
       ]);
       store = ReferenceStore.fromSpec(json);
     } else {
       const url = new URL(source);
-      // @ts-expect-error - pathname always starts with '/'
-      path = url.pathname;
+      // grab the path and then set the URL to the root
+      path = ensureAbosolutePath(url.pathname);
       url.pathname = "/";
       store = new zarr.FetchStore(url.href);
     }
@@ -46,6 +45,12 @@ async function normalizeStore(source: string | Readable): Promise<zarr.Location<
   }
 
   return zarr.root(source);
+}
+
+function ensureAbosolutePath(path: string): `/${string}` {
+  if (path === "/") return path;
+  // @ts-expect-error - path always starts with '/'
+  return path.startsWith("/") ? path : `/${path}`;
 }
 
 export async function open(source: string | Readable) {
@@ -112,8 +117,8 @@ export function rstrip(str: string, remove = " "): string {
 
 export function join(...args: (string | undefined)[]) {
   return args
-    .filter(Boolean)
-    .map((s: any) => rstrip(s as string, "/"))
+    .filter((s) => s !== undefined)
+    .map((s) => rstrip(s, "/"))
     .join("/");
 }
 
@@ -226,7 +231,6 @@ export function fitBounds(
   return { zoom, target: [width / 2, height / 2] };
 }
 
-// prettier-ignore
 type Array16 = [
   number,
   number,
@@ -319,7 +323,7 @@ export async function calcConstrastLimits<S extends string[]>(
  */
 export function defer<T>() {
   let resolve: (value: T | PromiseLike<T>) => void;
-  let reject: (reason?: any) => void;
+  let reject: (reason?: unknown) => void;
   const promise = new Promise<T>((res, rej) => {
     resolve = res;
     reject = rej;

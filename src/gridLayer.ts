@@ -86,7 +86,7 @@ function refreshGridData(props: GridLayerProps) {
   return pMap(loaders, mapper, { concurrency });
 }
 
-export default class GridLayer<P extends GridLayerProps = GridLayerProps> extends CompositeLayer<unknown, P> {
+export default class GridLayer extends CompositeLayer<unknown, CompositeLayerProps<unknown> & GridLayerProps> {
   initializeState() {
     this.state = { gridData: [], width: 0, height: 0 };
     refreshGridData(this.props).then((gridData) => {

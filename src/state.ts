@@ -38,7 +38,7 @@ interface BaseConfig {
   opacity?: number;
   acquisition?: string;
   model_matrix?: string | number[];
-  onClick?: (e: any) => void;
+  onClick?: (e: unknown) => void;
 }
 
 export interface MultichannelConfig extends BaseConfig {
@@ -56,6 +56,10 @@ export interface SingleChannelConfig extends BaseConfig {
 }
 
 export type ImageLayerConfig = MultichannelConfig | SingleChannelConfig;
+
+export type OnClickData = Record<string, unknown> & {
+  gridCoord?: { row: number; column: number };
+};
 
 export type SourceData = {
   loader: ZarrPixelSource[];
@@ -77,7 +81,7 @@ export type SourceData = {
   };
   model_matrix: Matrix4;
   axis_labels: string[];
-  onClick?: (e: any) => void;
+  onClick?: (e: OnClickData) => void;
 };
 
 export type VivProps = ConstructorParameters<typeof MultiscaleImageLayer>[0];
@@ -92,7 +96,7 @@ export interface BaseLayerProps {
   selections: number[][];
   modelMatrix: Matrix4;
   contrastLimitsRange: [min: number, max: number][];
-  onClick?: (e: any) => void;
+  onClick?: (e: OnClickData) => void;
 }
 
 interface MultiscaleImageLayerProps extends BaseLayerProps {
@@ -109,7 +113,8 @@ type LayerMap = {
   grid: [GridLayer, { loader: ZarrPixelSource<string[]> | ZarrPixelSource<string[]>[] } & GridLayerProps];
 };
 
-export type LayerCtr<T> = new (...args: any[]) => T;
+// biome-ignore lint/suspicious/noExplicitAny: Need a catch all for layer types
+export type LayerCtr<T> = new (...args: Array<any>) => T;
 export type LayerState<T extends "image" | "multiscale" | "grid" = "image" | "multiscale" | "grid"> = {
   Layer: LayerCtr<LayerMap[T][0]>;
   layerProps: LayerMap[T][1];
@@ -118,7 +123,7 @@ export type LayerState<T extends "image" | "multiscale" | "grid" = "image" | "mu
 
 type WithId<T> = T & { id: string };
 
-export type ControllerProps<T = {}> = {
+export type ControllerProps<T = object> = {
   sourceAtom: PrimitiveAtom<WithId<SourceData>>;
   layerAtom: PrimitiveAtom<WithId<LayerState>>;
 } & T;
