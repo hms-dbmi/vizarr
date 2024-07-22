@@ -10,7 +10,7 @@ of the repository to your local machine and change directories:
 
 ```bash
 git clone https://github.com/your-username/vizarr.git
-cd vizarg
+cd vizarr
 ``` 
 
 Set the `upstream` remote to the base `vizarr` repository:
