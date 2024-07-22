@@ -1,8 +1,10 @@
 import type { CompositeLayerProps } from "@deck.gl/core/lib/composite-layer";
-import { CompositeLayer, SolidPolygonLayer, TextLayer } from "deck.gl";
+import { CompositeLayer, type PickInfo, SolidPolygonLayer, TextLayer } from "deck.gl";
 import pMap from "p-map";
 
+import type { SolidPolygonLayerProps, TextLayerProps } from "@deck.gl/layers";
 import { ColorPaletteExtension, XRLayer } from "@hms-dbmi/viv";
+import type { SupportedTypedArray } from "@vivjs/types";
 import type { ZarrPixelSource } from "./ZarrPixelSource";
 import type { BaseLayerProps } from "./state";
 import { assert } from "./utils";
@@ -14,8 +16,10 @@ export interface GridLoader {
   name: string;
 }
 
+type Polygon = Array<[number, number]>;
+
 export interface GridLayerProps
-  extends Omit<CompositeLayerProps<any>, "modelMatrix" | "opacity" | "onClick" | "id">,
+  extends Omit<CompositeLayerProps<unknown>, "modelMatrix" | "opacity" | "onClick" | "id">,
     BaseLayerProps {
   loaders: GridLoader[];
   rows: number;
@@ -26,7 +30,8 @@ export interface GridLayerProps
 }
 
 const defaultProps = {
-  ...(XRLayer as any).defaultProps,
+  // @ts-expect-error - XRLayer props are not typed
+  ...XRLayer.defaultProps,
   // Special grid props
   loaders: { type: "array", value: [], compare: true },
   spacer: { type: "number", value: 5, compare: true },
@@ -51,10 +56,10 @@ function validateWidthHeight(d: { data: { width: number; height: number } }[]) {
   // Return early if no grid data. Maybe throw an error?
   const { width, height } = first.data;
   // Verify that all grid data is same shape (ignoring undefined)
-  d.forEach(({ data }) => {
-    if (!data) return;
+  for (const { data } of d) {
+    if (!data) continue;
     assert(data.width === width && data.height === height, "Grid data is not same shape.");
-  });
+  }
   return { width, height };
 }
 
@@ -81,7 +86,7 @@ function refreshGridData(props: GridLayerProps) {
   return pMap(loaders, mapper, { concurrency });
 }
 
-export default class GridLayer<P extends GridLayerProps = GridLayerProps> extends CompositeLayer<any, P> {
+export default class GridLayer extends CompositeLayer<unknown, CompositeLayerProps<unknown> & GridLayerProps> {
   initializeState() {
     this.state = { gridData: [], width: 0, height: 0 };
     refreshGridData(this.props).then((gridData) => {
@@ -90,7 +95,17 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
     });
   }
 
-  updateState({ props, oldProps, changeFlags }: { props: GridLayerProps; oldProps: GridLayerProps; changeFlags: any }) {
+  updateState({
+    props,
+    oldProps,
+    changeFlags,
+  }: {
+    props: GridLayerProps;
+    oldProps: GridLayerProps;
+    changeFlags: {
+      propsChanged: string | boolean | null;
+    };
+  }) {
     const { propsChanged } = changeFlags;
     const loaderChanged = typeof propsChanged === "string" && propsChanged.includes("props.loaders");
     const loaderSelectionChanged = props.selections !== oldProps.selections;
@@ -102,7 +117,7 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
     }
   }
 
-  getPickingInfo({ info }: { info: any }) {
+  getPickingInfo({ info }: { info: PickInfo<unknown> }) {
     // provide Grid row and column info for mouse events (hover & click)
     if (!info.coordinate) {
       return info;
@@ -112,8 +127,10 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
     const [x, y] = info.coordinate;
     const row = Math.floor(y / (height + spacer));
     const column = Math.floor(x / (width + spacer));
-    info.gridCoord = { row, column }; // add custom property
-    return info;
+    return {
+      ...info,
+      gridCoord: { row, column },
+    };
   }
 
   renderLayers() {
@@ -121,7 +138,8 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
     if (width === 0 || height === 0) return null; // early return if no data
 
     const { rows, columns, spacer = 0, id = "" } = this.props;
-    const layers = gridData.map((d: any) => {
+    type Data = { row: number; col: number; loader: Pick<ZarrPixelSource, "dtype">; data: Array<SupportedTypedArray> };
+    const layers = gridData.map((d: Data) => {
       const y = d.row * (height + spacer);
       const x = d.col * (width + spacer);
       const layerProps = {
@@ -132,44 +150,47 @@ export default class GridLayer<P extends GridLayerProps = GridLayerProps> extend
         pickable: false,
         extensions: [new ColorPaletteExtension()],
       };
-      return new (XRLayer as any)({ ...this.props, ...layerProps });
+      // @ts-expect-error - XRLayer props are not well typed
+      return new XRLayer({ ...this.props, ...layerProps });
     });
 
     if (this.props.pickable) {
-      const [top, left] = [0, 0];
+      type Data = { polygon: Polygon };
       const bottom = rows * (height + spacer);
       const right = columns * (width + spacer);
       const polygon = [
-        [left, top],
-        [right, top],
+        [0, 0],
+        [right, 0],
         [right, bottom],
-        [left, bottom],
-      ];
+        [0, bottom],
+      ] satisfies Polygon;
       const layerProps = {
         data: [{ polygon }],
-        getPolygon: (d: any) => d.polygon,
+        getPolygon: (d) => d.polygon,
         getFillColor: [0, 0, 0, 0], // transparent
         getLineColor: [0, 0, 0, 0],
         pickable: true, // enable picking
         id: `${id}-GridLayer-picking`,
-      } as any; // I was having an issue with typescript here....
-      const pickableLayer = new SolidPolygonLayer({ ...this.props, ...layerProps });
-      layers.push(pickableLayer);
+      } satisfies SolidPolygonLayerProps<Data>;
+      // @ts-expect-error - SolidPolygonLayer props are not well typed
+      const layer = new SolidPolygonLayer<Data, SolidPolygonLayerProps<Data>>({ ...this.props, ...layerProps });
+      layers.push(layer);
     }
 
     if (this.props.text) {
-      const textLayer = new TextLayer({
+      type Data = { col: number; row: number; name: string };
+      const layer = new TextLayer<Data, TextLayerProps<Data>>({
         id: `${id}-GridLayer-text`,
         data: gridData,
-        getPosition: (d: any) => [d.col * (width + spacer), d.row * (height + spacer)],
-        getText: (d: any) => d.name,
+        getPosition: (d) => [d.col * (width + spacer), d.row * (height + spacer)],
+        getText: (d) => d.name,
         getColor: [255, 255, 255, 255],
         getSize: 16,
         getAngle: 0,
         getTextAnchor: "start",
         getAlignmentBaseline: "top",
       });
-      layers.push(textLayer);
+      layers.push(layer);
     }
 
     return layers;

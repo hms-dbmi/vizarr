@@ -1,7 +1,10 @@
 import debounce from "just-debounce-it";
 import * as vizarr from "./src/index";
 
-function initStandaloneApp(viewer: vizarr.VizarrViewer) {
+async function main() {
+  console.log(`vizarr v${vizarr.version}: https://github.com/hms-dbmi/vizarr`);
+  // biome-ignore lint/style/noNonNullAssertion: We know the element exists
+  const viewer = await vizarr.createViewer(document.querySelector("#root")!);
   const url = new URL(window.location.href);
 
   if (!url.searchParams.has("source")) {
@@ -9,8 +12,9 @@ function initStandaloneApp(viewer: vizarr.VizarrViewer) {
   }
 
   // see if we have initial viewState
-  if (url.searchParams.has("viewState")) {
-    const viewState = JSON.parse(url.searchParams.get("viewState")!);
+  const viewStateString = url.searchParams.get("viewState");
+  if (viewStateString) {
+    const viewState = JSON.parse(viewStateString);
     viewer.setViewState(viewState);
   }
 
@@ -26,9 +30,11 @@ function initStandaloneApp(viewer: vizarr.VizarrViewer) {
   );
 
   // parse image config
-  const config: any = {};
+  // @ts-expect-error - TODO: validate config
+  const config: vizarr.ImageLayerConfig = {};
 
   for (const [key, value] of url.searchParams) {
+    // @ts-expect-error - TODO: validate config
     config[key] = value;
   }
 
@@ -41,12 +47,6 @@ function initStandaloneApp(viewer: vizarr.VizarrViewer) {
   if (window.location.href !== newLocation) {
     window.history.pushState(null, "", newLocation);
   }
-}
-
-async function main() {
-  console.log(`vizarr v${vizarr.version}: https://github.com/hms-dbmi/vizarr`);
-  const viewer = await vizarr.createViewer(document.querySelector("#root")!);
-  initStandaloneApp(viewer);
 }
 
 main();

@@ -1,7 +1,7 @@
 import type { Readable } from "@zarrita/storage";
 import pMap from "p-map";
 import * as zarr from "zarrita";
-import type { ImageLayerConfig, SourceData } from "./state";
+import type { ImageLayerConfig, OnClickData, SourceData } from "./state";
 
 import { ZarrPixelSource } from "./ZarrPixelSource";
 import * as utils from "./utils";
@@ -76,7 +76,7 @@ export async function loadWell(
       });
   });
 
-  let meta;
+  let meta: Meta;
   if (utils.isOmeroMultiscales(imgAttrs)) {
     meta = parseOmeroMeta(imgAttrs.omero, axes);
   } else {
@@ -105,7 +105,7 @@ export async function loadWell(
 
   sourceData.rows = rows;
   sourceData.columns = cols;
-  sourceData.onClick = (info: any) => {
+  sourceData.onClick = (info: OnClickData) => {
     let gridCoord = info.gridCoord;
     if (!gridCoord) {
       return;
@@ -198,7 +198,7 @@ export async function loadPlate(
       loader: new ZarrPixelSource(d[1], { labels: axis_labels, tileSize }),
     };
   });
-  let meta;
+  let meta: Meta;
   if ("omero" in imgAttrs) {
     meta = parseOmeroMeta(imgAttrs.omero, axes);
   } else {
@@ -222,7 +222,7 @@ export async function loadPlate(
     columns: columns.length,
   };
   // Us onClick from image config or Open Well in new window
-  sourceData.onClick = (info: any) => {
+  sourceData.onClick = (info: OnClickData) => {
     let gridCoord = info.gridCoord;
     if (!gridCoord) {
       return;
@@ -270,7 +270,17 @@ export async function loadOmeroMultiscales(
   };
 }
 
-async function defaultMeta(loader: ZarrPixelSource<string[]>, axis_labels: string[]) {
+type Meta = {
+  name: string | undefined;
+  names: Array<string>;
+  colors: Array<string>;
+  contrast_limits: Array<[number, number] | undefined>;
+  visibilities: Array<boolean>;
+  channel_axis: number | null;
+  defaultSelection: Array<number>;
+};
+
+async function defaultMeta(loader: ZarrPixelSource<string[]>, axis_labels: string[]): Promise<Meta> {
   const channel_axis = axis_labels.indexOf("c");
   const channel_count = channel_axis === -1 ? 1 : loader.shape[channel_axis];
   const visibilities = utils.getDefaultVisibilities(channel_count);
@@ -287,7 +297,7 @@ async function defaultMeta(loader: ZarrPixelSource<string[]>, axis_labels: strin
   };
 }
 
-function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axes: Ome.Axis[]) {
+function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axes: Ome.Axis[]): Meta {
   const t = rdefs?.defaultT ?? 0;
   const z = rdefs?.defaultZ ?? 0;
 
