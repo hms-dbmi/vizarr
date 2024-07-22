@@ -1,15 +1,15 @@
-import { Divider, IconButton, NativeSelect, Paper, Popover, Typography } from "@material-ui/core";
+import { Divider, NativeSelect, Paper, Popover, Typography } from "@material-ui/core";
 import { Add } from "@material-ui/icons";
-import { useAtom } from "jotai";
 import React, { useState } from "react";
 import type { ChangeEvent, MouseEvent } from "react";
 
-import type { ControllerProps } from "../../state";
 import { MAX_CHANNELS, calcDataRange, hexToRGB } from "../../utils";
+import { useSource, useLayer } from "@/hooks";
+import { Button } from "@/components/ui/button";
 
-function AddChannelButton({ sourceAtom, layerAtom }: ControllerProps) {
-  const [source, setSource] = useAtom(sourceAtom);
-  const [layer, setLayer] = useAtom(layerAtom);
+function AddChannelButton() {
+  const [source, setSource] = useSource();
+  const [layer, setLayer] = useLayer();
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
@@ -69,19 +69,14 @@ function AddChannelButton({ sourceAtom, layerAtom }: ControllerProps) {
   const id = open ? `layer-${source.id}-add-channel` : undefined;
   return (
     <>
-      <IconButton
+      <Button
         onClick={handleClick}
-        aria-describedby={id}
-        style={{
-          backgroundColor: "transparent",
-          padding: 0,
-          zIndex: 2,
-          cursor: "pointer",
-        }}
+        variant="ghost"
+        size="icon-sm"
         disabled={layer.layerProps.selections.length === MAX_CHANNELS}
       >
         <Add />
-      </IconButton>
+      </Button>
       <Popover
         id={id}
         open={open}

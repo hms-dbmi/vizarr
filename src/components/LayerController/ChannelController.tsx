@@ -1,19 +1,14 @@
 import { Grid, IconButton, Slider, Typography } from "@material-ui/core";
 import { RadioButtonChecked, RadioButtonUnchecked } from "@material-ui/icons";
-import { useAtom } from "jotai";
-import { useAtomValue } from "jotai";
 import React from "react";
 import type { ChangeEvent } from "react";
-import type { ControllerProps } from "../../state";
 import ChannelOptions from "./ChannelOptions";
+import { useLayer, useSourceValue } from "@/hooks";
 
-interface ChannelConfig {
-  channelIndex: number;
-}
-
-function ChannelController({ sourceAtom, layerAtom, channelIndex }: ControllerProps<ChannelConfig>) {
-  const sourceData = useAtomValue(sourceAtom);
-  const [layer, setLayer] = useAtom(layerAtom);
+function ChannelController(props: { channelIndex: number }) {
+  const { channelIndex } = props;
+  const sourceData = useSourceValue();
+  const [layer, setLayer] = useLayer();
 
   const handleContrastChange = (_: ChangeEvent<unknown>, v: number | number[]) => {
     setLayer((prev) => {
@@ -54,7 +49,7 @@ function ChannelController({ sourceAtom, layerAtom, channelIndex }: ControllerPr
           </div>
         </Grid>
         <Grid item xs={1}>
-          <ChannelOptions sourceAtom={sourceAtom} layerAtom={layerAtom} channelIndex={channelIndex} />
+          <ChannelOptions channelIndex={channelIndex} />
         </Grid>
       </Grid>
       <Grid container justifyContent="space-between">

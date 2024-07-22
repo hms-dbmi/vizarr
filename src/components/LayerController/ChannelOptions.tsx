@@ -1,12 +1,10 @@
 import { Divider, IconButton, Input, NativeSelect, Paper, Popover, Typography } from "@material-ui/core";
 import { MoreHoriz, Remove } from "@material-ui/icons";
 import { withStyles } from "@material-ui/styles";
-import { useAtom } from "jotai";
-import { useAtomValue } from "jotai";
 import React, { useState } from "react";
 import type { ChangeEvent, MouseEvent } from "react";
-import type { ControllerProps } from "../../state";
 import ColorPalette from "./ColorPalette";
+import { useSourceValue, useLayer } from "@/hooks";
 
 const DenseInput = withStyles({
   root: {
@@ -15,13 +13,10 @@ const DenseInput = withStyles({
   },
 })(Input);
 
-interface Props {
-  channelIndex: number;
-}
-
-function ChannelOptions({ sourceAtom, layerAtom, channelIndex }: ControllerProps<Props>) {
-  const sourceData = useAtomValue(sourceAtom);
-  const [layer, setLayer] = useAtom(layerAtom);
+function ChannelOptions(props: { channelIndex: number }) {
+  const { channelIndex } = props;
+  const sourceData = useSourceValue();
+  const [layer, setLayer] = useLayer();
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);
   const { channel_axis, names } = sourceData;
 

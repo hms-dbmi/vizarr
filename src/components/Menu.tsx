@@ -1,57 +1,31 @@
-import { Grid, IconButton } from "@material-ui/core";
 import { Add, Remove } from "@material-ui/icons";
-import { makeStyles } from "@material-ui/styles";
 import { useAtomValue } from "jotai";
 import React, { useReducer } from "react";
 
 import { sourceInfoAtomAtoms } from "../state";
 import LayerController from "./LayerController";
 
-const useStyles = makeStyles({
-  root: {
-    zIndex: 1,
-    position: "absolute",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    borderRadius: "5px",
-    left: "5px",
-    top: "5px",
-  },
-  scroll: {
-    maxHeight: 500,
-    overflowX: "hidden",
-    overflowY: "scroll",
-    "&::-webkit-scrollbar": {
-      display: "none",
-      background: "transparent",
-    },
-    scrollbarWidth: "none",
-    flexDirection: "column",
-  },
-});
+import { Card } from "./ui/card";
+import { Button } from "@/components/ui/button";
+import { LayerContext } from "@/hooks";
+import clsx from "clsx";
 
 function Menu(props: { open?: boolean }) {
   const sourceAtoms = useAtomValue(sourceInfoAtomAtoms);
   const [hidden, toggle] = useReducer((v) => !v, !(props.open ?? true));
-  const classes = useStyles();
   return (
-    <div className={classes.root} style={{ padding: `0px 5px ${hidden ? 0 : 5}px 5px` }}>
-      <Grid container direction="column" alignItems="flex-start">
-        <IconButton
-          style={{
-            backgroundColor: "transparent",
-            padding: 0,
-          }}
-          onClick={toggle}
-        >
-          {hidden ? <Add /> : <Remove />}
-        </IconButton>
-        <div className={classes.scroll} style={{ display: hidden ? "none" : "flex" }}>
-          {sourceAtoms.map((sourceAtom) => (
-            <LayerController key={`${sourceAtom}`} sourceAtom={sourceAtom} />
-          ))}
-        </div>
-      </Grid>
-    </div>
+    <Card className="relative left-2 top-2 z-20 w-fit border-border rounded-lg bg-card/85">
+      <Button onClick={toggle} variant="ghost" className="m-1 p-0 w-4 h-4 hover:bg-transparent cursor-pointer">
+        {hidden ? <Add /> : <Remove />}
+      </Button>
+      <div className={clsx("max-h-[500px] p-1 pt-0 no-scrollbar -mt-2 mb-0.5", hidden && "hidden")}>
+        {sourceAtoms.map((sourceAtom) => (
+          <LayerContext.Provider value={sourceAtom} key={`${sourceAtom}`}>
+            <LayerController />
+          </LayerContext.Provider>
+        ))}
+      </div>
+    </Card>
   );
 }
 

@@ -25,35 +25,6 @@ function Content({ sourceAtom, layerAtom }: ControllerProps) {
   const nChannels = layer.layerProps.selections.length;
   return (
     <Details>
-      <Grid container direction="column">
-        <AcquisitionController sourceAtom={sourceAtom} layerAtom={layerAtom} />
-        <Grid>
-          <Grid container justifyContent="space-between">
-            <Grid item xs={3}>
-              <Typography variant="caption">opacity:</Typography>
-            </Grid>
-            <Grid item xs={8}>
-              <OpacitySlider sourceAtom={sourceAtom} layerAtom={layerAtom} />
-            </Grid>
-          </Grid>
-        </Grid>
-        <Divider />
-        <AxisSliders sourceAtom={sourceAtom} layerAtom={layerAtom} />
-        <Grid container justifyContent="space-between">
-          <Grid item xs={3}>
-            <Typography variant="caption">channels:</Typography>
-          </Grid>
-          <Grid item xs={1}>
-            <AddChannelButton sourceAtom={sourceAtom} layerAtom={layerAtom} />
-          </Grid>
-        </Grid>
-        <Divider />
-        <Grid>
-          {range(nChannels).map((i) => (
-            <ChannelController sourceAtom={sourceAtom} layerAtom={layerAtom} channelIndex={i} key={i} />
-          ))}
-        </Grid>
-      </Grid>
     </Details>
   );
 }
