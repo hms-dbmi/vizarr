@@ -1,4 +1,3 @@
-import { ThemeProvider } from "@material-ui/styles";
 import { Provider, atom } from "jotai";
 import { useSetAtom } from "jotai";
 import * as React from "react";
@@ -8,7 +7,6 @@ import Menu from "./components/Menu";
 import Viewer from "./components/Viewer";
 import "./codecs/register";
 import { type ImageLayerConfig, type ViewState, addImageAtom, atomWithEffect } from "./state";
-import theme from "./theme";
 import { defer, typedEmitter } from "./utils";
 
 export { version } from "../package.json";
@@ -64,11 +62,9 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
   }
   let root = ReactDOM.createRoot(element);
   root.render(
-    <ThemeProvider theme={theme}>
-      <Provider>
-        <App />
-      </Provider>
-    </ThemeProvider>,
+    <Provider>
+      <App />
+    </Provider>,
   );
   return promise;
 }
