@@ -66,10 +66,11 @@ function LayerController() {
             <span className="ml-2 font-normal text-">{name}</span>
           </div>
         </AccordionTrigger>
-        <AccordionContent className="flex flex-col">
-          {true ? (
+        <AccordionContent className="flex flex-col pb-0">
+          {(info.acquisitions?.length ?? 0) > 0 ? (
             <>
-              <AcquisitionSelect acquisitions={info.acquisitions} acquisitionId={layer.layerProps.acquisitionId} />
+              {/* biome-ignore lint/style/noNonNullAssertion: Ok because we assert above */}
+              <AcquisitionSelect acquisitions={info.acquisitions!} acquisitionId={info.acquisitionId} />
               <Separator />
             </>
           ) : null}

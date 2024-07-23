@@ -19,7 +19,7 @@ function AxisOptions(props: { axisIndex: number; max: number }) {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="px-1 pt-0 pb-1 w-32 border-border rounded-lg" side="bottom" alignOffset={20}>
-        <span className="text-xs">Index:</span>
+        <span className="text-xs">index:</span>
         <Separator />
         <Input
           className="w-full focus:ring-0 focus-visible:ring-0 focus:border-none p-0 h-7 border-none text-xs cursor-pointer select-none"

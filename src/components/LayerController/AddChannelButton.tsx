@@ -1,37 +1,26 @@
-import { Divider, NativeSelect, Paper, Popover, Typography } from "@material-ui/core";
-import { Add } from "@material-ui/icons";
-import React, { useState } from "react";
-import type { ChangeEvent, MouseEvent } from "react";
+import { PlusIcon } from "@radix-ui/react-icons";
+import * as React from "react";
 
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { useLayer, useSource } from "@/hooks";
-import { MAX_CHANNELS, calcDataRange, hexToRGB } from "../../utils";
+import { MAX_CHANNELS, calcDataRange, hexToRGB } from "@/utils";
 
 function AddChannelButton() {
   const [source, setSource] = useSource();
   const [layer, setLayer] = useLayer();
-  const [anchorEl, setAnchorEl] = useState<null | Element>(null);
 
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleChange = async (event: ChangeEvent<HTMLSelectElement>) => {
-    handleClose();
-    const channelIndex = +event.target.value;
-    const channelSelection = [...source.defaults.selection];
-    if (source.channel_axis) {
-      channelSelection[source.channel_axis] = channelIndex;
-    }
+  const handleChange = async (channelIndex: number) => {
+    const channelSelection = source.channel_axis
+      ? source.defaults.selection.with(source.channel_axis, channelIndex)
+      : [...source.defaults.selection];
 
     // cacluate contrast limits if missing from source;
     let lim: [min: number, max: number];
     if (source.contrast_limits[channelIndex]) {
-      lim = source.contrast_limits[channelIndex] as [number, number];
+      lim = source.contrast_limits[channelIndex];
     } else {
       const { loader } = layer.layerProps;
       const lowres = Array.isArray(loader) ? loader[loader.length - 1] : loader;
@@ -43,15 +32,13 @@ function AddChannelButton() {
         return { ...prev, contrast_limits: clims };
       });
     }
-
-    setLayer((prev) => {
-      const { layerProps } = prev;
+    setLayer(({ layerProps, ...rest }) => {
       const selections = [...layerProps.selections, channelSelection];
       const colors = [...layerProps.colors, hexToRGB(source.colors[channelIndex])];
       const contrastLimits = [...layerProps.contrastLimitsRange, lim];
       const channelsVisible = [...layerProps.channelsVisible, true];
       return {
-        ...prev,
+        ...rest,
         layerProps: {
           ...layerProps,
           selections,
@@ -64,54 +51,35 @@ function AddChannelButton() {
     });
   };
 
-  const { names } = source;
-  const open = Boolean(anchorEl);
-  const id = open ? `layer-${source.id}-add-channel` : undefined;
   return (
-    <>
-      <Button
-        onClick={handleClick}
-        variant="ghost"
-        size="icon-sm"
-        disabled={layer.layerProps.selections.length === MAX_CHANNELS}
-      >
-        <Add />
-      </Button>
-      <Popover
-        id={id}
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
-      >
-        <Paper style={{ padding: "0px 4px", marginBottom: 4, width: "8em" }}>
-          <Typography variant="caption">selection: </Typography>
-          <Divider />
-          <NativeSelect
-            fullWidth
-            style={{ fontSize: "0.7em" }}
-            id={`layer-${source.id}-channel-select`}
-            onChange={handleChange}
-          >
-            <option aria-label="None" value="">
-              None
-            </option>
-            {names.map((name, i) => (
-              <option value={i} key={name}>
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="cursor-pointer bg-card hover:bg-card"
+          disabled={layer.layerProps.selections.length === MAX_CHANNELS}
+        >
+          <PlusIcon className="fill-accent" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="px-1 pt-0 pb-1 w-32 border-border rounded-lg" side="bottom" alignOffset={20}>
+        <span className="text-xs">selection:</span>
+        <Separator />
+        <Select onValueChange={(i) => handleChange(+i)} value={undefined}>
+          <SelectTrigger className="w-full focus:ring-0 p-0 h-7 border-none text-xs cursor-pointer select-none">
+            <SelectValue placeholder="None" />
+          </SelectTrigger>
+          <SelectContent className="focus:ring-0 border-none">
+            {source.names.map((name, i) => (
+              <SelectItem value={String(i)} key={name}>
                 {name}
-              </option>
+              </SelectItem>
             ))}
-          </NativeSelect>
-        </Paper>
-      </Popover>
-    </>
+          </SelectContent>
+        </Select>
+      </PopoverContent>
+    </Popover>
   );
 }
 
