@@ -1,85 +1,75 @@
-import { Grid, IconButton, Slider, Typography } from "@material-ui/core";
-import { RadioButtonChecked, RadioButtonUnchecked } from "@material-ui/icons";
-import React from "react";
-import type { ChangeEvent } from "react";
-import ChannelOptions from "./ChannelOptions";
+import * as React from "react";
+
+import { Slider } from "@/components/ui/slider";
 import { useLayer, useSourceValue } from "@/hooks";
+import ChannelOptions from "./ChannelOptions";
 
 function ChannelController(props: { channelIndex: number }) {
-  const { channelIndex } = props;
+  const { channelIndex: i } = props;
   const sourceData = useSourceValue();
   const [layer, setLayer] = useLayer();
+  const { contrastLimits, contrastLimitsRange, channelsVisible, colors, colormap, selections } = layer.layerProps;
 
-  const handleContrastChange = (_: ChangeEvent<unknown>, v: number | number[]) => {
-    setLayer((prev) => {
-      const contrastLimits = [...prev.layerProps.contrastLimits];
-      contrastLimits[channelIndex] = v as [number, number];
-      return { ...prev, layerProps: { ...prev.layerProps, contrastLimits } };
-    });
-  };
-
-  const handleVisibilityChange = () => {
-    setLayer((prev) => {
-      const channelsVisible = [...prev.layerProps.channelsVisible];
-      channelsVisible[channelIndex] = !channelsVisible[channelIndex];
-      return { ...prev, layerProps: { ...prev.layerProps, channelsVisible } };
-    });
-  };
-
-  const lp = layer.layerProps;
-
-  // Material slider tries to sort in place. Need to copy.
-  const value = [...lp.contrastLimits[channelIndex]];
-  const color = `rgb(${lp.colormap ? [255, 255, 255] : lp.colors[channelIndex]})`;
-  const on = lp.channelsVisible[channelIndex];
-  const [min, max] = lp.contrastLimitsRange[channelIndex];
+  const value = contrastLimits[i];
+  const color = `rgb(${colormap ? [255, 255, 255] : colors[i]})`;
+  const on = channelsVisible[i];
+  const [min, max] = contrastLimitsRange[i];
 
   const { channel_axis, names } = sourceData;
-  const selection = lp.selections[channelIndex];
-  const nameIndex = Number.isInteger(channel_axis) ? selection[channel_axis as number] : 0;
+  const selection = selections[i];
+  const nameIndex = Number.isInteger(channel_axis) && channel_axis !== null ? selection[channel_axis] : 0;
   const label = names[nameIndex];
+
   return (
     <>
-      <Grid container justifyContent="space-between" wrap="nowrap">
-        <Grid item xs={10}>
-          <div style={{ width: 165, overflow: "hidden", textOverflow: "ellipsis" }}>
-            <Typography variant="caption" noWrap>
-              {label}
-            </Typography>
-          </div>
-        </Grid>
-        <Grid item xs={1}>
-          <ChannelOptions channelIndex={channelIndex} />
-        </Grid>
-      </Grid>
-      <Grid container justifyContent="space-between">
-        <Grid item xs={2}>
-          <IconButton
-            style={{
-              color,
-              backgroundColor: "transparent",
-              padding: 0,
-              zIndex: 2,
+      <div className="flex items-center justify-between">
+        <label className="text-xs w-44 text-ellipsis overflow-hidden select-none">{label}</label>
+        <ChannelOptions channelIndex={i} />
+      </div>
+      <div className="flex items-center">
+        <label className="cursor-pointer">
+          {on ? (
+            <svg viewBox="0 -960 960 960" className="w-5 h-5" fill={color} role="img" aria-label="enabled">
+              <path d="M480-280q83 0 141.5-58.5T680-480q0-83-58.5-141.5T480-680q-83 0-141.5 58.5T280-480q0 83 58.5 141.5T480-280Zm0 200q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+            </svg>
+          ) : (
+            <svg viewBox="0 -960 960 960" className="w-5 h-5" fill={color} role="img" aria-label="disabled">
+              <path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+            </svg>
+          )}
+          <input
+            type="checkbox"
+            onChange={(event) => {
+              setLayer((prev) => ({
+                ...prev,
+                layerProps: {
+                  ...prev.layerProps,
+                  channelsVisible: prev.layerProps.channelsVisible.with(i, event.currentTarget.checked),
+                },
+              }));
             }}
-            onClick={handleVisibilityChange}
-          >
-            {on ? <RadioButtonChecked /> : <RadioButtonUnchecked />}
-          </IconButton>
-        </Grid>
-        <Grid item xs={10}>
-          <Slider
-            value={value}
-            onChange={handleContrastChange}
-            min={min}
-            max={max}
-            step={0.01}
-            style={{
-              padding: "10px 0px 5px 0px",
-              color,
-            }}
+            checked={on}
+            className="hidden"
           />
-        </Grid>
-      </Grid>
+        </label>
+        <Slider
+          className="mx-1"
+          value={value}
+          onValueChange={(value: [number, number]) => {
+            setLayer((prev) => ({
+              ...prev,
+              layerProps: {
+                ...prev.layerProps,
+                contrastLimits: prev.layerProps.contrastLimits.with(i, value),
+              },
+            }));
+          }}
+          color={color}
+          min={min}
+          max={max}
+          step={0.01}
+        />
+      </div>
     </>
   );
 }

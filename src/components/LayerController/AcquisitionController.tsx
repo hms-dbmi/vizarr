@@ -1,5 +1,5 @@
-import React from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import React from "react";
 
 function AcquisitionController(props: {
   acquisitionId: string | number | undefined;
@@ -22,7 +22,7 @@ function AcquisitionController(props: {
         window.location.href = decodeURIComponent(url.href);
       }}
     >
-      <SelectTrigger className="w-full focus:ring-0 p-0 h-7 border-none text-xs">
+      <SelectTrigger className="w-full focus:ring-0 p-0 h-7 border-none text-xs cursor-pointer select-none">
         <SelectValue placeholder="Filter by Acquisition" />
       </SelectTrigger>
       <SelectContent className="focus:ring-0 border-none">

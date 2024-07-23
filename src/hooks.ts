@@ -1,7 +1,7 @@
+import { type PrimitiveAtom, useAtom, useAtomValue } from "jotai";
 import * as React from "react";
-import { useAtom, useAtomValue, type PrimitiveAtom } from "jotai";
 
-import { layerFamilyAtom, type SourceData } from "./state";
+import { type SourceData, layerFamilyAtom } from "./state";
 import { assert } from "./utils";
 
 type WithId<T> = { id: string } & T;

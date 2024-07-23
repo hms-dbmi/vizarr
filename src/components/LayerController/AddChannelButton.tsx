@@ -3,9 +3,9 @@ import { Add } from "@material-ui/icons";
 import React, { useState } from "react";
 import type { ChangeEvent, MouseEvent } from "react";
 
-import { MAX_CHANNELS, calcDataRange, hexToRGB } from "../../utils";
-import { useSource, useLayer } from "@/hooks";
 import { Button } from "@/components/ui/button";
+import { useLayer, useSource } from "@/hooks";
+import { MAX_CHANNELS, calcDataRange, hexToRGB } from "../../utils";
 
 function AddChannelButton() {
   const [source, setSource] = useSource();

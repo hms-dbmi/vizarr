@@ -1,19 +1,14 @@
-import { Grid, Typography } from "@material-ui/core";
+import { Slider } from "@/components/ui/slider";
+import { useLayer, useSourceValue } from "@/hooks";
 import * as React from "react";
 import DimensionOptions from "./AxisOptions";
-import { useLayer, useSourceValue } from "@/hooks";
-import { Slider } from "@/components/ui/slider";
-
-interface Props {
-  axisIndex: number;
-  max: number;
-}
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-function AxisSlider({ axisIndex, max }: Props) {
+function AxisSlider(props: { axisIndex: number; max: number }) {
+  const { axisIndex, max } = props;
   const sourceData = useSourceValue();
   const [layer, setLayer] = useLayer();
   const { axis_labels } = sourceData;
@@ -31,31 +26,33 @@ function AxisSlider({ axisIndex, max }: Props) {
   let id = `axis-${axisIndex}-${sourceData.id}-slider`;
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 w-full">
       <div className="flex justify-between">
         <label htmlFor={id} className="text-xs w-52 ellipsis">
           {axisLabel}: {value}/{max}
         </label>
         <DimensionOptions axisIndex={axisIndex} max={max} />
       </div>
-      <Slider
-        id={id}
-        value={[value]}
-        onValueChange={([update]) => setValue(update)}
-        onValueCommit={([update]) => {
-          setLayer((prev) => {
-            let layerProps = { ...prev.layerProps };
-            // for each channel, update index of this axis
-            layerProps.selections = layerProps.selections.map((ch) => {
-              return ch.with(axisIndex, update);
+      <div className="w-full px-1">
+        <Slider
+          id={id}
+          value={[value]}
+          onValueChange={([update]) => setValue(update)}
+          onValueCommit={([update]) => {
+            setLayer((prev) => {
+              let layerProps = { ...prev.layerProps };
+              // for each channel, update index of this axis
+              layerProps.selections = layerProps.selections.map((ch) => {
+                return ch.with(axisIndex, update);
+              });
+              return { ...prev, layerProps };
             });
-            return { ...prev, layerProps };
-          });
-        }}
-        min={0}
-        max={max}
-        step={1}
-      />
+          }}
+          min={0}
+          max={max}
+          step={1}
+        />
+      </div>
     </div>
   );
 }

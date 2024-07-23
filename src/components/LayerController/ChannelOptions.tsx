@@ -1,10 +1,10 @@
+import { useLayer, useSourceValue } from "@/hooks";
 import { Divider, IconButton, Input, NativeSelect, Paper, Popover, Typography } from "@material-ui/core";
 import { MoreHoriz, Remove } from "@material-ui/icons";
 import { withStyles } from "@material-ui/styles";
 import React, { useState } from "react";
 import type { ChangeEvent, MouseEvent } from "react";
 import ColorPalette from "./ColorPalette";
-import { useSourceValue, useLayer } from "@/hooks";
 
 const DenseInput = withStyles({
   root: {
