@@ -1,3 +1,4 @@
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { useLayer } from "@/hooks";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 
 function AxisOptions(props: { axisIndex: number; max: number }) {
   const { axisIndex, max } = props;
