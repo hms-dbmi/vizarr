@@ -72,7 +72,7 @@ function AddChannelButton() {
           </SelectTrigger>
           <SelectContent className="focus:ring-0 border-none">
             {source.names.map((name, i) => (
-              <SelectItem value={String(i)} key={name}>
+              <SelectItem className="text-xs" value={String(i)} key={name}>
                 {name}
               </SelectItem>
             ))}

@@ -8,6 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { useLayer, useSourceValue } from "@/hooks";
+import { range } from "@/utils";
 
 /** Get the { name, idx, size } for each axis that is not the channel_axis and has size > 1 */
 function axisSliders(info: {
@@ -99,7 +100,7 @@ function LayerController() {
           </div>
           <Separator />
           <div>
-            {Array.from({ length: nChannels }).map((_, i) => (
+            {range(nChannels).map((i) => (
               <ChannelController channelIndex={i} key={`${name}-${i}`} />
             ))}
           </div>

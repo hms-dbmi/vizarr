@@ -7,8 +7,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useLayer, useSourceValue } from "@/hooks";
-import { clamp } from "@/utils";
-import ColorPalette from "./ColorPalette";
+import { COLORS, clamp, hexToRGB } from "@/utils";
+
+const RGB_COLORS: [string, string][] = Object.entries(COLORS);
 
 function ChannelOptions(props: { channelIndex: number }) {
   const { channelIndex: i } = props;
@@ -96,7 +97,7 @@ function ChannelOptions(props: { channelIndex: number }) {
           </SelectTrigger>
           <SelectContent className="focus:ring-0 border-none">
             {names.map((name, i) => (
-              <SelectItem value={String(i)} key={name}>
+              <SelectItem className="text-xs" value={String(i)} key={name}>
                 {name}
               </SelectItem>
             ))}
@@ -120,18 +121,25 @@ function ChannelOptions(props: { channelIndex: number }) {
         <Separator />
         <span className="text-xs">color:</span>
         <Separator />
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <ColorPalette
-            handleChange={(rgb) => {
-              setLayer(({ layerProps, ...rest }) => ({
-                ...rest,
-                layerProps: {
-                  ...layerProps,
-                  colors: layerProps.colors.with(i, rgb),
-                },
-              }));
-            }}
-          />
+        <div className="flex items-center justify-between" aria-label="color-swatch">
+          {RGB_COLORS.map(([name, rgb]) => (
+            <button
+              type="button"
+              aria-label={name}
+              style={{ backgroundColor: rgb }}
+              className="w-3.5 h-3.5 rounded-full cursor-pointer"
+              key={name}
+              onClick={() => {
+                setLayer(({ layerProps, ...rest }) => ({
+                  ...rest,
+                  layerProps: {
+                    ...layerProps,
+                    colors: layerProps.colors.with(i, hexToRGB(rgb)),
+                  },
+                }));
+              }}
+            />
+          ))}
         </div>
       </PopoverContent>
     </Popover>
