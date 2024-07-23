@@ -5,13 +5,7 @@ function AcquisitionController(props: {
   acquisitionId: string | number | undefined;
   acquisitions: Array<Ome.Acquisition>;
 }) {
-  const {
-    acquisitionId,
-    acquisitions = [
-      { id: "1", name: "testring a" },
-      { id: 2, name: "testing 1,2,3" },
-    ],
-  } = props;
+  const { acquisitionId, acquisitions } = props;
   const id = acquisitionId ? String(acquisitionId) : undefined;
   return (
     <Select
