@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useLayer, useSourceValue } from "@/hooks";
-import { COLORS, clamp, hexToRGB } from "@/utils";
+import { assert, COLORS, clamp, hexToRGB } from "@/utils";
 
 const RGB_COLORS: [string, string][] = Object.entries(COLORS);
 
@@ -16,6 +16,7 @@ function ChannelOptions(props: { channelIndex: number }) {
   const info = useSourceValue();
   const [layer, setLayer] = useLayer();
   const { channel_axis, names } = info;
+  assert(channel_axis !== null, "channel_axis is null");
 
   const handleContrastLimitChange = (unclamped: number, which: "min" | "max") => {
     const value = clamp(unclamped, { min: 0 });
@@ -42,15 +43,13 @@ function ChannelOptions(props: { channelIndex: number }) {
   };
 
   const handleSelectionChange = (idx: number) => {
-    setLayer((prev) => {
-      const selections = [...prev.layerProps.selections];
-      const channelSelection = [...selections[i]];
-      if (Number.isInteger(channel_axis)) {
-        channelSelection[channel_axis as number] = idx;
-        selections[i] = channelSelection;
-      }
-      return { ...prev, layerProps: { ...prev.layerProps, selections } };
-    });
+    setLayer(({ layerProps, ...rest }) => ({
+      ...rest,
+      layerProps: {
+        ...layerProps,
+        selections: layerProps.selections.with(i, layerProps.selections[i].with(channel_axis, idx)),
+      },
+    }));
   };
 
   const [vmin, vmax] = layer.layerProps.contrastLimits[i];
@@ -68,7 +67,7 @@ function ChannelOptions(props: { channelIndex: number }) {
           <Button
             variant="ghost"
             size="icon-sm"
-            className="cursor-pointer bg-card hover:bg-card"
+            className="-mr-1 cursor-pointer bg-card hover:bg-card"
             onMouseDown={() => {
               setLayer(({ layerProps, ...rest }) => {
                 return {
@@ -89,11 +88,14 @@ function ChannelOptions(props: { channelIndex: number }) {
           </Button>
         </div>
         <Separator />
-        <span className="text-xs">selection:</span>
+        <span className="text-xs">channel:</span>
         <Separator />
-        <Select onValueChange={(i) => handleSelectionChange(+i)} value={undefined}>
+        <Select
+          onValueChange={(i) => handleSelectionChange(+i)}
+          value={String(layer.layerProps.selections[i][channel_axis])}
+        >
           <SelectTrigger className="w-full focus:ring-0 p-0 h-7 border-none text-xs cursor-pointer select-none">
-            <SelectValue placeholder="None" />
+            <SelectValue />
           </SelectTrigger>
           <SelectContent className="focus:ring-0 border-none">
             {names.map((name, i) => (
