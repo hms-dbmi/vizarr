@@ -42,8 +42,8 @@ importers:
         specifier: ^0.16.1
         version: 0.16.1
       '@zarrita/storage':
-        specifier: ^0.0.2
-        version: 0.0.2
+        specifier: 0.1.0-next.5
+        version: 0.1.0-next.5
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.0
@@ -1248,9 +1248,6 @@ packages:
 
   '@zarrita/indexing@0.1.0-next.14':
     resolution: {integrity: sha512-13Af1eQgdkp9Cw+tQf3jQ5YYirkR2YEIiPFRcwNuHV3u2ycM1okuY2lilIjQ1hgeJzrmIc3q/y72ioT4bgiwcQ==}
-
-  '@zarrita/storage@0.0.2':
-    resolution: {integrity: sha512-uFt4abAoiOYLroalNDAnVaQxA17zGKrQ0waYKmTVm+bNonz8ggKZP+0FqMhgUZITGChqoANHuYTazbuU5AFXWA==}
 
   '@zarrita/storage@0.1.0-next.5':
     resolution: {integrity: sha512-E1VSxhNGZHL4RsKfIuyaz0HRsDk7hOU8Y7R+8yvKolaHDjK31XQsUgu97oaR24qS1j1OOg5vGyFyd+y0q7FNOA==}
@@ -3236,11 +3233,6 @@ snapshots:
       '@zarrita/core': 0.1.0-next.12
       '@zarrita/storage': 0.1.0-next.5
       '@zarrita/typedarray': 0.1.0-next.3
-
-  '@zarrita/storage@0.0.2':
-    dependencies:
-      reference-spec-reader: 0.2.0
-      unzipit: 1.4.3
 
   '@zarrita/storage@0.1.0-next.5':
     dependencies:
