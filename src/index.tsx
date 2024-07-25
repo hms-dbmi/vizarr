@@ -6,12 +6,13 @@ import ReactDOM from "react-dom/client";
 import Menu from "./components/Menu";
 import Viewer from "./components/Viewer";
 import "./codecs/register";
-import { type ImageLayerConfig, type ViewState, addImageAtom, atomWithEffect } from "./state";
+import { type ImageLayerConfig, type ViewState, addImageAtom } from "./state";
 import { defer, typedEmitter } from "./utils";
 
 export { version } from "../package.json";
 
 import "./index.css";
+import { ViewStateContext } from "./hooks";
 
 type Events = {
   viewStateChange: ViewState;
@@ -29,9 +30,14 @@ export interface VizarrViewer {
 export function createViewer(element: HTMLElement, options: { menuOpen?: boolean } = {}): Promise<VizarrViewer> {
   const ref = React.createRef<VizarrViewer>();
   const emitter = typedEmitter<Events>();
-  const viewStateAtom = atomWithEffect<ViewState | undefined, ViewState>(
-    atom<ViewState | undefined>(undefined),
-    ({ zoom, target }) => emitter.emit("viewStateChange", { zoom, target }),
+  const viewStateAtom = atom<ViewState | undefined>(undefined);
+  const viewStateAtomWithUrlSync = atom(
+    (get) => get(viewStateAtom),
+    (get, set, update) => {
+      const next = typeof update === "function" ? update(get(viewStateAtom)) : update;
+      next && emitter.emit("viewStateChange", { target: next.target, zoom: next.zoom });
+      set(viewStateAtom, next);
+    },
   );
   const { promise, resolve } = defer<VizarrViewer>();
 
@@ -54,10 +60,10 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
       }
     }, []);
     return (
-      <>
+      <ViewStateContext.Provider value={viewStateAtomWithUrlSync}>
         <Menu open={options.menuOpen ?? true} />
-        <Viewer viewStateAtom={viewStateAtom} />
-      </>
+        <Viewer />
+      </ViewStateContext.Provider>
     );
   }
   let root = ReactDOM.createRoot(element);

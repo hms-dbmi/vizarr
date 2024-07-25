@@ -1,12 +1,11 @@
 import DeckGL from "deck.gl";
 import { type Layer, OrthographicView } from "deck.gl";
-import { type WritableAtom, useAtom } from "jotai";
 import { useAtomValue } from "jotai";
 import * as React from "react";
 
+import { useViewState } from "@/hooks";
 import type { LayerProps } from "@deck.gl/core/lib/layer";
 import type { ZarrPixelSource } from "../ZarrPixelSource";
-import type { ViewState } from "../state";
 import { layerAtoms } from "../state";
 import { fitBounds, isInterleaved } from "../utils";
 
@@ -28,11 +27,8 @@ function getLayerSize(props: Data) {
   return { height, width, maxZoom };
 }
 
-function WrappedViewStateDeck(props: {
-  layers: Array<VizarrLayer | null>;
-  viewStateAtom: WritableAtom<ViewState | undefined, ViewState>;
-}) {
-  const [viewState, setViewState] = useAtom(props.viewStateAtom);
+function WrappedViewStateDeck(props: { layers: Array<VizarrLayer | null> }) {
+  const [viewState, setViewState] = useViewState();
   const deckRef = React.useRef<DeckGL>(null);
   const firstLayerProps = props.layers[0]?.props;
 
@@ -46,11 +42,6 @@ function WrappedViewStateDeck(props: {
     setViewState(bounds);
   }
 
-  // Enables screenshots of the canvas: https://github.com/visgl/deck.gl/issues/2200
-  const glOptions: WebGLContextAttributes = {
-    preserveDrawingBuffer: true,
-  };
-
   return (
     <DeckGL
       ref={deckRef}
@@ -58,18 +49,21 @@ function WrappedViewStateDeck(props: {
       viewState={viewState}
       onViewStateChange={(e) => setViewState(e.viewState)}
       views={[new OrthographicView({ id: "ortho", controller: true })]}
-      glOptions={glOptions}
+      glOptions={{
+        // Enables screenshots of the canvas: https://github.com/visgl/deck.gl/issues/2200
+        preserveDrawingBuffer: true,
+      }}
     />
   );
 }
 
-function Viewer({ viewStateAtom }: { viewStateAtom: WritableAtom<ViewState | undefined, ViewState> }) {
+function Viewer() {
   const layerConstructors = useAtomValue(layerAtoms);
   // @ts-expect-error - Viv types are giving up an issue
   const layers: Array<VizarrLayer | null> = layerConstructors.map((layer) => {
     return !layer.on ? null : new layer.Layer(layer.layerProps);
   });
-  return <WrappedViewStateDeck viewStateAtom={viewStateAtom} layers={layers} />;
+  return <WrappedViewStateDeck layers={layers} />;
 }
 
 export default Viewer;
