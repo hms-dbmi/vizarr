@@ -20,24 +20,17 @@ function ChannelOptions(props: { channelIndex: number }) {
 
   const handleContrastLimitChange = (unclamped: number, which: "min" | "max") => {
     const value = clamp(unclamped, { min: 0 });
-
-    setLayer((prev) => {
-      const contrastLimitsRange = [...prev.layerProps.contrastLimitsRange];
-      const contrastLimits = [...prev.layerProps.contrastLimits];
-
-      const [cmin, cmax] = contrastLimitsRange[i];
-      const [smin, smax] = contrastLimits[i];
-
-      const [umin, umax] = which === "min" ? [value, cmax] : [cmin, value];
-
-      // Update sliders if needed
-      if (umin > smin) contrastLimits[i] = [umin, smax];
-      if (umax < smax) contrastLimits[i] = [smin, umax];
-
-      contrastLimitsRange[i] = [umin, umax];
+    setLayer(({ layerProps, ...rest }) => {
+      const lims = layerProps.contrastLimitsRange[i];
+      const vals = layerProps.contrastLimits[i];
+      const [min, max] = which === "min" ? [value, lims[1]] : [lims[0], value];
       return {
-        ...prev,
-        layerProps: { ...prev.layerProps, contrastLimits, contrastLimitsRange },
+        ...rest,
+        layerProps: {
+          ...layerProps,
+          contrastLimits: layerProps.contrastLimits.with(i, [clamp(vals[0], { min }), clamp(vals[1], { min: 0, max })]),
+          contrastLimitsRange: layerProps.contrastLimitsRange.with(i, [min, max]),
+        },
       };
     });
   };
@@ -52,7 +45,7 @@ function ChannelOptions(props: { channelIndex: number }) {
     }));
   };
 
-  const [vmin, vmax] = layer.layerProps.contrastLimits[i];
+  const [min, max] = layer.layerProps.contrastLimitsRange[i];
 
   return (
     <Popover>
@@ -109,16 +102,26 @@ function ChannelOptions(props: { channelIndex: number }) {
         <span className="text-xs">contrast limits:</span>
         <Separator />
         <Input
-          className="w-full focus:ring-0 focus-visible:ring-0 focus:border-none p-0 h-7 border-none text-xs cursor-pointer select-none"
-          value={vmin}
-          onChange={(e) => handleContrastLimitChange(+e.target.value, "min")}
           type="number"
+          className="w-full focus:ring-0 focus-visible:ring-0 focus:border-none p-0 h-7 border-none text-xs cursor-pointer select-none"
+          defaultValue={min}
+          onKeyDown={(e) => {
+            if (e.key !== "Enter") return;
+            const value = +e.currentTarget.value;
+            handleContrastLimitChange(value, "min");
+          }}
+          onBlur={(e) => handleContrastLimitChange(+e.currentTarget.value, "min")}
         />
         <Input
-          className="w-full focus:ring-0 focus-visible:ring-0 focus:border-none p-0 h-7 border-none text-xs cursor-pointer select-none"
-          value={vmax}
-          onChange={(e) => handleContrastLimitChange(+e.target.value, "max")}
           type="number"
+          className="w-full focus:ring-0 focus-visible:ring-0 focus:border-none p-0 h-7 border-none text-xs cursor-pointer select-none"
+          defaultValue={max}
+          onKeyDown={(e) => {
+            if (e.key !== "Enter") return;
+            const value = +e.currentTarget.value;
+            handleContrastLimitChange(value, "max");
+          }}
+          onBlur={(e) => handleContrastLimitChange(+e.currentTarget.value, "max")}
         />
         <Separator />
         <span className="text-xs">color:</span>

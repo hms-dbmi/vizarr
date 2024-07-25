@@ -8,15 +8,14 @@ function ChannelController(props: { channelIndex: number }) {
   const { channelIndex: i } = props;
   const sourceData = useSourceValue();
   const [layer, setLayer] = useLayer();
-  const { contrastLimits, contrastLimitsRange, channelsVisible, colors, colormap, selections } = layer.layerProps;
 
-  const value = contrastLimits[i];
-  const color = `rgb(${colormap ? [255, 255, 255] : colors[i]})`;
-  const on = channelsVisible[i];
-  const [min, max] = contrastLimitsRange[i];
+  const value = layer.layerProps.contrastLimits[i];
+  const color = `rgb(${layer.layerProps.colormap ? [255, 255, 255] : layer.layerProps.colors[i]})`;
+  const on = layer.layerProps.channelsVisible[i];
+  const [min, max] = layer.layerProps.contrastLimitsRange[i];
 
   const { channel_axis, names } = sourceData;
-  const selection = selections[i];
+  const selection = layer.layerProps.selections[i];
   const nameIndex = Number.isInteger(channel_axis) && channel_axis !== null ? selection[channel_axis] : 0;
   const label = names[nameIndex];
 
@@ -54,13 +53,13 @@ function ChannelController(props: { channelIndex: number }) {
         </label>
         <Slider
           className="mx-1"
-          value={value}
-          onValueChange={(value: [number, number]) => {
+          value={[...value]}
+          onValueChange={(update: [number, number]) => {
             setLayer((prev) => ({
               ...prev,
               layerProps: {
                 ...prev.layerProps,
-                contrastLimits: prev.layerProps.contrastLimits.with(i, value),
+                contrastLimits: prev.layerProps.contrastLimits.with(i, [...update]),
               },
             }));
           }}
