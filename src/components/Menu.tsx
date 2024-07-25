@@ -1,56 +1,33 @@
-import { Grid, IconButton } from "@material-ui/core";
-import { Add, Remove } from "@material-ui/icons";
-import { makeStyles } from "@material-ui/styles";
 import { useAtomValue } from "jotai";
 import React, { useReducer } from "react";
 
 import { sourceInfoAtomAtoms } from "../state";
 import LayerController from "./LayerController";
 
-const useStyles = makeStyles({
-  root: {
-    zIndex: 1,
-    position: "absolute",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    borderRadius: "5px",
-    left: "5px",
-    top: "5px",
-  },
-  scroll: {
-    maxHeight: 500,
-    overflowX: "hidden",
-    overflowY: "scroll",
-    "&::-webkit-scrollbar": {
-      display: "none",
-      background: "transparent",
-    },
-    scrollbarWidth: "none",
-    flexDirection: "column",
-  },
-});
+import { LayerContext } from "@/hooks";
+import { cn } from "@/lib/utils";
+import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 
-function Menu(props: { open?: boolean }) {
-  const sourceAtoms = useAtomValue(sourceInfoAtomAtoms);
-  const [hidden, toggle] = useReducer((v) => !v, !(props.open ?? true));
-  const classes = useStyles();
+function Menu({ open = true }: { open?: boolean }) {
+  const atoms = useAtomValue(sourceInfoAtomAtoms);
+  const [hidden, toggle] = useReducer((v) => !v, !open);
   return (
-    <div className={classes.root} style={{ padding: `0px 5px ${hidden ? 0 : 5}px 5px` }}>
-      <Grid container direction="column" alignItems="flex-start">
-        <IconButton
-          style={{
-            backgroundColor: "transparent",
-            padding: 0,
-          }}
-          onClick={toggle}
-        >
-          {hidden ? <Add /> : <Remove />}
-        </IconButton>
-        <div className={classes.scroll} style={{ display: hidden ? "none" : "flex" }}>
-          {sourceAtoms.map((sourceAtom) => (
-            <LayerController key={`${sourceAtom}`} sourceAtom={sourceAtom} />
-          ))}
-        </div>
-      </Grid>
+    <div
+      className={cn(
+        "relative left-2 top-2 z-20 w-fit h-fit bg-card text-card-foreground rounded-lg",
+        hidden && "rounded-full p-0 m-0 w-5 h-5 flex items-center justify-center",
+      )}
+    >
+      <button type="button" onClick={toggle} className={cn("bg-card hover:bg-card cursor-pointer", !hidden && "ml-1")}>
+        {hidden ? <PlusIcon /> : <MinusIcon />}
+      </button>
+      <div className={cn("max-h-[500px] m-1 bg-card no-scrollbar pb-1")} hidden={hidden}>
+        {atoms.map((sourceAtom) => (
+          <LayerContext.Provider value={sourceAtom} key={`${sourceAtom}`}>
+            <LayerController />
+          </LayerContext.Provider>
+        ))}
+      </div>
     </div>
   );
 }
