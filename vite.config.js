@@ -1,5 +1,6 @@
 import * as path from "node:path";
 
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
@@ -28,7 +29,7 @@ function writeEntryPoint(entryPointName, chunkName) {
 }
 
 export default defineConfig({
-  plugins: [react(), writeEntryPoint("index.js", /^vizarr-/)],
+  plugins: [react(), tailwindcss(), writeEntryPoint("index.js", /^vizarr-/)],
   base: process.env.VIZARR_PREFIX || "./",
   build: {
     assetsDir: "",
@@ -37,9 +38,14 @@ export default defineConfig({
       output: {
         minifyInternalExports: false,
         manualChunks: {
-          vizarr: [path.resolve(__dirname, "src/index.tsx")],
+          vizarr: [path.resolve(__dirname, "./src/index.tsx")],
         },
       },
+    },
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   server: {

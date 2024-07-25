@@ -1,5 +1,4 @@
 import type { ImageLayer, MultiscaleImageLayer } from "@hms-dbmi/viv";
-import type { PrimitiveAtom, WritableAtom } from "jotai";
 import { atom } from "jotai";
 import { atomFamily, splitAtom, waitForAll } from "jotai/utils";
 import type { Matrix4 } from "math.gl";
@@ -12,22 +11,6 @@ import { initLayerStateFromSource } from "./io";
 export interface ViewState {
   zoom: number;
   target: [number, number];
-}
-
-export function atomWithEffect<Value, Update extends object, Result extends void | Promise<void> = void>(
-  baseAtom: WritableAtom<Value, Update | ((prev: Value) => Update), Result>,
-  callback: (data: Update) => void,
-) {
-  const derivedAtom: typeof baseAtom = atom(
-    (get) => get(baseAtom),
-    (get, set, update) => {
-      const next = typeof update === "function" ? update(get(baseAtom)) : update;
-      const result = set(baseAtom, next);
-      callback(next);
-      return result;
-    },
-  );
-  return derivedAtom;
 }
 
 interface BaseConfig {
@@ -122,11 +105,6 @@ export type LayerState<T extends "image" | "multiscale" | "grid" = "image" | "mu
 };
 
 type WithId<T> = T & { id: string };
-
-export type ControllerProps<T = object> = {
-  sourceAtom: PrimitiveAtom<WithId<SourceData>>;
-  layerAtom: PrimitiveAtom<WithId<LayerState>>;
-} & T;
 
 export const sourceInfoAtom = atom<WithId<SourceData>[]>([]);
 

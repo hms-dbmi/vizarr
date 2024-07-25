@@ -425,3 +425,10 @@ export function isOmeroMultiscales(
 export function isMultiscales(attrs: zarr.Attributes): attrs is { multiscales: Ome.Multiscale[] } {
   return "multiscales" in attrs;
 }
+
+export function clamp(
+  value: number,
+  { min = Number.NEGATIVE_INFINITY, max = Number.POSITIVE_INFINITY }: { min?: number; max?: number },
+) {
+  return Math.min(Math.max(value, min), max);
+}
