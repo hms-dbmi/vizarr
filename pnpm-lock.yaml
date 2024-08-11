@@ -24,8 +24,8 @@ importers:
         specifier: ^0.16.1
         version: 0.16.1
       '@zarrita/storage':
-        specifier: ^0.0.2
-        version: 0.0.2
+        specifier: 0.1.0-next.5
+        version: 0.1.0-next.5
       deck.gl:
         specifier: ^8.9.34
         version: 8.9.36(@loaders.gl/core@3.4.15)(@loaders.gl/gltf@3.4.15)(@loaders.gl/images@3.4.15)(@luma.gl/constants@8.5.21)(@luma.gl/core@8.5.21)(@luma.gl/engine@8.5.21)(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@8.5.21)(@luma.gl/webgl@8.5.21)(@math.gl/core@4.0.1)(@math.gl/web-mercator@3.6.3)(@types/react@18.3.3)(gl-matrix@3.4.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -51,8 +51,8 @@ importers:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
       zarrita:
-        specifier: ^0.4.0-next.14
-        version: 0.4.0-next.14
+        specifier: 0.4.0-next.15
+        version: 0.4.0-next.15
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.8.3
@@ -868,14 +868,11 @@ packages:
       '@deck.gl/core': ~8.8.27
       '@deck.gl/layers': ~8.8.27
 
-  '@zarrita/core@0.1.0-next.12':
-    resolution: {integrity: sha512-Y3TsUBqyQ86Z7Z/1uI9CllI8clm0fFGi0URlVn+YrSfuoZV377DBfYwksoycyb2KtPyo/tfRvwahYXW71RrWhQ==}
+  '@zarrita/core@0.1.0-next.13':
+    resolution: {integrity: sha512-aoGq1mS3SAfDhmMVtCQAcgNeD4O2SKbCqFmJ/hyAeHoCpAwOWpc+6grpKqMtuVNQdFtRl+r4pt7UQPZgsxdIrQ==}
 
-  '@zarrita/indexing@0.1.0-next.14':
-    resolution: {integrity: sha512-13Af1eQgdkp9Cw+tQf3jQ5YYirkR2YEIiPFRcwNuHV3u2ycM1okuY2lilIjQ1hgeJzrmIc3q/y72ioT4bgiwcQ==}
-
-  '@zarrita/storage@0.0.2':
-    resolution: {integrity: sha512-uFt4abAoiOYLroalNDAnVaQxA17zGKrQ0waYKmTVm+bNonz8ggKZP+0FqMhgUZITGChqoANHuYTazbuU5AFXWA==}
+  '@zarrita/indexing@0.1.0-next.15':
+    resolution: {integrity: sha512-1WAHDZvWYq0bnMquwWbCsKnx1rsuvDNcgersD5e6tNMpYnqPRUZUyOFpYaxBhrvJjEf5AM9CI3uCPE8RGYg7ag==}
 
   '@zarrita/storage@0.1.0-next.5':
     resolution: {integrity: sha512-E1VSxhNGZHL4RsKfIuyaz0HRsDk7hOU8Y7R+8yvKolaHDjK31XQsUgu97oaR24qS1j1OOg5vGyFyd+y0q7FNOA==}
@@ -1475,8 +1472,8 @@ packages:
     resolution: {integrity: sha512-v7g3i/NfLEHtGtCEX8zl9b/LMY+8BY7fIYvbNX3nskAhliMCY5mA12jlc8Rbe91hSwL/4Nh2d3fUcVmnthXQkQ==}
     engines: {node: '>=12'}
 
-  zarrita@0.4.0-next.14:
-    resolution: {integrity: sha512-B5a3Nw31EEaxjI0yh+CJuSdqDo3f0KnCrf8aZiDj4Nhrsi/Jau7Mtc7Yo6T3SmM6AInTmA/VNv/FKT5ZLfADTQ==}
+  zarrita@0.4.0-next.15:
+    resolution: {integrity: sha512-s2ZElXObBqmsTZOkSMuamc1c05pc2Ar+OBlPndFPvzAcnx/G8cQoLe5Yo3mdqwTd7a28Lq/zrTvFc/Qbpj22VA==}
 
   zod@3.23.8:
     resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
@@ -2474,22 +2471,17 @@ snapshots:
       - '@luma.gl/engine'
       - '@luma.gl/webgl'
 
-  '@zarrita/core@0.1.0-next.12':
+  '@zarrita/core@0.1.0-next.13':
     dependencies:
       '@zarrita/storage': 0.1.0-next.5
       '@zarrita/typedarray': 0.1.0-next.3
       numcodecs: 0.3.1
 
-  '@zarrita/indexing@0.1.0-next.14':
+  '@zarrita/indexing@0.1.0-next.15':
     dependencies:
-      '@zarrita/core': 0.1.0-next.12
+      '@zarrita/core': 0.1.0-next.13
       '@zarrita/storage': 0.1.0-next.5
       '@zarrita/typedarray': 0.1.0-next.3
-
-  '@zarrita/storage@0.0.2':
-    dependencies:
-      reference-spec-reader: 0.2.0
-      unzipit: 1.4.3
 
   '@zarrita/storage@0.1.0-next.5':
     dependencies:
@@ -3051,10 +3043,10 @@ snapshots:
       numcodecs: 0.2.2
       p-queue: 7.4.1
 
-  zarrita@0.4.0-next.14:
+  zarrita@0.4.0-next.15:
     dependencies:
-      '@zarrita/core': 0.1.0-next.12
-      '@zarrita/indexing': 0.1.0-next.14
+      '@zarrita/core': 0.1.0-next.13
+      '@zarrita/indexing': 0.1.0-next.15
       '@zarrita/storage': 0.1.0-next.5
 
   zod@3.23.8: {}
