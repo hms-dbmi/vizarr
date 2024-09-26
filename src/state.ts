@@ -128,17 +128,23 @@ export type ControllerProps<T = object> = {
   layerAtom: PrimitiveAtom<WithId<LayerState>>;
 } & T;
 
+export const sourceErrorAtom = atom<string | null>(null);
+
 export const sourceInfoAtom = atom<WithId<SourceData>[]>([]);
 
 export const addImageAtom = atom(null, async (get, set, config: ImageLayerConfig) => {
   const { createSourceData } = await import("./io");
   const id = Math.random().toString(36).slice(2);
-  const sourceData = await createSourceData(config);
-  const prevSourceInfo = get(sourceInfoAtom);
-  if (!sourceData.name) {
-    sourceData.name = `image_${Object.keys(prevSourceInfo).length}`;
+  try {
+    const sourceData = await createSourceData(config);
+    const prevSourceInfo = get(sourceInfoAtom);
+    if (!sourceData.name) {
+      sourceData.name = `image_${Object.keys(prevSourceInfo).length}`;
+    }
+    set(sourceInfoAtom, [...prevSourceInfo, { id, ...sourceData }]);
+  } catch (err) {
+    set(sourceErrorAtom, (err as Error).message);
   }
-  set(sourceInfoAtom, [...prevSourceInfo, { id, ...sourceData }]);
 });
 
 export const sourceInfoAtomAtoms = splitAtom(sourceInfoAtom);
