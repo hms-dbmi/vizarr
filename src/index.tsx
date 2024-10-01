@@ -1,13 +1,13 @@
-import { ThemeProvider } from "@material-ui/styles";
+import { ThemeProvider, makeStyles } from "@material-ui/styles";
 import { Provider, atom } from "jotai";
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import * as React from "react";
 import ReactDOM from "react-dom/client";
 
 import Menu from "./components/Menu";
 import Viewer from "./components/Viewer";
 import "./codecs/register";
-import { type ImageLayerConfig, type ViewState, addImageAtom, atomWithEffect } from "./state";
+import { type ImageLayerConfig, type ViewState, addImageAtom, atomWithEffect, sourceErrorAtom } from "./state";
 import theme from "./theme";
 import { defer, typedEmitter } from "./utils";
 
@@ -26,6 +26,22 @@ export interface VizarrViewer {
   destroy(): void;
 }
 
+const useStyles = makeStyles({
+  errorContainer: {
+    position: "fixed",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    color: "#fff",
+    display: "flex",
+    alignItems: "center",
+    textAlign: "center",
+    justifyContent: "center",
+    fontSize: "120%",
+  },
+});
+
 export function createViewer(element: HTMLElement, options: { menuOpen?: boolean } = {}): Promise<VizarrViewer> {
   const ref = React.createRef<VizarrViewer>();
   const emitter = typedEmitter<Events>();
@@ -36,6 +52,7 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
   const { promise, resolve } = defer<VizarrViewer>();
 
   function App() {
+    const sourceError = useAtomValue(sourceErrorAtom);
     const addImage = useSetAtom(addImageAtom);
     const setViewState = useSetAtom(viewStateAtom);
     React.useImperativeHandle(
@@ -53,10 +70,20 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
         resolve(ref.current);
       }
     }, []);
+    const classes = useStyles();
     return (
       <>
-        <Menu open={options.menuOpen ?? true} />
-        <Viewer viewStateAtom={viewStateAtom} />
+        {sourceError === null && (
+          <>
+            <Menu open={options.menuOpen ?? true} />
+            <Viewer viewStateAtom={viewStateAtom} />
+          </>
+        )}
+        {sourceError !== null && (
+          <div className={classes.errorContainer}>
+            <p>{`Error: server replied with "${sourceError}" when loading the resource`}</p>
+          </div>
+        )}
       </>
     );
   }
