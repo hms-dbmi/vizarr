@@ -10,6 +10,23 @@ dependencies = ["anywidget", "zarr"]
 [project.optional-dependencies]
 dev = ["watchfiles", "jupyterlab"]
 
-# automatically add the dev feature to the default env (e.g., hatch shell)
-[tool.hatch.envs.default]
-features = ["dev"]
+[tool.ruff.lint]
+pydocstyle = { convention = "numpy" }
+select = [
+	"E",    # style errors
+	"W",    # style warnings
+	"F",    # flakes
+	"D",    # pydocstyle
+	"D417", # Missing argument descriptions in Docstrings
+	"I",    # isort
+	"UP",   # pyupgrade
+	"C4",   # flake8-comprehensions
+	"B",    # flake8-bugbear
+	"A001", # flake8-builtins
+	"RUF",  # ruff-specific rules
+	"TCH",  # flake8-type-checking
+	"TID",  # flake8-tidy-imports
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = ["D", "S"]

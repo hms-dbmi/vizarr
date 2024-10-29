@@ -10,13 +10,15 @@
 		]
 	},
 	"fmt": {
-		"useTabs": true
+		"useTabs": true,
+		"exclude": [".venv", "notebooks"]
 	},
 	"lint": {
 		"rules": {
 			"exclude": [
 				"prefer-const"
 			]
-		}
+		},
+		"exclude": [".venv", "notebooks"]
 	}
 }
