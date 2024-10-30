@@ -24,8 +24,8 @@ importers:
         specifier: ^0.16.1
         version: 0.16.1
       '@zarrita/storage':
-        specifier: 0.1.0-next.5
-        version: 0.1.0-next.5
+        specifier: 0.1.0-next.7
+        version: 0.1.0-next.7
       deck.gl:
         specifier: ^8.9.34
         version: 8.9.36(@loaders.gl/core@3.4.15)(@loaders.gl/gltf@3.4.15)(@loaders.gl/images@3.4.15)(@luma.gl/constants@8.5.21)(@luma.gl/core@8.5.21)(@luma.gl/engine@8.5.21)(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@8.5.21)(@luma.gl/webgl@8.5.21)(@math.gl/core@4.0.1)(@math.gl/web-mercator@3.6.3)(@types/react@18.3.10)(gl-matrix@3.4.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -51,8 +51,8 @@ importers:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
       zarrita:
-        specifier: 0.4.0-next.15
-        version: 0.4.0-next.15
+        specifier: 0.4.0-next.17
+        version: 0.4.0-next.17
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.8.3
@@ -868,14 +868,14 @@ packages:
       '@deck.gl/core': ~8.8.27
       '@deck.gl/layers': ~8.8.27
 
-  '@zarrita/core@0.1.0-next.13':
-    resolution: {integrity: sha512-aoGq1mS3SAfDhmMVtCQAcgNeD4O2SKbCqFmJ/hyAeHoCpAwOWpc+6grpKqMtuVNQdFtRl+r4pt7UQPZgsxdIrQ==}
+  '@zarrita/core@0.1.0-next.15':
+    resolution: {integrity: sha512-ObMFklHfKMGah4juLo3mz2HOGkAK6jLmWv0QpWG6Qp4SU6+juqXms57ULAD6eE00NBCC+u8wq//NqQrk8ozuhQ==}
 
-  '@zarrita/indexing@0.1.0-next.15':
-    resolution: {integrity: sha512-1WAHDZvWYq0bnMquwWbCsKnx1rsuvDNcgersD5e6tNMpYnqPRUZUyOFpYaxBhrvJjEf5AM9CI3uCPE8RGYg7ag==}
+  '@zarrita/indexing@0.1.0-next.17':
+    resolution: {integrity: sha512-ix222Rz23zApfdIfpa5ovalaiVXg74hoBo6bFmL8sLiNRQ2blWD1GwkEZbQsBlknWz3g0I5M0PTg1DSZBRWI6g==}
 
-  '@zarrita/storage@0.1.0-next.5':
-    resolution: {integrity: sha512-E1VSxhNGZHL4RsKfIuyaz0HRsDk7hOU8Y7R+8yvKolaHDjK31XQsUgu97oaR24qS1j1OOg5vGyFyd+y0q7FNOA==}
+  '@zarrita/storage@0.1.0-next.7':
+    resolution: {integrity: sha512-rxaY161KiD+SqsNZUV6a7WdcxDg7q1O0ggvKa37IvOLjv+9lVJNU6DFuvSK9/mmjO0eRml6ysmwXqAZTC+Kymg==}
 
   '@zarrita/typedarray@0.1.0-next.3':
     resolution: {integrity: sha512-DpSaU3Cr6HmYDC/v8oM+e219cHU/kzKma309Z9E+QbpRnZycKNbSTKcxFR7FqB6HgB9640gzNUVFG5P+wzX5Xg==}
@@ -1265,8 +1265,8 @@ packages:
     resolution: {integrity: sha512-Y5K8mv80yb4MgVpcElBkUeMZqeE4TrovxRit/dTZvoRl6YkB6WEjY+fiUjGCblITnt3T3fmrDg8yRWu0gOLjhQ==}
     engines: {node: '>=12'}
 
-  numcodecs@0.3.1:
-    resolution: {integrity: sha512-ywIyGpJ+c6Ojktq9a8jsWSy12ZSUcW/W+I3jlH0q0zv9aR/ZiMsN7IrWaNq9YV2FRdLu6r/M6lp35jMA6fug/A==}
+  numcodecs@0.3.2:
+    resolution: {integrity: sha512-6YSPnmZgg0P87jnNhi3s+FVLOcIn3y+1CTIgUulA3IdASzK9fJM87sUFkpyA+be9GibGRaST2wCgkD+6U+fWKw==}
 
   object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
@@ -1478,8 +1478,8 @@ packages:
     resolution: {integrity: sha512-v7g3i/NfLEHtGtCEX8zl9b/LMY+8BY7fIYvbNX3nskAhliMCY5mA12jlc8Rbe91hSwL/4Nh2d3fUcVmnthXQkQ==}
     engines: {node: '>=12'}
 
-  zarrita@0.4.0-next.15:
-    resolution: {integrity: sha512-s2ZElXObBqmsTZOkSMuamc1c05pc2Ar+OBlPndFPvzAcnx/G8cQoLe5Yo3mdqwTd7a28Lq/zrTvFc/Qbpj22VA==}
+  zarrita@0.4.0-next.17:
+    resolution: {integrity: sha512-5vN+B+IY4GSh2JN9tqFNPJtAP20Q+eVPokDuG/TwDKn33bS3g8wyW5hENFfWLzxAEmSWvndWy+EU1xJ1Dlt5AA==}
 
   zod@3.23.8:
     resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
@@ -2477,19 +2477,19 @@ snapshots:
       - '@luma.gl/engine'
       - '@luma.gl/webgl'
 
-  '@zarrita/core@0.1.0-next.13':
+  '@zarrita/core@0.1.0-next.15':
     dependencies:
-      '@zarrita/storage': 0.1.0-next.5
+      '@zarrita/storage': 0.1.0-next.7
       '@zarrita/typedarray': 0.1.0-next.3
-      numcodecs: 0.3.1
+      numcodecs: 0.3.2
 
-  '@zarrita/indexing@0.1.0-next.15':
+  '@zarrita/indexing@0.1.0-next.17':
     dependencies:
-      '@zarrita/core': 0.1.0-next.13
-      '@zarrita/storage': 0.1.0-next.5
+      '@zarrita/core': 0.1.0-next.15
+      '@zarrita/storage': 0.1.0-next.7
       '@zarrita/typedarray': 0.1.0-next.3
 
-  '@zarrita/storage@0.1.0-next.5':
+  '@zarrita/storage@0.1.0-next.7':
     dependencies:
       reference-spec-reader: 0.2.0
       unzipit: 1.4.3
@@ -2871,7 +2871,7 @@ snapshots:
 
   numcodecs@0.2.2: {}
 
-  numcodecs@0.3.1:
+  numcodecs@0.3.2:
     dependencies:
       fflate: 0.8.2
 
@@ -3051,11 +3051,11 @@ snapshots:
       numcodecs: 0.2.2
       p-queue: 7.4.1
 
-  zarrita@0.4.0-next.15:
+  zarrita@0.4.0-next.17:
     dependencies:
-      '@zarrita/core': 0.1.0-next.13
-      '@zarrita/indexing': 0.1.0-next.15
-      '@zarrita/storage': 0.1.0-next.5
+      '@zarrita/core': 0.1.0-next.15
+      '@zarrita/indexing': 0.1.0-next.17
+      '@zarrita/storage': 0.1.0-next.7
 
   zod@3.23.8: {}
 
