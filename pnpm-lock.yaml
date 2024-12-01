@@ -30,8 +30,8 @@ importers:
         specifier: ^8.9.34
         version: 8.9.36(@loaders.gl/core@3.4.15)(@loaders.gl/gltf@3.4.15)(@loaders.gl/images@3.4.15)(@luma.gl/constants@8.5.21)(@luma.gl/core@8.5.21)(@luma.gl/engine@8.5.21)(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@8.5.21)(@luma.gl/webgl@8.5.21)(@math.gl/core@4.0.1)(@math.gl/web-mercator@3.6.3)(@types/react@18.3.10)(gl-matrix@3.4.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       jotai:
-        specifier: ^1.0.0
-        version: 1.13.1(@babel/core@7.24.9)(@babel/template@7.24.7)(react@18.3.1)
+        specifier: ^2.10.3
+        version: 2.10.3(@types/react@18.3.10)(react@18.3.1)
       just-debounce-it:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1118,44 +1118,16 @@ packages:
   is-in-browser@1.1.3:
     resolution: {integrity: sha512-FeXIBgG/CPGd/WUxuEyvgGTEfwiG9Z4EKGxjNMRqviiIIfsmgrpnHLffEDdwUHqNva1VEW91o3xBT/m8Elgl9g==}
 
-  jotai@1.13.1:
-    resolution: {integrity: sha512-RUmH1S4vLsG3V6fbGlKzGJnLrDcC/HNb5gH2AeA9DzuJknoVxSGvvg8OBB7lke+gDc4oXmdVsaKn/xDUhWZ0vw==}
+  jotai@2.10.3:
+    resolution: {integrity: sha512-Nnf4IwrLhNfuz2JOQLI0V/AgwcpxvVy8Ec8PidIIDeRi4KCFpwTFIpHAAcU+yCgnw/oASYElq9UY0YdUUegsSA==}
     engines: {node: '>=12.20.0'}
     peerDependencies:
-      '@babel/core': '*'
-      '@babel/template': '*'
-      jotai-devtools: '*'
-      jotai-immer: '*'
-      jotai-optics: '*'
-      jotai-redux: '*'
-      jotai-tanstack-query: '*'
-      jotai-urql: '*'
-      jotai-valtio: '*'
-      jotai-xstate: '*'
-      jotai-zustand: '*'
-      react: '>=16.8'
+      '@types/react': '>=17.0.0'
+      react: '>=17.0.0'
     peerDependenciesMeta:
-      '@babel/core':
+      '@types/react':
         optional: true
-      '@babel/template':
-        optional: true
-      jotai-devtools:
-        optional: true
-      jotai-immer:
-        optional: true
-      jotai-optics:
-        optional: true
-      jotai-redux:
-        optional: true
-      jotai-tanstack-query:
-        optional: true
-      jotai-urql:
-        optional: true
-      jotai-valtio:
-        optional: true
-      jotai-xstate:
-        optional: true
-      jotai-zustand:
+      react:
         optional: true
 
   js-tokens@4.0.0:
@@ -2755,12 +2727,10 @@ snapshots:
 
   is-in-browser@1.1.3: {}
 
-  jotai@1.13.1(@babel/core@7.24.9)(@babel/template@7.24.7)(react@18.3.1):
-    dependencies:
-      react: 18.3.1
+  jotai@2.10.3(@types/react@18.3.10)(react@18.3.1):
     optionalDependencies:
-      '@babel/core': 7.24.9
-      '@babel/template': 7.24.7
+      '@types/react': 18.3.10
+      react: 18.3.1
 
   js-tokens@4.0.0: {}
 
