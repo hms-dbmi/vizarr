@@ -35,7 +35,7 @@
     "@types/react-dom": "^18.2.18",
     "@vitejs/plugin-react": "^4.3.1",
     "typescript": "^5.5.4",
-    "vite": "^5.4.8"
+    "vite": "^5.4.12"
   },
   "packageManager": "pnpm@9.5.0"
 }
