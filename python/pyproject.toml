@@ -5,10 +5,10 @@ build-backend = "hatchling.build"
 [project]
 name = "vizarr"
 version = "0.1.0"
-dependencies = ["anywidget", "zarr"]
+dependencies = ["anywidget", "zarr<3"]
 
-[project.optional-dependencies]
-dev = ["watchfiles", "jupyterlab"]
+[dependency-groups]
+dev = ["watchfiles", "jupyterlab", "scikit-image"]
 
 # automatically add the dev feature to the default env (e.g., hatch shell)
 [tool.hatch.envs.default]
