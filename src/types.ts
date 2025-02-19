@@ -39,6 +39,10 @@ declare namespace Ome {
     axes?: string[] | Axis[];
   }
 
+  interface Bioformats2rawlayout {
+    "bioformats2raw.layout": 3;
+  }
+
   interface Acquisition {
     id: number;
     name?: string;

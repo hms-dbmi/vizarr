@@ -1,3 +1,4 @@
+import { Link, Typography } from "@material-ui/core";
 import { ThemeProvider, makeStyles } from "@material-ui/styles";
 import { Provider, atom } from "jotai";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -7,7 +8,14 @@ import ReactDOM from "react-dom/client";
 import Menu from "./components/Menu";
 import Viewer from "./components/Viewer";
 import "./codecs/register";
-import { type ImageLayerConfig, type ViewState, addImageAtom, atomWithEffect, sourceErrorAtom } from "./state";
+import {
+  type ImageLayerConfig,
+  type ViewState,
+  addImageAtom,
+  atomWithEffect,
+  redirectObjAtom,
+  sourceErrorAtom,
+} from "./state";
 import theme from "./theme";
 import { defer, typedEmitter } from "./utils";
 
@@ -53,6 +61,7 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
 
   function App() {
     const sourceError = useAtomValue(sourceErrorAtom);
+    const redirectObj = useAtomValue(redirectObjAtom);
     const addImage = useSetAtom(addImageAtom);
     const setViewState = useSetAtom(viewStateAtom);
     React.useImperativeHandle(
@@ -73,7 +82,7 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
     const classes = useStyles();
     return (
       <>
-        {sourceError === null && (
+        {sourceError === null && redirectObj === null && (
           <>
             <Menu open={options.menuOpen ?? true} />
             <Viewer viewStateAtom={viewStateAtom} />
@@ -82,6 +91,14 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
         {sourceError !== null && (
           <div className={classes.errorContainer}>
             <p>{`Error: server replied with "${sourceError}" when loading the resource`}</p>
+          </div>
+        )}
+        {redirectObj !== null && (
+          <div className={classes.errorContainer}>
+            <Typography variant="h5">
+              {redirectObj.message}
+              <Link href={redirectObj.url}> {redirectObj.url} </Link>
+            </Typography>
           </div>
         )}
       </>

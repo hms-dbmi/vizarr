@@ -106,6 +106,10 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
       }
     }
 
+    if (utils.isBioformats2rawlayout(attrs)) {
+      let toUrl = `${utils.OME_VALIDATOR_URL}?source=${config.source}`;
+      throw new utils.RedirectError("Please open in ome-ngff-validator", toUrl);
+    }
     utils.assert(utils.isMultiscales(attrs), "Group is missing multiscales specification.");
     data = await utils.loadMultiscales(node, attrs.multiscales);
     if (attrs.multiscales[0].axes) {

@@ -20,6 +20,7 @@ export const COLORS = {
 export const MAGENTA_GREEN = [COLORS.magenta, COLORS.green];
 export const RGB = [COLORS.red, COLORS.green, COLORS.blue];
 export const CYMRGB = Object.values(COLORS).slice(0, -2);
+export const OME_VALIDATOR_URL = "https://ome.github.io/ome-ngff-validator/";
 
 async function normalizeStore(source: string | Readable): Promise<zarr.Location<Readable>> {
   if (typeof source === "string") {
@@ -381,6 +382,23 @@ export class AssertionError extends Error {
 }
 
 /**
+ * Error thrown when we want to redirect.
+ */
+export class RedirectError extends Error {
+  url: string;
+
+  /**
+   * @param message The error message.
+   * @param url The url to redirect to.
+   */
+  constructor(message: string, url: string) {
+    super(message);
+    this.name = "RedirectError";
+    this.url = url;
+  }
+}
+
+/**
  * Make an assertion. An error is thrown if `expr` does not have truthy value.
  *
  * @param expr The expression to test.
@@ -424,4 +442,8 @@ export function isOmeroMultiscales(
 
 export function isMultiscales(attrs: zarr.Attributes): attrs is { multiscales: Ome.Multiscale[] } {
   return "multiscales" in attrs;
+}
+
+export function isBioformats2rawlayout(attrs: zarr.Attributes): attrs is { multiscales: Ome.Bioformats2rawlayout } {
+  return "bioformats2raw.layout" in attrs;
 }

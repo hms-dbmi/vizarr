@@ -8,6 +8,7 @@ import type { Readable } from "@zarrita/storage";
 import type { ZarrPixelSource } from "./ZarrPixelSource";
 import type { default as GridLayer, GridLayerProps, GridLoader } from "./gridLayer";
 import { initLayerStateFromSource } from "./io";
+import type { RedirectError } from "./utils";
 
 export interface ViewState {
   zoom: number;
@@ -130,6 +131,12 @@ export type ControllerProps<T = object> = {
 
 export const sourceErrorAtom = atom<string | null>(null);
 
+export interface Redirect {
+  url: string;
+  message: string;
+}
+export const redirectObjAtom = atom<Redirect | null>(null);
+
 export const sourceInfoAtom = atom<WithId<SourceData>[]>([]);
 
 export const addImageAtom = atom(null, async (get, set, config: ImageLayerConfig) => {
@@ -143,7 +150,12 @@ export const addImageAtom = atom(null, async (get, set, config: ImageLayerConfig
     }
     set(sourceInfoAtom, [...prevSourceInfo, { id, ...sourceData }]);
   } catch (err) {
-    set(sourceErrorAtom, (err as Error).message);
+    if ((err as Error).name === "RedirectError") {
+      let redirect = err as RedirectError;
+      set(redirectObjAtom, { message: redirect.message, url: redirect.url });
+    } else {
+      set(sourceErrorAtom, (err as Error).message);
+    }
   }
 });
 
