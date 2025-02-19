@@ -1,5 +1,5 @@
+import { Link, Typography } from "@material-ui/core";
 import { ThemeProvider, makeStyles } from "@material-ui/styles";
-import { Typography, Link } from "@material-ui/core";
 import { Provider, atom } from "jotai";
 import { useAtomValue, useSetAtom } from "jotai";
 import * as React from "react";
@@ -8,7 +8,14 @@ import ReactDOM from "react-dom/client";
 import Menu from "./components/Menu";
 import Viewer from "./components/Viewer";
 import "./codecs/register";
-import { type ImageLayerConfig, type ViewState, addImageAtom, atomWithEffect, sourceErrorAtom, redirectObjAtom } from "./state";
+import {
+  type ImageLayerConfig,
+  type ViewState,
+  addImageAtom,
+  atomWithEffect,
+  redirectObjAtom,
+  sourceErrorAtom,
+} from "./state";
 import theme from "./theme";
 import { defer, typedEmitter } from "./utils";
 
@@ -75,7 +82,7 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
     const classes = useStyles();
     return (
       <>
-        {(sourceError === null && redirectObj === null) && (
+        {sourceError === null && redirectObj === null && (
           <>
             <Menu open={options.menuOpen ?? true} />
             <Viewer viewStateAtom={viewStateAtom} />
@@ -88,10 +95,10 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
         )}
         {redirectObj !== null && (
           <div className={classes.errorContainer}>
-          <Typography variant="h5">
-            {redirectObj.message}
-            <Link href={redirectObj.url}> {redirectObj.url} </Link>
-          </Typography>
+            <Typography variant="h5">
+              {redirectObj.message}
+              <Link href={redirectObj.url}> {redirectObj.url} </Link>
+            </Typography>
           </div>
         )}
       </>

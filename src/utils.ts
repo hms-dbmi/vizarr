@@ -385,7 +385,6 @@ export class AssertionError extends Error {
  * Error thrown when we want to redirect.
  */
 export class RedirectError extends Error {
-
   url: string;
 
   /**
