@@ -447,3 +447,42 @@ export function isMultiscales(attrs: zarr.Attributes): attrs is { multiscales: O
 export function isBioformats2rawlayout(attrs: zarr.Attributes): attrs is { multiscales: Ome.Bioformats2rawlayout } {
   return "bioformats2raw.layout" in attrs;
 }
+
+/**
+ * Ensures an error matches expected type(s), otherwise rethrows.
+ *
+ * Unmatched errors bubble up, like Python's `except`. Narrows error types for
+ * type-safe property access.
+ *
+ * Usage
+ * @example
+ * ```ts
+ * class DatabaseError extends Error {}
+ * class NetworkError extends Error {}
+ *
+ * try {
+ *   await db.query();
+ * } catch (error) {
+ *   rethrowUnless(error, DatabaseError, NetworkError);
+ *   error; // DatabaseError | NetworkError
+ * }
+ * ```
+ *
+ * @param error - The error to check
+ * @param ErrorClasses - Expected error type(s)
+ * @throws The original error if it doesn't match expected type(s)
+ *
+ * @copyright Trevor Manz 2025
+ * @license MIT
+ * @see {@link https://github.com/manzt/manzt/blob/4b04f2/utils/rethrow-unless.js}
+ */
+// biome-ignore lint/suspicious/noExplicitAny: Ok to use any for generic constraint
+export function rethrowUnless<E extends ReadonlyArray<new (...args: any[]) => Error>>(
+  error: unknown,
+  ...ErrorClasses: E
+  // biome-ignore lint/suspicious/noExplicitAny: Ok to use any for generic constraint
+): asserts error is E[number] extends new (...args: any[]) => infer R ? R : never {
+  if (!ErrorClasses.some((ErrorClass) => error instanceof ErrorClass)) {
+    throw error;
+  }
+}
