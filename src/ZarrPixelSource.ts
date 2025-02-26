@@ -1,10 +1,8 @@
+import { getImageSize } from "@hms-dbmi/viv";
 import * as zarr from "zarrita";
+import { assert } from "./utils";
 
 import type * as viv from "@vivjs/types";
-import type { Readable } from "@zarrita/storage";
-
-import { getImageSize } from "@hms-dbmi/viv";
-import { assert } from "./utils";
 
 // TODO: Export from top-level zarrita
 type Slice = ReturnType<typeof zarr.slice>;
@@ -15,13 +13,13 @@ const RGBA_CHANNEL_AXIS_NAME = "_c";
 const SUPPORTED_DTYPES = ["Uint8", "Uint16", "Uint32", "Float32", "Int8", "Int16", "Int32", "Float64"] as const;
 
 export class ZarrPixelSource<S extends Array<string> = Array<string>> implements viv.PixelSource<S> {
-  #arr: zarr.Array<zarr.DataType, Readable>;
+  #arr: zarr.Array<zarr.DataType, zarr.Readable>;
   readonly labels: viv.Labels<S>;
   readonly tileSize: number;
   readonly dtype: viv.SupportedDtype;
 
   constructor(
-    arr: zarr.Array<zarr.DataType, Readable>,
+    arr: zarr.Array<zarr.DataType, zarr.Readable>,
     options: {
       labels: viv.Labels<S>;
       tileSize: number;

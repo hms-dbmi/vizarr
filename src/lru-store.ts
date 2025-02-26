@@ -1,5 +1,6 @@
-import type { Readable } from "@zarrita/storage";
 import QuickLRU from "quick-lru";
+
+import type * as zarr from "zarrita";
 
 type RangeQuery =
   | {
@@ -16,7 +17,7 @@ function normalizeKey(key: string, range?: RangeQuery) {
   return `${key}:${range.offset}:${range.offset + range.length - 1}`;
 }
 
-export function lru<S extends Readable>(store: S, maxSize = 100) {
+export function lru<S extends zarr.Readable>(store: S, maxSize = 100) {
   const cache = new QuickLRU<string, Promise<Uint8Array | undefined>>({ maxSize });
   let getRange = store.getRange ? store.getRange.bind(store) : undefined;
   function get(...args: Parameters<S["get"]>) {

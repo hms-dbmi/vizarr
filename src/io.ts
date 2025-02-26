@@ -1,5 +1,4 @@
 import { ImageLayer, MultiscaleImageLayer } from "@hms-dbmi/viv";
-import type { Readable } from "@zarrita/storage";
 import * as zarr from "zarrita";
 
 import { ZarrPixelSource } from "./ZarrPixelSource";
@@ -79,7 +78,7 @@ async function loadMultiChannel(
 
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
   const node = await utils.open(config.source);
-  let data: zarr.Array<zarr.DataType, Readable>[];
+  let data: zarr.Array<zarr.DataType, zarr.Readable>[];
   let axes: Ome.Axis[] | undefined;
 
   if (node instanceof zarr.Group) {
@@ -145,7 +144,7 @@ type Labels = [...string[], "y", "x"];
 function getAxisLabelsAndChannelAxis(
   config: ImageLayerConfig,
   ngffAxes: Ome.Axis[] | undefined,
-  arr: zarr.Array<zarr.DataType, Readable>,
+  arr: zarr.Array<zarr.DataType, zarr.Readable>,
 ): { labels: Labels; channel_axis: number } {
   // type cast string[] to Labels
   const maybeAxisLabels = config.axis_labels as undefined | Labels;
