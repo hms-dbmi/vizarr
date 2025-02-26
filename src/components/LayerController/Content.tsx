@@ -1,6 +1,5 @@
 import { AccordionDetails, Divider, Grid, Typography } from "@material-ui/core";
 import { withStyles } from "@material-ui/styles";
-import { useAtomValue } from "jotai";
 import React from "react";
 
 import AcquisitionController from "./AcquisitionController";
@@ -9,7 +8,7 @@ import AxisSliders from "./AxisSliders";
 import ChannelController from "./ChannelController";
 import OpacitySlider from "./OpacitySlider";
 
-import type { ControllerProps } from "../../state";
+import { useLayerState } from "../../hooks";
 import { range } from "../../utils";
 
 const Details = withStyles({
@@ -20,37 +19,36 @@ const Details = withStyles({
   },
 })(AccordionDetails);
 
-function Content({ sourceAtom, layerAtom }: ControllerProps) {
-  const layer = useAtomValue(layerAtom);
+function Content() {
+  const [layer] = useLayerState();
   const nChannels = layer.layerProps.selections.length;
   return (
     <Details>
       <Grid container direction="column">
-        <AcquisitionController sourceAtom={sourceAtom} layerAtom={layerAtom} />
+        <AcquisitionController />
         <Grid>
           <Grid container justifyContent="space-between">
             <Grid item xs={3}>
               <Typography variant="caption">opacity:</Typography>
             </Grid>
             <Grid item xs={8}>
-              <OpacitySlider sourceAtom={sourceAtom} layerAtom={layerAtom} />
+              <OpacitySlider />
             </Grid>
           </Grid>
         </Grid>
-        <Divider />
-        <AxisSliders sourceAtom={sourceAtom} layerAtom={layerAtom} />
+        <AxisSliders />
         <Grid container justifyContent="space-between">
           <Grid item xs={3}>
             <Typography variant="caption">channels:</Typography>
           </Grid>
           <Grid item xs={1}>
-            <AddChannelButton sourceAtom={sourceAtom} layerAtom={layerAtom} />
+            <AddChannelButton />
           </Grid>
         </Grid>
         <Divider />
         <Grid>
           {range(nChannels).map((i) => (
-            <ChannelController sourceAtom={sourceAtom} layerAtom={layerAtom} channelIndex={i} key={i} />
+            <ChannelController channelIndex={i} key={i} />
           ))}
         </Grid>
       </Grid>

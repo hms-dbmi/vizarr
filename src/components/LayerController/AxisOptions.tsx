@@ -1,10 +1,9 @@
 import { Divider, IconButton, Input, Paper, Popover, Typography } from "@material-ui/core";
 import { MoreHoriz } from "@material-ui/icons";
 import { withStyles } from "@material-ui/styles";
-import { useAtom, useAtomValue } from "jotai";
 import React, { useState } from "react";
 import type { ChangeEvent, MouseEvent } from "react";
-import type { ControllerProps } from "../../state";
+import { useLayerState, useSourceData } from "../../hooks";
 
 const DenseInput = withStyles({
   root: {
@@ -18,9 +17,9 @@ interface Props {
   max: number;
 }
 
-function AxisOptions({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<Props>) {
-  const sourceData = useAtomValue(sourceAtom);
-  const [layer, setLayer] = useAtom(layerAtom);
+function AxisOptions({ axisIndex, max }: Props) {
+  const [sourceData] = useSourceData();
+  const [layer, setLayer] = useLayerState();
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {

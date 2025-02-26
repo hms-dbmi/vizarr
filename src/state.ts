@@ -124,11 +124,6 @@ export type LayerState<T extends "image" | "multiscale" | "grid" = "image" | "mu
 
 type WithId<T> = T & { id: string };
 
-export type ControllerProps<T = object> = {
-  sourceAtom: PrimitiveAtom<WithId<SourceData>>;
-  layerAtom: PrimitiveAtom<WithId<LayerState>>;
-} & T;
-
 export const sourceErrorAtom = atom<string | null>(null);
 
 export interface Redirect {

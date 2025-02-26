@@ -1,14 +1,12 @@
 import { IconButton } from "@material-ui/core";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
-import { useAtom } from "jotai";
-import { useAtomValue } from "jotai";
 import React from "react";
 import type { MouseEvent } from "react";
-import type { ControllerProps } from "../../state";
+import { useLayerState, useSourceData } from "../../hooks";
 
-function LayerVisibilityButton({ sourceAtom, layerAtom }: ControllerProps) {
-  const sourceData = useAtomValue(sourceAtom);
-  const [layer, setLayer] = useAtom(layerAtom);
+function LayerVisibilityButton() {
+  const [sourceData] = useSourceData();
+  const [layer, setLayer] = useLayerState();
   const toggle = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     setLayer((prev) => {

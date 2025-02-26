@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/styles";
 import { useAtomValue } from "jotai";
 import React, { useReducer } from "react";
 
+import { SourceDataContext } from "../hooks";
 import { sourceInfoAtomAtoms } from "../state";
 import LayerController from "./LayerController";
 
@@ -36,18 +37,14 @@ function Menu(props: { open?: boolean }) {
   return (
     <div className={classes.root} style={{ padding: `0px 5px ${hidden ? 0 : 5}px 5px` }}>
       <Grid container direction="column" alignItems="flex-start">
-        <IconButton
-          style={{
-            backgroundColor: "transparent",
-            padding: 0,
-          }}
-          onClick={toggle}
-        >
+        <IconButton style={{ backgroundColor: "transparent", padding: 0 }} onClick={toggle}>
           {hidden ? <Add /> : <Remove />}
         </IconButton>
         <div className={classes.scroll} style={{ display: hidden ? "none" : "flex" }}>
           {sourceAtoms.map((sourceAtom) => (
-            <LayerController key={`${sourceAtom}`} sourceAtom={sourceAtom} />
+            <SourceDataContext.Provider key={`${sourceAtom}`} value={sourceAtom}>
+              <LayerController />
+            </SourceDataContext.Provider>
           ))}
         </div>
       </Grid>

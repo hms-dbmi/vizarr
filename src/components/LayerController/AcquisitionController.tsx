@@ -1,11 +1,10 @@
 import { Grid, NativeSelect } from "@material-ui/core";
-import { useAtomValue } from "jotai";
 import React from "react";
 import type { ChangeEvent } from "react";
-import type { ControllerProps } from "../../state";
+import { useSourceData } from "../../hooks";
 
-function AcquisitionController({ sourceAtom }: ControllerProps) {
-  const sourceData = useAtomValue(sourceAtom);
+function AcquisitionController() {
+  const [sourceData] = useSourceData();
   const { acquisitionId, acquisitions } = sourceData;
 
   if (!acquisitions) {

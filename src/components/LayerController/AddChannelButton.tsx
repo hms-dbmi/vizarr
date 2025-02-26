@@ -1,15 +1,14 @@
 import { Divider, IconButton, NativeSelect, Paper, Popover, Typography } from "@material-ui/core";
 import { Add } from "@material-ui/icons";
-import { useAtom } from "jotai";
 import React, { useState } from "react";
 import type { ChangeEvent, MouseEvent } from "react";
 
-import type { ControllerProps } from "../../state";
+import { useLayerState, useSourceData } from "../../hooks";
 import { MAX_CHANNELS, calcDataRange, hexToRGB } from "../../utils";
 
-function AddChannelButton({ sourceAtom, layerAtom }: ControllerProps) {
-  const [source, setSource] = useAtom(sourceAtom);
-  const [layer, setLayer] = useAtom(layerAtom);
+function AddChannelButton() {
+  const [source, setSource] = useSourceData();
+  const [layer, setLayer] = useLayerState();
   const [anchorEl, setAnchorEl] = useState<null | Element>(null);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
