@@ -4,7 +4,7 @@ import { atom } from "jotai";
 import { atomFamily, splitAtom, waitForAll } from "jotai/utils";
 import type { Matrix4 } from "math.gl";
 
-import type { Readable } from "@zarrita/storage";
+import type * as zarr from "zarrita";
 import type { ZarrPixelSource } from "./ZarrPixelSource";
 import type { default as GridLayer, GridLayerProps, GridLoader } from "./gridLayer";
 import { initLayerStateFromSource } from "./io";
@@ -32,7 +32,7 @@ export function atomWithEffect<Value, Update extends object, Result extends void
 }
 
 interface BaseConfig {
-  source: string | Readable;
+  source: string | zarr.Readable;
   axis_labels?: string[];
   name?: string;
   colormap?: string;

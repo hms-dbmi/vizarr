@@ -1,4 +1,3 @@
-import type { Readable } from "@zarrita/storage";
 import { Matrix4 } from "math.gl";
 import * as zarr from "zarrita";
 
@@ -22,9 +21,9 @@ export const RGB = [COLORS.red, COLORS.green, COLORS.blue];
 export const CYMRGB = Object.values(COLORS).slice(0, -2);
 export const OME_VALIDATOR_URL = "https://ome.github.io/ome-ngff-validator/";
 
-async function normalizeStore(source: string | Readable): Promise<zarr.Location<Readable>> {
+async function normalizeStore(source: string | zarr.Readable): Promise<zarr.Location<zarr.Readable>> {
   if (typeof source === "string") {
-    let store: Readable;
+    let store: zarr.Readable;
     let path: `/${string}` = "/";
     if (source.endsWith(".json")) {
       // import custom store implementation
@@ -54,13 +53,13 @@ function ensureAbosolutePath(path: string): `/${string}` {
   return path.startsWith("/") ? path : `/${path}`;
 }
 
-export async function open(source: string | Readable) {
+export async function open(source: string | zarr.Readable) {
   const location = await normalizeStore(source);
   return zarr.open(location);
 }
 
 export async function getAttrsOnly<T = unknown>(
-  location: zarr.Location<Readable>,
+  location: zarr.Location<zarr.Readable>,
   options: { path?: string; zarrVersion: 2 | 3 },
 ) {
   const decoder = new TextDecoder();
@@ -83,9 +82,9 @@ export async function getAttrsOnly<T = unknown>(
  * NOTE: We avoid loading the attributes here because we don't need them.
  */
 export async function loadMultiscales(
-  grp: zarr.Group<Readable>,
+  grp: zarr.Group<zarr.Readable>,
   multiscales: Ome.Multiscale[],
-): Promise<Array<zarr.Array<zarr.DataType, Readable>>> {
+): Promise<Array<zarr.Array<zarr.DataType, zarr.Readable>>> {
   const { datasets } = multiscales[0] || [{ path: "0" }];
   return Promise.all(
     // TODO(Trevor): TS is not happy about { attrs: false }.
@@ -124,7 +123,7 @@ export function join(...args: (string | undefined)[]) {
 }
 
 export function getAxisLabels(
-  arr: zarr.Array<zarr.DataType, Readable>,
+  arr: zarr.Array<zarr.DataType, zarr.Readable>,
   axis_labels?: string[],
 ): [...string[], "y", "x"] {
   if (!axis_labels || axis_labels.length !== arr.shape.length) {
@@ -211,7 +210,7 @@ export function isInterleaved(shape: number[]) {
   return lastDimSize === 3 || lastDimSize === 4;
 }
 
-export function guessTileSize(arr: zarr.Array<zarr.DataType, Readable>) {
+export function guessTileSize(arr: zarr.Array<zarr.DataType, zarr.Readable>) {
   const interleaved = isInterleaved(arr.shape);
   const [ySize, xSize] = arr.chunks.slice(interleaved ? -3 : -2);
   const size = Math.min(ySize, xSize);
@@ -413,7 +412,7 @@ export function assert(expr: unknown, msg = ""): asserts expr {
 /**
  * Guess the zarr version of a store.
  */
-export async function guessZarrVersion(location: zarr.Location<Readable>): Promise<2 | 3> {
+export async function guessZarrVersion(location: zarr.Location<zarr.Readable>): Promise<2 | 3> {
   try {
     await zarr.open.v3(location);
     return 3;

@@ -1,4 +1,3 @@
-import type { Readable } from "@zarrita/storage";
 import pMap from "p-map";
 import * as zarr from "zarrita";
 import type { ImageLayerConfig, OnClickData, SourceData } from "./state";
@@ -8,7 +7,7 @@ import * as utils from "./utils";
 
 export async function loadWell(
   config: ImageLayerConfig,
-  grp: zarr.Group<Readable>,
+  grp: zarr.Group<zarr.Readable>,
   wellAttrs: Ome.Well,
 ): Promise<SourceData> {
   // Can filter Well fields by URL query ?acquisition=ID
@@ -52,7 +51,7 @@ export async function loadWell(
   const promises = imgPaths.map((p) => {
     const loc = grp.resolve(utils.join(p, resolution));
     // @ts-expect-error - ok flag to avoid loading unused attrs
-    const arr: zarr.Array<zarr.DataType, Readable> = zarr.open(loc, { kind: "array", attrs: false });
+    const arr: zarr.Array<zarr.DataType, zarr.Readable> = zarr.open(loc, { kind: "array", attrs: false });
     return arr;
   });
   const data = await Promise.all(promises);
@@ -130,7 +129,7 @@ export async function loadWell(
 
 export async function loadPlate(
   config: ImageLayerConfig,
-  grp: zarr.Group<Readable>,
+  grp: zarr.Group<zarr.Readable>,
   plateAttrs: Ome.Plate,
 ): Promise<SourceData> {
   utils.assert(plateAttrs?.rows || plateAttrs?.columns, "Plate .zattrs missing rows, columns or wells");
@@ -173,7 +172,7 @@ export async function loadPlate(
   // Create loader for every Well. Some loaders may be undefined if Wells are missing.
   const mapper = async ([key, path]: string[]) => {
     // @ts-expect-error - we don't need the meta for these arrays
-    let arr: zarr.Array<zarr.DataType, Readable> = await zarr.open(grp.resolve(path), {
+    let arr: zarr.Array<zarr.DataType, zarr.Readable> = await zarr.open(grp.resolve(path), {
       kind: "array",
       attrs: false,
     });
@@ -245,7 +244,7 @@ export async function loadPlate(
 
 export async function loadOmeroMultiscales(
   config: ImageLayerConfig,
-  grp: zarr.Group<Readable>,
+  grp: zarr.Group<zarr.Readable>,
   attrs: { multiscales: Ome.Multiscale[]; omero: Ome.Omero },
 ): Promise<SourceData> {
   const { name, opacity = 1, colormap = "" } = config;
