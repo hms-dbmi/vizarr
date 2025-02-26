@@ -1,17 +1,17 @@
 import DeckGL from "deck.gl";
-import { type Layer, OrthographicView } from "deck.gl";
+import { OrthographicView } from "deck.gl";
 import { type WritableAtom, useAtom } from "jotai";
 import { useAtomValue } from "jotai";
 import * as React from "react";
 
-import type { LayerProps } from "@deck.gl/core/lib/layer";
+import type { DeckGLRef, Layer, LayerProps, OrthographicViewState } from "deck.gl";
 import type { ZarrPixelSource } from "../ZarrPixelSource";
 import type { ViewState } from "../state";
 import { layerAtoms } from "../state";
 import { fitBounds, isInterleaved } from "../utils";
 
 type Data = { loader: ZarrPixelSource; rows: number; columns: number };
-type VizarrLayer = Layer<unknown, LayerProps<unknown> & Data>;
+type VizarrLayer = Layer<LayerProps & Data>;
 
 function getLayerSize(props: Data) {
   const { loader } = props;
@@ -33,12 +33,12 @@ function WrappedViewStateDeck(props: {
   viewStateAtom: WritableAtom<ViewState | undefined, ViewState>;
 }) {
   const [viewState, setViewState] = useAtom(props.viewStateAtom);
-  const deckRef = React.useRef<DeckGL>(null);
+  const deckRef = React.useRef<DeckGLRef>(null);
   const firstLayerProps = props.layers[0]?.props;
 
   // If viewState hasn't been updated, use the first loader to guess viewState
   // TODO: There is probably a better place / way to set the intital view and this is a hack.
-  if (deckRef.current && !viewState && firstLayerProps?.loader) {
+  if (deckRef.current?.deck && !viewState && firstLayerProps?.loader) {
     const { deck } = deckRef.current;
     const { width, height, maxZoom } = getLayerSize(firstLayerProps);
     const padding = deck.width < 400 ? 10 : deck.width < 600 ? 30 : 50; // Adjust depending on viewport width.
@@ -55,8 +55,11 @@ function WrappedViewStateDeck(props: {
     <DeckGL
       ref={deckRef}
       layers={props.layers}
-      viewState={viewState}
-      onViewStateChange={(e) => setViewState(e.viewState)}
+      viewState={viewState && { ortho: viewState }}
+      onViewStateChange={(e: { viewState: OrthographicViewState }) =>
+        // @ts-expect-error - deck doesn't know this should be ok
+        setViewState(e.viewState)
+      }
       views={[new OrthographicView({ id: "ortho", controller: true })]}
       glOptions={glOptions}
     />

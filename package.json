@@ -11,13 +11,13 @@
     "check": "tsc"
   },
   "dependencies": {
-    "@hms-dbmi/viv": "^0.16.0",
+    "@hms-dbmi/viv": "~0.17.0",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/styles": "^4.11.5",
-    "@vivjs/types": "^0.16.1",
-    "@zarrita/storage": "0.1.0-next.7",
-    "deck.gl": "^8.9.34",
+    "@vivjs/types": "~0.17.0",
+    "@zarrita/storage": "0.1.0-next.9",
+    "deck.gl": "~9.0.0",
     "jotai": "^1.0.0",
     "just-debounce-it": "^3.1.1",
     "math.gl": "^4.0.1",
@@ -25,17 +25,16 @@
     "quick-lru": "^7.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "zarrita": "0.4.0-next.17"
+    "zarrita": "0.4.0-next.24"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.8.3",
-    "@danmarshall/deckgl-typings": "^4.3.10",
-    "@types/node": "^20.14.11",
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.13.5",
     "@types/react": "^18.3.10",
     "@types/react-dom": "^18.2.18",
-    "@vitejs/plugin-react": "^4.3.1",
-    "typescript": "^5.5.4",
-    "vite": "^5.4.12"
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.0"
   },
   "packageManager": "pnpm@9.5.0"
 }

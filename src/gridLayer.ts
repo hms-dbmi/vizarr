@@ -1,10 +1,9 @@
-import type { CompositeLayerProps } from "@deck.gl/core/lib/composite-layer";
-import { CompositeLayer, type PickInfo, SolidPolygonLayer, TextLayer } from "deck.gl";
+import { CompositeLayer, SolidPolygonLayer, TextLayer } from "deck.gl";
 import pMap from "p-map";
 
-import type { SolidPolygonLayerProps, TextLayerProps } from "@deck.gl/layers";
 import { ColorPaletteExtension, XRLayer } from "@hms-dbmi/viv";
 import type { SupportedTypedArray } from "@vivjs/types";
+import type { CompositeLayerProps, PickingInfo, SolidPolygonLayerProps, TextLayerProps } from "deck.gl";
 import type { ZarrPixelSource } from "./ZarrPixelSource";
 import type { BaseLayerProps } from "./state";
 import { assert } from "./utils";
@@ -19,7 +18,7 @@ export interface GridLoader {
 type Polygon = Array<[number, number]>;
 
 export interface GridLayerProps
-  extends Omit<CompositeLayerProps<unknown>, "modelMatrix" | "opacity" | "onClick" | "id">,
+  extends Omit<CompositeLayerProps, "loaders" | "modelMatrix" | "opacity" | "onClick" | "id">,
     BaseLayerProps {
   loaders: GridLoader[];
   rows: number;
@@ -86,9 +85,24 @@ function refreshGridData(props: GridLayerProps) {
   return pMap(loaders, mapper, { concurrency });
 }
 
-export default class GridLayer extends CompositeLayer<unknown, CompositeLayerProps<unknown> & GridLayerProps> {
+type SharedLayerState = {
+  gridData: Awaited<ReturnType<typeof refreshGridData>>;
+  width: number;
+  height: number;
+};
+
+export default class GridLayer extends CompositeLayer<CompositeLayerProps & GridLayerProps> {
+  get #state(): SharedLayerState {
+    // @ts-expect-error - typed as any by deck
+    return this.state;
+  }
+
+  set #state(state: SharedLayerState) {
+    this.state = state;
+  }
+
   initializeState() {
-    this.state = { gridData: [], width: 0, height: 0 };
+    this.#state = { gridData: [], width: 0, height: 0 };
     refreshGridData(this.props).then((gridData) => {
       const { width, height } = validateWidthHeight(gridData);
       this.setState({ gridData, width, height });
@@ -117,13 +131,13 @@ export default class GridLayer extends CompositeLayer<unknown, CompositeLayerPro
     }
   }
 
-  getPickingInfo({ info }: { info: PickInfo<unknown> }) {
+  getPickingInfo({ info }: { info: PickingInfo }) {
     // provide Grid row and column info for mouse events (hover & click)
     if (!info.coordinate) {
       return info;
     }
     const spacer = this.props.spacer || 0;
-    const { width, height } = this.state;
+    const { width, height } = this.#state;
     const [x, y] = info.coordinate;
     const row = Math.floor(y / (height + spacer));
     const column = Math.floor(x / (width + spacer));
@@ -134,12 +148,12 @@ export default class GridLayer extends CompositeLayer<unknown, CompositeLayerPro
   }
 
   renderLayers() {
-    const { gridData, width, height } = this.state;
+    const { gridData, width, height } = this.#state;
     if (width === 0 || height === 0) return null; // early return if no data
 
     const { rows, columns, spacer = 0, id = "" } = this.props;
     type Data = { row: number; col: number; loader: Pick<ZarrPixelSource, "dtype">; data: Array<SupportedTypedArray> };
-    const layers = gridData.map((d: Data) => {
+    const layers = gridData.map((d) => {
       const y = d.row * (height + spacer);
       const x = d.col * (width + spacer);
       const layerProps = {
@@ -172,7 +186,6 @@ export default class GridLayer extends CompositeLayer<unknown, CompositeLayerPro
         pickable: true, // enable picking
         id: `${id}-GridLayer-picking`,
       } satisfies SolidPolygonLayerProps<Data>;
-      // @ts-expect-error - SolidPolygonLayer props are not well typed
       const layer = new SolidPolygonLayer<Data, SolidPolygonLayerProps<Data>>({ ...this.props, ...layerProps });
       layers.push(layer);
     }
