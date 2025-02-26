@@ -1,9 +1,8 @@
 import { Slider } from "@material-ui/core";
 import { withStyles } from "@material-ui/styles";
-import { useAtom } from "jotai";
 import React from "react";
 import type { ChangeEvent } from "react";
-import type { ControllerProps } from "../../state";
+import { useLayerState } from "../../hooks";
 
 const DenseSlider = withStyles({
   root: {
@@ -16,8 +15,8 @@ const DenseSlider = withStyles({
   },
 })(Slider);
 
-function OpacitySlider({ layerAtom }: ControllerProps) {
-  const [layer, setLayer] = useAtom(layerAtom);
+function OpacitySlider() {
+  const [layer, setLayer] = useLayerState();
   const handleChange = (_: ChangeEvent<unknown>, value: number | number[]) => {
     const opacity = value as number;
     setLayer((prev) => ({ ...prev, layerProps: { ...prev.layerProps, opacity } }));

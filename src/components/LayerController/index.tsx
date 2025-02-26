@@ -1,9 +1,8 @@
 import MuiAccordion from "@material-ui/core/Accordion";
 import { withStyles } from "@material-ui/styles";
-import { useAtomValue } from "jotai";
 import React from "react";
 
-import type { ControllerProps } from "../../state";
+import { LayerStateContext, useSourceData } from "../../hooks";
 import { layerFamilyAtom } from "../../state";
 import Content from "./Content";
 import Header from "./Header";
@@ -29,15 +28,17 @@ const Accordion = withStyles({
   },
 })(MuiAccordion);
 
-function LayerController({ sourceAtom }: Omit<ControllerProps, "layerAtom">) {
-  const sourceInfo = useAtomValue(sourceAtom);
+function LayerController() {
+  const [sourceInfo] = useSourceData();
   const layerAtom = layerFamilyAtom(sourceInfo);
   const { name = "" } = sourceInfo;
   return (
-    <Accordion defaultExpanded>
-      <Header sourceAtom={sourceAtom} layerAtom={layerAtom} name={name} />
-      <Content sourceAtom={sourceAtom} layerAtom={layerAtom} />
-    </Accordion>
+    <LayerStateContext.Provider value={layerAtom}>
+      <Accordion defaultExpanded>
+        <Header name={sourceInfo.name ?? ""} />
+        <Content />
+      </Accordion>
+    </LayerStateContext.Provider>
   );
 }
 

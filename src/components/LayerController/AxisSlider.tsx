@@ -1,10 +1,9 @@
 import { Divider, Grid, Typography } from "@material-ui/core";
 import { Slider } from "@material-ui/core";
 import { withStyles } from "@material-ui/styles";
-import { useAtom, useAtomValue } from "jotai";
 import * as React from "react";
 import type { ChangeEvent } from "react";
-import type { ControllerProps } from "../../state";
+import { useLayerState, useSourceData } from "../../hooks";
 import DimensionOptions from "./AxisOptions";
 
 const DenseSlider = withStyles({
@@ -23,9 +22,9 @@ interface Props {
   max: number;
 }
 
-function AxisSlider({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<Props>) {
-  const [layer, setLayer] = useAtom(layerAtom);
-  const sourceData = useAtomValue(sourceAtom);
+function AxisSlider({ axisIndex, max }: Props) {
+  const [layer, setLayer] = useLayerState();
+  const [sourceData] = useSourceData();
   const { axis_labels } = sourceData;
   let axisLabel = axis_labels[axisIndex];
   if (axisLabel === "t" || axisLabel === "z") {
@@ -69,7 +68,7 @@ function AxisSlider({ sourceAtom, layerAtom, axisIndex, max }: ControllerProps<P
             </div>
           </Grid>
           <Grid item xs={1}>
-            <DimensionOptions sourceAtom={sourceAtom} layerAtom={layerAtom} axisIndex={axisIndex} max={max} />
+            <DimensionOptions axisIndex={axisIndex} max={max} />
           </Grid>
         </Grid>
         <Grid container justifyContent="space-between">
