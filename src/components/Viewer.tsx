@@ -4,7 +4,7 @@ import { type WritableAtom, useAtom } from "jotai";
 import { useAtomValue } from "jotai";
 import * as React from "react";
 
-import type { LayerProps, Layer, DeckGLRef, OrthographicViewState } from "deck.gl";
+import type { DeckGLRef, Layer, LayerProps, OrthographicViewState } from "deck.gl";
 import type { ZarrPixelSource } from "../ZarrPixelSource";
 import type { ViewState } from "../state";
 import { layerAtoms } from "../state";

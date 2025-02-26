@@ -1,9 +1,9 @@
 import { CompositeLayer, SolidPolygonLayer, TextLayer } from "deck.gl";
 import pMap from "p-map";
 
-import type { SolidPolygonLayerProps, TextLayerProps, CompositeLayerProps, PickingInfo } from "deck.gl";
 import { ColorPaletteExtension, XRLayer } from "@hms-dbmi/viv";
 import type { SupportedTypedArray } from "@vivjs/types";
+import type { CompositeLayerProps, PickingInfo, SolidPolygonLayerProps, TextLayerProps } from "deck.gl";
 import type { ZarrPixelSource } from "./ZarrPixelSource";
 import type { BaseLayerProps } from "./state";
 import { assert } from "./utils";
