@@ -1,12 +1,11 @@
 import DeckGL from "deck.gl";
 import { OrthographicView } from "deck.gl";
-import { type WritableAtom, useAtom } from "jotai";
 import { useAtomValue } from "jotai";
 import * as React from "react";
 
 import type { DeckGLRef, Layer, LayerProps, OrthographicViewState } from "deck.gl";
 import type { ZarrPixelSource } from "../ZarrPixelSource";
-import type { ViewState } from "../state";
+import { useViewState } from "../hooks";
 import { layerAtoms } from "../state";
 import { fitBounds, isInterleaved } from "../utils";
 
@@ -28,12 +27,9 @@ function getLayerSize(props: Data) {
   return { height, width, maxZoom };
 }
 
-function WrappedViewStateDeck(props: {
-  layers: Array<VizarrLayer | null>;
-  viewStateAtom: WritableAtom<ViewState | undefined, ViewState>;
-}) {
-  const [viewState, setViewState] = useAtom(props.viewStateAtom);
+function WrappedViewStateDeck(props: { layers: Array<VizarrLayer | null> }) {
   const deckRef = React.useRef<DeckGLRef>(null);
+  const [viewState, setViewState] = useViewState();
   const firstLayerProps = props.layers[0]?.props;
 
   // If viewState hasn't been updated, use the first loader to guess viewState
@@ -66,13 +62,13 @@ function WrappedViewStateDeck(props: {
   );
 }
 
-function Viewer({ viewStateAtom }: { viewStateAtom: WritableAtom<ViewState | undefined, ViewState> }) {
+function Viewer() {
   const layerConstructors = useAtomValue(layerAtoms);
   // @ts-expect-error - Viv types are giving up an issue
   const layers: Array<VizarrLayer | null> = layerConstructors.map((layer) => {
     return !layer.on ? null : new layer.Layer(layer.layerProps);
   });
-  return <WrappedViewStateDeck viewStateAtom={viewStateAtom} layers={layers} />;
+  return <WrappedViewStateDeck layers={layers} />;
 }
 
 export default Viewer;

@@ -1,6 +1,6 @@
 import { type PrimitiveAtom, useAtom } from "jotai";
 import * as React from "react";
-import type { LayerState, SourceData } from "./state";
+import type { LayerState, SourceData, ViewState } from "./state";
 
 import * as utils from "./utils";
 
@@ -17,5 +17,13 @@ export const LayerStateContext = React.createContext<PrimitiveAtom<{ id: string 
 export function useLayerState() {
   const atom = React.useContext(LayerStateContext);
   utils.assert(atom, "useLayerState hook must be used within LayerStateContext.");
+  return useAtom(atom);
+}
+
+export const ViewStateContext = React.createContext<PrimitiveAtom<ViewState | null> | null>(null);
+
+export function useViewState() {
+  const atom = React.useContext(ViewStateContext);
+  utils.assert(atom, "useViewState hook must be used within ViewStateContext.");
   return useAtom(atom);
 }

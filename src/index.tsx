@@ -1,6 +1,6 @@
 import { Link, Typography } from "@material-ui/core";
 import { ThemeProvider, makeStyles } from "@material-ui/styles";
-import { Provider, atom } from "jotai";
+import { type PrimitiveAtom, Provider, atom } from "jotai";
 import { useAtomValue, useSetAtom } from "jotai";
 import * as React from "react";
 import ReactDOM from "react-dom/client";
@@ -8,13 +8,14 @@ import ReactDOM from "react-dom/client";
 import Menu from "./components/Menu";
 import Viewer from "./components/Viewer";
 import "./codecs/register";
+import { ViewStateContext } from "./hooks";
 import {
   type ImageLayerConfig,
   type ViewState,
   addImageAtom,
-  atomWithEffect,
   redirectObjAtom,
   sourceErrorAtom,
+  viewStateAtom,
 } from "./state";
 import theme from "./theme";
 import { defer, typedEmitter } from "./utils";
@@ -53,9 +54,17 @@ const useStyles = makeStyles({
 export function createViewer(element: HTMLElement, options: { menuOpen?: boolean } = {}): Promise<VizarrViewer> {
   const ref = React.createRef<VizarrViewer>();
   const emitter = typedEmitter<Events>();
-  const viewStateAtom = atomWithEffect<ViewState | undefined, ViewState>(
-    atom<ViewState | undefined>(undefined),
-    ({ zoom, target }) => emitter.emit("viewStateChange", { zoom, target }),
+  const viewStateAtomWithEffect: PrimitiveAtom<ViewState | null> = atom(
+    (get) => get(viewStateAtom),
+    (get, set, update) => {
+      const viewState = typeof update === "function" ? update(get(viewStateAtom)) : update;
+      if (viewState)
+        emitter.emit("viewStateChange", {
+          target: viewState.target,
+          zoom: viewState.zoom,
+        });
+      set(viewStateAtom, update);
+    },
   );
   const { promise, resolve } = defer<VizarrViewer>();
 
@@ -63,7 +72,7 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
     const sourceError = useAtomValue(sourceErrorAtom);
     const redirectObj = useAtomValue(redirectObjAtom);
     const addImage = useSetAtom(addImageAtom);
-    const setViewState = useSetAtom(viewStateAtom);
+    const setViewState = useSetAtom(viewStateAtomWithEffect);
     React.useImperativeHandle(
       ref,
       () => ({
@@ -83,10 +92,10 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
     return (
       <>
         {sourceError === null && redirectObj === null && (
-          <>
+          <ViewStateContext.Provider value={viewStateAtomWithEffect}>
             <Menu open={options.menuOpen ?? true} />
-            <Viewer viewStateAtom={viewStateAtom} />
-          </>
+            <Viewer />
+          </ViewStateContext.Provider>
         )}
         {sourceError !== null && (
           <div className={classes.errorContainer}>
@@ -108,7 +117,9 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
   root.render(
     <ThemeProvider theme={theme}>
       <Provider>
-        <App />
+        <ViewStateContext.Provider value={viewStateAtomWithEffect}>
+          <App />
+        </ViewStateContext.Provider>
       </Provider>
     </ThemeProvider>,
   );
