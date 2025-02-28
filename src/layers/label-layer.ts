@@ -1,10 +1,11 @@
 import { getImageSize } from "@hms-dbmi/viv";
-import { BitmapLayer, TileLayer } from "deck.gl";
+import { BitmapLayer, TileLayer, type UpdateParameters } from "deck.gl";
 import * as utils from "../utils";
+import fs from "./label-layer-fragment";
 
-import type { PixelData } from "@vivjs/types";
 import { type Matrix4, clamp } from "math.gl";
 import type { ZarrPixelSource } from "../ZarrPixelSource";
+type Texture = ReturnType<BitmapLayer["context"]["device"]["createTexture"]>;
 
 export type LabelLayerLut = Readonly<Record<number, readonly [number, number, number, number]>>;
 
@@ -17,7 +18,18 @@ export interface LabelLayerProps {
   lut?: LabelLayerLut;
 }
 
-export class LabelLayer extends TileLayer<PixelData> {
+/**
+ * The decoded tile data from a OME-NGFF label source
+ *
+ * @see {@href https://ngff.openmicroscopy.org/0.5/index.html#labels-md}
+ *
+ * The pixels of the label images MUST be integer data types, i.e. one of [uint8, int8, uint16, int16, uint32, int32, uint64, int64].
+ *
+ * TODO: Support integer data types beyond Uint8
+ */
+type LabelPixelData = { data: Uint8Array; width: number; height: number };
+
+export class LabelLayer extends TileLayer<LabelPixelData> {
   constructor(props: LabelLayerProps) {
     const resolutions = props.loader;
     const dimensions = getImageSize(resolutions[0]);
@@ -39,18 +51,71 @@ export class LabelLayer extends TileLayer<PixelData> {
         const resolution = resolutions[Math.round(-z)];
         const request = { x, y, signal, selection: props.selection };
         const { data, width, height } = await resolution.getTile(request);
-        return { data, width, height };
+        // FIXME: Casting _any_ data type to Uint8Array
+        return { data: new Uint8Array(data), width, height };
       },
       renderSubLayers({ tile, data }) {
         const [[left, bottom], [right, top]] = tile.boundingBox;
         const { width, height } = dimensions;
-        return new BitmapLayer(props, {
+        return new GrayscaleBitmapLayer({
           id: `tile-${tile.index.x}.${tile.index.y}.${tile.index.z}-${props.id}`,
-          image: renderGrayscalePixelDataToImage(data, { opacity: props.opacity, lut: props.lut }),
+          pixelData: data,
+          opacity: props.opacity,
+          modelMatrix: props.modelMatrix,
           bounds: [clamp(left, 0, width), clamp(top, 0, height), clamp(right, 0, width), clamp(bottom, 0, height)],
+          // For underlying class
+          image: new ImageData(data.width, data.height),
+          pickable: false,
         });
       },
     });
+  }
+}
+
+export class GrayscaleBitmapLayer extends BitmapLayer<{ pixelData: LabelPixelData }> {
+  static layerName = "GrayscaleBitmapLayer";
+  // @ts-expect-error - only way to extend the base state type
+  state!: { texture: Texture } & BitmapLayer["state"];
+
+  getShaders() {
+    const shaders = super.getShaders();
+    // replace the builtin fragment shader with our own
+    return { ...shaders, fs };
+  }
+
+  updateState({ props, oldProps, changeFlags, ...rest }: UpdateParameters<this>): void {
+    super.updateState({ props, oldProps, changeFlags, ...rest });
+    if (props.pixelData !== oldProps.pixelData || changeFlags.dataChanged) {
+      if (this.state.texture) {
+        this.state.texture.destroy();
+      }
+      this.setState({
+        texture: this.context.device.createTexture({
+          width: props.pixelData.width,
+          height: props.pixelData.height,
+          dimension: "2d",
+          data: props.pixelData.data,
+          mipmaps: false,
+          sampler: {
+            minFilter: "nearest",
+            magFilter: "nearest",
+            addressModeU: "clamp-to-edge",
+            addressModeV: "clamp-to-edge",
+          },
+          format: "r8unorm",
+        }),
+      });
+    }
+  }
+
+  draw(opts: unknown) {
+    const { texture } = this.state;
+    if (texture) {
+      this.state.model?.setBindings({
+        uGrayscaleTexture: texture,
+      });
+    }
+    super.draw(opts);
   }
 }
 
@@ -61,32 +126,4 @@ function getTileSizeForResolutions(resolutions: Array<ZarrPixelSource>): number 
     "resolutions must all have the same tile size",
   );
   return tileSize;
-}
-
-/**
- * Converts a grayscale image (single-channel pixel data) into an RGBA image.
- *
- * This function takes an input array of pixel intensity values (`data`), where each value
- * represents a grayscale intensity. It creates an `ImageData` object where nonzero pixels
- * are converted to a color with the fully specified opacity. Zero-value pixels remain fully transparent.
- *
- * TODO: We should create a custom deck sublayer to do this on the GPU instead
- */
-function renderGrayscalePixelDataToImage(
-  pixelData: PixelData,
-  options: { opacity: number; lut?: LabelLayerLut },
-): ImageData {
-  const { data, width, height } = pixelData;
-  const alpha = Math.round(options.opacity * 255);
-  const mask = new Uint8ClampedArray(width * height * 4);
-  for (let i = 0; i < data.length; i++) {
-    const [r, g, b] = options?.lut?.[data[i]] ?? [255, 255, 255];
-    const value = data[i] > 0 ? 1 : 0;
-    const offset = i * 4;
-    mask[offset] = r;
-    mask[offset + 1] = g;
-    mask[offset + 2] = b;
-    mask[offset + 3] = value * alpha;
-  }
-  return new ImageData(mask, width, height);
 }
