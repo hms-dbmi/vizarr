@@ -25,6 +25,7 @@ const SUPPORTED_DTYPES = [
 
 export class ZarrPixelSource<S extends Array<string> = Array<string>> implements viv.PixelSource<S> {
   #arr: zarr.Array<zarr.NumberDataType | zarr.BigintDataType, zarr.Readable>;
+
   readonly labels: viv.Labels<S>;
   readonly tileSize: number;
   readonly dtype: viv.SupportedDtype;
@@ -106,6 +107,8 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
     });
 
     if (data instanceof BigInt64Array || data instanceof BigUint64Array) {
+      // We need to cast data these typed arrays to something that is viv compatible.
+      // See the comment in the constructor for more information.
       data = Uint32Array.from(data, (bint) => Number(bint));
     }
 
@@ -152,4 +155,4 @@ class BoundsCheckError extends Error {
   name = "BoundsCheckError";
 }
 
-function resolveDataType() {}
+function resolveDataType() { }
