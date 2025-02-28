@@ -3,12 +3,12 @@ import { BitmapLayer, TileLayer, type UpdateParameters } from "deck.gl";
 import * as utils from "../utils";
 
 import { type Matrix4, clamp } from "math.gl";
+import type * as zarr from "zarrita";
 import type { ZarrPixelSource } from "../ZarrPixelSource";
 
 type Texture = ReturnType<BitmapLayer["context"]["device"]["createTexture"]>;
 
 export type LabelLayerLut = Readonly<Record<number, readonly [number, number, number, number]>>;
-
 export interface LabelLayerProps {
   id: string;
   loader: Array<ZarrPixelSource>;
@@ -19,15 +19,21 @@ export interface LabelLayerProps {
 }
 
 /**
- * The decoded tile data from a OME-NGFF label source
- *
  * @see {@href https://ngff.openmicroscopy.org/0.5/index.html#labels-md}
  *
  * The pixels of the label images MUST be integer data types, i.e. one of [uint8, int8, uint16, int16, uint32, int32, uint64, int64].
- *
- * TODO: Support integer data types beyond Uint8
  */
-type LabelPixelData = { data: Uint8Array; width: number; height: number };
+type LabelDataType = zarr.Uint8 | zarr.Int8 | zarr.Uint16 | zarr.Int16 | zarr.Uint32 | zarr.Int32;
+// TODO: bigint data types are supported by the spec but not by Viv's data loader.
+// | zarr.Uint64
+// | zarr.Int64;
+
+/** The decoded tile data from a OME-NGFF label source */
+type LabelPixelData = {
+  data: zarr.TypedArray<LabelDataType>;
+  width: number;
+  height: number;
+};
 
 export class LabelLayer extends TileLayer<LabelPixelData> {
   constructor(props: LabelLayerProps) {
@@ -51,8 +57,15 @@ export class LabelLayer extends TileLayer<LabelPixelData> {
         const resolution = resolutions[Math.round(-z)];
         const request = { x, y, signal, selection: props.selection };
         const { data, width, height } = await resolution.getTile(request);
-        // FIXME: Casting _any_ data type to Uint8Array
-        return { data: new Uint8Array(data), width, height };
+        utils.assert(
+          !(data instanceof Float32Array) && !(data instanceof Float64Array),
+          `The pixels of labels MUST be integer data types, got ${JSON.stringify(resolution.dtype)}`,
+        );
+        utils.assert(
+          !(data instanceof BigInt64Array) && !(data instanceof BigUint64Array),
+          "Int64 and Uint64 label data types are not currently supported in vizarr. Please open an issue.",
+        );
+        return { data, width, height };
       },
       renderSubLayers({ tile, data }) {
         const [[left, bottom], [right, top]] = tile.boundingBox;
@@ -79,17 +92,28 @@ export class GrayscaleBitmapLayer extends BitmapLayer<{ pixelData: LabelPixelDat
   state!: { texture: Texture } & BitmapLayer["state"];
 
   getShaders() {
-    const shaders = super.getShaders();
+    const sampler = (
+      {
+        Uint8Array: "usampler2D",
+        Uint16Array: "usampler2D",
+        Uint32Array: "usampler2D",
+        Int8Array: "isampler2D",
+        Int16Array: "isampler2D",
+        Int32Array: "isampler2D",
+      } as const
+    )[typedArrayConstructorName(this.props.pixelData.data)];
     // replace the builtin fragment shader with our own
     return {
-      ...shaders,
+      ...super.getShaders(),
       fs: `\
 #version 300 es
 #define SHADER_NAME grayscale-bitmap-layer-fragment-shader
 
 precision highp float;
+precision highp int;
+precision highp ${sampler};
 
-uniform sampler2D grayscaleTexture;
+uniform ${sampler} grayscaleTexture;
 uniform float opacity;
 uniform vec3 lut[256];
 uniform bool useLUT;
@@ -98,11 +122,11 @@ in vec2 vTexCoord;
 out vec4 fragColor;
 
 void main() {
-  float intensity = texture(grayscaleTexture, vTexCoord).r;
+  float intensity = float(texture(grayscaleTexture, vTexCoord).r) / 255.0;
   vec3 color;
   if (useLUT) {
-    int index = int(floor(intensity * 255.0));
-    index = clamp(index, 0, 255);
+    int index = int(floor(intensity * 255.0)) % 256;
+    index = (index + 256) % 256; // Ensures index is always in the range [0, 255]
     color = lut[index];
   } else {
     color = vec3(1.0);
@@ -124,8 +148,8 @@ void main() {
         texture: this.context.device.createTexture({
           width: props.pixelData.width,
           height: props.pixelData.height,
-          dimension: "2d",
           data: props.pixelData.data,
+          dimension: "2d",
           mipmaps: false,
           sampler: {
             minFilter: "nearest",
@@ -133,23 +157,30 @@ void main() {
             addressModeU: "clamp-to-edge",
             addressModeV: "clamp-to-edge",
           },
-          format: "r8unorm",
+          format: (
+            {
+              Uint8Array: "r8uint",
+              Uint16Array: "r16uint",
+              Uint32Array: "r32uint",
+              Int8Array: "r8sint",
+              Int16Array: "r16sint",
+              Int32Array: "r32sint",
+            } as const
+          )[typedArrayConstructorName(props.pixelData.data)],
         }),
       });
     }
   }
 
   draw(opts: unknown) {
-    const { texture } = this.state;
-    if (this.props.lut) {
-    }
-    this.state.model?.setUniforms({
-      // @ts-expect-error - Float32Array is ok here
-      lut: this.props.lut ?? new Float32Array(),
-      useLUT: !!this.props.lut,
-    });
-    if (texture) {
-      this.state.model?.setBindings({ grayscaleTexture: texture });
+    const { model, texture } = this.state;
+    if (model && texture) {
+      model.setUniforms({
+        // @ts-expect-error - Float32Array is ok here
+        lut: this.props.lut ?? new Float32Array(),
+        useLUT: !!this.props.lut,
+      });
+      model.setBindings({ grayscaleTexture: texture });
     }
     super.draw(opts);
   }
@@ -216,4 +247,10 @@ function generateCategoricalLUT(
   }
 
   return lut;
+}
+
+function typedArrayConstructorName(arr: zarr.TypedArray<LabelDataType>) {
+  const ArrayType = arr.constructor as zarr.TypedArrayConstructor<LabelDataType>;
+  const name = ArrayType.name as `${Capitalize<LabelDataType>}Array`;
+  return name;
 }
