@@ -56,14 +56,10 @@ export class LabelLayer extends TileLayer<LabelPixelData> {
         const { x, y, z } = index;
         const resolution = resolutions[Math.round(-z)];
         const request = { x, y, signal, selection: props.selection };
-        const { data, width, height } = await resolution.getTile(request);
+        let { data, width, height } = await resolution.getTile(request);
         utils.assert(
           !(data instanceof Float32Array) && !(data instanceof Float64Array),
           `The pixels of labels MUST be integer data types, got ${JSON.stringify(resolution.dtype)}`,
-        );
-        utils.assert(
-          !(data instanceof BigInt64Array) && !(data instanceof BigUint64Array),
-          "Int64 and Uint64 label data types are not currently supported in vizarr. Please open an issue.",
         );
         return { data, width, height };
       },
