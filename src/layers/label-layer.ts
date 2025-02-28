@@ -195,9 +195,17 @@ function createLUT(source?: LabelLayerLut) {
   if (source) {
     const lut = new Float32Array(256 * 3);
     for (let [value, color] of Object.entries(source)) {
-      lut[+value * 3 + 0] = color[0];
-      lut[+value * 3 + 1] = color[1];
-      lut[+value * 3 + 2] = color[2];
+      const i = +value;
+      if (i < 0 || i >= 256) {
+        console.warn(
+          `[vizarr] Warning: OME-NGFF "labels" specifying colors outside the range [0, 255] are not currently supported. Falling back to random categorical default.`,
+        );
+        return generateCategoricalLUT();
+      }
+      utils.assert(i < 256, "");
+      lut[i * 3 + 0] = color[0];
+      lut[i * 3 + 1] = color[1];
+      lut[i * 3 + 2] = color[2];
     }
     return lut;
   }
