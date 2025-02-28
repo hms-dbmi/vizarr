@@ -11,7 +11,7 @@
     "check": "tsc"
   },
   "dependencies": {
-    "@hms-dbmi/viv": "~0.17.0",
+    "@hms-dbmi/viv": "~0.17.1",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/styles": "^4.11.5",

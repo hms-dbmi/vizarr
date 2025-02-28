@@ -13,7 +13,7 @@ const RGBA_CHANNEL_AXIS_NAME = "_c";
 const SUPPORTED_DTYPES = ["Uint8", "Uint16", "Uint32", "Float32", "Int8", "Int16", "Int32", "Float64"] as const;
 
 export class ZarrPixelSource<S extends Array<string> = Array<string>> implements viv.PixelSource<S> {
-  #arr: zarr.Array<zarr.DataType, zarr.Readable>;
+  #arr: zarr.Array<zarr.NumberDataType, zarr.Readable>;
   readonly labels: viv.Labels<S>;
   readonly tileSize: number;
   readonly dtype: viv.SupportedDtype;
@@ -25,12 +25,12 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
       tileSize: number;
     },
   ) {
+    const dtype = capitalize(arr.dtype);
+    assert(arr.is("number") && isSupportedDtype(dtype), `Unsupported viv dtype: ${dtype}`);
+    this.dtype = dtype;
     this.#arr = arr;
     this.labels = options.labels;
     this.tileSize = options.tileSize;
-    const vivDtype = capitalize(arr.dtype);
-    assert(isSupportedDtype(vivDtype), `Unsupported viv dtype: ${vivDtype}`);
-    this.dtype = vivDtype;
   }
 
   get shape() {
