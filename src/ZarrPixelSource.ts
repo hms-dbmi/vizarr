@@ -13,7 +13,9 @@ const RGBA_CHANNEL_AXIS_NAME = "_c";
 const SUPPORTED_DTYPES = ["Uint8", "Uint16", "Uint32", "Float32", "Int8", "Int16", "Int32", "Float64"] as const;
 
 export class ZarrPixelSource<S extends Array<string> = Array<string>> implements viv.PixelSource<S> {
-  #arr: zarr.Array<zarr.DataType, zarr.Readable>;
+  #arr: zarr.Array<zarr.NumberDataType, zarr.Readable>;
+  #dataCompat = (x: zarr.TypedArray<zarr.NumberDataType>) => x;
+
   readonly labels: viv.Labels<S>;
   readonly tileSize: number;
   readonly dtype: viv.SupportedDtype;
@@ -25,12 +27,25 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
       tileSize: number;
     },
   ) {
+    const vivDtype = capitalize(arr.dtype);
+    assert(arr.is("number") && isSupportedDtype(vivDtype), `Unsupported viv dtype: ${vivDtype}`);
     this.#arr = arr;
     this.labels = options.labels;
     this.tileSize = options.tileSize;
-    const vivDtype = capitalize(arr.dtype);
-    assert(isSupportedDtype(vivDtype), `Unsupported viv dtype: ${vivDtype}`);
-    this.dtype = vivDtype;
+
+    // NOTE: Trevor(2025-02-27): Viv 0.17 introduced new GL constants that are not
+    // supported by WebGL. Specifically, certain texture formats (e.g., r8int) are
+    // incompatible, causing errors when rendering. This workaround ensures
+    // compatibility by casting unsupported data types (e.g., Int8) to a
+    // supported equivalent (Uint8).
+    if (vivDtype === "Int8") {
+      // FIXME: This could overflow and is not a safe cast.
+      this.dtype = "Uint8";
+      this.#dataCompat = (x) => new Uint8Array(x);
+    } else {
+      this.dtype = vivDtype;
+      this.#dataCompat = (x) => x;
+    }
   }
 
   get shape() {
@@ -81,14 +96,15 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
   }
 
   async #fetchData(selection: Array<number | Slice>, options: { signal?: AbortSignal }): Promise<viv.PixelData> {
-    const {
-      data,
-      shape: [height, width],
-    } = await zarr.get(this.#arr, selection, {
+    const chunk = await zarr.get(this.#arr, selection, {
       // @ts-expect-error this is ok for now and should be supported by all backends
       signal: options.signal,
     });
-    return { data: data as viv.SupportedTypedArray, width, height };
+    return {
+      data: this.#dataCompat(chunk.data) as viv.SupportedTypedArray,
+      width: chunk.shape[1],
+      height: chunk.shape[0],
+    };
   }
 }
 

@@ -1,11 +1,10 @@
-import { ImageLayer, MultiscaleImageLayer } from "@hms-dbmi/viv";
 import * as zarr from "zarrita";
-
 import { ZarrPixelSource } from "./ZarrPixelSource";
-import GridLayer from "./gridLayer";
-import { loadOmeroMultiscales, loadPlate, loadWell } from "./ome";
-import type { ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from "./state";
+import { loadOmeroMultiscales as loadOmeMultiscales, loadPlate, loadWell } from "./ome";
 import * as utils from "./utils";
+
+import type { BaseLayerProps } from "./layers/viv-layers";
+import type { ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from "./state";
 
 async function loadSingleChannel(
   config: SingleChannelConfig,
@@ -92,8 +91,8 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
       return loadWell(config, node, attrs.well);
     }
 
-    if (utils.isOmeroMultiscales(attrs)) {
-      return loadOmeroMultiscales(config, node, attrs);
+    if (utils.isOmeMultiscales(attrs)) {
+      return loadOmeMultiscales(config, node, attrs);
     }
 
     if (Object.keys(attrs).length === 0 && node.path) {
@@ -196,14 +195,13 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
     colormap,
     modelMatrix: source.model_matrix,
     onClick: source.onClick,
-  };
+  } satisfies BaseLayerProps;
 
-  if ("loaders" in source) {
+  if (source.loaders) {
     return {
-      Layer: GridLayer,
+      kind: "grid",
       layerProps: {
         ...layerProps,
-        loader: source.loader,
         loaders: source.loaders,
         columns: source.columns as number,
         rows: source.rows as number,
@@ -214,7 +212,7 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
 
   if (source.loader.length === 1) {
     return {
-      Layer: ImageLayer,
+      kind: "image",
       layerProps: {
         ...layerProps,
         loader: source.loader[0],
@@ -223,12 +221,54 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
     };
   }
 
+  let labels = undefined;
+  if (source.labels && source.labels.length > 0) {
+    labels = {
+      on: true,
+      layerProps: source.labels.map((label, i) => ({
+        id: `${source.id}_${i}`,
+        loader: label.loader,
+        modelMatrix: label.modelMatrix,
+        opacity: 1,
+        lut: label.lut,
+      })),
+      transformSourceSelection: getTransformSourceSelectionFromLabels(
+        source.labels.map((label) => label.loader[0].labels),
+        source.loader[0].labels,
+      ),
+    };
+  }
+
   return {
-    Layer: MultiscaleImageLayer,
+    kind: "multiscale",
     layerProps: {
       ...layerProps,
       loader: source.loader,
     },
     on: true,
+    labels,
+  };
+}
+
+function getTransformSourceSelectionFromLabels(labelAxesNames: Array<Array<string>>, sourceAxesNames: Array<string>) {
+  utils.assert(
+    labelAxesNames[0].every((name) => sourceAxesNames.includes(name)),
+    () =>
+      `Label axes names be a subset of source. Source: ${JSON.stringify(sourceAxesNames)} Labels: ${JSON.stringify(labelAxesNames)}`,
+  );
+  for (const axes of labelAxesNames) {
+    utils.assert(
+      axes.every((name, i) => name === labelAxesNames[0][i]),
+      () => {
+        const mismatchedLabels = labelAxesNames.map((axes) => ({ axes }));
+        return `Error: All labels must share the same axes. Mismatched labels found: ${JSON.stringify(mismatchedLabels)}`;
+      },
+    );
+  }
+  return (sourceSelection: Array<number>): Array<number> => {
+    return labelAxesNames[0].map((name) => {
+      if (name === "c") return 0; // skip
+      return sourceSelection[sourceAxesNames.indexOf(name)];
+    });
   };
 }

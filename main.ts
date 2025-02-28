@@ -20,14 +20,14 @@ async function main() {
 
   // Add event listener to sync viewState as query param.
   // Debounce to limit how quickly we are pushing to browser history
-  viewer.on(
-    "viewStateChange",
-    debounce((update: vizarr.ViewState) => {
-      const url = new URL(window.location.href);
-      url.searchParams.set("viewState", JSON.stringify(update));
-      window.history.pushState({}, "", decodeURIComponent(url.href));
-    }, 200),
-  );
+  // viewer.on(
+  //   "viewStateChange",
+  //   debounce((update: vizarr.ViewState) => {
+  //     const url = new URL(window.location.href);
+  //     url.searchParams.set("viewState", JSON.stringify(update));
+  //     window.history.pushState({}, "", decodeURIComponent(url.href));
+  //   }, 200),
+  // );
 
   // parse image config
   // @ts-expect-error - TODO: validate config

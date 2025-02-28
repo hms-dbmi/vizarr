@@ -1,8 +1,9 @@
 import pMap from "p-map";
 import * as zarr from "zarrita";
-import type { ImageLayerConfig, OnClickData, SourceData } from "./state";
+import type { ImageLabels, ImageLayerConfig, OnClickData, SourceData } from "./state";
 
 import { ZarrPixelSource } from "./ZarrPixelSource";
+import type { LabelLayerLut } from "./layers/label-layer";
 import * as utils from "./utils";
 
 export async function loadWell(
@@ -76,7 +77,7 @@ export async function loadWell(
   });
 
   let meta: Meta;
-  if (utils.isOmeroMultiscales(imgAttrs)) {
+  if (utils.isOmeMultiscales(imgAttrs)) {
     meta = parseOmeroMeta(imgAttrs.omero, axes);
   } else {
     meta = await defaultMeta(loaders[0].loader, axis_labels);
@@ -85,7 +86,7 @@ export async function loadWell(
   const sourceData: SourceData = {
     loaders,
     ...meta,
-    axis_labels,
+    axis_labels: axis_labels,
     loader: [loaders[0].loader],
     model_matrix: utils.parseMatrix(config.model_matrix),
     defaults: {
@@ -208,7 +209,7 @@ export async function loadPlate(
   const sourceData: SourceData = {
     loaders,
     ...meta,
-    axis_labels,
+    axis_labels: axis_labels,
     loader: [loaders[0].loader],
     model_matrix: utils.parseMatrix(config.model_matrix),
     defaults: {
@@ -253,12 +254,14 @@ export async function loadOmeroMultiscales(
   const axis_labels = utils.getNgffAxisLabels(axes);
   const meta = parseOmeroMeta(attrs.omero, axes);
   const tileSize = utils.guessTileSize(data[0]);
-
   const loader = data.map((arr) => new ZarrPixelSource(arr, { labels: axis_labels, tileSize }));
+  const labels = await resolveOmeLabelsFromMultiscales(grp);
   return {
     loader: loader,
-    axis_labels,
-    model_matrix: utils.parseMatrix(config.model_matrix),
+    axis_labels: axis_labels,
+    model_matrix: config.model_matrix
+      ? utils.parseMatrix(config.model_matrix)
+      : utils.coordinateTransformationsToMatrix(attrs.multiscales),
     defaults: {
       selection: meta.defaultSelection,
       colormap,
@@ -266,7 +269,34 @@ export async function loadOmeroMultiscales(
     },
     ...meta,
     name: meta.name ?? name,
+    labels: await Promise.all(labels.map((name) => loadOmeImageLabel(grp.resolve("labels"), name))),
   };
+}
+
+async function loadOmeImageLabel(root: zarr.Location<zarr.Readable>, name: string): Promise<ImageLabels[number]> {
+  const grp = await zarr.open(root.resolve(name), { kind: "group" });
+  const attrs = utils.resolveAttrs(grp.attrs);
+  utils.assert(utils.isOmeImageLabel(attrs), "No 'image-label' metadata.");
+  const data = await utils.loadMultiscales(grp, attrs.multiscales);
+  const tileSize = utils.guessTileSize(data[0]);
+  const axes = utils.getNgffAxes(attrs.multiscales);
+  const labels = utils.getNgffAxisLabels(axes);
+  return {
+    name,
+    lut: resolveImageLabelsLut(attrs["image-label"]),
+    modelMatrix: utils.coordinateTransformationsToMatrix(attrs.multiscales),
+    loader: data.map((arr) => new ZarrPixelSource(arr, { labels, tileSize })),
+  };
+}
+
+async function resolveOmeLabelsFromMultiscales(grp: zarr.Group<zarr.Readable>): Promise<Array<string>> {
+  return zarr
+    .open(grp.resolve("labels"), { kind: "group" })
+    .then(({ attrs }) => (attrs.labels ?? []) as Array<string>)
+    .catch((e) => {
+      utils.rethrowUnless(e, zarr.NodeNotFoundError);
+      return [];
+    });
 }
 
 type Meta = {
@@ -328,4 +358,9 @@ function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axes: Ome.Axis[]):
     channel_axis,
     defaultSelection,
   };
+}
+
+function resolveImageLabelsLut(attrs: Ome.ImageLabel): LabelLayerLut | undefined {
+  if (!attrs.colors) return undefined;
+  return Object.fromEntries(attrs.colors.map((d) => [d["label-value"], d.rgba]));
 }
