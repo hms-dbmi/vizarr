@@ -71,7 +71,7 @@ export class LabelLayer extends TileLayer<LabelPixelData> {
           pixelData: data,
           opacity: props.opacity,
           modelMatrix: props.modelMatrix,
-          lut: createLUT(props.lut),
+          lut: createColorLookupTable({ source: props.lut }),
           bounds: [clamp(left, 0, width), clamp(top, 0, height), clamp(right, 0, width), clamp(bottom, 0, height)],
           // For underlying class
           image: new ImageData(data.width, data.height),
@@ -82,12 +82,13 @@ export class LabelLayer extends TileLayer<LabelPixelData> {
   }
 }
 
-export class GrayscaleBitmapLayer extends BitmapLayer<{ pixelData: LabelPixelData; lut?: Float32Array }> {
+export class GrayscaleBitmapLayer extends BitmapLayer<{ pixelData: LabelPixelData; lut: Float32Array }> {
   static layerName = "GrayscaleBitmapLayer";
   // @ts-expect-error - only way to extend the base state type
   state!: { texture: Texture } & BitmapLayer["state"];
 
   getShaders() {
+    const lutSize = this.props.lut.length / 3;
     const sampler = (
       {
         Uint8Array: "usampler2D",
@@ -111,18 +112,18 @@ precision highp ${sampler};
 
 uniform ${sampler} grayscaleTexture;
 uniform float opacity;
-uniform vec3 lut[256];
+uniform vec3 lut[${lutSize}];
 uniform bool useLUT;
 
 in vec2 vTexCoord;
 out vec4 fragColor;
 
 void main() {
-  float intensity = float(texture(grayscaleTexture, vTexCoord).r) / 255.0;
+  float intensity = float(texture(grayscaleTexture, vTexCoord).r) / ${lutSize - 1}.0;
   vec3 color;
   if (useLUT) {
-    int index = int(floor(intensity * 255.0)) % 256;
-    index = (index + 256) % 256; // Ensures index is always in the range [0, 255]
+    int index = int(floor(intensity * ${lutSize - 1}.0)) % ${lutSize};
+    index = (index + ${lutSize}) % ${lutSize}; // Ensures index is always in the range [0, 255]
     color = lut[index];
   } else {
     color = vec3(1.0);
@@ -191,28 +192,30 @@ function getTileSizeForResolutions(resolutions: Array<ZarrPixelSource>): number 
   return tileSize;
 }
 
-function createLUT(source?: LabelLayerLut) {
+function createColorLookupTable(options: {
+  source?: LabelLayerLut;
+  palette?: ReadonlyArray<readonly [number, number, number]>;
+}): Float32Array {
+  const { source, palette = COLOR_PALETTES.pastel1 } = options;
   if (source) {
-    const lut = new Float32Array(256 * 3);
+    const values = Object.keys(source).map((value) => +value);
+    // This could blow up in size, should we worry about it?
+    // What about alpha?
+    const lut = new Float32Array(Math.max(...values) * 3);
     for (let [value, color] of Object.entries(source)) {
       const i = +value;
-      if (i < 0 || i >= 256) {
-        console.warn(
-          `[vizarr] Warning: OME-NGFF "labels" specifying colors outside the range [0, 255] are not currently supported. Falling back to random categorical default.`,
-        );
-        return generateCategoricalLUT();
-      }
-      utils.assert(i < 256, "");
       lut[i * 3 + 0] = color[0];
       lut[i * 3 + 1] = color[1];
       lut[i * 3 + 2] = color[2];
     }
     return lut;
   }
-  return generateCategoricalLUT();
+
+  // generate a random categorical palette
+  return Float32Array.from(palette.flat(), (d) => d / 255.0);
 }
 
-const palettes = {
+const COLOR_PALETTES = {
   pastel1: [
     [251, 180, 174],
     [179, 205, 227],
@@ -237,21 +240,6 @@ const palettes = {
     [188, 128, 189],
   ],
 } as const;
-
-function generateCategoricalLUT(
-  palette: ReadonlyArray<readonly [number, number, number, a?: number]> = palettes.pastel1,
-) {
-  const lut = new Float32Array(256 * 3);
-
-  for (let i = 0; i < 256; i++) {
-    const color = palette[i % palette.length];
-    lut[i * 3 + 0] = color[0] / 255.0;
-    lut[i * 3 + 1] = color[1] / 255.0;
-    lut[i * 3 + 2] = color[2] / 255.0;
-  }
-
-  return lut;
-}
 
 function typedArrayConstructorName(arr: zarr.TypedArray<LabelDataType>) {
   const ArrayType = arr.constructor as zarr.TypedArrayConstructor<LabelDataType>;
