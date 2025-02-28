@@ -81,14 +81,15 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
   }
 
   async #fetchData(selection: Array<number | Slice>, options: { signal?: AbortSignal }): Promise<viv.PixelData> {
-    const {
-      data,
-      shape: [height, width],
-    } = await zarr.get(this.#arr, selection, {
+    const chunk = await zarr.get(this.#arr, selection, {
       // @ts-expect-error this is ok for now and should be supported by all backends
       signal: options.signal,
     });
-    return { data: data as viv.SupportedTypedArray, width, height };
+    return {
+      data: chunk.data as viv.SupportedTypedArray,
+      width: chunk.shape[1],
+      height: chunk.shape[0],
+    };
   }
 }
 
