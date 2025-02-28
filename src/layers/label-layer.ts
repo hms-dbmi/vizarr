@@ -85,7 +85,7 @@ export class GrayscaleBitmapLayer extends BitmapLayer<{ pixelData: LabelPixelDat
 
   updateState({ props, oldProps, changeFlags, ...rest }: UpdateParameters<this>): void {
     super.updateState({ props, oldProps, changeFlags, ...rest });
-    if (props.pixelData !== oldProps.pixelData || changeFlags.dataChanged) {
+    if (false && props.pixelData !== oldProps.pixelData || changeFlags.dataChanged) {
       if (this.state.texture) {
         this.state.texture.destroy();
       }
@@ -111,9 +111,7 @@ export class GrayscaleBitmapLayer extends BitmapLayer<{ pixelData: LabelPixelDat
   draw(opts: unknown) {
     const { texture } = this.state;
     if (texture) {
-      this.state.model?.setBindings({
-        uGrayscaleTexture: texture,
-      });
+      this.state.model?.setBindings({ grayscaleTexture: texture });
     }
     super.draw(opts);
   }
