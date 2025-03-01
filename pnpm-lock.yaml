@@ -51,8 +51,8 @@ importers:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
       zarrita:
-        specifier: 0.4.0-next.24
-        version: 0.4.0-next.24
+        specifier: 0.4.0
+        version: 0.4.0
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4
@@ -1071,11 +1071,8 @@ packages:
   '@webcomponents/shadycss@1.11.2':
     resolution: {integrity: sha512-vRq+GniJAYSBmTRnhCYPAPq6THYqovJ/gzGThWbgEZUQaBccndGTi1hdiUP15HzEco0I6t4RCtXyX0rsSmwgPw==}
 
-  '@zarrita/core@0.1.0-next.21':
-    resolution: {integrity: sha512-BgAM9feJ/23HCUsoYpEecJxr7lTzPzkBUJjuX2N9Bk9FotEKiPBTciO4qIV5dKoSySO4PLkblxMK3Q4UPiq+5w==}
-
-  '@zarrita/indexing@0.1.0-next.23':
-    resolution: {integrity: sha512-qSj4gdZdELbzsKe0swjqsu1FkqBFxZ1aSXAWtI/Xqb3ZIsYGIbCMY0UgK3voW6Ivg2GyxbVTizuMroI6pjhMOw==}
+  '@zarrita/storage@0.1.0':
+    resolution: {integrity: sha512-lSGDQik2fLt/UyvWzWd23sJFHckEmk50F9Baz2XlbgFQhvd2EVBcHGweOTBhu3c5SB05TzOnlY1M1i2FMDi6YA==}
 
   '@zarrita/storage@0.1.0-next.9':
     resolution: {integrity: sha512-6zlrk2CkLPbGmj+LJlKSX11UKTstCJgH5WnkIje74LawjdJqR/rCFF894bMZgTBnkRmkhYtoFoKzDY2yBsMNRw==}
@@ -1828,8 +1825,8 @@ packages:
     resolution: {integrity: sha512-v7g3i/NfLEHtGtCEX8zl9b/LMY+8BY7fIYvbNX3nskAhliMCY5mA12jlc8Rbe91hSwL/4Nh2d3fUcVmnthXQkQ==}
     engines: {node: '>=12'}
 
-  zarrita@0.4.0-next.24:
-    resolution: {integrity: sha512-3+ssr3EnfRodvqJVdEu8ahblJrwEcEROxkko/ylV6KujJNGqWrV9ra+e3MS5KOrZS2eH4/ERzJFhMpionQTivA==}
+  zarrita@0.4.0:
+    resolution: {integrity: sha512-MK2uustzUF0PooWl6HVUfTares/nmaq5NwRZux/L3npvkSX6Qdpd7w/NOW2cF9EI35yqggoHNi3Nlxyq1YT5eQ==}
 
   zod@3.24.2:
     resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
@@ -3090,15 +3087,10 @@ snapshots:
 
   '@webcomponents/shadycss@1.11.2': {}
 
-  '@zarrita/core@0.1.0-next.21':
+  '@zarrita/storage@0.1.0':
     dependencies:
-      '@zarrita/storage': 0.1.0-next.9
-      numcodecs: 0.3.2
-
-  '@zarrita/indexing@0.1.0-next.23':
-    dependencies:
-      '@zarrita/core': 0.1.0-next.21
-      '@zarrita/storage': 0.1.0-next.9
+      reference-spec-reader: 0.2.0
+      unzipit: 1.4.3
 
   '@zarrita/storage@0.1.0-next.9':
     dependencies:
@@ -3777,11 +3769,10 @@ snapshots:
       numcodecs: 0.2.2
       p-queue: 7.4.1
 
-  zarrita@0.4.0-next.24:
+  zarrita@0.4.0:
     dependencies:
-      '@zarrita/core': 0.1.0-next.21
-      '@zarrita/indexing': 0.1.0-next.23
-      '@zarrita/storage': 0.1.0-next.9
+      '@zarrita/storage': 0.1.0
+      numcodecs: 0.3.2
 
   zod@3.24.2: {}
 
