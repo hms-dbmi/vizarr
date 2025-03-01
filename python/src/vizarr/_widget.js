@@ -71,41 +71,43 @@ function get_source(model, source) {
  * @property {[x: number, y: number]} target
  */
 
-/** @type {import("npm:@anywidget/types").Render<Model>} */
-export async function render({ model, el }) {
-	let div = document.createElement("div");
-	{
-		div.style.height = model.get("height");
-		div.style.backgroundColor = "black";
-		model.on("change:height", () => {
+export default {
+	/** @type {import("npm:@anywidget/types").Render<Model>} */
+	async render({ model, el }) {
+		let div = document.createElement("div");
+		{
 			div.style.height = model.get("height");
-		});
-	}
-	let viewer = await vizarr.createViewer(div);
-	{
-		model.on("change:view_state", () => {
-			viewer.setViewState(model.get("view_state"));
-		});
-		viewer.on(
-			"viewStateChange",
-			debounce((/** @type {ViewState} */ update) => {
-				model.set("view_state", update);
-				model.save_changes();
-			}, 200),
-		);
-	}
-	{
-		// sources are append-only now
-		for (const config of model.get("_configs")) {
-			const source = get_source(model, config.source);
-			viewer.addImage({ ...config, source });
+			div.style.backgroundColor = "black";
+			model.on("change:height", () => {
+				div.style.height = model.get("height");
+			});
 		}
-		model.on("change:_configs", () => {
-			const last = model.get("_configs").at(-1);
-			if (!last) return;
-			const source = get_source(model, last.source);
-			viewer.addImage({ ...last, source });
-		});
-	}
-	el.appendChild(div);
-}
+		let viewer = await vizarr.createViewer(div);
+		{
+			model.on("change:view_state", () => {
+				viewer.setViewState(model.get("view_state"));
+			});
+			viewer.on(
+				"viewStateChange",
+				debounce((/** @type {ViewState} */ update) => {
+					model.set("view_state", update);
+					model.save_changes();
+				}, 200),
+			);
+		}
+		{
+			// sources are append-only now
+			for (const config of model.get("_configs")) {
+				const source = get_source(model, config.source);
+				viewer.addImage({ ...config, source });
+			}
+			model.on("change:_configs", () => {
+				const last = model.get("_configs").at(-1);
+				if (!last) return;
+				const source = get_source(model, last.source);
+				viewer.addImage({ ...last, source });
+			});
+		}
+		el.appendChild(div);
+	},
+};
