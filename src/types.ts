@@ -33,8 +33,18 @@ declare namespace Ome {
     type?: string;
   }
 
+  type CoordinateTransform =
+    | {
+        type: "scale";
+        scale: Array<number>;
+      }
+    | {
+        type: "translation";
+        translation: Array<number>;
+      };
+
   interface Multiscale {
-    datasets: { path: string }[];
+    datasets: { path: string; coordinateTransformations?: Array<CoordinateTransform> }[];
     version?: string;
     axes?: string[] | Axis[];
   }
@@ -70,9 +80,27 @@ declare namespace Ome {
     version: Version;
   }
 
+  interface ImageLabel {
+    version: Version;
+    colors?: Array<{
+      "label-value": number;
+      rgba: [r: number, g: number, b: number, a: number];
+    }>;
+    properties?: Array<{
+      "label-value": number;
+      "omero:roiId": number;
+      "omero:shapeId": number;
+    }>;
+    /** Location of source image */
+    source: {
+      image: string;
+    };
+  }
+
   type Attrs =
     | { multiscales: Multiscale[] }
     | { omero: Omero; multiscales: Multiscale[] }
     | { plate: Plate }
-    | { well: Well };
+    | { well: Well }
+    | { "image-label": ImageLabel; multiscales: Multiscale[] };
 }

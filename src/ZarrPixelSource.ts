@@ -10,10 +10,22 @@ type Slice = ReturnType<typeof zarr.slice>;
 const X_AXIS_NAME = "x";
 const Y_AXIS_NAME = "y";
 const RGBA_CHANNEL_AXIS_NAME = "_c";
-const SUPPORTED_DTYPES = ["Uint8", "Uint16", "Uint32", "Float32", "Int8", "Int16", "Int32", "Float64"] as const;
+const SUPPORTED_DTYPES = [
+  "Uint8",
+  "Uint16",
+  "Uint32",
+  "Float32",
+  "Int8",
+  "Int16",
+  "Int32",
+  "Float64",
+  "Uint64",
+  "Int64",
+] as const;
 
 export class ZarrPixelSource<S extends Array<string> = Array<string>> implements viv.PixelSource<S> {
-  #arr: zarr.Array<zarr.NumberDataType, zarr.Readable>;
+  #arr: zarr.Array<zarr.NumberDataType | zarr.BigintDataType, zarr.Readable>;
+
   readonly labels: viv.Labels<S>;
   readonly tileSize: number;
   readonly dtype: viv.SupportedDtype;
@@ -26,11 +38,19 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
     },
   ) {
     const dtype = capitalize(arr.dtype);
-    assert(arr.is("number") && isSupportedDtype(dtype), `Unsupported viv dtype: ${dtype}`);
-    this.dtype = dtype;
+    assert((arr.is("number") || arr.is("bigint")) && isSupportedDtype(dtype), `Unsupported viv dtype: ${dtype}`);
     this.#arr = arr;
     this.labels = options.labels;
     this.tileSize = options.tileSize;
+
+    if (dtype === "Uint64" || dtype === "Int64") {
+      console.warn(
+        "[vizarr] warning: Casting Int64/Uint64 labels data to Uint32. This may be unsafe and lead to incorrect rendering.",
+      );
+      this.dtype = "Uint32";
+    } else {
+      this.dtype = dtype;
+    }
   }
 
   get shape() {
@@ -81,14 +101,22 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
   }
 
   async #fetchData(selection: Array<number | Slice>, options: { signal?: AbortSignal }): Promise<viv.PixelData> {
-    const {
-      data,
-      shape: [height, width],
-    } = await zarr.get(this.#arr, selection, {
+    let { data, shape } = await zarr.get(this.#arr, selection, {
       // @ts-expect-error this is ok for now and should be supported by all backends
       signal: options.signal,
     });
-    return { data: data as viv.SupportedTypedArray, width, height };
+
+    if (data instanceof BigInt64Array || data instanceof BigUint64Array) {
+      // We need to cast data these typed arrays to something that is viv compatible.
+      // See the comment in the constructor for more information.
+      data = Uint32Array.from(data, (bint) => Number(bint));
+    }
+
+    return {
+      data: data as viv.SupportedTypedArray,
+      width: shape[1],
+      height: shape[0],
+    };
   }
 }
 
@@ -118,7 +146,7 @@ function capitalize<T extends string>(s: T): Capitalize<T> {
   return s[0].toUpperCase() + s.slice(1);
 }
 
-function isSupportedDtype(dtype: string): dtype is viv.SupportedDtype {
+function isSupportedDtype(dtype: string): dtype is viv.SupportedDtype | "Uint64" | "Int64" {
   // @ts-expect-error - TypeScript can't verify that the return type is correct
   return SUPPORTED_DTYPES.includes(dtype);
 }
@@ -126,3 +154,5 @@ function isSupportedDtype(dtype: string): dtype is viv.SupportedDtype {
 class BoundsCheckError extends Error {
   name = "BoundsCheckError";
 }
+
+function resolveDataType() { }

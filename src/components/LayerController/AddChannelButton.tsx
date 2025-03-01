@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import type { ChangeEvent, MouseEvent } from "react";
 
 import { useLayerState, useSourceData } from "../../hooks";
-import { MAX_CHANNELS, calcDataRange, hexToRGB } from "../../utils";
+import { MAX_CHANNELS, calcDataRange, hexToRGB, resolveLoaderFromLayerProps } from "../../utils";
 
 function AddChannelButton() {
   const [source, setSource] = useSourceData();
@@ -32,7 +32,7 @@ function AddChannelButton() {
     if (source.contrast_limits[channelIndex]) {
       lim = source.contrast_limits[channelIndex] as [number, number];
     } else {
-      const { loader } = layer.layerProps;
+      const loader = resolveLoaderFromLayerProps(layer.layerProps);
       const lowres = Array.isArray(loader) ? loader[loader.length - 1] : loader;
       lim = await calcDataRange(lowres, channelSelection);
       // Update source data with newly calculated limit
