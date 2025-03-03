@@ -1,4 +1,3 @@
-import { getImageSize } from "@hms-dbmi/viv";
 import * as zarr from "zarrita";
 import { assert } from "./utils";
 
@@ -18,19 +17,33 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
   readonly tileSize: number;
   readonly dtype: viv.SupportedDtype;
 
-  constructor(
-    arr: zarr.Array<zarr.DataType, zarr.Readable>,
-    options: {
-      labels: viv.Labels<S>;
-      tileSize: number;
-    },
-  ) {
+  #pendingId: undefined | number = undefined;
+  #pending: Array<{
+    resolve: (data: viv.PixelData) => void;
+    reject: (err: unknown) => void;
+    request: {
+      selection: Array<number | zarr.Slice>;
+      signal?: AbortSignal;
+    };
+  }> = [];
+
+  constructor(arr: zarr.Array<zarr.DataType, zarr.Readable>, options: { labels: viv.Labels<S>; tileSize: number }) {
     const dtype = capitalize(arr.dtype);
     assert(arr.is("number") && isSupportedDtype(dtype), `Unsupported viv dtype: ${dtype}`);
     this.dtype = dtype;
     this.#arr = arr;
     this.labels = options.labels;
     this.tileSize = options.tileSize;
+  }
+
+  get #width() {
+    const lastIndex = this.shape.length - 1;
+    return this.shape[this.labels.indexOf("c") === lastIndex ? lastIndex - 1 : lastIndex];
+  }
+
+  get #height() {
+    const lastIndex = this.shape.length - 1;
+    return this.shape[this.labels.indexOf("c") === lastIndex ? lastIndex - 2 : lastIndex - 1];
   }
 
   get shape() {
@@ -42,7 +55,17 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
     signal?: AbortSignal;
   }): Promise<viv.PixelData> {
     const { selection, signal } = options;
-    return this.#fetchData(buildZarrQuery(this.labels, selection), { signal });
+    return this.#fetchData({
+      selection: buildZarrSelection(selection, {
+        labels: this.labels,
+        slices: { x: zarr.slice(null), y: zarr.slice(null) },
+      }),
+      signal,
+    });
+  }
+
+  onTileError(_err: unknown): void {
+    // no-op
   }
 
   async getTile(options: {
@@ -52,65 +75,79 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
     signal?: AbortSignal;
   }): Promise<viv.PixelData> {
     const { x, y, selection, signal } = options;
-    const sel = buildZarrQuery(this.labels, selection);
-
-    const { height, width } = getImageSize(this);
-    const [xStart, xStop] = [x * this.tileSize, Math.min((x + 1) * this.tileSize, width)];
-    const [yStart, yStop] = [y * this.tileSize, Math.min((y + 1) * this.tileSize, height)];
-
-    // Deck.gl can sometimes request edge tiles that don't exist. We throw
-    // a BoundsCheckError which is picked up in `ZarrPixelSource.onTileError`
-    // and ignored by deck.gl.
-    if (xStart === xStop || yStart === yStop) {
-      throw new BoundsCheckError("Tile slice is zero-sized.");
-    }
-    if (xStart < 0 || yStart < 0 || xStop > width || yStop > height) {
-      throw new BoundsCheckError("Tile slice is out of bounds.");
-    }
-
-    sel[this.labels.indexOf(X_AXIS_NAME)] = zarr.slice(xStart, xStop);
-    sel[this.labels.indexOf(Y_AXIS_NAME)] = zarr.slice(yStart, yStop);
-    return this.#fetchData(sel, { signal });
-  }
-
-  onTileError(err: Error): void {
-    if (err instanceof BoundsCheckError) {
-      return;
-    }
-    throw err;
-  }
-
-  async #fetchData(selection: Array<number | Slice>, options: { signal?: AbortSignal }): Promise<viv.PixelData> {
-    const {
-      data,
-      shape: [height, width],
-    } = await zarr.get(this.#arr, selection, {
-      // @ts-expect-error this is ok for now and should be supported by all backends
-      signal: options.signal,
+    return this.#fetchData({
+      selection: buildZarrSelection(selection, {
+        labels: this.labels,
+        slices: {
+          x: zarr.slice(x * this.tileSize, Math.min((x + 1) * this.tileSize, this.#width)),
+          y: zarr.slice(y * this.tileSize, Math.min((y + 1) * this.tileSize, this.#height)),
+        },
+      }),
+      signal,
     });
-    return { data: data as viv.SupportedTypedArray, width, height };
+  }
+
+  async #fetchData(request: { selection: Array<number | Slice>; signal?: AbortSignal }): Promise<viv.PixelData> {
+    const { promise, resolve, reject } = Promise.withResolvers<viv.PixelData>();
+    this.#pending.push({ request, resolve, reject });
+    this.#pendingId = this.#pendingId ?? requestAnimationFrame(() => this.#fetchPending());
+    return promise;
+  }
+
+  /**
+   * Fetch a pending batch of requests together and resolve independently.
+   *
+   * TODO: There could be more optimizations (e.g., multi-get)
+   */
+  async #fetchPending() {
+    for (const { request, resolve, reject } of this.#pending) {
+      zarr
+        .get(this.#arr, request.selection, { opts: { signal: request.signal } })
+        .then(({ data, shape }) => {
+          if (data instanceof BigInt64Array || data instanceof BigUint64Array) {
+            // We need to cast data these typed arrays to something that is viv compatible.
+            // See the comment in the constructor for more information.
+            data = Uint32Array.from(data, (bint) => Number(bint));
+          }
+          resolve({
+            data: data as viv.SupportedTypedArray,
+            width: shape[1],
+            height: shape[0],
+          });
+        })
+        .catch((error) => reject(error));
+    }
+    this.#pendingId = undefined;
+    this.#pending = [];
   }
 }
 
-function buildZarrQuery(labels: string[], selection: Record<string, number> | Array<number>): Array<Slice | number> {
-  let sel: Array<Slice | number>;
-  if (Array.isArray(selection)) {
+function buildZarrSelection(
+  baseSelection: Record<string, number> | Array<number>,
+  options: {
+    labels: string[];
+    slices: { x: zarr.Slice; y: zarr.Slice };
+  },
+): Array<Slice | number> {
+  const { labels, slices } = options;
+  let selection: Array<Slice | number>;
+  if (Array.isArray(baseSelection)) {
     // shallow copy
-    sel = [...selection];
+    selection = [...baseSelection];
   } else {
     // initialize with zeros
-    sel = Array.from({ length: labels.length }, () => 0);
+    selection = Array.from({ length: labels.length }, () => 0);
     // fill in the selection
-    for (const [key, idx] of Object.entries(selection)) {
-      sel[labels.indexOf(key)] = idx;
+    for (const [key, idx] of Object.entries(baseSelection)) {
+      selection[labels.indexOf(key)] = idx;
     }
   }
-  sel[labels.indexOf(X_AXIS_NAME)] = zarr.slice(null);
-  sel[labels.indexOf(Y_AXIS_NAME)] = zarr.slice(null);
+  selection[labels.indexOf(X_AXIS_NAME)] = slices.x;
+  selection[labels.indexOf(Y_AXIS_NAME)] = slices.y;
   if (RGBA_CHANNEL_AXIS_NAME in labels) {
-    sel[labels.indexOf(RGBA_CHANNEL_AXIS_NAME)] = zarr.slice(null);
+    selection[labels.indexOf(RGBA_CHANNEL_AXIS_NAME)] = zarr.slice(null);
   }
-  return sel;
+  return selection;
 }
 
 function capitalize<T extends string>(s: T): Capitalize<T> {
@@ -121,8 +158,4 @@ function capitalize<T extends string>(s: T): Capitalize<T> {
 function isSupportedDtype(dtype: string): dtype is viv.SupportedDtype {
   // @ts-expect-error - TypeScript can't verify that the return type is correct
   return SUPPORTED_DTYPES.includes(dtype);
-}
-
-class BoundsCheckError extends Error {
-  name = "BoundsCheckError";
 }
