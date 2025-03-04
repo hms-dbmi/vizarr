@@ -1,0 +1,13 @@
+diff --git a/dist/index.mjs b/dist/index.mjs
+index b709ea0b4eb932f46b304b4cd8d241ac09e37a8b..37788b9807822f2d4bc257a5079f534a1d34dea7 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -1,8 +1,6 @@
+ import { BaseDecoder, fromBlob, fromFile, fromUrl, GeoTIFFImage, addDecoder } from 'geotiff';
+-import { decompress } from 'lzw-tiff-decoder';
+ import quickselect from 'quickselect';
+ import * as z from 'zod';
+-import { KeyError, openGroup, HTTPStore } from 'zarr';
+ 
+ var __defProp$3 = Object.defineProperty;
+ var __defNormalProp$3 = (obj, key, value) => key in obj ? __defProp$3(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
