@@ -4,8 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vizarr"
-version = "0.1.0"
-dependencies = ["anywidget", "zarr<3"]
+version = "0.1.1"
+dependencies = ["anywidget>=0.9.13", "zarr<3"]
+requires-python = ">=3.9"
 
 [dependency-groups]
 dev = ["watchfiles", "jupyterlab", "scikit-image"]

@@ -30,6 +30,7 @@ function writeEntryPoint(entryPointName, chunkName) {
 export default defineConfig({
   plugins: [react(), writeEntryPoint("index.js", /^vizarr-/)],
   base: process.env.VIZARR_PREFIX || "./",
+  publicDir: path.resolve(__dirname, "assets"),
   build: {
     assetsDir: "",
     sourcemap: true,
