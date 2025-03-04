@@ -11,6 +11,8 @@ requires-python = ">=3.9"
 [dependency-groups]
 dev = ["watchfiles", "jupyterlab", "scikit-image"]
 
-# automatically add the dev feature to the default env (e.g., hatch shell)
-[tool.hatch.envs.default]
-features = ["dev"]
+[tool.hatch.build.targets.sdist]
+only-include = ["src"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vizarr"]
