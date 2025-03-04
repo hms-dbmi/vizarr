@@ -9,7 +9,7 @@ import type { BaseLayerProps } from "./state";
 import { assert } from "./utils";
 
 export interface GridLoader {
-  loader: ZarrPixelSource<string[]>;
+  loader: ZarrPixelSource;
   row: number;
   col: number;
   name: string;

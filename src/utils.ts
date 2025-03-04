@@ -290,8 +290,8 @@ export async function calcDataRange(
   return [minVal, maxVal];
 }
 
-export async function calcConstrastLimits<S extends string[]>(
-  source: ZarrPixelSource<S>,
+export async function calcConstrastLimits(
+  source: ZarrPixelSource,
   channelAxis: number,
   visibilities: boolean[],
   defaultSelection?: number[],

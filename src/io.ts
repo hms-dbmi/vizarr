@@ -7,10 +7,7 @@ import { loadOmeroMultiscales, loadPlate, loadWell } from "./ome";
 import type { ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from "./state";
 import * as utils from "./utils";
 
-async function loadSingleChannel(
-  config: SingleChannelConfig,
-  data: Array<ZarrPixelSource<string[]>>,
-): Promise<SourceData> {
+async function loadSingleChannel(config: SingleChannelConfig, data: Array<ZarrPixelSource>): Promise<SourceData> {
   const { color, contrast_limits, visibility, name, colormap = "", opacity = 1 } = config;
   const lowres = data[data.length - 1];
   const selection = Array(data[0].shape.length).fill(0);
@@ -35,7 +32,7 @@ async function loadSingleChannel(
 
 async function loadMultiChannel(
   config: MultichannelConfig,
-  data: ZarrPixelSource<string[]>[],
+  data: Array<ZarrPixelSource>,
   channelAxis: number,
 ): Promise<SourceData> {
   const { names, contrast_limits, name, model_matrix, opacity = 1, colormap = "" } = config;
