@@ -36,5 +36,10 @@
     "typescript": "^5.8.2",
     "vite": "^6.2.0"
   },
-  "packageManager": "pnpm@9.5.0"
+  "packageManager": "pnpm@9.5.0",
+  "pnpm": {
+    "patchedDependencies": {
+      "@vivjs/loaders@0.17.1": "patches/@vivjs__loaders@0.17.1.patch"
+    }
+  }
 }
