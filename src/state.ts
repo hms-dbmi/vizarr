@@ -84,17 +84,17 @@ export interface BaseLayerProps {
 }
 
 interface MultiscaleImageLayerProps extends BaseLayerProps {
-  loader: ZarrPixelSource<string[]>[];
+  loader: Array<ZarrPixelSource>;
 }
 
 interface ImageLayerProps extends BaseLayerProps {
-  loader: ZarrPixelSource<string[]>;
+  loader: ZarrPixelSource;
 }
 
 type LayerMap = {
   image: [typeof ImageLayer, ImageLayerProps];
   multiscale: [typeof MultiscaleImageLayer, MultiscaleImageLayerProps];
-  grid: [GridLayer, { loader: ZarrPixelSource<string[]> | ZarrPixelSource<string[]>[] } & GridLayerProps];
+  grid: [GridLayer, { loader: ZarrPixelSource | Array<ZarrPixelSource> } & GridLayerProps];
 };
 
 // biome-ignore lint/suspicious/noExplicitAny: Need a catch all for layer types

@@ -279,7 +279,7 @@ type Meta = {
   defaultSelection: Array<number>;
 };
 
-async function defaultMeta(loader: ZarrPixelSource<string[]>, axis_labels: string[]): Promise<Meta> {
+async function defaultMeta(loader: ZarrPixelSource, axis_labels: string[]): Promise<Meta> {
   const channel_axis = axis_labels.indexOf("c");
   const channel_count = channel_axis === -1 ? 1 : loader.shape[channel_axis];
   const visibilities = utils.getDefaultVisibilities(channel_count);

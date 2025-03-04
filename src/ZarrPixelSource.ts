@@ -9,17 +9,25 @@ type Slice = ReturnType<typeof zarr.slice>;
 const X_AXIS_NAME = "x";
 const Y_AXIS_NAME = "y";
 const RGBA_CHANNEL_AXIS_NAME = "_c";
-const SUPPORTED_DTYPES = ["Uint8", "Uint16", "Uint32", "Float32", "Int8", "Int16", "Int32", "Float64"] as const;
 
-export class ZarrPixelSource<S extends Array<string> = Array<string>> implements viv.PixelSource<S> {
-  #arr: zarr.Array<zarr.NumberDataType, zarr.Readable>;
-  readonly labels: viv.Labels<S>;
+type VivPixelData = {
+  data: zarr.TypedArray<Lowercase<viv.SupportedDtype>>;
+  width: number;
+  height: number;
+};
+
+export class ZarrPixelSource implements viv.PixelSource<Array<string>> {
+  readonly labels: viv.Labels<Array<string>>;
   readonly tileSize: number;
   readonly dtype: viv.SupportedDtype;
+  readonly #arr: zarr.Array<zarr.NumberDataType | zarr.BigintDataType, zarr.Readable>;
+  readonly #transform: (
+    arr: zarr.TypedArray<zarr.NumberDataType | zarr.BigintDataType>,
+  ) => zarr.TypedArray<Lowercase<viv.SupportedDtype>>;
 
   #pendingId: undefined | number = undefined;
   #pending: Array<{
-    resolve: (data: viv.PixelData) => void;
+    resolve: (data: VivPixelData) => void;
     reject: (err: unknown) => void;
     request: {
       selection: Array<number | zarr.Slice>;
@@ -27,13 +35,33 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
     };
   }> = [];
 
-  constructor(arr: zarr.Array<zarr.DataType, zarr.Readable>, options: { labels: viv.Labels<S>; tileSize: number }) {
-    const dtype = capitalize(arr.dtype);
-    assert(arr.is("number") && isSupportedDtype(dtype), `Unsupported viv dtype: ${dtype}`);
-    this.dtype = dtype;
+  constructor(
+    arr: zarr.Array<zarr.DataType, zarr.Readable>,
+    options: { labels: viv.Labels<Array<string>>; tileSize: number },
+  ) {
+    assert(arr.is("number") || arr.is("bigint"), `Unsupported viv dtype: ${arr.dtype}`);
     this.#arr = arr;
     this.labels = options.labels;
     this.tileSize = options.tileSize;
+    /**
+     * Some `zarrita` data types are not supported by Viv and require casting.
+     *
+     * Note how the casted type in the transform function is type-cast to `zarr.TypedArray<typeof arr.dtype>`.
+     * This ensures that the function body is correct based on whatever type narrowing we do in the if/else
+     * blocks based on dtype.
+     *
+     * TODO: Maybe we should add a console warning?
+     */
+    if (arr.dtype === "uint64" || arr.dtype === "int64") {
+      this.dtype = "Uint32";
+      this.#transform = (x) => Uint32Array.from(x as zarr.TypedArray<typeof arr.dtype>, (bint) => Number(bint));
+    } else if (arr.dtype === "float16") {
+      this.dtype = "Float32";
+      this.#transform = (x) => new Float32Array(x as zarr.TypedArray<typeof arr.dtype>);
+    } else {
+      this.dtype = capitalize(arr.dtype);
+      this.#transform = (x) => x as zarr.TypedArray<typeof arr.dtype>;
+    }
   }
 
   get #width() {
@@ -51,7 +79,7 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
   }
 
   async getRaster(options: {
-    selection: viv.PixelSourceSelection<S> | Array<number>;
+    selection: viv.PixelSourceSelection<Array<string>> | Array<number>;
     signal?: AbortSignal;
   }): Promise<viv.PixelData> {
     const { selection, signal } = options;
@@ -71,7 +99,7 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
   async getTile(options: {
     x: number;
     y: number;
-    selection: viv.PixelSourceSelection<S> | Array<number>;
+    selection: viv.PixelSourceSelection<Array<string>> | Array<number>;
     signal?: AbortSignal;
   }): Promise<viv.PixelData> {
     const { x, y, selection, signal } = options;
@@ -88,9 +116,10 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
   }
 
   async #fetchData(request: { selection: Array<number | Slice>; signal?: AbortSignal }): Promise<viv.PixelData> {
-    const { promise, resolve, reject } = Promise.withResolvers<viv.PixelData>();
+    const { promise, resolve, reject } = Promise.withResolvers<VivPixelData>();
     this.#pending.push({ request, resolve, reject });
     this.#pendingId = this.#pendingId ?? requestAnimationFrame(() => this.#fetchPending());
+    // @ts-expect-error - The missing generic ArrayBuffer type from Viv makes VivPixelData and viv.PixelData incompatible, even though they are.
     return promise;
   }
 
@@ -104,13 +133,8 @@ export class ZarrPixelSource<S extends Array<string> = Array<string>> implements
       zarr
         .get(this.#arr, request.selection, { opts: { signal: request.signal } })
         .then(({ data, shape }) => {
-          if (data instanceof BigInt64Array || data instanceof BigUint64Array) {
-            // We need to cast data these typed arrays to something that is viv compatible.
-            // See the comment in the constructor for more information.
-            data = Uint32Array.from(data, (bint) => Number(bint));
-          }
           resolve({
-            data: data as viv.SupportedTypedArray,
+            data: this.#transform(data),
             width: shape[1],
             height: shape[0],
           });
@@ -153,9 +177,4 @@ function buildZarrSelection(
 function capitalize<T extends string>(s: T): Capitalize<T> {
   // @ts-expect-error - TypeScript can't verify that the return type is correct
   return s[0].toUpperCase() + s.slice(1);
-}
-
-function isSupportedDtype(dtype: string): dtype is viv.SupportedDtype {
-  // @ts-expect-error - TypeScript can't verify that the return type is correct
-  return SUPPORTED_DTYPES.includes(dtype);
 }
