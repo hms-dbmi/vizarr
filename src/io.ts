@@ -3,6 +3,7 @@ import { ZarrPixelSource } from "./ZarrPixelSource";
 import { loadOmeMultiscales, loadPlate, loadWell } from "./ome";
 import * as utils from "./utils";
 
+import { DEFAULT_LABEL_OPACITY } from "./layers/label-layer";
 import type { BaseLayerProps } from "./layers/viv-layers";
 import type { ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from "./state";
 
@@ -226,7 +227,7 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
         id: `${source.id}_${i}`,
         loader: label.loader,
         modelMatrix: label.modelMatrix,
-        opacity: 1,
+        opacity: DEFAULT_LABEL_OPACITY,
         colors: label.colors,
       })),
       transformSourceSelection: getTransformSourceSelectionFromLabels(

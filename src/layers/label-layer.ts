@@ -8,6 +8,8 @@ import type { ZarrPixelSource } from "../ZarrPixelSource";
 
 type Texture = ReturnType<BitmapLayer["context"]["device"]["createTexture"]>;
 
+export const DEFAULT_LABEL_OPACITY = 0.5;
+
 export type OmeColor = Readonly<{
   labelValue: number;
   rgba: readonly [r: number, g: number, b: number, a: number];
