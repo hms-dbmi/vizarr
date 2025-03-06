@@ -1,7 +1,7 @@
 import * as geotiff from "geotiff";
 // @ts-expect-error- we don't have the types for this
 import { decompress } from "lzw-tiff-decoder";
-import { CYMRGB } from "./utils";
+import * as utils from "./utils";
 
 import type * as zarr from "zarrita";
 
@@ -103,13 +103,13 @@ type Context = {
 async function resolveMetadata(tiff: geotiff.GeoTIFF) {
   const image = await tiff.getImage();
   const subIfds = image.fileDirectory.SubIFDs;
-  assert(subIfds, "Only support bioformats >6");
+  utils.assert(subIfds, "Only support bioformats >6");
   const raw = image.fileDirectory.ImageDescription;
   // biome-ignore lint/suspicious/noExplicitAny: proper validation later
   const xml = parseXml(raw) as Record<string, any>;
 
   const name = xml?.Image?.attr?.Name ?? "unknown";
-  assert(typeof name === "string");
+  utils.assert(typeof name === "string");
 
   // TODO: translate to OME-NGFF "axes" units
   // const physicalSizeX = Number(xml.Image?.Pixels?.attr?.PhysicalSizeX);
@@ -122,7 +122,7 @@ async function resolveMetadata(tiff: geotiff.GeoTIFF) {
   const sizeZ = Number(xml.Image?.Pixels?.attr?.SizeZ);
   const sizeY = Number(xml.Image?.Pixels?.attr?.SizeY);
   const sizeX = Number(xml.Image?.Pixels?.attr?.SizeX);
-  assert(
+  utils.assert(
     !Number.isNaN(sizeT) &&
       !Number.isNaN(sizeC) &&
       !Number.isNaN(sizeZ) &&
@@ -141,7 +141,7 @@ async function resolveMetadata(tiff: geotiff.GeoTIFF) {
           ({
             active: i < 6,
             label: entry.attr.Name,
-            color: entry.attr.Color ? intToHexColor(Number(entry.attr.Color)) : CYMRGB[i % CYMRGB.length],
+            color: entry.attr.Color ? intToHexColor(Number(entry.attr.Color)) : utils.CYMRGB[i % utils.CYMRGB.length],
             coefficient: 1,
             family: "linear",
             inverted: false,
@@ -160,14 +160,14 @@ async function resolveMetadata(tiff: geotiff.GeoTIFF) {
   }
 
   const dimensionOrder = xml.Image?.Pixels?.attr?.DimensionOrder;
-  assert(typeof dimensionOrder === "string");
+  utils.assert(typeof dimensionOrder === "string");
 
   const interleaved = xml.Image?.Pixels?.attr?.Interleaved;
-  assert(interleaved === "false" || interleaved === undefined);
+  utils.assert(interleaved === "false" || interleaved === undefined);
 
   const dataType = xml.Image?.Pixels?.attr?.Type;
   // Zarr will tell us if we have a supported dtype or not
-  assert(typeof dataType === "string");
+  utils.assert(typeof dataType === "string");
   return {
     raw,
     dimensionOrder,
@@ -374,18 +374,6 @@ function parseXml(xmlString: string) {
   return xmlToJson(doc.documentElement, { attrtibutesKey: "attr" });
 }
 
-/**
- * Make an assertion.
- *
- * @param expression - The expression to test.
- * @param msg - The optional message to display if the assertion fails.
- *
- * @throws an {@link Error} if `expression` is not truthy.
- */
-function assert(expression: unknown, msg: string | undefined = ""): asserts expression {
-  if (!expression) throw new Error(msg);
-}
-
 function getTileSize(image: geotiff.GeoTIFFImage) {
   const tileWidth = image.getTileWidth();
   const tileHeight = image.getTileHeight();
@@ -446,7 +434,7 @@ function ensureFullSizeChunk(
     tileSize: number;
   },
 ) {
-  assert(Array.isArray(result));
+  utils.assert(Array.isArray(result));
   const { tileSize } = options;
   const [data] = result;
   const { width, height } = result;
