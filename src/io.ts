@@ -1,11 +1,10 @@
-import { ImageLayer, MultiscaleImageLayer } from "@hms-dbmi/viv";
 import * as zarr from "zarrita";
-
 import { ZarrPixelSource } from "./ZarrPixelSource";
-import GridLayer from "./gridLayer";
-import { loadOmeroMultiscales, loadPlate, loadWell } from "./ome";
-import type { ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from "./state";
+import { loadOmeMultiscales, loadPlate, loadWell } from "./ome";
 import * as utils from "./utils";
+
+import type { BaseLayerProps } from "./layers/viv-layers";
+import type { ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from "./state";
 
 async function loadSingleChannel(config: SingleChannelConfig, data: Array<ZarrPixelSource>): Promise<SourceData> {
   const { color, contrast_limits, visibility, name, colormap = "", opacity = 1 } = config;
@@ -89,8 +88,8 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
       return loadWell(config, node, attrs.well);
     }
 
-    if (utils.isOmeroMultiscales(attrs)) {
-      return loadOmeroMultiscales(config, node, attrs);
+    if (utils.isOmeMultiscales(attrs)) {
+      return loadOmeMultiscales(config, node, attrs);
     }
 
     if (Object.keys(attrs).length === 0 && node.path) {
@@ -193,14 +192,13 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
     colormap,
     modelMatrix: source.model_matrix,
     onClick: source.onClick,
-  };
+  } satisfies BaseLayerProps;
 
-  if ("loaders" in source) {
+  if (source.loaders) {
     return {
-      Layer: GridLayer,
+      kind: "grid",
       layerProps: {
         ...layerProps,
-        loader: source.loader,
         loaders: source.loaders,
         columns: source.columns as number,
         rows: source.rows as number,
@@ -211,7 +209,7 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
 
   if (source.loader.length === 1) {
     return {
-      Layer: ImageLayer,
+      kind: "image",
       layerProps: {
         ...layerProps,
         loader: source.loader[0],
@@ -221,7 +219,7 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
   }
 
   return {
-    Layer: MultiscaleImageLayer,
+    kind: "multiscale",
     layerProps: {
       ...layerProps,
       loader: source.loader,

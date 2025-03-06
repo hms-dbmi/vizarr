@@ -2,6 +2,8 @@ import { Matrix4 } from "math.gl";
 import * as zarr from "zarrita";
 
 import type { ZarrPixelSource } from "./ZarrPixelSource";
+import type { GridLayerProps } from "./layers/grid-layer";
+import type { ImageLayerProps, MultiscaleImageLayerProps } from "./layers/viv-layers";
 import { lru } from "./lru-store";
 import type { ViewState } from "./state";
 
@@ -219,16 +221,37 @@ export function guessTileSize(arr: zarr.Array<zarr.DataType, zarr.Readable>) {
 }
 
 // Scales the real image size to the target viewport.
-export function fitBounds(
-  [width, height]: [width: number, height: number],
-  [targetWidth, targetHeight]: [targetWidth: number, targetHeight: number],
-  maxZoom: number,
-  padding: number,
-): ViewState {
-  const scaleX = (targetWidth - padding * 2) / width;
-  const scaleY = (targetHeight - padding * 2) / height;
-  const zoom = Math.min(maxZoom, Math.log2(Math.min(scaleX, scaleY)));
-  return { zoom, target: [width / 2, height / 2] };
+export function fitImageToViewport(options: {
+  image: { width: number; height: number };
+  viewport: { width: number; height: number };
+  padding: number;
+  matrix?: Matrix4;
+}): ViewState {
+  const { image, viewport, padding, matrix = new Matrix4().identity() } = options;
+  const corners = [
+    [0, 0, 0],
+    [image.width, 0, 0],
+    [image.width, image.height, 0],
+    [0, image.height, 0],
+  ].map((corner) => matrix.transformAsPoint(corner));
+
+  const minX = Math.min(...corners.map((p) => p[0]));
+  const maxX = Math.max(...corners.map((p) => p[0]));
+  const minY = Math.min(...corners.map((p) => p[1]));
+  const maxY = Math.max(...corners.map((p) => p[1]));
+
+  const availableWidth = viewport.width - 2 * padding;
+  const availableHeight = viewport.height - 2 * padding;
+
+  return {
+    zoom: Math.log2(
+      Math.min(
+        availableWidth / (maxX - minX), // scaleX
+        availableHeight / (maxY - minX), // scaleY
+      ),
+    ),
+    target: [(minX + maxX) / 2, (minY + maxY) / 2],
+  };
 }
 
 type Array16 = [
@@ -433,10 +456,8 @@ export function isOmeWell(attrs: zarr.Attributes): attrs is { well: Ome.Well } {
   return "well" in attrs;
 }
 
-export function isOmeroMultiscales(
-  attrs: zarr.Attributes,
-): attrs is { omero: Ome.Omero; multiscales: Ome.Multiscale[] } {
-  return "omero" in attrs && "multiscales" in attrs;
+export function isOmeMultiscales(attrs: zarr.Attributes): attrs is { omero: Ome.Omero; multiscales: Ome.Multiscale[] } {
+  return "omero" in attrs && isMultiscales(attrs);
 }
 
 export function isMultiscales(attrs: zarr.Attributes): attrs is { multiscales: Ome.Multiscale[] } {
@@ -484,4 +505,66 @@ export function rethrowUnless<E extends ReadonlyArray<new (...args: any[]) => Er
   if (!ErrorClasses.some((ErrorClass) => error instanceof ErrorClass)) {
     throw error;
   }
+}
+
+export function isGridLayerProps(
+  props: GridLayerProps | ImageLayerProps | MultiscaleImageLayerProps,
+): props is GridLayerProps {
+  return "loaders" in props && "rows" in props && "columns" in props;
+}
+
+export function resolveLoaderFromLayerProps(layerProps: GridLayerProps | ImageLayerProps | MultiscaleImageLayerProps) {
+  return isGridLayerProps(layerProps) ? layerProps.loaders[0].loader : layerProps.loader;
+}
+
+/**
+ * Convert an array of coordinateTransformations objects to a 16-element
+ * plain JS array using Matrix4 linear algebra transformation functions.
+ *
+ * Adapted from Vitessce: https://github.com/vitessce/vitessce/blob/c267ebecab1824dae68d6f2640a6c5ce7250efbb/packages/utils/spatial-utils/src/spatial.js#L403-L524
+ *
+ * @param coordinateTransformations List of objects matching the OME-NGFF v0.4 coordinateTransformations spec.
+ * @param axes - Axes in OME-NGFF v0.4 format
+ *
+ * @returns Array of 16 numbers representing the Matrix4.
+ */
+export function coordinateTransformationsToMatrix(multiscales: Array<Ome.Multiscale>) {
+  let mat = new Matrix4().identity();
+  const axes = getNgffAxes(multiscales);
+  const coordinateTransformations = multiscales[0].datasets[0]?.coordinateTransformations;
+  const xyzIndices = ["x", "y", "z"].map((name) =>
+    axes.findIndex((axisObj) => axisObj.type === "space" && axisObj.name === name),
+  );
+
+  // Apply each transformation sequentially and in order according to the OME-NGFF v0.4 spec.
+  // Reference: https://ngff.openmicroscopy.org/0.4/#trafo-md
+  for (const transform of coordinateTransformations ?? []) {
+    if (transform.type === "translation") {
+      const { translation: axisOrderedTranslation } = transform;
+      if (axisOrderedTranslation.length !== axes.length) {
+        throw new Error("Length of translation array was expected to match length of axes.");
+      }
+      const defaultValue = 0;
+      // Get the translation values for [x, y, z].
+      const xyzTranslation = xyzIndices.map((axisIndex) =>
+        axisIndex >= 0 ? axisOrderedTranslation[axisIndex] : defaultValue,
+      );
+      const nextMat = new Matrix4().translate(xyzTranslation);
+      mat = mat.multiplyLeft(nextMat);
+    }
+    if (transform.type === "scale") {
+      const { scale: axisOrderedScale } = transform;
+      // Add in z dimension needed for Matrix4 scale API.
+      if (axisOrderedScale.length !== axes.length) {
+        throw new Error("Length of scale array was expected to match length of axes.");
+      }
+      const defaultValue = 1;
+      // Get the scale values for [x, y, z].
+      const xyzScale = xyzIndices.map((axisIndex) => (axisIndex >= 0 ? axisOrderedScale[axisIndex] : defaultValue));
+      const nextMat = new Matrix4().scale(xyzScale);
+      mat = mat.multiplyLeft(nextMat);
+    }
+  }
+
+  return mat;
 }
