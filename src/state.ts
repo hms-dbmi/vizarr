@@ -1,4 +1,4 @@
-import { atom } from "jotai";
+import { type Atom, atom } from "jotai";
 import { atomFamily, splitAtom, waitForAll } from "jotai/utils";
 import { RedirectError, rethrowUnless } from "./utils";
 
@@ -157,24 +157,40 @@ const LayerConstructors = {
   grid: GridLayer,
 } as const;
 
-export const layerAtoms = atom((get) => {
-  const atoms = get(sourceInfoAtomAtoms);
-  if (atoms.length === 0) {
-    return [];
-  }
-  const layersState = get(waitForAll(atoms.map((a) => layerFamilyAtom(get(a)))));
-  return layersState.flatMap((layer) => {
-    if (!layer.on) return [];
-    const Layer = LayerConstructors[layer.kind];
-    // @ts-expect-error - TS can't resolve that Layer & layerProps bound together
-    const layers: Array<VizarrLayer> = [new Layer(layer.layerProps)];
-    if (layer.kind === "multiscale" && layer.labels?.length) {
-      const imageLabelLayers = layer.labels.map(
-        ({ layerProps, transformSourceSelection }) =>
-          new LabelLayer({ ...layerProps, selection: transformSourceSelection(layer.layerProps.selections[0]) }),
-      );
-      layers.push(...imageLabelLayers);
+const layerInstanceFamily = atomFamily((a: Atom<LayerState>) =>
+  atom((get) => {
+    const { on, layerProps, kind } = get(a);
+    if (!on) {
+      return null;
     }
-    return layers;
-  });
+    const Layer = LayerConstructors[kind];
+    // @ts-expect-error - TS can't resolve that Layer & layerProps bound together
+    return new Layer(layerProps) as VizarrLayer;
+  }),
+);
+
+const imageLabelsIstanceFamily = atomFamily((a: Atom<LayerState>) =>
+  atom((get) => {
+    const { on, labels, layerProps } = get(a);
+    if (!on || !labels) {
+      return [];
+    }
+    return labels.map(
+      (label) =>
+        new LabelLayer({
+          ...label.layerProps,
+          selection: label.transformSourceSelection(layerProps.selections[0]),
+        }),
+    );
+  }),
+);
+
+export const layerAtoms = atom((get) => {
+  const layerAtoms = [];
+  for (const sourceAtom of get(sourceInfoAtomAtoms)) {
+    const layerStateAtom = layerFamilyAtom(get(sourceAtom));
+    layerAtoms.push(layerInstanceFamily(layerStateAtom));
+    layerAtoms.push(imageLabelsIstanceFamily(layerStateAtom));
+  }
+  return get(waitForAll(layerAtoms)).flat();
 });
