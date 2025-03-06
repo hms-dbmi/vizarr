@@ -427,9 +427,9 @@ export class RedirectError extends Error {
  * @param expr The expression to test.
  * @param msg The message to display if the assertion fails.
  */
-export function assert(expr: unknown, msg: string | (() => string) = ""): asserts expr {
+export function assert(expr: unknown, msg = ""): asserts expr {
   if (!expr) {
-    throw new AssertionError(typeof msg === "function" ? msg() : msg);
+    throw new AssertionError(msg);
   }
 }
 
