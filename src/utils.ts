@@ -27,7 +27,10 @@ async function normalizeStore(source: string | zarr.Readable): Promise<zarr.Loca
   if (typeof source === "string") {
     let store: zarr.Readable;
     let path: `/${string}` = "/";
-    if (source.endsWith(".json")) {
+    if (source.endsWith("ome.tiff") || source.endsWith("ome.tif")) {
+      const { OmeTiffStore } = await import("./ome-tiff-store");
+      store = await OmeTiffStore.fromUrl(source);
+    } else if (source.endsWith(".json")) {
       // import custom store implementation
       const [{ default: ReferenceStore }, json] = await Promise.all([
         import("@zarrita/storage/ref"),
