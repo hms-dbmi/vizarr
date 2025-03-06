@@ -112,11 +112,11 @@ export type LayerState<T extends LayerType = LayerType> = {
   kind: T;
   layerProps: LayerPropsMap[T];
   on: boolean;
-  labels?: {
-    layerProps: Array<Omit<LabelLayerProps, "selection">>;
+  labels?: Array<{
+    layerProps: Omit<LabelLayerProps, "selection">;
     on: boolean;
     transformSourceSelection: (sourceSelection: Array<number>) => Array<number>;
-  };
+  }>;
 };
 
 type WithId<T> = T & { id: string };
@@ -183,10 +183,11 @@ export const layerAtoms = atom((get) => {
     const Layer = LayerConstructors[layer.kind];
     // @ts-expect-error - TS can't resolve that Layer & layerProps bound together
     const layers: Array<VizarrLayer> = [new Layer(layer.layerProps)];
-    if (layer.kind === "multiscale" && layer.labels?.on) {
-      const { layerProps, transformSourceSelection } = layer.labels;
-      const selection = transformSourceSelection(layer.layerProps.selections[0]);
-      const imageLabelLayers = layerProps.map((props) => new LabelLayer({ ...props, selection }));
+    if (layer.kind === "multiscale" && layer.labels?.length) {
+      const imageLabelLayers = layer.labels.map(
+        ({ layerProps, transformSourceSelection }) =>
+          new LabelLayer({ ...layerProps, selection: transformSourceSelection(layer.layerProps.selections[0]) }),
+      );
       layers.push(...imageLabelLayers);
     }
     return layers;

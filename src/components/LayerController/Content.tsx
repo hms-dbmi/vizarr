@@ -23,7 +23,7 @@ const Details = withStyles({
 function Content() {
   const [layer] = useLayerState();
   const nChannels = layer.layerProps.selections.length;
-  const nLabels = layer.labels?.layerProps.length ?? 0;
+  const nLabels = layer.labels?.length ?? 0;
   return (
     <Details>
       <Grid container direction="column">

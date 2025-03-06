@@ -27,19 +27,19 @@ export default function Labels({ labelIndex }: { labelIndex: number }) {
       assert(prev.kind === "multiscale" && prev.labels, "Missing image labels");
       return {
         ...prev,
-        labels: {
-          ...prev.labels,
-          layerProps: prev.labels.layerProps.with(labelIndex, {
-            ...prev.labels.layerProps[labelIndex],
+        labels: prev.labels.with(labelIndex, {
+          ...prev.labels[labelIndex],
+          layerProps: {
+            ...prev.labels[labelIndex].layerProps,
             opacity: value as number,
-          }),
-        },
+          },
+        }),
       };
     });
   };
 
   const { name } = source.labels[labelIndex];
-  const { opacity } = layer.labels.layerProps[labelIndex];
+  const { opacity } = layer.labels[labelIndex].layerProps;
   return (
     <>
       <Divider />
