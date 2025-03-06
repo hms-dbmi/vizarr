@@ -1,13 +1,22 @@
-import type { ImageLayer, MultiscaleImageLayer } from "@hms-dbmi/viv";
 import { atom } from "jotai";
 import { atomFamily, splitAtom, waitForAll } from "jotai/utils";
-import type { Matrix4 } from "math.gl";
+import { RedirectError, rethrowUnless } from "./utils";
 
+import type { Layer } from "deck.gl";
+import type { PrimitiveAtom } from "jotai";
+import type { AtomFamily } from "jotai/vanilla/utils/atomFamily";
+import type { Matrix4 } from "math.gl";
 import type * as zarr from "zarrita";
 import type { ZarrPixelSource } from "./ZarrPixelSource";
-import type { default as GridLayer, GridLayerProps, GridLoader } from "./gridLayer";
 import { initLayerStateFromSource } from "./io";
-import { RedirectError, rethrowUnless } from "./utils";
+
+import { GridLayer, type GridLayerProps, type GridLoader } from "./layers/grid-layer";
+import {
+  ImageLayer,
+  type ImageLayerProps,
+  MultiscaleImageLayer,
+  type MultiscaleImageLayerProps,
+} from "./layers/viv-layers";
 
 export interface ViewState {
   zoom: number;
@@ -83,25 +92,16 @@ export interface BaseLayerProps {
   onClick?: (e: OnClickData) => void;
 }
 
-interface MultiscaleImageLayerProps extends BaseLayerProps {
-  loader: Array<ZarrPixelSource>;
-}
-
-interface ImageLayerProps extends BaseLayerProps {
-  loader: ZarrPixelSource;
-}
-
-type LayerMap = {
-  image: [typeof ImageLayer, ImageLayerProps];
-  multiscale: [typeof MultiscaleImageLayer, MultiscaleImageLayerProps];
-  grid: [GridLayer, { loader: ZarrPixelSource | Array<ZarrPixelSource> } & GridLayerProps];
+type LayerType = "image" | "multiscale" | "grid";
+type LayerPropsMap = {
+  image: ImageLayerProps;
+  multiscale: MultiscaleImageLayerProps;
+  grid: GridLayerProps;
 };
 
-// biome-ignore lint/suspicious/noExplicitAny: Need a catch all for layer types
-export type LayerCtr<T> = new (...args: Array<any>) => T;
-export type LayerState<T extends "image" | "multiscale" | "grid" = "image" | "multiscale" | "grid"> = {
-  Layer: LayerCtr<LayerMap[T][0]>;
-  layerProps: LayerMap[T][1];
+export type LayerState<T extends LayerType = LayerType> = {
+  kind: T;
+  layerProps: LayerPropsMap[T];
   on: boolean;
 };
 
@@ -121,6 +121,7 @@ export const sourceInfoAtom = atom<WithId<SourceData>[]>([]);
 export const addImageAtom = atom(null, async (get, set, config: ImageLayerConfig) => {
   const { createSourceData } = await import("./io");
   const id = Math.random().toString(36).slice(2);
+
   try {
     const sourceData = await createSourceData(config);
     const prevSourceInfo = get(sourceInfoAtom);
@@ -140,14 +141,28 @@ export const addImageAtom = atom(null, async (get, set, config: ImageLayerConfig
 
 export const sourceInfoAtomAtoms = splitAtom(sourceInfoAtom);
 
-export const layerFamilyAtom = atomFamily(
+export const layerFamilyAtom: AtomFamily<WithId<SourceData>, PrimitiveAtom<WithId<LayerState>>> = atomFamily(
   (param: WithId<SourceData>) => atom({ ...initLayerStateFromSource(param), id: param.id }),
   (a, b) => a.id === b.id,
 );
 
+export type VizarrLayer = Layer<MultiscaleImageLayerProps> | Layer<ImageLayerProps> | Layer<GridLayerProps>;
+
+const LayerConstructors = {
+  image: ImageLayer,
+  multiscale: MultiscaleImageLayer,
+  grid: GridLayer,
+} as const;
+
 export const layerAtoms = atom((get) => {
   const atoms = get(sourceInfoAtomAtoms);
-  if (atoms.length === 0) return [];
-  const layers = atoms.map((a) => layerFamilyAtom(get(a)));
-  return get(waitForAll(layers));
+  if (atoms.length === 0) {
+    return [];
+  }
+  const layersState = get(waitForAll(atoms.map((a) => layerFamilyAtom(get(a)))));
+  return layersState.map((layer) => {
+    const Layer = LayerConstructors[layer.kind];
+    // @ts-expect-error - TS can't resolve that Layer & layerProps bound together
+    return new Layer(layer.layerProps);
+  }) as Array<VizarrLayer>;
 });

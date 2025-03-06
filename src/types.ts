@@ -33,8 +33,23 @@ declare namespace Ome {
     type?: string;
   }
 
+  type CoordinateTransformation =
+    | {
+        type: "scale";
+        scale: Array<number>;
+      }
+    | {
+        type: "translation";
+        translation: Array<number>;
+      };
+
+  interface Dataset {
+    path: string;
+    coordinateTransformations?: Array<CoordinateTransformation>;
+  }
+
   interface Multiscale {
-    datasets: { path: string }[];
+    datasets: Array<Dataset>;
     version?: string;
     axes?: string[] | Axis[];
   }

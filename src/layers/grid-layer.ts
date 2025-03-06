@@ -4,9 +4,9 @@ import pMap from "p-map";
 import { ColorPaletteExtension, XRLayer } from "@hms-dbmi/viv";
 import type { SupportedTypedArray } from "@vivjs/types";
 import type { CompositeLayerProps, PickingInfo, SolidPolygonLayerProps, TextLayerProps } from "deck.gl";
-import type { ZarrPixelSource } from "./ZarrPixelSource";
-import type { BaseLayerProps } from "./state";
-import { assert } from "./utils";
+import type { ZarrPixelSource } from "../ZarrPixelSource";
+import { assert } from "../utils";
+import type { BaseLayerProps } from "./viv-layers";
 
 export interface GridLoader {
   loader: ZarrPixelSource;
@@ -27,21 +27,6 @@ export interface GridLayerProps
   text?: boolean;
   concurrency?: number;
 }
-
-const defaultProps = {
-  // @ts-expect-error - XRLayer props are not typed
-  ...XRLayer.defaultProps,
-  // Special grid props
-  loaders: { type: "array", value: [], compare: true },
-  spacer: { type: "number", value: 5, compare: true },
-  rows: { type: "number", value: 0, compare: true },
-  columns: { type: "number", value: 0, compare: true },
-  concurrency: { type: "number", value: 10, compare: false }, // set concurrency for queue
-  text: { type: "boolean", value: false, compare: true },
-  // Deck.gl
-  onClick: { type: "function", value: null, compare: true },
-  onHover: { type: "function", value: null, compare: true },
-};
 
 function scaleBounds(width: number, height: number, translate = [0, 0], scale = 1) {
   const [left, top] = translate;
@@ -91,7 +76,23 @@ type SharedLayerState = {
   height: number;
 };
 
-export default class GridLayer extends CompositeLayer<CompositeLayerProps & GridLayerProps> {
+class GridLayer extends CompositeLayer<CompositeLayerProps & GridLayerProps> {
+  static layerName = "VizarrGridLayer";
+  static defaultProps = {
+    // @ts-expect-error - XRLayer props are not typed
+    ...XRLayer.defaultProps,
+    // Special grid props
+    loaders: { type: "array", value: [], compare: true },
+    spacer: { type: "number", value: 5, compare: true },
+    rows: { type: "number", value: 0, compare: true },
+    columns: { type: "number", value: 0, compare: true },
+    concurrency: { type: "number", value: 10, compare: false }, // set concurrency for queue
+    text: { type: "boolean", value: false, compare: true },
+    // Deck.gl
+    onClick: { type: "function", value: null, compare: true },
+    onHover: { type: "function", value: null, compare: true },
+  };
+
   get #state(): SharedLayerState {
     // @ts-expect-error - typed as any by deck
     return this.state;
@@ -210,5 +211,4 @@ export default class GridLayer extends CompositeLayer<CompositeLayerProps & Grid
   }
 }
 
-GridLayer.layerName = "GridLayer";
-GridLayer.defaultProps = defaultProps;
+export { GridLayer };

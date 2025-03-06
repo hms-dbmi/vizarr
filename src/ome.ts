@@ -76,7 +76,7 @@ export async function loadWell(
   });
 
   let meta: Meta;
-  if (utils.isOmeroMultiscales(imgAttrs)) {
+  if (utils.isOmeMultiscales(imgAttrs)) {
     meta = parseOmeroMeta(imgAttrs.omero, axes);
   } else {
     meta = await defaultMeta(loaders[0].loader, axis_labels);
@@ -242,7 +242,7 @@ export async function loadPlate(
   return sourceData;
 }
 
-export async function loadOmeroMultiscales(
+export async function loadOmeMultiscales(
   config: ImageLayerConfig,
   grp: zarr.Group<zarr.Readable>,
   attrs: { multiscales: Ome.Multiscale[]; omero: Ome.Omero },
@@ -258,7 +258,9 @@ export async function loadOmeroMultiscales(
   return {
     loader: loader,
     axis_labels,
-    model_matrix: utils.parseMatrix(config.model_matrix),
+    model_matrix: config.model_matrix
+      ? utils.parseMatrix(config.model_matrix)
+      : utils.coordinateTransformationsToMatrix(attrs.multiscales),
     defaults: {
       selection: meta.defaultSelection,
       colormap,
