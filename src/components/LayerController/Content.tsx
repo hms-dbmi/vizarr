@@ -6,6 +6,7 @@ import AcquisitionController from "./AcquisitionController";
 import AddChannelButton from "./AddChannelButton";
 import AxisSliders from "./AxisSliders";
 import ChannelController from "./ChannelController";
+import Labels from "./Labels";
 import OpacitySlider from "./OpacitySlider";
 
 import { useLayerState } from "../../hooks";
@@ -22,6 +23,7 @@ const Details = withStyles({
 function Content() {
   const [layer] = useLayerState();
   const nChannels = layer.layerProps.selections.length;
+  const nLabels = layer.labels?.layerProps.length ?? 0;
   return (
     <Details>
       <Grid container direction="column">
@@ -51,6 +53,14 @@ function Content() {
             <ChannelController channelIndex={i} key={i} />
           ))}
         </Grid>
+        {nLabels > 0 && (
+          <Grid>
+            <Typography variant="caption">labels:</Typography>
+            {range(nLabels).map((i) => (
+              <Labels labelIndex={i} key={i} />
+            ))}
+          </Grid>
+        )}
       </Grid>
     </Details>
   );

@@ -1,8 +1,9 @@
 import pMap from "p-map";
 import * as zarr from "zarrita";
-import type { ImageLayerConfig, OnClickData, SourceData } from "./state";
+import type { ImageLabels, ImageLayerConfig, OnClickData, SourceData } from "./state";
 
 import { ZarrPixelSource } from "./ZarrPixelSource";
+import type { OmeColor } from "./layers/label-layer";
 import * as utils from "./utils";
 
 export async function loadWell(
@@ -253,8 +254,8 @@ export async function loadOmeMultiscales(
   const axis_labels = utils.getNgffAxisLabels(axes);
   const meta = parseOmeroMeta(attrs.omero, axes);
   const tileSize = utils.guessTileSize(data[0]);
-
   const loader = data.map((arr) => new ZarrPixelSource(arr, { labels: axis_labels, tileSize }));
+  const labels = await resolveOmeLabelsFromMultiscales(grp);
   return {
     loader: loader,
     axis_labels,
@@ -268,7 +269,37 @@ export async function loadOmeMultiscales(
     },
     ...meta,
     name: meta.name ?? name,
+    labels: await Promise.all(labels.map((name) => loadOmeImageLabel(grp.resolve("labels"), name))),
   };
+}
+
+async function loadOmeImageLabel(root: zarr.Location<zarr.Readable>, name: string): Promise<ImageLabels[number]> {
+  const grp = await zarr.open(root.resolve(name), { kind: "group" });
+  const attrs = utils.resolveAttrs(grp.attrs);
+  utils.assert(utils.isOmeImageLabel(attrs), "No 'image-label' metadata.");
+  const data = await utils.loadMultiscales(grp, attrs.multiscales);
+  const baseResolution = data.at(0);
+  utils.assert(baseResolution, "No base resolution found for multiscale labels.");
+  const tileSize = utils.guessTileSize(baseResolution);
+  const axes = utils.getNgffAxes(attrs.multiscales);
+  const labels = utils.getNgffAxisLabels(axes);
+  const colors = (attrs["image-label"].colors ?? []).map((d) => ({ labelValue: d["label-value"], rgba: d.rgba }));
+  return {
+    name,
+    modelMatrix: utils.coordinateTransformationsToMatrix(attrs.multiscales),
+    loader: data.map((arr) => new ZarrPixelSource(arr, { labels, tileSize })),
+    colors: colors.length > 0 ? colors : undefined,
+  };
+}
+
+async function resolveOmeLabelsFromMultiscales(grp: zarr.Group<zarr.Readable>): Promise<Array<string>> {
+  return zarr
+    .open(grp.resolve("labels"), { kind: "group" })
+    .then(({ attrs }) => (attrs.labels ?? []) as Array<string>)
+    .catch((e) => {
+      utils.rethrowUnless(e, zarr.NodeNotFoundError);
+      return [];
+    });
 }
 
 type Meta = {

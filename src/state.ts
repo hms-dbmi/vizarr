@@ -11,6 +11,7 @@ import type { ZarrPixelSource } from "./ZarrPixelSource";
 import { initLayerStateFromSource } from "./io";
 
 import { GridLayer, type GridLayerProps, type GridLoader } from "./layers/grid-layer";
+import { LabelLayer, type LabelLayerProps, type OmeColor } from "./layers/label-layer";
 import {
   ImageLayer,
   type ImageLayerProps,
@@ -54,6 +55,13 @@ export type OnClickData = Record<string, unknown> & {
   gridCoord?: { row: number; column: number };
 };
 
+export type ImageLabels = Array<{
+  name: string;
+  loader: ZarrPixelSource[];
+  modelMatrix: Matrix4;
+  colors?: ReadonlyArray<OmeColor>;
+}>;
+
 export type SourceData = {
   loader: ZarrPixelSource[];
   loaders?: GridLoader[]; // for OME plates
@@ -75,6 +83,7 @@ export type SourceData = {
   model_matrix: Matrix4;
   axis_labels: string[];
   onClick?: (e: OnClickData) => void;
+  labels?: ImageLabels;
 };
 
 export type VivProps = ConstructorParameters<typeof MultiscaleImageLayer>[0];
@@ -103,6 +112,11 @@ export type LayerState<T extends LayerType = LayerType> = {
   kind: T;
   layerProps: LayerPropsMap[T];
   on: boolean;
+  labels?: {
+    layerProps: Array<Omit<LabelLayerProps, "selection">>;
+    on: boolean;
+    transformSourceSelection: (sourceSelection: Array<number>) => Array<number>;
+  };
 };
 
 type WithId<T> = T & { id: string };
@@ -146,7 +160,11 @@ export const layerFamilyAtom: AtomFamily<WithId<SourceData>, PrimitiveAtom<WithI
   (a, b) => a.id === b.id,
 );
 
-export type VizarrLayer = Layer<MultiscaleImageLayerProps> | Layer<ImageLayerProps> | Layer<GridLayerProps>;
+export type VizarrLayer =
+  | Layer<MultiscaleImageLayerProps>
+  | Layer<ImageLayerProps>
+  | Layer<GridLayerProps>
+  | Layer<LabelLayerProps>;
 
 const LayerConstructors = {
   image: ImageLayer,
@@ -160,9 +178,17 @@ export const layerAtoms = atom((get) => {
     return [];
   }
   const layersState = get(waitForAll(atoms.map((a) => layerFamilyAtom(get(a)))));
-  return layersState.map((layer) => {
+  return layersState.flatMap((layer) => {
+    if (!layer.on) return [];
     const Layer = LayerConstructors[layer.kind];
     // @ts-expect-error - TS can't resolve that Layer & layerProps bound together
-    return new Layer(layer.layerProps);
-  }) as Array<VizarrLayer>;
+    const layers: Array<VizarrLayer> = [new Layer(layer.layerProps)];
+    if (layer.kind === "multiscale" && layer.labels?.on) {
+      const { layerProps, transformSourceSelection } = layer.labels;
+      const selection = transformSourceSelection(layer.layerProps.selections[0]);
+      const imageLabelLayers = layerProps.map((props) => new LabelLayer({ ...props, selection }));
+      layers.push(...imageLabelLayers);
+    }
+    return layers;
+  });
 });

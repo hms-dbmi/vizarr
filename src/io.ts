@@ -218,6 +218,24 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
     };
   }
 
+  let labels = undefined;
+  if (source.labels && source.labels.length > 0) {
+    labels = {
+      on: true,
+      layerProps: source.labels.map((label, i) => ({
+        id: `${source.id}_${i}`,
+        loader: label.loader,
+        modelMatrix: label.modelMatrix,
+        opacity: 1,
+        colors: label.colors,
+      })),
+      transformSourceSelection: getTransformSourceSelectionFromLabels(
+        source.labels.map((label) => label.loader[0]),
+        source.loader[0],
+      ),
+    };
+  }
+
   return {
     kind: "multiscale",
     layerProps: {
@@ -225,5 +243,48 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
       loader: source.loader,
     },
     on: true,
+    labels,
+  };
+}
+
+function getTransformSourceSelectionFromLabels(
+  labelsResolutions: Array<{ shape: Array<number>; labels: Array<string> }>,
+  source: { shape: Array<number>; labels: Array<string> },
+) {
+  // representative source for labels
+  const labelsSource = labelsResolutions[0];
+  utils.assert(
+    source.shape.length === source.labels.length,
+    `Image source axes and shape are not same rank. Got ${JSON.stringify(source)}`,
+  );
+  utils.assert(
+    labelsSource.shape.length === labelsSource.labels.length,
+    `Label axes and shape are not same rank. Got ${JSON.stringify(labelsSource)}`,
+  );
+  utils.assert(
+    labelsSource.labels.every((label) => source.labels.includes(label)),
+    `Label axes MUST be a subset of source. Source: ${JSON.stringify(source.labels)} Labels: ${JSON.stringify(labelsSource.labels)}`,
+  );
+  for (const { labels, shape } of labelsResolutions.slice(1)) {
+    utils.assert(
+      utils.zip(labels, labelsSource.labels).every(([a, b]) => a === b),
+      `Error: All labels must share the same axes. Mismatched labels found: ${JSON.stringify(labels)}`,
+    );
+    utils.assert(
+      utils.zip(shape, labelsSource.shape).every(([a, b]) => a === b),
+      `Error: All labels must share the same shape. Mismatched labels found: ${JSON.stringify(shape)}`,
+    );
+  }
+  // Identify labels that should always map to 0, regardless of the source selection.
+  const excludeFromTransformedSelection = new Set(
+    utils
+      .zip(labelsSource.labels, labelsSource.shape)
+      .filter(([_, size]) => size === 1)
+      .map(([name, _]) => name),
+  );
+  return (sourceSelection: Array<number>): Array<number> => {
+    return labelsSource.labels.map((name) =>
+      excludeFromTransformedSelection.has(name) ? 0 : sourceSelection[source.labels.indexOf(name)],
+    );
   };
 }
