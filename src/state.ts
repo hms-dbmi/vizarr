@@ -86,21 +86,6 @@ export type SourceData = {
   labels?: ImageLabels;
 };
 
-export type VivProps = ConstructorParameters<typeof MultiscaleImageLayer>[0];
-
-export interface BaseLayerProps {
-  id: string;
-  contrastLimits: VivProps["contrastLimits"];
-  colors: [r: number, g: number, b: number][];
-  channelsVisible: NonNullable<VivProps["channelsVisible"]>;
-  opacity: NonNullable<VivProps["opacity"]>;
-  colormap: string; // TODO: more precise
-  selections: number[][];
-  modelMatrix: Matrix4;
-  contrastLimitsRange: [min: number, max: number][];
-  onClick?: (e: OnClickData) => void;
-}
-
 type LayerType = "image" | "multiscale" | "grid";
 type LayerPropsMap = {
   image: ImageLayerProps;
