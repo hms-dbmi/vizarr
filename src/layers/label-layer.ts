@@ -291,40 +291,9 @@ function createColorTexture(options: {
   return { data, width, height };
 }
 
-const COLOR_PALETTES = {
-  pastel1: [
-    [251, 180, 174],
-    [179, 205, 227],
-    [204, 235, 197],
-    [222, 203, 228],
-    [254, 217, 166],
-    [255, 255, 204],
-    [229, 216, 189],
-    [253, 218, 236],
-    [242, 242, 242],
-  ],
-  set3: [
-    [141, 211, 199],
-    [255, 255, 179],
-    [190, 186, 218],
-    [251, 128, 114],
-    [128, 177, 211],
-    [253, 180, 98],
-    [179, 222, 105],
-    [252, 205, 229],
-    [217, 217, 217],
-    [188, 128, 189],
-  ],
-  pathology: [
-    [228, 158, 37],
-    [91, 181, 231],
-    [22, 157, 116],
-    [239, 226, 82],
-    [16, 115, 176],
-    [211, 94, 26],
-    [202, 122, 166],
-  ],
-  pathologyLarge: [
+// From Vitessce https://github.com/vitessce/vitessce/blob/03c6d5d843640982e984a0e309f1ba1807085128/packages/utils/other-utils/src/components.ts#L50-L67
+const DEFAULT_COLOR_TEXTURE = Uint8Array.from(
+  [
     [0, 73, 73],
     [0, 146, 146],
     [255, 109, 182],
@@ -340,10 +309,8 @@ const COLOR_PALETTES = {
     [36, 255, 36],
     [255, 255, 109],
     [255, 255, 255],
-  ],
-} as const;
-
-const DEFAULT_COLOR_TEXTURE = Uint8Array.from(COLOR_PALETTES.pathologyLarge.flatMap((color) => [...color, 255]));
+  ].flatMap((color) => [...color, 255]),
+);
 
 function typedArrayConstructorName(arr: zarr.TypedArray<LabelDataType>) {
   const ArrayType = arr.constructor as zarr.TypedArrayConstructor<LabelDataType>;
