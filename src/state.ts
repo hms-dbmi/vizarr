@@ -163,6 +163,6 @@ export const layerAtoms = atom((get) => {
   return layersState.map((layer) => {
     const Layer = LayerConstructors[layer.kind];
     // @ts-expect-error - TS can't resolve that Layer & layerProps bound together
-    return new Layer(layer.layerProps);
-  }) as Array<VizarrLayer>;
+    return layer.on ? new Layer(layer.layerProps) : null;
+  }) as Array<VizarrLayer | null>;
 });
