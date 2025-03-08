@@ -3,6 +3,7 @@ import { ZarrPixelSource } from "./ZarrPixelSource";
 import { loadOmeMultiscales, loadPlate, loadWell } from "./ome";
 import * as utils from "./utils";
 
+import { DEFAULT_LABEL_OPACITY } from "./layers/label-layer";
 import type { BaseLayerProps } from "./layers/viv-layers";
 import type { ImageLayerConfig, LayerState, MultichannelConfig, SingleChannelConfig, SourceData } from "./state";
 
@@ -218,6 +219,21 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
     };
   }
 
+  let labels = undefined;
+  if (source.labels && source.labels.length > 0) {
+    labels = source.labels.map((label, i) => ({
+      on: false,
+      transformSourceSelection: getSourceSelectionTransform(label.loader[0], source.loader[0]),
+      layerProps: {
+        id: `${source.id}_${i}`,
+        loader: label.loader,
+        modelMatrix: label.modelMatrix,
+        opacity: DEFAULT_LABEL_OPACITY,
+        colors: label.colors,
+      },
+    }));
+  }
+
   return {
     kind: "multiscale",
     layerProps: {
@@ -225,5 +241,36 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
       loader: source.loader,
     },
     on: true,
+    labels,
+  };
+}
+
+function getSourceSelectionTransform(
+  labels: { shape: Array<number>; labels: Array<string> },
+  source: { shape: Array<number>; labels: Array<string> },
+) {
+  utils.assert(
+    source.shape.length === source.labels.length,
+    `Image source axes and shape are not same rank. Got ${JSON.stringify(source)}`,
+  );
+  utils.assert(
+    labels.shape.length === labels.labels.length,
+    `Label axes and shape are not same rank. Got ${JSON.stringify(labels)}`,
+  );
+  utils.assert(
+    labels.labels.every((label) => source.labels.includes(label)),
+    `Label axes MUST be a subset of source. Source: ${JSON.stringify(source.labels)} Labels: ${JSON.stringify(labels.labels)}`,
+  );
+  // Identify labels that should always map to 0, regardless of the source selection.
+  const excludeFromTransformedSelection = new Set(
+    utils
+      .zip(labels.labels, labels.shape)
+      .filter(([_, size]) => size === 1)
+      .map(([name, _]) => name),
+  );
+  return (sourceSelection: Array<number>): Array<number> => {
+    return labels.labels.map((name) =>
+      excludeFromTransformedSelection.has(name) ? 0 : sourceSelection[source.labels.indexOf(name)],
+    );
   };
 }

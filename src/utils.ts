@@ -3,6 +3,7 @@ import * as zarr from "zarrita";
 
 import type { ZarrPixelSource } from "./ZarrPixelSource";
 import type { GridLayerProps } from "./layers/grid-layer";
+import type { LabelLayerProps } from "./layers/label-layer";
 import type { ImageLayerProps, MultiscaleImageLayerProps } from "./layers/viv-layers";
 import { lru } from "./lru-store";
 import type { ViewState } from "./state";
@@ -456,6 +457,12 @@ export function isOmeWell(attrs: zarr.Attributes): attrs is { well: Ome.Well } {
   return "well" in attrs;
 }
 
+export function isOmeImageLabel(
+  attrs: zarr.Attributes,
+): attrs is { "image-label": Ome.ImageLabel; multiscales: Ome.Multiscale[] } {
+  return "image-label" in attrs && isMultiscales(attrs);
+}
+
 export function isOmeMultiscales(attrs: zarr.Attributes): attrs is { omero: Ome.Omero; multiscales: Ome.Multiscale[] } {
   return "omero" in attrs && isMultiscales(attrs);
 }
@@ -508,12 +515,14 @@ export function rethrowUnless<E extends ReadonlyArray<new (...args: any[]) => Er
 }
 
 export function isGridLayerProps(
-  props: GridLayerProps | ImageLayerProps | MultiscaleImageLayerProps,
+  props: GridLayerProps | ImageLayerProps | MultiscaleImageLayerProps | LabelLayerProps,
 ): props is GridLayerProps {
   return "loaders" in props && "rows" in props && "columns" in props;
 }
 
-export function resolveLoaderFromLayerProps(layerProps: GridLayerProps | ImageLayerProps | MultiscaleImageLayerProps) {
+export function resolveLoaderFromLayerProps(
+  layerProps: GridLayerProps | ImageLayerProps | MultiscaleImageLayerProps | LabelLayerProps,
+) {
   return isGridLayerProps(layerProps) ? layerProps.loaders[0].loader : layerProps.loader;
 }
 
@@ -567,4 +576,18 @@ export function coordinateTransformationsToMatrix(multiscales: Array<Ome.Multisc
   }
 
   return mat;
+}
+
+/**
+ * Builds N-tuples of elements from the given N arrays with matching indices,
+ * stopping when the smallest array's end is reached.
+ */
+export function zip<T extends unknown[]>(...arrays: { [K in keyof T]: ReadonlyArray<T[K]> }): T[] {
+  const minLength = arrays.reduce((minLength, arr) => Math.min(arr.length, minLength), Number.POSITIVE_INFINITY);
+  const result: T[] = new Array(minLength);
+  for (let i = 0; i < minLength; i += 1) {
+    const arr = arrays.map((it) => it[i]);
+    result[i] = arr as T;
+  }
+  return result;
 }

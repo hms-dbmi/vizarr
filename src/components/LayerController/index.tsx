@@ -31,7 +31,6 @@ const Accordion = withStyles({
 function LayerController() {
   const [sourceInfo] = useSourceData();
   const layerAtom = layerFamilyAtom(sourceInfo);
-  const { name = "" } = sourceInfo;
   return (
     <LayerStateContext.Provider value={layerAtom}>
       <Accordion defaultExpanded>

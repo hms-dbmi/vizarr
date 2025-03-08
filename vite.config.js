@@ -3,8 +3,6 @@ import * as path from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-const source = process.env.VIZARR_DATA || "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/6001253.zarr";
-
 /**
  * Writes a new entry point that exports contents of an existing chunk.
  * @param {string} entryPointName - Name of the new entry point
@@ -44,6 +42,6 @@ export default defineConfig({
     },
   },
   server: {
-    open: `?source=${source}`,
+    open: `?source=${process.env.VIZARR_DATA || "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/6001253.zarr"}`,
   },
 });

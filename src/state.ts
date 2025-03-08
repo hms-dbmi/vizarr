@@ -1,4 +1,4 @@
-import { atom } from "jotai";
+import { type Atom, atom } from "jotai";
 import { atomFamily, splitAtom, waitForAll } from "jotai/utils";
 import { RedirectError, rethrowUnless } from "./utils";
 
@@ -11,6 +11,7 @@ import type { ZarrPixelSource } from "./ZarrPixelSource";
 import { initLayerStateFromSource } from "./io";
 
 import { GridLayer, type GridLayerProps, type GridLoader } from "./layers/grid-layer";
+import { LabelLayer, type LabelLayerProps, type OmeColor } from "./layers/label-layer";
 import {
   ImageLayer,
   type ImageLayerProps,
@@ -54,6 +55,13 @@ export type OnClickData = Record<string, unknown> & {
   gridCoord?: { row: number; column: number };
 };
 
+export type ImageLabels = Array<{
+  name: string;
+  loader: ZarrPixelSource[];
+  modelMatrix: Matrix4;
+  colors?: ReadonlyArray<OmeColor>;
+}>;
+
 export type SourceData = {
   loader: ZarrPixelSource[];
   loaders?: GridLoader[]; // for OME plates
@@ -75,22 +83,8 @@ export type SourceData = {
   model_matrix: Matrix4;
   axis_labels: string[];
   onClick?: (e: OnClickData) => void;
+  labels?: ImageLabels;
 };
-
-export type VivProps = ConstructorParameters<typeof MultiscaleImageLayer>[0];
-
-export interface BaseLayerProps {
-  id: string;
-  contrastLimits: VivProps["contrastLimits"];
-  colors: [r: number, g: number, b: number][];
-  channelsVisible: NonNullable<VivProps["channelsVisible"]>;
-  opacity: NonNullable<VivProps["opacity"]>;
-  colormap: string; // TODO: more precise
-  selections: number[][];
-  modelMatrix: Matrix4;
-  contrastLimitsRange: [min: number, max: number][];
-  onClick?: (e: OnClickData) => void;
-}
 
 type LayerType = "image" | "multiscale" | "grid";
 type LayerPropsMap = {
@@ -103,6 +97,11 @@ export type LayerState<T extends LayerType = LayerType> = {
   kind: T;
   layerProps: LayerPropsMap[T];
   on: boolean;
+  labels?: Array<{
+    layerProps: Omit<LabelLayerProps, "selection">;
+    on: boolean;
+    transformSourceSelection: (sourceSelection: Array<number>) => Array<number>;
+  }>;
 };
 
 type WithId<T> = T & { id: string };
@@ -146,7 +145,11 @@ export const layerFamilyAtom: AtomFamily<WithId<SourceData>, PrimitiveAtom<WithI
   (a, b) => a.id === b.id,
 );
 
-export type VizarrLayer = Layer<MultiscaleImageLayerProps> | Layer<ImageLayerProps> | Layer<GridLayerProps>;
+export type VizarrLayer =
+  | Layer<MultiscaleImageLayerProps>
+  | Layer<ImageLayerProps>
+  | Layer<GridLayerProps>
+  | Layer<LabelLayerProps>;
 
 const LayerConstructors = {
   image: ImageLayer,
@@ -154,15 +157,41 @@ const LayerConstructors = {
   grid: GridLayer,
 } as const;
 
-export const layerAtoms = atom((get) => {
-  const atoms = get(sourceInfoAtomAtoms);
-  if (atoms.length === 0) {
-    return [];
-  }
-  const layersState = get(waitForAll(atoms.map((a) => layerFamilyAtom(get(a)))));
-  return layersState.map((layer) => {
-    const Layer = LayerConstructors[layer.kind];
+const layerInstanceFamily = atomFamily((a: Atom<LayerState>) =>
+  atom((get) => {
+    const { on, layerProps, kind } = get(a);
+    if (!on) {
+      return null;
+    }
+    const Layer = LayerConstructors[kind];
     // @ts-expect-error - TS can't resolve that Layer & layerProps bound together
-    return layer.on ? new Layer(layer.layerProps) : null;
-  }) as Array<VizarrLayer | null>;
+    return new Layer(layerProps) as VizarrLayer;
+  }),
+);
+
+const imageLabelsIstanceFamily = atomFamily((a: Atom<LayerState>) =>
+  atom((get) => {
+    const { on, labels, layerProps } = get(a);
+    if (!on || !labels) {
+      return [];
+    }
+    return labels.map((label) =>
+      label.on
+        ? new LabelLayer({
+            ...label.layerProps,
+            selection: label.transformSourceSelection(layerProps.selections[0]),
+          })
+        : null,
+    );
+  }),
+);
+
+export const layerAtoms = atom((get) => {
+  const layerAtoms = [];
+  for (const sourceAtom of get(sourceInfoAtomAtoms)) {
+    const layerStateAtom = layerFamilyAtom(get(sourceAtom));
+    layerAtoms.push(layerInstanceFamily(layerStateAtom));
+    layerAtoms.push(imageLabelsIstanceFamily(layerStateAtom));
+  }
+  return get(waitForAll(layerAtoms)).flat();
 });
