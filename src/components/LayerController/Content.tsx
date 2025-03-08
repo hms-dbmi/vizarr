@@ -23,7 +23,6 @@ const Details = withStyles({
 function Content() {
   const [layer] = useLayerState();
   const nChannels = layer.layerProps.selections.length;
-  const nLabels = layer.labels?.length ?? 0;
   return (
     <Details>
       <Grid container direction="column">
@@ -53,13 +52,18 @@ function Content() {
             <ChannelController channelIndex={i} key={i} />
           ))}
         </Grid>
-        {nLabels > 0 && (
-          <Grid>
-            <Typography variant="caption">labels:</Typography>
-            {range(nLabels).map((i) => (
-              <Labels labelIndex={i} key={i} />
-            ))}
-          </Grid>
+        {layer.labels?.length && (
+          <>
+            <Grid container justifyContent="space-between">
+              <Typography variant="caption">labels:</Typography>
+            </Grid>
+            <Divider />
+            <Grid>
+              {layer.labels.map((label, i) => (
+                <Labels labelIndex={i} key={label.layerProps.id} />
+              ))}
+            </Grid>
+          </>
         )}
       </Grid>
     </Details>

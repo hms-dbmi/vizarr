@@ -1,21 +1,9 @@
-import { Divider, Typography } from "@material-ui/core";
-import { Slider } from "@material-ui/core";
-import { withStyles } from "@material-ui/styles";
+import { Grid, IconButton, Slider, Typography } from "@material-ui/core";
+import { RadioButtonChecked, RadioButtonUnchecked } from "@material-ui/icons";
 import React from "react";
 
 import { useLayerState, useSourceData } from "../../hooks";
 import { assert } from "../../utils";
-
-const DenseSlider = withStyles({
-  root: {
-    color: "white",
-    padding: "10px 0px 5px 0px",
-    marginRight: "5px",
-  },
-  active: {
-    boxshadow: "0px 0px 0px 8px rgba(158, 158, 158, 0.16)",
-  },
-})(Slider);
 
 export default function Labels({ labelIndex }: { labelIndex: number }) {
   const [source] = useSourceData();
@@ -39,12 +27,47 @@ export default function Labels({ labelIndex }: { labelIndex: number }) {
   };
 
   const { name } = source.labels[labelIndex];
-  const { opacity } = layer.labels[labelIndex].layerProps;
+  const label = layer.labels[labelIndex];
   return (
     <>
-      <Divider />
-      <Typography variant="caption">{name}</Typography>
-      <DenseSlider value={opacity} onChange={handleOpacityChange} min={0} max={1} step={0.01} />
+      <Grid container justifyContent="space-between" wrap="nowrap">
+        <div style={{ width: 165, overflow: "hidden", textOverflow: "ellipsis" }}>
+          <Typography variant="caption" noWrap>
+            {name}
+          </Typography>
+        </div>
+      </Grid>
+      <Grid container justifyContent="space-between">
+        <Grid item xs={2}>
+          <IconButton
+            style={{ backgroundColor: "transparent", padding: 0, zIndex: 2 }}
+            onClick={() => {
+              setLayer((prev) => {
+                assert(prev.kind === "multiscale" && prev.labels, "Missing image labels");
+                return {
+                  ...prev,
+                  labels: prev.labels.with(labelIndex, {
+                    ...prev.labels[labelIndex],
+                    on: !prev.labels[labelIndex].on,
+                  }),
+                };
+              });
+            }}
+          >
+            {label.on ? <RadioButtonChecked /> : <RadioButtonUnchecked />}
+          </IconButton>
+        </Grid>
+        <Grid item xs={10}>
+          <Slider
+            value={label.layerProps.opacity}
+            onChange={handleOpacityChange}
+            min={0}
+            max={1}
+            step={0.01}
+            style={{ padding: "10px 0px 5px 0px" }}
+          />
+        </Grid>
+      </Grid>
     </>
   );
 }

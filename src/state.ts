@@ -175,12 +175,13 @@ const imageLabelsIstanceFamily = atomFamily((a: Atom<LayerState>) =>
     if (!on || !labels) {
       return [];
     }
-    return labels.map(
-      (label) =>
-        new LabelLayer({
-          ...label.layerProps,
-          selection: label.transformSourceSelection(layerProps.selections[0]),
-        }),
+    return labels.map((label) =>
+      label.on
+        ? new LabelLayer({
+            ...label.layerProps,
+            selection: label.transformSourceSelection(layerProps.selections[0]),
+          })
+        : null,
     );
   }),
 );

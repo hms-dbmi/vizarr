@@ -222,13 +222,14 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
   let labels = undefined;
   if (source.labels && source.labels.length > 0) {
     labels = source.labels.map((label, i) => ({
-      on: true,
+      on: false,
       transformSourceSelection: getSourceSelectionTransform(label.loader[0], source.loader[0]),
       layerProps: {
         id: `${source.id}_${i}`,
         loader: label.loader,
         modelMatrix: label.modelMatrix,
         opacity: DEFAULT_LABEL_OPACITY,
+        colors: label.colors,
       },
     }));
   }
