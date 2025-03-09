@@ -22,7 +22,7 @@ function ChannelController(props: { channelIndex: number }) {
   return (
     <>
       <div className="flex items-center justify-between">
-        <label className="text-xs w-44 text-ellipsis overflow-hidden select-none">{label}</label>
+        <span className="text-xs w-44 text-ellipsis overflow-hidden select-none">{label}</span>
         <ChannelOptions channelIndex={i} />
       </div>
       <div className="flex items-center">
