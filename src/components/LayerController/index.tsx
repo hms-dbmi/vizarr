@@ -83,8 +83,11 @@ function LayerController() {
               </>
             ) : null}
             <div className="flex items-center my-0.5">
-              <label className="text-xs">opacity:</label>
+              <label className="text-xs" htmlFor={`${info.id}-opacity`}>
+                opacity:
+              </label>
               <Slider
+                id={`${info.id}-opacity`}
                 className="ml-2 mt-0.5 mx-1"
                 value={[layer.layerProps.opacity]}
                 onValueChange={(update) => {
@@ -102,7 +105,7 @@ function LayerController() {
             ))}
             <Separator />
             <div className="flex justify-between items-center">
-              <label className="text-xs">channels:</label>
+              <span className="text-xs">channels:</span>
               <AddChannelButton />
             </div>
             <Separator />
@@ -114,7 +117,7 @@ function LayerController() {
             {layer.labels?.length && (
               <>
                 <div className="flex justify-between items-center">
-                  <label className="text-xs">labels:</label>
+                  <span className="text-xs">labels:</span>
                 </div>
                 <Separator />
                 <div>
