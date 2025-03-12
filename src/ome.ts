@@ -332,6 +332,7 @@ async function defaultMeta(loader: ZarrPixelSource, axis_labels: string[]): Prom
 function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axes: Ome.Axis[]): Meta {
   const t = rdefs?.defaultT ?? 0;
   const z = rdefs?.defaultZ ?? 0;
+  const greyscale = rdefs?.model === "greyscale";
 
   const colors: string[] = [];
   const contrast_limits: [min: number, max: number][] = [];
@@ -344,6 +345,10 @@ function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axes: Ome.Axis[]):
     visibilities.push(c.active);
     names.push(c.label || `${index}`);
   });
+
+  if (greyscale && colors.length === 1) {
+    colors[0] = "FFFFFF";
+  }
 
   const defaultSelection = axes.map((axis) => {
     if (axis.type === "time") return t;
