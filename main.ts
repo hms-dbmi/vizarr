@@ -38,8 +38,14 @@ async function main() {
     config[key] = value;
   }
 
-  // Make sure the source URL is decoded.
-  viewer.addImage(config);
+  // We want to addImage() for each source in the query params
+  const sources = url.searchParams.getAll("source");
+  sources.forEach((source) => {
+    // deepcopy config
+    let configCopy = JSON.parse(JSON.stringify(config));
+    configCopy['source'] = source;
+    viewer.addImage(configCopy);
+  });
 
   const newLocation = decodeURIComponent(url.href);
 
