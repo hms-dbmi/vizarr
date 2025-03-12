@@ -24,6 +24,8 @@ export const RGB = [COLORS.red, COLORS.green, COLORS.blue];
 export const CYMRGB = Object.values(COLORS).slice(0, -2);
 export const OME_VALIDATOR_URL = "https://ome.github.io/ome-ngff-validator/";
 
+export { clamp } from "math.gl";
+
 async function normalizeStore(source: string | zarr.Readable): Promise<zarr.Location<zarr.Readable>> {
   if (typeof source === "string") {
     let store: zarr.Readable;

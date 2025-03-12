@@ -1,184 +1,156 @@
-import { Divider, IconButton, Input, NativeSelect, Paper, Popover, Typography } from "@material-ui/core";
-import { MoreHoriz, Remove } from "@material-ui/icons";
-import { withStyles } from "@material-ui/styles";
-import React, { useState } from "react";
-import type { ChangeEvent, MouseEvent } from "react";
-import { useLayerState, useSourceData } from "../../hooks";
-import ColorPalette from "./ColorPalette";
+import { Cross2Icon, DotsHorizontalIcon } from "@radix-ui/react-icons";
+import * as React from "react";
 
-const DenseInput = withStyles({
-  root: {
-    width: "5.5em",
-    fontSize: "0.7em",
-  },
-})(Input);
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { useLayerState, useSourceData } from "@/hooks";
+import { assert, COLORS, clamp, hexToRGB } from "@/utils";
 
-interface Props {
-  channelIndex: number;
-}
+const RGB_COLORS: [string, string][] = Object.entries(COLORS);
 
-function ChannelOptions({ channelIndex }: Props) {
-  const [sourceData] = useSourceData();
+function ChannelOptions(props: { channelIndex: number }) {
+  const { channelIndex: i } = props;
+  const [info] = useSourceData();
   const [layer, setLayer] = useLayerState();
-  const [anchorEl, setAnchorEl] = useState<null | Element>(null);
-  const { channel_axis, names } = sourceData;
+  const { channel_axis, names } = info;
+  assert(channel_axis !== null, "channel_axis is null");
 
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleColorChange = (rgb: [number, number, number]) => {
-    setLayer((prev) => {
-      const colors = [...prev.layerProps.colors];
-      colors[channelIndex] = rgb;
-      return { ...prev, layerProps: { ...prev.layerProps, colors } };
-    });
-  };
-
-  const handleContrastLimitChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const targetId = event.target.id;
-    let value = +event.target.value;
-
-    // Only let positive values
-    if (value < 0) value = 0;
-
-    setLayer((prev) => {
-      // Need to move sliders in if contrast limits are narrower
-      const contrastLimitsRange = [...prev.layerProps.contrastLimitsRange];
-      const contrastLimits = [...prev.layerProps.contrastLimits];
-
-      const [cmin, cmax] = contrastLimitsRange[channelIndex];
-      const [smin, smax] = contrastLimits[channelIndex];
-
-      // Calculate climit update
-      const [umin, umax] = targetId === "min" ? [value, cmax] : [cmin, value];
-
-      // Update sliders if needed
-      if (umin > smin) contrastLimits[channelIndex] = [umin, smax];
-      if (umax < smax) contrastLimits[channelIndex] = [smin, umax];
-
-      // Update channel constrast limits range
-      contrastLimitsRange[channelIndex] = [umin, umax];
-
+  const handleContrastLimitChange = (unclamped: number, which: "min" | "max") => {
+    const value = clamp(unclamped, 0, Number.POSITIVE_INFINITY);
+    setLayer(({ layerProps, ...rest }) => {
+      const lims = layerProps.contrastLimitsRange[i];
+      const vals = layerProps.contrastLimits[i];
+      const [min, max] = which === "min" ? [value, lims[1]] : [lims[0], value];
       return {
-        ...prev,
-        layerProps: { ...prev.layerProps, contrastLimits, contrastLimitsRange },
-      };
-    });
-  };
-
-  const handleRemove = () => {
-    setLayer((prev) => {
-      const { layerProps } = prev;
-      const colors = [...layerProps.colors];
-      const contrastLimits = [...layerProps.contrastLimits];
-      const contrastLimitsRange = [...layerProps.contrastLimitsRange];
-      const selections = [...layerProps.selections];
-      const channelsVisible = [...layerProps.channelsVisible];
-      colors.splice(channelIndex, 1);
-      contrastLimits.splice(channelIndex, 1);
-      contrastLimitsRange.splice(channelIndex, 1);
-      selections.splice(channelIndex, 1);
-      channelsVisible.splice(channelIndex, 1);
-      return {
-        ...prev,
+        ...rest,
         layerProps: {
           ...layerProps,
-          colors,
-          selections,
-          channelsVisible,
-          contrastLimits,
-          contrastLimitsRange,
+          contrastLimits: layerProps.contrastLimits.with(i, [
+            clamp(vals[0], min, Number.POSITIVE_INFINITY),
+            clamp(vals[1], 0, max),
+          ]),
+          contrastLimitsRange: layerProps.contrastLimitsRange.with(i, [min, max]),
         },
       };
     });
   };
 
-  const handleSelectionChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setLayer((prev) => {
-      const selections = [...prev.layerProps.selections];
-      const channelSelection = [...selections[channelIndex]];
-      if (Number.isInteger(channel_axis)) {
-        channelSelection[channel_axis as number] = +event.target.value;
-        selections[channelIndex] = channelSelection;
-      }
-      return { ...prev, layerProps: { ...prev.layerProps, selections } };
-    });
+  const handleSelectionChange = (idx: number) => {
+    setLayer(({ layerProps, ...rest }) => ({
+      ...rest,
+      layerProps: {
+        ...layerProps,
+        selections: layerProps.selections.with(i, layerProps.selections[i].with(channel_axis, idx)),
+      },
+    }));
   };
 
-  const open = Boolean(anchorEl);
-  const id = open ? `channel-${channelIndex}-${sourceData.name}-options` : undefined;
-  const [min, max] = layer.layerProps.contrastLimitsRange[channelIndex];
+  const [min, max] = layer.layerProps.contrastLimitsRange[i];
 
   return (
-    <>
-      <IconButton
-        onClick={handleClick}
-        aria-describedby={id}
-        style={{
-          backgroundColor: "transparent",
-          padding: 0,
-          zIndex: 2,
-          cursor: "pointer",
-        }}
-      >
-        <MoreHoriz />
-      </IconButton>
-      <Popover
-        id={id}
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
-      >
-        <Paper style={{ padding: "0px 4px", marginBottom: 4 }}>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <Typography variant="caption">remove:</Typography>
-            <IconButton onClick={handleRemove}>
-              <Remove />
-            </IconButton>
-          </div>
-          <Divider />
-          <Typography variant="caption">selection:</Typography>
-          <Divider />
-          <NativeSelect
-            fullWidth
-            style={{ fontSize: "0.7em" }}
-            id={`layer-${sourceData.name}-channel-select`}
-            onChange={handleSelectionChange}
-            value={layer.layerProps.selections[channelIndex][channel_axis as number]}
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="icon-sm" className="cursor-pointer bg-card hover:bg-card">
+          <DotsHorizontalIcon className="fill-accent" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="px-1 pt-0 pb-1 w-32 border-border rounded-lg" side="bottom" alignOffset={20}>
+        <div className="flex items-center justify-between">
+          <span className="text-xs">remove:</span>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="-mr-1 cursor-pointer bg-card hover:bg-card"
+            onMouseDown={() => {
+              setLayer(({ layerProps, ...rest }) => {
+                return {
+                  ...rest,
+                  layerProps: {
+                    ...layerProps,
+                    colors: layerProps.colors.toSpliced(i, 1),
+                    selections: layerProps.selections.toSpliced(i, 1),
+                    channelsVisible: layerProps.channelsVisible.toSpliced(i, 1),
+                    contrastLimits: layerProps.contrastLimits.toSpliced(i, 1),
+                    contrastLimitsRange: layerProps.contrastLimitsRange.toSpliced(i, 1),
+                  },
+                };
+              });
+            }}
           >
+            <Cross2Icon />
+          </Button>
+        </div>
+        <Separator />
+        <span className="text-xs">channel:</span>
+        <Separator />
+        <Select
+          onValueChange={(i) => handleSelectionChange(+i)}
+          value={String(layer.layerProps.selections[i][channel_axis])}
+        >
+          <SelectTrigger className="w-full focus:ring-0 p-0 h-7 border-none text-xs cursor-pointer select-none">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="focus:ring-0 border-none">
             {names.map((name, i) => (
-              <option value={i} key={name}>
-                ({i}) {name}
-              </option>
+              <SelectItem className="text-xs" value={String(i)} key={name}>
+                {name}
+              </SelectItem>
             ))}
-          </NativeSelect>
-          <Divider />
-          <Typography variant="caption">contrast limits:</Typography>
-          <Divider />
-          <DenseInput value={min} onChange={handleContrastLimitChange} type="number" id="min" fullWidth={false} />
-          <DenseInput value={max} onChange={handleContrastLimitChange} type="number" id="max" fullWidth={false} />
-          <Divider />
-          <Typography variant="caption">color:</Typography>
-          <Divider />
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <ColorPalette handleChange={handleColorChange} />
-          </div>
-        </Paper>
-      </Popover>
-    </>
+          </SelectContent>
+        </Select>
+        <Separator />
+        <span className="text-xs">contrast limits:</span>
+        <Separator />
+        <Input
+          type="number"
+          className="w-full focus:ring-0 focus-visible:ring-0 focus:border-none p-0 h-7 border-none text-xs cursor-pointer select-none"
+          defaultValue={min}
+          onKeyDown={(e) => {
+            if (e.key !== "Enter") return;
+            const value = +e.currentTarget.value;
+            handleContrastLimitChange(value, "min");
+          }}
+          onBlur={(e) => handleContrastLimitChange(+e.currentTarget.value, "min")}
+        />
+        <Input
+          type="number"
+          className="w-full focus:ring-0 focus-visible:ring-0 focus:border-none p-0 h-7 border-none text-xs cursor-pointer select-none"
+          defaultValue={max}
+          onKeyDown={(e) => {
+            if (e.key !== "Enter") return;
+            const value = +e.currentTarget.value;
+            handleContrastLimitChange(value, "max");
+          }}
+          onBlur={(e) => handleContrastLimitChange(+e.currentTarget.value, "max")}
+        />
+        <Separator />
+        <span className="text-xs">color:</span>
+        <Separator />
+        <div className="flex items-center justify-between" aria-label="color-swatch">
+          {RGB_COLORS.map(([name, rgb]) => (
+            <button
+              type="button"
+              aria-label={name}
+              style={{ backgroundColor: rgb }}
+              className="w-3.5 h-3.5 rounded-full cursor-pointer"
+              key={name}
+              onClick={() => {
+                setLayer(({ layerProps, ...rest }) => ({
+                  ...rest,
+                  layerProps: {
+                    ...layerProps,
+                    colors: layerProps.colors.with(i, hexToRGB(rgb)),
+                  },
+                }));
+              }}
+            />
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
