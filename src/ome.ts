@@ -246,14 +246,20 @@ export async function loadPlate(
 export async function loadOmeMultiscales(
   config: ImageLayerConfig,
   grp: zarr.Group<zarr.Readable>,
-  attrs: { multiscales: Ome.Multiscale[]; omero: Ome.Omero },
+  attrs: { multiscales: Ome.Multiscale[] },
 ): Promise<SourceData> {
   const { name, opacity = 1, colormap = "" } = config;
   const data = await utils.loadMultiscales(grp, attrs.multiscales);
   const axes = utils.getNgffAxes(attrs.multiscales);
   const axis_labels = utils.getNgffAxisLabels(axes);
-  const meta = parseOmeroMeta(attrs.omero, axes);
   const tileSize = utils.guessTileSize(data[0]);
+  let meta;
+  if (utils.isOmeMultiscales(attrs)) {
+    meta = parseOmeroMeta(attrs.omero, axes);
+  } else {
+    const loaders = data.map((d) => new ZarrPixelSource(d, { labels: axis_labels, tileSize }));
+    meta = await defaultMeta(loaders[0], axis_labels);
+  }
   const loader = data.map((arr) => new ZarrPixelSource(arr, { labels: axis_labels, tileSize }));
   const labels = await resolveOmeLabelsFromMultiscales(grp);
   return {
