@@ -253,7 +253,7 @@ export async function loadOmeMultiscales(
   const axes = utils.getNgffAxes(attrs.multiscales);
   const axis_labels = utils.getNgffAxisLabels(axes);
   const tileSize = utils.guessTileSize(data[0]);
-  let meta;
+  let meta: Meta;
   if (utils.isOmeMultiscales(attrs)) {
     meta = parseOmeroMeta(attrs.omero, axes);
   } else {
