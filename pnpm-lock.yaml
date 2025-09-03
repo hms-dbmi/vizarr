@@ -56,8 +56,8 @@ importers:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
       zarrita:
-        specifier: 0.5.0
-        version: 0.5.0
+        specifier: 0.5.3
+        version: 0.5.3
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4
@@ -1063,8 +1063,11 @@ packages:
   '@zarrita/storage@0.1.0':
     resolution: {integrity: sha512-lSGDQik2fLt/UyvWzWd23sJFHckEmk50F9Baz2XlbgFQhvd2EVBcHGweOTBhu3c5SB05TzOnlY1M1i2FMDi6YA==}
 
-  '@zip.js/zip.js@2.7.72':
-    resolution: {integrity: sha512-3/A4JwrgkvGBlCxtItjxs8HrNbuTAAl/zlGkV6tC5Fb5k5nk4x2Dqxwl/YnUys5Ch+QB01eJ8Q5K/J2uXfy9Vw==}
+  '@zarrita/storage@0.1.2':
+    resolution: {integrity: sha512-zUi3CqeEU6avbE104qm5y4MGZbyxmqxXBIh3jyAJgQ4eQRG7KJ6cCmoD7wS7y/uCTl6nUiG7QU6k8QbyfrFjyg==}
+
+  '@zip.js/zip.js@2.7.73':
+    resolution: {integrity: sha512-I2UP8/rdQE5hTtVVL08B7P8XuwXiKuuMUPjNuFOVL/9b+8IsExR9S5jz2H58u0rJjU4M1BikLgqEMG8gZJZVBw==}
     engines: {bun: '>=0.7.0', deno: '>=1.0.0', node: '>=16.5.0'}
 
   argparse@1.0.10:
@@ -1789,8 +1792,8 @@ packages:
     resolution: {integrity: sha512-v7g3i/NfLEHtGtCEX8zl9b/LMY+8BY7fIYvbNX3nskAhliMCY5mA12jlc8Rbe91hSwL/4Nh2d3fUcVmnthXQkQ==}
     engines: {node: '>=12'}
 
-  zarrita@0.5.0:
-    resolution: {integrity: sha512-wyvnnzeXh9rBCZxsn6GEW4oXDv3LD2f4KSJ6LLFjYaMNtmAtaSt3qEO3fHuuq0VZWUGb8cjTYDEtwJTa09wp6g==}
+  zarrita@0.5.3:
+    resolution: {integrity: sha512-to2JRq9nHwYdhWEwJwytHYdMYC6I0f2vKUAQfYkgrwwy8OjShhwmv4sH9drzyV3sLzdy7XS9N1ipdMA/Qjspow==}
 
   zod@3.24.2:
     resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
@@ -1817,7 +1820,7 @@ snapshots:
       '@esri/arcgis-html-sanitizer': 4.1.0
       '@esri/calcite-components': 3.2.1
       '@vaadin/grid': 24.6.11
-      '@zip.js/zip.js': 2.7.72
+      '@zip.js/zip.js': 2.7.73
       luxon: 3.5.0
       marked: 15.0.12
 
@@ -3028,7 +3031,12 @@ snapshots:
       reference-spec-reader: 0.2.0
       unzipit: 1.4.3
 
-  '@zip.js/zip.js@2.7.72': {}
+  '@zarrita/storage@0.1.2':
+    dependencies:
+      reference-spec-reader: 0.2.0
+      unzipit: 1.4.3
+
+  '@zip.js/zip.js@2.7.73': {}
 
   argparse@1.0.10:
     dependencies:
@@ -3677,9 +3685,9 @@ snapshots:
       numcodecs: 0.2.2
       p-queue: 7.4.1
 
-  zarrita@0.5.0:
+  zarrita@0.5.3:
     dependencies:
-      '@zarrita/storage': 0.1.0
+      '@zarrita/storage': 0.1.2
       numcodecs: 0.3.2
 
   zod@3.24.2: {}
