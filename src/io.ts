@@ -89,7 +89,7 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
       return loadWell(config, node, attrs.well);
     }
 
-    if (utils.isOmeMultiscales(attrs)) {
+    if (utils.isMultiscales(attrs)) {
       return loadOmeMultiscales(config, node, attrs);
     }
 
