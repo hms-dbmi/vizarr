@@ -21,7 +21,7 @@ export const COLORS = {
 };
 export const MAGENTA_GREEN = [COLORS.magenta, COLORS.green];
 export const RGB = [COLORS.red, COLORS.green, COLORS.blue];
-export const CYMRGB = Object.values(COLORS).slice(0, -2);
+export const CYMRGB = Object.values(COLORS).slice(0, MAX_CHANNELS);
 export const OME_VALIDATOR_URL = "https://ome.github.io/ome-ngff-validator/";
 
 async function normalizeStore(source: string | zarr.Readable): Promise<zarr.Location<zarr.Readable>> {
