@@ -80,7 +80,7 @@ export async function loadWell(
   if (utils.isOmeMultiscales(imgAttrs)) {
     meta = parseOmeroMeta(imgAttrs.omero, axes);
   } else {
-    meta = await defaultMeta(loaders[0].loader, axis_labels);
+    meta = await defaultMeta(loaders[loaders.length - 1].loader, axis_labels);
   }
 
   const sourceData: SourceData = {
@@ -202,7 +202,7 @@ export async function loadPlate(
   if ("omero" in imgAttrs) {
     meta = parseOmeroMeta(imgAttrs.omero, axes);
   } else {
-    meta = await defaultMeta(loaders[0].loader, axis_labels);
+    meta = await defaultMeta(loaders[loaders.length - 1].loader, axis_labels);
   }
 
   // Load Image to use for channel names, rendering settings, sizeZ, sizeT etc.
@@ -257,8 +257,8 @@ export async function loadOmeMultiscales(
   if (utils.isOmeMultiscales(attrs)) {
     meta = parseOmeroMeta(attrs.omero, axes);
   } else {
-    const loaders = data.map((d) => new ZarrPixelSource(d, { labels: axis_labels, tileSize }));
-    meta = await defaultMeta(loaders[0], axis_labels);
+    const lowres = new ZarrPixelSource(data[data.length - 1], { labels: axis_labels, tileSize });
+    meta = await defaultMeta(lowres, axis_labels);
   }
   const loader = data.map((arr) => new ZarrPixelSource(arr, { labels: axis_labels, tileSize }));
   const labels = await resolveOmeLabelsFromMultiscales(grp);
