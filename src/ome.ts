@@ -80,7 +80,9 @@ export async function loadWell(
   if (utils.isOmeMultiscales(imgAttrs)) {
     meta = parseOmeroMeta(imgAttrs.omero, axes);
   } else {
-    meta = await defaultMeta(loaders[loaders.length - 1].loader, axis_labels);
+    const lowres = loaders.at(-1);
+    utils.assert(lowres, "Expected at least one resolution, found none.");
+    meta = await defaultMeta(lowres.loader, axis_labels);
   }
 
   const sourceData: SourceData = {
@@ -202,7 +204,9 @@ export async function loadPlate(
   if ("omero" in imgAttrs) {
     meta = parseOmeroMeta(imgAttrs.omero, axes);
   } else {
-    meta = await defaultMeta(loaders[loaders.length - 1].loader, axis_labels);
+    const lowres = loaders.at(-1);
+    utils.assert(lowres, "Expected at least one resolution, found none.");
+    meta = await defaultMeta(lowres.loader, axis_labels);
   }
 
   // Load Image to use for channel names, rendering settings, sizeZ, sizeT etc.
@@ -257,8 +261,10 @@ export async function loadOmeMultiscales(
   if (utils.isOmeMultiscales(attrs)) {
     meta = parseOmeroMeta(attrs.omero, axes);
   } else {
-    const lowres = new ZarrPixelSource(data[data.length - 1], { labels: axis_labels, tileSize });
-    meta = await defaultMeta(lowres, axis_labels);
+    const lowresArray = data.at(-1);
+    utils.assert(lowresArray, "Expected at least one resolution in multiscales, found none.");
+    const lowresSource = new ZarrPixelSource(lowresArray, { labels: axis_labels, tileSize });
+    meta = await defaultMeta(lowresSource, axis_labels);
   }
   const loader = data.map((arr) => new ZarrPixelSource(arr, { labels: axis_labels, tileSize }));
   const labels = await resolveOmeLabelsFromMultiscales(grp);
