@@ -248,7 +248,7 @@ export function fitImageToViewport(options: {
     zoom: Math.log2(
       Math.min(
         availableWidth / (maxX - minX), // scaleX
-        availableHeight / (maxY - minX), // scaleY
+        availableHeight / (maxY - minY), // scaleY
       ),
     ),
     target: [(minX + maxX) / 2, (minY + maxY) / 2],
