@@ -19,6 +19,7 @@ type VivPixelData = {
 export class ZarrPixelSource implements viv.PixelSource<Array<string>> {
   readonly labels: viv.Labels<Array<string>>;
   readonly tileSize: number;
+  originalSizeZ: number;
   readonly dtype: viv.SupportedDtype;
   readonly #arr: zarr.Array<zarr.NumberDataType | zarr.BigintDataType, zarr.Readable>;
   readonly #transform: (
@@ -43,6 +44,7 @@ export class ZarrPixelSource implements viv.PixelSource<Array<string>> {
     this.#arr = arr;
     this.labels = options.labels;
     this.tileSize = options.tileSize;
+    this.originalSizeZ = this.shape[this.labels.indexOf('z')];
     /**
      * Some `zarrita` data types are not supported by Viv and require casting.
      *
@@ -62,6 +64,10 @@ export class ZarrPixelSource implements viv.PixelSource<Array<string>> {
       this.dtype = capitalize(arr.dtype);
       this.#transform = (x) => x as zarr.TypedArray<typeof arr.dtype>;
     }
+  }
+
+  setOriginalSizeZ(sizeZ: number) {
+    this.originalSizeZ = sizeZ;
   }
 
   get #width() {
@@ -103,14 +109,21 @@ export class ZarrPixelSource implements viv.PixelSource<Array<string>> {
     signal?: AbortSignal;
   }): Promise<viv.PixelData> {
     const { x, y, selection, signal } = options;
-    return this.#fetchData({
-      selection: buildZarrSelection(selection, {
+    let zarrSelection = buildZarrSelection(selection, {
         labels: this.labels,
         slices: {
           x: zarr.slice(x * this.tileSize, Math.min((x + 1) * this.tileSize, this.#width)),
           y: zarr.slice(y * this.tileSize, Math.min((y + 1) * this.tileSize, this.#height)),
         },
-      }),
+      });
+    // If we know the original sizeZ, adjust the z index of this array to account for downsampling
+    let zIndex = this.labels.indexOf('z');
+    if (this.originalSizeZ > 0 && zarrSelection[zIndex] instanceof Number) {
+      let z = zarrSelection[zIndex] as number;
+      zarrSelection[zIndex] = Math.floor(z * this.shape[zIndex] / this.originalSizeZ);
+    }
+    return this.#fetchData({
+      selection: zarrSelection,
       signal,
     });
   }
