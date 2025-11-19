@@ -267,6 +267,9 @@ export async function loadOmeMultiscales(
     meta = await defaultMeta(lowresSource, axis_labels);
   }
   const loader = data.map((arr) => new ZarrPixelSource(arr, { labels: axis_labels, tileSize }));
+  // Set originalSizeZ for all ZarrPixelSource arrays so they can adjust for Z downsampling
+  let originalSizeZ = loader[0].shape[axis_labels.indexOf("z")];
+  loader.forEach((l) => l.setOriginalSizeZ(originalSizeZ));
   const labels = await resolveOmeLabelsFromMultiscales(grp);
   return {
     loader: loader,
