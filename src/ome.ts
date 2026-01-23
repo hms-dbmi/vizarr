@@ -250,7 +250,7 @@ export async function loadPlate(
     sourceData.acquisitions = plateAttrs.acquisitions;
     sourceData.acquisitionId = acquisitionId ?? -1;
   }
-  // Us onClick from image config or Open Well in new window
+  // Use onClick from image config or Open Well in new window
   sourceData.onClick = (info: OnClickData) => {
     let gridCoord = info.gridCoord;
     if (!gridCoord) {
