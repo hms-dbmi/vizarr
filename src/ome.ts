@@ -248,7 +248,7 @@ export async function loadPlate(
   if ((plateAttrs.acquisitions?.length ?? 0) > 0 && acquisitionIds.length > 1) {
     // To show acquisition chooser in UI
     sourceData.acquisitions = plateAttrs.acquisitions;
-    sourceData.acquisitionId = acquisitionId || -1;
+    sourceData.acquisitionId = acquisitionId ?? -1;
   }
   // Us onClick from image config or Open Well in new window
   sourceData.onClick = (info: OnClickData) => {
