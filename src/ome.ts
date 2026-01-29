@@ -137,6 +137,9 @@ export async function loadPlate(
 ): Promise<SourceData> {
   utils.assert(plateAttrs?.rows || plateAttrs?.columns, "Plate .zattrs missing rows, columns or wells");
 
+  // Can filter Plate wells by URL query ?acquisition=ID
+  const acquisitionId: number | undefined = config.acquisition ? Number.parseInt(config.acquisition) : undefined;
+
   const rows = plateAttrs.rows.map((row) => row.name);
   const columns = plateAttrs.columns.map((row) => row.name);
 
@@ -162,15 +165,32 @@ export async function loadPlate(
   const { datasets } = imgAttrs.multiscales[0];
   const resolution = datasets[datasets.length - 1].path;
 
-  async function getImgPath(wellPath: string) {
+  async function getWellImageInfo(wellPath: string) {
     const wellAttrs = await utils.getAttrsOnly<{ well: Ome.Well }>(grp, {
       path: wellPath,
       zarrVersion,
     });
     utils.assert("well" in wellAttrs, "Path for image is not valid, not a well.");
-    return utils.join(wellPath, wellAttrs.well.images[0].path);
+
+    const images = wellAttrs.well.images;
+    const acqIds = images.flatMap((img) => (img.acquisition ? [img.acquisition] : []));
+
+    let selected = images[0];
+    if (Number.isInteger(acquisitionId)) {
+      const match = images.find((img) => img.acquisition === acquisitionId);
+      if (match) {
+        selected = match;
+      }
+    }
+
+    return {
+      imagePath: utils.join(wellPath, selected.path),
+      acqIds,
+    };
   }
-  const wellImagePaths = await Promise.all(wellPaths.map(getImgPath));
+  const wellImageInfos = await Promise.all(wellPaths.map(getWellImageInfo));
+  const wellImagePaths = wellImageInfos.map((info) => info.imagePath);
+  const acquisitionIds = Array.from(new Set(wellImageInfos.flatMap((info) => info.acqIds)));
 
   // Create loader for every Well. Some loaders may be undefined if Wells are missing.
   const mapper = async ([key, path]: string[]) => {
@@ -225,7 +245,12 @@ export async function loadPlate(
     rows: rows.length,
     columns: columns.length,
   };
-  // Us onClick from image config or Open Well in new window
+  if ((plateAttrs.acquisitions?.length ?? 0) > 0 && acquisitionIds.length > 1) {
+    // To show acquisition chooser in UI
+    sourceData.acquisitions = plateAttrs.acquisitions;
+    sourceData.acquisitionId = acquisitionId ?? -1;
+  }
+  // Use onClick from image config or Open Well in new window
   sourceData.onClick = (info: OnClickData) => {
     let gridCoord = info.gridCoord;
     if (!gridCoord) {
@@ -241,7 +266,12 @@ export async function loadPlate(
       info.imageSource = imgSource;
       config.onClick(info);
     } else if (imgSource) {
-      window.open(`${window.location.origin + window.location.pathname}?source=${imgSource}`);
+      const url = new URL(window.location.href);
+      url.searchParams.set("source", imgSource);
+      if (Number.isInteger(acquisitionId)) {
+        url.searchParams.set("acquisition", String(acquisitionId));
+      }
+      window.open(decodeURIComponent(url.href));
     }
   };
   return sourceData;
