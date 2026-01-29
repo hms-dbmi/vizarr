@@ -25,7 +25,7 @@ async function main() {
     debounce((update: vizarr.ViewState) => {
       const url = new URL(window.location.href);
       url.searchParams.set("viewState", JSON.stringify(update));
-      window.history.pushState({}, "", decodeURIComponent(url.href));
+      window.history.replaceState({}, "", decodeURIComponent(url.href));
     }, 200),
   );
 
