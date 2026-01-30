@@ -1,7 +1,5 @@
-import { Link, Typography } from "@material-ui/core";
-import { ThemeProvider, makeStyles } from "@material-ui/styles";
-import { type PrimitiveAtom, Provider, atom } from "jotai";
-import { useAtomValue, useSetAtom } from "jotai";
+import { type PrimitiveAtom, Provider, atom, useAtomValue } from "jotai";
+import { useSetAtom } from "jotai";
 import * as React from "react";
 import ReactDOM from "react-dom/client";
 
@@ -9,6 +7,7 @@ import Menu from "./components/Menu";
 import Viewer from "./components/Viewer";
 import "./codecs/register";
 import { ViewStateContext } from "./hooks";
+
 import {
   type ImageLayerConfig,
   type ViewState,
@@ -17,10 +16,11 @@ import {
   sourceErrorAtom,
   viewStateAtom,
 } from "./state";
-import theme from "./theme";
 import { defer, typedEmitter } from "./utils";
 
 export { version } from "../package.json";
+
+import "./index.css";
 
 type Events = {
   viewStateChange: ViewState;
@@ -35,23 +35,14 @@ export interface VizarrViewer {
   destroy(): void;
 }
 
-const useStyles = makeStyles({
-  errorContainer: {
-    position: "fixed",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    color: "#fff",
-    display: "flex",
-    alignItems: "center",
-    textAlign: "center",
-    justifyContent: "center",
-    fontSize: "120%",
-  },
-});
-
 export function createViewer(element: HTMLElement, options: { menuOpen?: boolean } = {}): Promise<VizarrViewer> {
+  const shadowRoot = element.attachShadow({ mode: "open" });
+  const link = Object.assign(document.createElement("link"), {
+    rel: "stylesheet",
+    href: new URL(/* @vite-ignore */ "index.css", import.meta.url).href,
+  });
+  shadowRoot.appendChild(link);
+
   const ref = React.createRef<VizarrViewer>();
   const emitter = typedEmitter<Events>();
   const viewStateAtomWithEffect: PrimitiveAtom<ViewState | null> = atom(
@@ -88,7 +79,6 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
         resolve(ref.current);
       }
     }, []);
-    const classes = useStyles();
     return (
       <>
         {sourceError === null && redirectObj === null && (
@@ -98,30 +88,26 @@ export function createViewer(element: HTMLElement, options: { menuOpen?: boolean
           </ViewStateContext.Provider>
         )}
         {sourceError !== null && (
-          <div className={classes.errorContainer}>
+          <div className={""}>
             <p>{`Error: server replied with "${sourceError}" when loading the resource`}</p>
           </div>
         )}
         {redirectObj !== null && (
-          <div className={classes.errorContainer}>
-            <Typography variant="h5">
+          <div className={""}>
+            <span>
               {redirectObj.message}
-              <Link href={redirectObj.url}> {redirectObj.url} </Link>
-            </Typography>
+              <a href={redirectObj.url}> {redirectObj.url} </a>
+            </span>
           </div>
         )}
       </>
     );
   }
-  let root = ReactDOM.createRoot(element);
+  let root = ReactDOM.createRoot(shadowRoot);
   root.render(
-    <ThemeProvider theme={theme}>
-      <Provider>
-        <ViewStateContext.Provider value={viewStateAtomWithEffect}>
-          <App />
-        </ViewStateContext.Provider>
-      </Provider>
-    </ThemeProvider>,
+    <Provider>
+      <App />
+    </Provider>,
   );
   return promise;
 }
