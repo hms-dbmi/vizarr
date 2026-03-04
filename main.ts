@@ -29,17 +29,25 @@ async function main() {
     }, 200),
   );
 
-  // parse image config
-  // @ts-expect-error - TODO: validate config
-  const config: vizarr.ImageLayerConfig = {};
-
-  for (const [key, value] of url.searchParams) {
+  // We want to addImage() for each source in the query params
+  const sources = url.searchParams.getAll("source");
+  sources.forEach((source, index) => {
+    // parse image config
     // @ts-expect-error - TODO: validate config
-    config[key] = value;
-  }
+    const config: vizarr.ImageLayerConfig = {};
 
-  // Make sure the source URL is decoded.
-  viewer.addImage(config);
+    for (const [key, value] of url.searchParams) {
+      // get all the values for key...
+      const values = url.searchParams.getAll(key);
+      if (values.length > index) {
+        // @ts-expect-error - TODO: validate config
+        config[key] = values[index];
+      }
+    }
+    let configCopy = JSON.parse(JSON.stringify(config));
+    configCopy.source = source;
+    viewer.addImage(configCopy);
+  });
 
   const newLocation = decodeURIComponent(url.href);
 
