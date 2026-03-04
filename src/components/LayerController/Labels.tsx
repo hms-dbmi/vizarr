@@ -8,11 +8,11 @@ import { assert } from "../../utils";
 export default function Labels({ labelIndex }: { labelIndex: number }) {
   const [source] = useSourceData();
   const [layer, setLayer] = useLayerState();
-  assert(source.labels && layer.kind === "multiscale" && layer.labels, "Missing image labels");
+  assert(source.labels && layer.labels, "Missing image labels");
 
   const handleOpacityChange = (_: unknown, value: number | number[]) => {
     setLayer((prev) => {
-      assert(prev.kind === "multiscale" && prev.labels, "Missing image labels");
+      assert(prev.labels, "Missing image labels");
       return {
         ...prev,
         labels: prev.labels.with(labelIndex, {
@@ -43,7 +43,7 @@ export default function Labels({ labelIndex }: { labelIndex: number }) {
             style={{ backgroundColor: "transparent", padding: 0, zIndex: 2 }}
             onClick={() => {
               setLayer((prev) => {
-                assert(prev.kind === "multiscale" && prev.labels, "Missing image labels");
+                assert(prev.labels, "Missing image labels");
                 return {
                   ...prev,
                   labels: prev.labels.with(labelIndex, {
