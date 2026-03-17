@@ -481,6 +481,30 @@ describe("initLayerStateFromSource", () => {
     `);
   });
 
+  // https://github.com/hms-dbmi/vizarr/pull/273
+  it("v0.4 idr0062 single-resolution with labels", async () => {
+    const node = await openFixture("v0.4/idr0062-with-labels");
+    assert(node instanceof zarr.Group);
+    const attrs = resolveAttrs(node.attrs);
+    assert(isOmeMultiscales(attrs));
+    const source = buildSourceData(attrs, { loaderCount: 1 });
+    source.labels = [
+      {
+        name: "0",
+        loader: source.loader,
+        modelMatrix: source.model_matrix,
+      },
+    ];
+    const state = initLayerStateFromSource(source);
+
+    expect(formatLayerState(state, source)).toMatchInlineSnapshot(`
+      "image | opacity=1 | colormap="" | on | axes=[c,z,y,x]
+        ch 0  LaminB1           ON   rgb(0,0,255)    [0,1500]      sel=[0,118,0,0]
+        ch 1  Dapi              ON   rgb(255,255,0)  [0,1500]      sel=[1,118,0,0]
+        matrix: scale=[0.3604,0.3604,0.5002]"
+    `);
+  });
+
   it("v0.5 idr0047 (4 channels)", async () => {
     const node = await openFixture("v0.5/idr0047-multiscale");
     assert(node instanceof zarr.Group);
