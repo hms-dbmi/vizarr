@@ -1,6 +1,6 @@
-import * as geotiff from "geotiff";
-// @ts-expect-error- we don't have the types for this
-import { decompress } from "lzw-tiff-decoder";
+import { SourceHttp } from "@chunkd/source-http";
+import { Compression, Predictor, Tiff, type TiffImage, TiffTag } from "@cogeotiff/core";
+import { decompress } from "@developmentseed/lzw-tiff-decoder";
 import * as utils from "./utils";
 
 import type * as zarr from "zarrita";
@@ -83,6 +83,8 @@ function parseKey(key: zarr.AbsolutePath):
 
 type Context = {
   tileSize: number;
+  bytesPerPixel: number;
+  predictor: Predictor;
   indexer(
     coords: {
       z: number;
@@ -90,7 +92,7 @@ type Context = {
       c: number;
     },
     resolution: number,
-  ): Promise<geotiff.GeoTIFFImage>;
+  ): Promise<TiffImage>;
   root: {
     zarrJson: Uint8Array;
   };
@@ -100,11 +102,11 @@ type Context = {
   }>;
 };
 
-async function resolveMetadata(tiff: geotiff.GeoTIFF) {
-  const image = await tiff.getImage();
-  const subIfds = image.fileDirectory.SubIFDs;
+async function resolveMetadata(tiff: Tiff) {
+  const image = tiff.images[0];
+  const subIfds = (await image.fetch(TiffTag.SubIFDs)) as number[] | null;
   utils.assert(subIfds, "Only support bioformats >6");
-  const raw = image.fileDirectory.ImageDescription;
+  const raw = String(await image.fetch(TiffTag.ImageDescription));
   // biome-ignore lint/suspicious/noExplicitAny: proper validation later
   const xml = parseXml(raw) as Record<string, any>;
 
@@ -168,6 +170,11 @@ async function resolveMetadata(tiff: geotiff.GeoTIFF) {
   const dataType = xml.Image?.Pixels?.attr?.Type;
   // Zarr will tell us if we have a supported dtype or not
   utils.assert(typeof dataType === "string");
+
+  const bitsPerSample = image.value(TiffTag.BitsPerSample);
+  const bytesPerPixel = bitsPerSample ? bitsPerSample[0] / 8 : 1;
+  const predictor = image.value(TiffTag.Predictor) ?? Predictor.None;
+
   return {
     raw,
     dimensionOrder,
@@ -177,12 +184,35 @@ async function resolveMetadata(tiff: geotiff.GeoTIFF) {
     omero,
     resolutions: subIfds.length - 1,
     tileSize: getTileSize(image),
+    bytesPerPixel,
+    predictor,
   };
 }
 
-type ImageFileDirectory = Awaited<ReturnType<geotiff.GeoTIFF["parseFileDirectoryAt"]>>;
+/**
+ * cogeotiff only reads the top-level IFD chain during init(). Sub-IFDs
+ * (used by bioformats for multi-resolution pyramids) must be parsed
+ * separately. The `readIfd` method exists at runtime but is private in
+ * the type declarations, so we use a runtime check to access it safely.
+ */
+function getReadIfd(tiff: Tiff): (offset: number, view: DataView & { sourceOffset: number }) => number {
+  // @ts-expect-error - readIfd is private but we need it to parse sub-IFDs
+  const fn: unknown = tiff.readIfd;
+  utils.assert(typeof fn === "function", "Expected Tiff instance to have readIfd method");
+  return fn.bind(tiff);
+}
 
-async function createVirtualZarrMetadata(tiff: geotiff.GeoTIFF): Promise<Context> {
+async function loadSubIfd(tiff: Tiff, offset: number): Promise<TiffImage> {
+  const readIfd = getReadIfd(tiff);
+  const bytes = await tiff.source.fetch(offset, tiff.defaultReadSize);
+  const view = Object.assign(new DataView(bytes), { sourceOffset: offset });
+  readIfd(offset, view);
+  const subImage = tiff.images[tiff.images.length - 1];
+  await subImage.init();
+  return subImage;
+}
+
+async function createVirtualZarrMetadata(tiff: Tiff): Promise<Context> {
   const meta = await resolveMetadata(tiff);
   const ome = {
     omero: meta.omero,
@@ -201,29 +231,27 @@ async function createVirtualZarrMetadata(tiff: geotiff.GeoTIFF): Promise<Context
       },
     ],
   };
-  const cache = new Map<number, ImageFileDirectory>();
+  const subIfdCache = new Map<number, TiffImage>();
   return {
     tileSize: meta.tileSize,
+    bytesPerPixel: meta.bytesPerPixel,
+    predictor: meta.predictor,
     async indexer(coords: { z: number; c: number; t: number }, resolution: number) {
-      const baseImage = await tiff.getImage(getRelativeOmeIfdIndex(coords, meta));
+      const baseImage = tiff.images[getRelativeOmeIfdIndex(coords, meta)];
 
       // It's the highest resolution, no need to look up SubIFDs.
       if (resolution === 0) {
         return baseImage;
       }
 
-      const index = baseImage.fileDirectory.SubIFDs[resolution - 1];
-      const ifd = cache.get(index) ?? (await tiff.parseFileDirectoryAt(index));
-      cache.set(index, ifd);
+      const subIfdOffsets = (await baseImage.fetch(TiffTag.SubIFDs)) as number[];
+      const offset = subIfdOffsets[resolution - 1];
+      const cached = subIfdCache.get(offset);
+      if (cached) return cached;
 
-      return new geotiff.GeoTIFFImage(
-        ifd.fileDirectory,
-        ifd.geoKeyDirectory,
-        baseImage.dataView,
-        tiff.littleEndian,
-        tiff.cache,
-        tiff.source,
-      );
+      const subImage = await loadSubIfd(tiff, offset);
+      subIfdCache.set(offset, subImage);
+      return subImage;
     },
     root: {
       zarrJson: encodeJson({
@@ -260,18 +288,93 @@ async function createVirtualZarrMetadata(tiff: geotiff.GeoTIFF): Promise<Context
   };
 }
 
+/**
+ * Undo TIFF horizontal differencing (Predictor=2).
+ *
+ * To improve compression ratios, TIFF encoders can store each pixel as the
+ * difference from its left neighbor instead of the absolute value. Adjacent
+ * pixels in an image are usually similar, so these differences cluster near
+ * zero and compress much better.
+ *
+ * This function reverses that transform by accumulating the differences back
+ * into absolute values. The operation is per-row and per-byte — for multi-byte
+ * samples (e.g. uint16), each byte lane is accumulated independently.
+ */
+function undoHorizontalDifferencing(data: Uint8Array, options: { tileSize: number; bytesPerPixel: number }) {
+  const { tileSize, bytesPerPixel } = options;
+  const rowBytes = tileSize * bytesPerPixel;
+  for (let row = 0; row < tileSize; row++) {
+    const rowStart = row * rowBytes;
+    for (let i = rowStart + bytesPerPixel; i < rowStart + rowBytes; i++) {
+      data[i] = (data[i] + data[i - bytesPerPixel]) & 0xff;
+    }
+  }
+}
+
+/** Swap bytes in-place from big-endian to little-endian for multi-byte samples. */
+function swapEndianness(data: Uint8Array, bytesPerPixel: number) {
+  const half = bytesPerPixel >>> 1;
+  for (let i = 0; i < data.length; i += bytesPerPixel) {
+    for (let j = 0; j < half; j++) {
+      const lo = i + j;
+      const hi = i + bytesPerPixel - 1 - j;
+      const tmp = data[lo];
+      data[lo] = data[hi];
+      data[hi] = tmp;
+    }
+  }
+}
+
+/**
+ * Decompress a raw TIFF tile, undo predictor differencing, and normalize
+ * to little-endian so the zarr codec can always declare `endian: "little"`.
+ */
+async function decompressTile(
+  tile: { bytes: ArrayBuffer; compression: Compression },
+  options: { tileSize: number; bytesPerPixel: number; predictor: Predictor; isLittleEndian: boolean },
+): Promise<Uint8Array> {
+  const { tileSize, bytesPerPixel, predictor, isLittleEndian } = options;
+  const maxUncompressedSize = tileSize * tileSize * bytesPerPixel;
+  let data: Uint8Array;
+  switch (tile.compression) {
+    case Compression.None:
+      data = new Uint8Array(tile.bytes);
+      break;
+    case Compression.Lzw: {
+      data = await decompress(new Uint8Array(tile.bytes), maxUncompressedSize);
+      break;
+    }
+    case Compression.Deflate:
+    case Compression.DeflateOther: {
+      const ds = new DecompressionStream("deflate");
+      const writer = ds.writable.getWriter();
+      writer.write(tile.bytes);
+      writer.close();
+      data = new Uint8Array(await new Response(ds.readable).arrayBuffer());
+      break;
+    }
+    default:
+      throw new Error(`Unsupported compression: ${tile.compression}`);
+  }
+  if (predictor === Predictor.Horizontal) {
+    undoHorizontalDifferencing(data, { tileSize, bytesPerPixel });
+  }
+  if (!isLittleEndian && bytesPerPixel > 1) {
+    swapEndianness(data, bytesPerPixel);
+  }
+  return data;
+}
+
 export class OmeTiffStore implements zarr.AsyncReadable<{ signal: AbortSignal }> {
-  #tiff: geotiff.GeoTIFF;
+  #tiff: Tiff;
   #context: Context | undefined = undefined;
 
-  constructor(tiff: geotiff.GeoTIFF) {
+  constructor(tiff: Tiff) {
     this.#tiff = tiff;
   }
 
   static async fromUrl(url: string) {
-    // ensure we have the LZWDecoder registered
-    geotiff.addDecoder(5, () => LZWDecoder);
-    return new OmeTiffStore(await geotiff.fromUrl(url));
+    return new OmeTiffStore(await Tiff.create(new SourceHttp(url)));
   }
 
   async get(key: zarr.AbsolutePath, options: { signal?: AbortSignal } = {}): Promise<Uint8Array | undefined> {
@@ -289,24 +392,22 @@ export class OmeTiffStore implements zarr.AsyncReadable<{ signal: AbortSignal }>
       let resolution = keyResult.value.value;
       return this.#context.resolutions[resolution]?.zarrJson;
     }
-    let { tileSize } = this.#context;
+    let { tileSize, bytesPerPixel, predictor } = this.#context;
     let { resolution, coords } = keyResult;
     let sizes = this.#context.resolutions[resolution]?.sizes;
     if (!sizes) {
       return undefined;
     }
-    const extent = getTileExtent({ coords, tileSize, sizes });
-    const x0 = coords.x * tileSize;
-    const y0 = coords.y * tileSize;
     const image = await this.#context.indexer(coords, resolution);
-    const rasterResult = await image.readRasters({
-      window: [x0, y0, x0 + extent.width, y0 + extent.height],
-      signal: options.signal,
-    });
-    const data = ensureFullSizeChunk(rasterResult, { tileSize });
-    return new Uint8Array(data.buffer);
+    const tile = await image.getTile(coords.x, coords.y, { signal: options.signal });
+    if (!tile) {
+      // Sparse / empty tile — return zeros
+      return new Uint8Array(tileSize * tileSize * bytesPerPixel);
+    }
+    return decompressTile(tile, { tileSize, bytesPerPixel, predictor, isLittleEndian: this.#tiff.isLittleEndian });
   }
 }
+
 type XmlNode = string | { [x: string]: XmlNode } | Array<XmlNode>;
 
 function isElement(node: Node): node is HTMLElement {
@@ -374,10 +475,9 @@ function parseXml(xmlString: string) {
   return xmlToJson(doc.documentElement, { attrtibutesKey: "attr" });
 }
 
-function getTileSize(image: geotiff.GeoTIFFImage) {
-  const tileWidth = image.getTileWidth();
-  const tileHeight = image.getTileHeight();
-  const size = Math.min(tileWidth, tileHeight);
+function getTileSize(image: TiffImage) {
+  const { width, height } = image.tileSize;
+  const size = Math.min(width, height);
   // deck.gl requirement for power-of-two tile size.
   return 2 ** Math.floor(Math.log2(size));
 }
@@ -402,77 +502,4 @@ function intToHexColor(int: number): string {
   const bytes = new Uint8Array(buffer);
 
   return [bytes[0], bytes[1], bytes[2]].map((byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-
-function getTileExtent(options: {
-  coords: { x: number; y: number };
-  tileSize: number;
-  sizes: { x: number; y: number };
-}) {
-  const { coords, tileSize, sizes } = options;
-  const { y: zoomLevelHeight, x: zoomLevelWidth } = sizes;
-  let height = tileSize;
-  let width = tileSize;
-  const maxXTileCoord = Math.floor(zoomLevelWidth / tileSize);
-  const maxYTileCoord = Math.floor(zoomLevelHeight / tileSize);
-  if (coords.x === maxXTileCoord) {
-    width = zoomLevelWidth % tileSize;
-  }
-  if (coords.y === maxYTileCoord) {
-    height = zoomLevelHeight % tileSize;
-  }
-  return { height, width };
-}
-
-/**
- * Ensures chunk data is complete for the expected tile size,
- * or create a new chunk with expected tile size (and data).
- */
-function ensureFullSizeChunk(
-  result: geotiff.ReadRasterResult,
-  options: {
-    tileSize: number;
-  },
-) {
-  utils.assert(Array.isArray(result));
-  const { tileSize } = options;
-  const [data] = result;
-  const { width, height } = result;
-  if (width === tileSize && height === tileSize) {
-    return data;
-  }
-  const TypedArrayConstructor = data.constructor;
-  // @ts-expect-error - TS doesn't know the stypes
-  const full: geotiff.TypedArray = new TypedArrayConstructor(tileSize * tileSize);
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      full[y * tileSize + x] = data[y * width + x];
-    }
-  }
-  return full;
-}
-
-/** A custom WASM LZW decoder */
-class LZWDecoder extends geotiff.BaseDecoder {
-  maxUncompressedSize: number;
-
-  constructor(fileDirectory: {
-    TileWidth?: number;
-    TileLength?: number;
-    ImageWidth: number;
-    ImageLength: number;
-    BitsPerSample: number[];
-  }) {
-    super();
-    const width = fileDirectory.TileWidth || fileDirectory.ImageWidth;
-    const height = fileDirectory.TileLength || fileDirectory.ImageLength;
-    const nbytes = fileDirectory.BitsPerSample[0] / 8;
-    this.maxUncompressedSize = width * height * nbytes;
-  }
-
-  async decodeBlock(buffer: ArrayBuffer) {
-    const bytes = new Uint8Array(buffer);
-    const decoded = await decompress(bytes, this.maxUncompressedSize);
-    return decoded.buffer;
-  }
 }

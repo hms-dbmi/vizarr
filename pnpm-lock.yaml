@@ -8,6 +8,15 @@ importers:
 
   .:
     dependencies:
+      '@chunkd/source-http':
+        specifier: ^11.2.0
+        version: 11.2.0
+      '@cogeotiff/core':
+        specifier: ^9.4.0
+        version: 9.4.0
+      '@developmentseed/lzw-tiff-decoder':
+        specifier: ^0.2.2
+        version: 0.2.2
       '@hms-dbmi/viv':
         specifier: ~0.19.0
         version: 0.19.0(5l22q4hiee7mqn7u3bqndgm5xy)
@@ -223,6 +232,18 @@ packages:
   '@carto/api-client@0.4.9':
     resolution: {integrity: sha512-W0kjEmWgRA7Mqh7jdvHZ0/WHz3ACFsmnUkGLnPT7BJjkIBS/WtCsx2YXjV4lGi/eA1NZtZ7pU+sq3Z7OPgb/fw==}
 
+  '@chunkd/source-http@11.2.0':
+    resolution: {integrity: sha512-LyufrRAx5g0JUxdTGeLx/Vz3XXJOPC3xnv/+VaxLBhbxCaHEE7mxyQsYWjlJwEiO6r1wsNQdtQKG/ZCFqGdSAg==}
+    engines: {node: '>=18.0.0'}
+
+  '@chunkd/source@11.2.0':
+    resolution: {integrity: sha512-GnxGHpGgvEeU2xuZFbwzJpvqDjEYRwdGKe6u1sQWW7qv6a+OlfM2WnRfeSlk41MNWMH9Xgy3V6/9vrqI3j+w/w==}
+    engines: {node: '>=16.0.0'}
+
+  '@cogeotiff/core@9.4.0':
+    resolution: {integrity: sha512-2aI7NHN2XMLTJx4LXghhYY2jMyJLJe4rnWTmnA6RuwaYjiZPhLc6PSmzNcaOebtraklucmJHXgfhTi3s+/XVaQ==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
   '@deck.gl/aggregation-layers@9.1.15':
     resolution: {integrity: sha512-EC+WZX64Uv8K1H42e6oZEfuVtcx/bOd+KdgKshE7alfdby8LkVvwfz+uoO6h87BYSG0KRAVqZny/nbGmKkjdtw==}
     peerDependencies:
@@ -317,6 +338,9 @@ packages:
     resolution: {integrity: sha512-cSscNelsIlgjNrfVCmgXiXcYQbvJxmFv8iedpUPxTYLrW0hQq/ftZtLVZ8sWsNkn/EM8/KKysO5IXeEVj3iGbQ==}
     peerDependencies:
       '@deck.gl/core': ^9.1.0
+
+  '@developmentseed/lzw-tiff-decoder@0.2.2':
+    resolution: {integrity: sha512-bsBIdV1LyqcrtnYtIYu3C/297X2wxeYkmmhHzR02OOX823sGxT8GLGdenTmwoXvNWkozk3b+ptXtJeSUmNPaTA==}
 
   '@emnapi/core@1.9.0':
     resolution: {integrity: sha512-0DQ98G9ZQZOxfUcQn1waV2yS8aWdZ6kJMbYCJB3oUBecjWYO1fqJ+a1DRfPF3O5JEkwqwP1A9QEN/9mYm2Yd0w==}
@@ -2417,6 +2441,14 @@ snapshots:
     transitivePeerDependencies:
       - '@loaders.gl/core'
 
+  '@chunkd/source-http@11.2.0':
+    dependencies:
+      '@chunkd/source': 11.2.0
+
+  '@chunkd/source@11.2.0': {}
+
+  '@cogeotiff/core@9.4.0': {}
+
   '@deck.gl/aggregation-layers@9.1.15(@deck.gl/core@9.1.15)(@deck.gl/layers@9.1.15(@deck.gl/core@9.1.15)(@loaders.gl/core@4.3.4)(@luma.gl/core@9.1.10)(@luma.gl/engine@9.1.10(@luma.gl/core@9.1.10)(@luma.gl/shadertools@9.1.10(@luma.gl/core@9.1.10))))(@luma.gl/core@9.1.10)(@luma.gl/engine@9.1.10(@luma.gl/core@9.1.10)(@luma.gl/shadertools@9.1.10(@luma.gl/core@9.1.10)))':
     dependencies:
       '@deck.gl/core': 9.1.15
@@ -2584,6 +2616,8 @@ snapshots:
     dependencies:
       '@deck.gl/core': 9.1.15
       preact: 10.29.0
+
+  '@developmentseed/lzw-tiff-decoder@0.2.2': {}
 
   '@emnapi/core@1.9.0':
     dependencies:
