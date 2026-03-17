@@ -1,0 +1,2 @@
+import{BaseDecoder as e}from"./vizarr-BWub46AN.js";import{inflate_1 as t}from"./pako.esm-CaAFH68O.js";var n=class extends e{decodeBlock(e){return t(new Uint8Array(e)).buffer}};export{n as default};
+//# sourceMappingURL=deflate-DxCeAG8n.js.map
