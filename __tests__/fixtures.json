@@ -23425,5 +23425,171 @@
     "node_type": "array",
     "shape": [4, 25, 64, 64],
     "zarr_format": 3
-  }
+  },
+  "generated/plain-yx/.zgroup": {
+    "zarr_format": 2
+  },
+  "generated/plain-yx/.zattrs": {
+    "multiscales": [
+      {
+        "datasets": [
+          {
+            "path": "0"
+          },
+          {
+            "path": "1"
+          }
+        ],
+        "version": "0.1"
+      }
+    ]
+  },
+  "generated/plain-yx/0/.zarray": {
+    "shape": [1024, 1024],
+    "chunks": [256, 256],
+    "dtype": "|u1",
+    "fill_value": 0,
+    "order": "C",
+    "filters": null,
+    "compressor": {
+      "id": "blosc",
+      "cname": "lz4",
+      "clevel": 5,
+      "shuffle": 1,
+      "blocksize": 0
+    },
+    "zarr_format": 2
+  },
+  "generated/plain-yx/0/.zattrs": {},
+  "generated/plain-yx/1/.zarray": {
+    "shape": [512, 512],
+    "chunks": [256, 256],
+    "dtype": "|u1",
+    "fill_value": 0,
+    "order": "C",
+    "filters": null,
+    "compressor": {
+      "id": "blosc",
+      "cname": "lz4",
+      "clevel": 5,
+      "shuffle": 1,
+      "blocksize": 0
+    },
+    "zarr_format": 2
+  },
+  "generated/plain-yx/1/.zattrs": {},
+  "generated/plain-tyx/.zgroup": {
+    "zarr_format": 2
+  },
+  "generated/plain-tyx/.zattrs": {
+    "multiscales": [
+      {
+        "datasets": [
+          {
+            "path": "0"
+          },
+          {
+            "path": "1"
+          }
+        ],
+        "version": "0.1"
+      }
+    ]
+  },
+  "generated/plain-tyx/0/.zarray": {
+    "shape": [10, 512, 512],
+    "chunks": [1, 256, 256],
+    "dtype": "|u1",
+    "fill_value": 0,
+    "order": "C",
+    "filters": null,
+    "compressor": {
+      "id": "blosc",
+      "cname": "lz4",
+      "clevel": 5,
+      "shuffle": 1,
+      "blocksize": 0
+    },
+    "zarr_format": 2
+  },
+  "generated/plain-tyx/0/.zattrs": {},
+  "generated/plain-tyx/1/.zarray": {
+    "shape": [10, 256, 256],
+    "chunks": [1, 256, 256],
+    "dtype": "|u1",
+    "fill_value": 0,
+    "order": "C",
+    "filters": null,
+    "compressor": {
+      "id": "blosc",
+      "cname": "lz4",
+      "clevel": 5,
+      "shuffle": 1,
+      "blocksize": 0
+    },
+    "zarr_format": 2
+  },
+  "generated/plain-tyx/1/.zattrs": {},
+  "generated/plain-yx-with-axes/.zgroup": {
+    "zarr_format": 2
+  },
+  "generated/plain-yx-with-axes/.zattrs": {
+    "multiscales": [
+      {
+        "datasets": [
+          {
+            "path": "0"
+          },
+          {
+            "path": "1"
+          }
+        ],
+        "version": "0.4",
+        "axes": [
+          {
+            "name": "y",
+            "type": "space"
+          },
+          {
+            "name": "x",
+            "type": "space"
+          }
+        ]
+      }
+    ]
+  },
+  "generated/plain-yx-with-axes/0/.zarray": {
+    "shape": [1024, 1024],
+    "chunks": [256, 256],
+    "dtype": "|u1",
+    "fill_value": 0,
+    "order": "C",
+    "filters": null,
+    "compressor": {
+      "id": "blosc",
+      "cname": "lz4",
+      "clevel": 5,
+      "shuffle": 1,
+      "blocksize": 0
+    },
+    "zarr_format": 2
+  },
+  "generated/plain-yx-with-axes/0/.zattrs": {},
+  "generated/plain-yx-with-axes/1/.zarray": {
+    "shape": [512, 512],
+    "chunks": [256, 256],
+    "dtype": "|u1",
+    "fill_value": 0,
+    "order": "C",
+    "filters": null,
+    "compressor": {
+      "id": "blosc",
+      "cname": "lz4",
+      "clevel": 5,
+      "shuffle": 1,
+      "blocksize": 0
+    },
+    "zarr_format": 2
+  },
+  "generated/plain-yx-with-axes/1/.zattrs": {}
 }

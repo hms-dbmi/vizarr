@@ -284,11 +284,14 @@ export async function loadOmeMultiscales(
 ): Promise<SourceData> {
   const { name, opacity = 1, colormap = "" } = config;
   const data = await utils.loadMultiscales(grp, attrs.multiscales);
-  const axes = utils.getNgffAxes(attrs.multiscales);
-  const axis_labels = utils.getNgffAxisLabels(axes);
+  const hasExplicitAxes = !!attrs.multiscales[0]?.axes;
+  const isOme = utils.isOmeMultiscales(attrs);
+  // Use default 5D axes for OME-ZARR (has omero metadata), otherwise infer from shape
+  const axes = hasExplicitAxes || isOme ? utils.getNgffAxes(attrs.multiscales) : undefined;
+  const axis_labels = axes ? utils.getNgffAxisLabels(axes) : utils.getAxisLabels(data[0]);
   const tileSize = utils.guessTileSize(data[0]);
   let meta: Meta;
-  if (utils.isOmeMultiscales(attrs)) {
+  if (isOme && axes) {
     meta = parseOmeroMeta(attrs.omero, axes);
   } else {
     const lowresArray = data.at(-1);

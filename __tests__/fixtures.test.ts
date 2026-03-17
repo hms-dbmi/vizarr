@@ -158,6 +158,12 @@ describe("classifySource", () => {
     assert(node instanceof zarr.Group);
     expect(classifySource(node, resolveAttrs(node.attrs)).kind).toMatchInlineSnapshot(`"multiscales"`);
   });
+
+  it("plain yx multiscale (no omero, no axes)", async () => {
+    const node = await openFixture("generated/plain-yx");
+    assert(node instanceof zarr.Group);
+    expect(classifySource(node, resolveAttrs(node.attrs)).kind).toMatchInlineSnapshot(`"multiscales"`);
+  });
 });
 
 describe("initLayerStateFromSource", () => {
@@ -281,6 +287,36 @@ describe("initLayerStateFromSource", () => {
       "multiscale | opacity=1 | colormap="" | on | axes=[t,c,z,y,x]
         ch 0  0                 ON   rgb(255,255,255)[1500,6000]   sel=[0,0,0,0,0]
         matrix: scale=[1.003,1.003,1.000]"
+    `);
+  });
+
+  it("plain yx multiscale (no omero, no axes) — infers 2D", async () => {
+    const source = await sourceDataFromFixture("generated/plain-yx");
+    const state = initLayerStateFromSource(source);
+    expect(formatLayerState(state, source)).toMatchInlineSnapshot(`
+      "multiscale | "Image" | opacity=1 | colormap="" | on | axes=[y,x]
+        ch 0  channel_0         ON   rgb(255,255,255)[0,255]       sel=[0,0]
+        matrix: none"
+    `);
+  });
+
+  it("plain tyx multiscale (no omero, no axes) — infers 3D", async () => {
+    const source = await sourceDataFromFixture("generated/plain-tyx");
+    const state = initLayerStateFromSource(source);
+    expect(formatLayerState(state, source)).toMatchInlineSnapshot(`
+      "multiscale | "Image" | opacity=1 | colormap="" | on | axes=[0,y,x]
+        ch 0  channel_0         ON   rgb(255,255,255)[0,255]       sel=[0,0,0]
+        matrix: none"
+    `);
+  });
+
+  it("plain yx with explicit axes — uses provided axes", async () => {
+    const source = await sourceDataFromFixture("generated/plain-yx-with-axes");
+    const state = initLayerStateFromSource(source);
+    expect(formatLayerState(state, source)).toMatchInlineSnapshot(`
+      "multiscale | "Image" | opacity=1 | colormap="" | on | axes=[y,x]
+        ch 0  channel_0         ON   rgb(255,255,255)[0,255]       sel=[0,0]
+        matrix: none"
     `);
   });
 });
