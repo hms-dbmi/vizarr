@@ -44,6 +44,22 @@ For example, to view [this dataset](https://minio-dev.openmicroscopy.org/idr/v0.
 https://hms-dbmi.github.io/vizarr/?source=https://minio-dev.openmicroscopy.org/idr/v0.3/idr0062-blin-nuclearsegmentation/6001240.zarr
 ```
 
+#### Supported sources
+
+The `?source` parameter uses a protocol prefix to select the appropriate store:
+
+| Prefix | Description |
+|--------|-------------|
+| `ome-tiff://` | OME-TIFF files served over HTTP with range request support |
+| `ref://` | [Kerchunk](https://fsspec.github.io/kerchunk/) virtual Zarr reference stores (`.json`) |
+| _(none)_ | OME-Zarr / Zarr stores (default) |
+
+For example, to view a remote OME-TIFF:
+
+```
+https://hms-dbmi.github.io/vizarr/?source=ome-tiff://https://example.com/image.ome.tif
+```
+
 ### 2. Python API
 
 The Python API is an [anywidget](https://github.com/manzt/anywidget), allowing programatic control of the viewer in computational notebooks like Jupyter, JupyterLab, Colab, and VS Code. The easiest way to get started is to open a Zarr store and load it into the viewer.
