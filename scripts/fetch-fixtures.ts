@@ -43,7 +43,7 @@ const SOURCES: Record<string, { url: string; maxDepth: number }> = {
   // A 5D multiscale image (t, c, z, y, x) with omero rendering metadata
   "v0.1/idr0062-multiscale": {
     url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/6001240.zarr",
-    maxDepth: 2,
+    maxDepth: 4,
   },
   // An HCS plate — we only crawl 2 levels deep to get plate + one well
   "v0.1/idr0001-plate": {
@@ -78,11 +78,36 @@ const SOURCES: Record<string, { url: string; maxDepth: number }> = {
   // v0.4 multiscale with image-label metadata
   "v0.4/idr0062-with-labels": {
     url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr",
-    maxDepth: 3,
+    maxDepth: 4,
   },
   // v0.1 single-channel image
   "v0.1/idr0083-singlechannel": {
     url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/9836831.zarr",
+    maxDepth: 2,
+  },
+  // v0.4 CYX only — 50 channels, no z or t (multiplexed imaging)
+  "v0.4/idr0076-cyx-50ch": {
+    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0076A/10501752.zarr",
+    maxDepth: 4,
+  },
+  // v0.4 5D single-channel greyscale with time
+  "v0.4/idr0083-5d-greyscale": {
+    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0083A/9822152.zarr",
+    maxDepth: 2,
+  },
+  // v0.4 tyx — time series, no channels, no z
+  "v0.4/embl-tyx": {
+    url: "https://s3.embl.de/i2k-2020/ngff-example-data/v0.4/tyx.ome.zarr",
+    maxDepth: 2,
+  },
+  // v0.4 yx — minimal 2D, no omero metadata
+  "v0.4/embl-yx": {
+    url: "https://s3.embl.de/i2k-2020/ngff-example-data/v0.4/yx.ome.zarr",
+    maxDepth: 2,
+  },
+  // v0.4 zyx — 3D volume, no channels, no time, nanometer units
+  "v0.4/embl-zyx": {
+    url: "https://s3.embl.de/i2k-2020/ngff-example-data/v0.4/zyx.ome.zarr",
     maxDepth: 2,
   },
   // v0.5 (zarr v3) multiscale with ome wrapper (from ome2024-ngff-challenge)
