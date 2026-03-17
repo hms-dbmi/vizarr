@@ -28,14 +28,15 @@ async function normalizeStore(source: string | zarr.Readable): Promise<zarr.Loca
   if (typeof source === "string") {
     let store: zarr.Readable;
     let path: `/${string}` = "/";
-    if (source.endsWith("ome.tiff") || source.endsWith("ome.tif")) {
+    // Use a protocol prefix to select the store, e.g. "ome-tiff://https://example.com/image.ome.tif"
+    if (source.startsWith("ome-tiff://")) {
       const { OmeTiffStore } = await import("./ome-tiff-store");
-      store = await OmeTiffStore.fromUrl(source);
-    } else if (source.endsWith(".json")) {
-      // import custom store implementation
+      store = await OmeTiffStore.fromUrl(source.slice("ome-tiff://".length));
+    } else if (source.startsWith("ref://") || source.endsWith(".json")) {
+      const url = source.startsWith("ref://") ? source.slice("ref://".length) : source;
       const [{ default: ReferenceStore }, json] = await Promise.all([
         import("@zarrita/storage/ref"),
-        fetch(source).then((res) => res.json()),
+        fetch(url).then((res) => res.json()),
       ]);
       store = ReferenceStore.fromSpec(json);
     } else {
