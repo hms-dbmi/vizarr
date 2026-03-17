@@ -1,67 +1,130 @@
-import anywidget
-import traitlets
-import pathlib
+"""Vizarr: an anywidget for viewing Zarr-based images."""
 
-import zarr
+import pathlib
+from typing import Literal
+
+import anywidget
+import msgspec
 import numpy as np
+import traitlets
+import zarr
+import zarr.storage
+from zarr.abc.store import Store
+from zarr.core.buffer import default_buffer_prototype
+from zarr.core.sync import sync as _sync
 
 __all__ = ["Viewer"]
 
+# ---------------------------------------------------------------------------
+# Messages
+# ---------------------------------------------------------------------------
 
-def _store_keyprefix(obj):
-    # Just grab the store and key_prefix from zarr.Array and zarr.Group objects
+
+class StoreOperation(msgspec.Struct):
+    """An operation to perform against a store."""
+
+    method: Literal["has", "get"]
+    target: tuple[int, str]
+
+
+class StoreResult(msgspec.Struct):
+    """The result of a store operation."""
+
+    success: bool
+
+
+class Message[T](msgspec.Struct):
+    """A message with a correlation id."""
+
+    uuid: str
+    payload: T
+
+
+# ---------------------------------------------------------------------------
+# Store helpers
+# ---------------------------------------------------------------------------
+
+
+def _resolve_store(
+    obj: zarr.Array | zarr.Group | np.ndarray | Store,
+) -> tuple[Store, str]:
+    """Extract a store and key prefix from a zarr-compatible object."""
     if isinstance(obj, (zarr.Array, zarr.Group)):
-        return obj.store, obj._key_prefix
+        prefix = obj.path + "/" if obj.path else ""
+        return obj.store, prefix
 
     if isinstance(obj, np.ndarray):
-        # Create an in-memory store, and write array as as single chunk
-        store = {}
-        arr = zarr.create(
-            store=store, shape=obj.shape, chunks=obj.shape, dtype=obj.dtype
+        store = zarr.storage.MemoryStore()
+        zarr.create_array(
+            store=store,
+            data=obj,
+            chunks=obj.shape,
+            zarr_format=2,
         )
-        arr[:] = obj
         return store, ""
 
-    if hasattr(obj, "__getitem__") and hasattr(obj, "__contains__"):
+    if isinstance(obj, Store):
         return obj, ""
 
-    raise TypeError("Cannot normalize store path")
+    msg = "Cannot normalize store path"
+    raise TypeError(msg)
+
+
+# ---------------------------------------------------------------------------
+# Widget
+# ---------------------------------------------------------------------------
 
 
 class Viewer(anywidget.AnyWidget):
+    """An anywidget for viewing Zarr-based images."""
+
     _esm = pathlib.Path(__file__).parent / "_widget.js"
     _configs = traitlets.List().tag(sync=True)
     view_state = traitlets.Dict().tag(sync=True)
     height = traitlets.Unicode("500px").tag(sync=True)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object) -> None:
         super().__init__(**kwargs)
-        self._store_paths = []
-        self.on_msg(self._handle_custom_msg)
+        self._store_paths: list[tuple[Store, str]] = []
+        self.on_msg(self._handle_custom_message)
 
-    def _handle_custom_msg(self, msg, buffers):
-        store, key_prefix = self._store_paths[msg["payload"]["source_id"]]
-        key = key_prefix + msg["payload"]["key"].lstrip("/")
+    def _handle_custom_message(
+        self,
+        _widget: object,
+        msg: object,
+        _buffers: list[object],
+    ) -> None:
+        message = msgspec.convert(msg, type=Message[StoreOperation])
+        store_id, path = message.payload.target
+        store, key_prefix = self._store_paths[store_id]
+        key = key_prefix + path.lstrip("/")
 
-        if msg["payload"]["type"] == "has":
-            self.send({"uuid": msg["uuid"], "payload": key in store})
+        if message.payload.method == "has":
+            success = _sync(store.exists(key))
+            reply = Message(message.uuid, StoreResult(success))
+            self.send(msgspec.to_builtins(reply))
             return
 
-        if msg["payload"]["type"] == "get":
-            try:
-                buffers = [store[key]]
-            except KeyError:
-                buffers = []
-            self.send(
-                {"uuid": msg["uuid"], "payload": {"success": len(buffers) == 1}},
-                buffers,
-            )
+        if message.payload.method == "get":
+            buf = _sync(store.get(key, prototype=default_buffer_prototype()))
+            if buf is not None:
+                reply = Message(message.uuid, StoreResult(success=True))
+                self.send(msgspec.to_builtins(reply), [buf.to_bytes()])
+            else:
+                reply = Message(message.uuid, StoreResult(success=False))
+                self.send(msgspec.to_builtins(reply))
             return
 
-    def add_image(self, source, **config):
-        if not isinstance(source, str):
-            store, key_prefix = _store_keyprefix(source)
-            source = {"id": len(self._store_paths)}
+    def add_image(
+        self,
+        source: str | zarr.Array | zarr.Group | np.ndarray | Store,
+        **config: object,
+    ) -> None:
+        """Add an image source to the viewer."""
+        if isinstance(source, str):
+            config["source"] = source
+        else:
+            store, key_prefix = _resolve_store(source)
+            config["source"] = {"id": len(self._store_paths)}
             self._store_paths.append((store, key_prefix))
-        config["source"] = source
-        self._configs = self._configs + [config]
+        self._configs = [*self._configs, config]

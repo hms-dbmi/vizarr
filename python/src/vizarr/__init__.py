@@ -1,10 +1,4 @@
-import importlib.metadata
+"""Vizarr: an anywidget for viewing Zarr-based images."""
 
-try:
-    __version__ = importlib.metadata.version("vizarr")
-except importlib.metadata.PackageNotFoundError:
-    __version__ = "unknown"
-
-del importlib
-
-from ._widget import Viewer
+from ._version import __version__ as __version__
+from ._widget import Viewer as Viewer
