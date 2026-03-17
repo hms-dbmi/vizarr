@@ -2,9 +2,27 @@ import * as vizarr from "https://hms-dbmi.github.io/vizarr/index.js";
 import debounce from "https://esm.sh/just-debounce-it@3";
 
 /**
+ * @typedef StoreOperation
+ * @property {"has" | "get"} method
+ * @property {[number, string]} target
+ */
+
+/**
+ * @typedef StoreResult
+ * @property {boolean} success
+ */
+
+/**
+ * @template T
+ * @typedef Message
+ * @property {string} uuid
+ * @property {T} payload
+ */
+
+/**
  * @template T
  * @param {import("npm:@anywidget/types").AnyModel} model
- * @param {any} payload
+ * @param {StoreOperation} payload
  * @param {{ timeout?: number }} [options]
  * @returns {Promise<{ data: T, buffers: DataView[] }>}
  */
@@ -16,7 +34,7 @@ function send(model, payload, { timeout = 3000 } = {}) {
 			model.off("msg:custom", handler);
 		}, timeout);
 		/**
-		 * @param {{ uuid: string, payload: T }} msg
+		 * @param {Message<T>} msg
 		 * @param {DataView[]} buffers
 		 */
 		function handler(msg, buffers) {
@@ -32,13 +50,12 @@ function send(model, payload, { timeout = 3000 } = {}) {
 
 /**
  * @param {import("npm:@anywidget/types").AnyModel} model
- * @param {string | { id: string }} source
+ * @param {string | { id: number }} source
  */
 function get_source(model, source) {
 	if (typeof source === "string") {
 		return source;
 	}
-	// create a python
 	return {
 		/**
 		 * @param {string} key
@@ -72,7 +89,7 @@ function get_source(model, source) {
  * @typedef Model
  * @property {string} height
  * @property {ViewState=} view_state
- * @property {{ source: string | { id: string }}[]} _configs
+ * @property {{ source: string | { id: number }}[]} _configs
  */
 
 /**

@@ -1,9 +1,7 @@
 """Vizarr: an anywidget for viewing Zarr-based images."""
 
-from __future__ import annotations
-
 import pathlib
-from typing import TYPE_CHECKING, Literal, Protocol
+from typing import Literal
 
 import anywidget
 import msgspec
@@ -11,11 +9,9 @@ import numpy as np
 import traitlets
 import zarr
 import zarr.storage
+from zarr.abc.store import Store
 from zarr.core.buffer import default_buffer_prototype
 from zarr.core.sync import sync as _sync
-
-if TYPE_CHECKING:
-    from zarr.abc.store import Store
 
 __all__ = ["Viewer"]
 
@@ -45,40 +41,17 @@ class Message[T](msgspec.Struct):
 
 
 # ---------------------------------------------------------------------------
-# Store adapters
+# Store helpers
 # ---------------------------------------------------------------------------
 
 
-class _DictLike(Protocol):
-    """Protocol for dict-like store objects."""
-
-    def __getitem__(self, key: str) -> bytes: ...
-    def __contains__(self, key: object) -> bool: ...
-
-
-class _ReadableStore:
-    """Wraps a zarr v3 Store for synchronous, dict-like read access."""
-
-    def __init__(self, store: Store) -> None:
-        self._store = store
-
-    def __contains__(self, key: str) -> bool:
-        return _sync(self._store.exists(key))
-
-    def __getitem__(self, key: str) -> bytes:
-        buf = _sync(self._store.get(key, prototype=default_buffer_prototype()))
-        if buf is None:
-            raise KeyError(key)
-        return buf.to_bytes()
-
-
-def _store_keyprefix(
-    obj: zarr.Array | zarr.Group | np.ndarray | _DictLike,
-) -> tuple[_ReadableStore | _DictLike, str]:
-    """Extract a readable store and key prefix from a zarr-compatible object."""
+def _resolve_store(
+    obj: zarr.Array | zarr.Group | np.ndarray | Store,
+) -> tuple[Store, str]:
+    """Extract a store and key prefix from a zarr-compatible object."""
     if isinstance(obj, (zarr.Array, zarr.Group)):
         prefix = obj.path + "/" if obj.path else ""
-        return _ReadableStore(obj.store), prefix
+        return obj.store, prefix
 
     if isinstance(obj, np.ndarray):
         store = zarr.storage.MemoryStore()
@@ -88,9 +61,9 @@ def _store_keyprefix(
             chunks=obj.shape,
             zarr_format=2,
         )
-        return _ReadableStore(store), ""
+        return store, ""
 
-    if hasattr(obj, "__getitem__") and hasattr(obj, "__contains__"):
+    if isinstance(obj, Store):
         return obj, ""
 
     msg = "Cannot normalize store path"
@@ -112,39 +85,43 @@ class Viewer(anywidget.AnyWidget):
 
     def __init__(self, **kwargs: object) -> None:
         super().__init__(**kwargs)
-        self._store_paths: list[tuple[_ReadableStore | _DictLike, str]] = []
+        self._store_paths: list[tuple[Store, str]] = []
         self.on_msg(self._handle_custom_message)
 
-    def _handle_custom_message(self, msg: object, buffers: list[object]) -> None:
+    def _handle_custom_message(
+        self, _widget: object, msg: object, _buffers: list[object],
+    ) -> None:
         message = msgspec.convert(msg, type=Message[StoreOperation])
         store_id, path = message.payload.target
         store, key_prefix = self._store_paths[store_id]
         key = key_prefix + path.lstrip("/")
 
         if message.payload.method == "has":
-            reply = Message(message.uuid, StoreResult(key in store))
+            success = _sync(store.exists(key))
+            reply = Message(message.uuid, StoreResult(success))
             self.send(msgspec.to_builtins(reply))
             return
 
         if message.payload.method == "get":
-            try:
-                buffers = [store[key]]
-            except KeyError:
-                buffers = []
-            reply = Message(message.uuid, StoreResult(len(buffers) == 1))
-            self.send(msgspec.to_builtins(reply), buffers)
+            buf = _sync(store.get(key, prototype=default_buffer_prototype()))
+            if buf is not None:
+                reply = Message(message.uuid, StoreResult(success=True))
+                self.send(msgspec.to_builtins(reply), [buf.to_bytes()])
+            else:
+                reply = Message(message.uuid, StoreResult(success=False))
+                self.send(msgspec.to_builtins(reply))
             return
 
     def add_image(
         self,
-        source: str | zarr.Array | zarr.Group | np.ndarray | _DictLike,
+        source: str | zarr.Array | zarr.Group | np.ndarray | Store,
         **config: object,
     ) -> None:
         """Add an image source to the viewer."""
         if isinstance(source, str):
             config["source"] = source
         else:
-            store, key_prefix = _store_keyprefix(source)
+            store, key_prefix = _resolve_store(source)
             config["source"] = {"id": len(self._store_paths)}
             self._store_paths.append((store, key_prefix))
         self._configs = [*self._configs, config]

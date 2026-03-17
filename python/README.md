@@ -12,3 +12,15 @@ viewer = vizarr.Viewer()
 viewer.add_image(source=zarr.open("path/to/ome.zarr"))
 viewer
 ```
+
+
+### development
+
+```sh
+ANYWIDGET_HMR=1 uv run jupyter lab notebooks/
+```
+
+```sh
+uv run ruff check # lint
+uv run ty check   # typecheck
+```
