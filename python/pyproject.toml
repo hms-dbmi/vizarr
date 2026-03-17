@@ -34,7 +34,19 @@ ignore = [
   "ISC001",  # Import sorting (conflicts with ruff format)
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = [
+  "D",  # No docstrings in tests
+  "S101",  # Use of assert
+  "B018",  # "useless expression", for accessing the Foo._repr_mimbundle_ descriptor
+  "SLF001",
+  "PLC",
+  "PLR",
+  "FIX",
+  "ANN201"
+]
+
 [tool.ty.src]
 exclude = [
-    "notebooks",
+  "notebooks",
 ]
