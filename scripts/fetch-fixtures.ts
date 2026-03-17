@@ -43,7 +43,7 @@ const SOURCES: Record<string, { url: string; maxDepth: number }> = {
   // A 5D multiscale image (t, c, z, y, x) with omero rendering metadata
   "v0.1/idr0062-multiscale": {
     url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/6001240.zarr",
-    maxDepth: 2,
+    maxDepth: 4,
   },
   // An HCS plate — we only crawl 2 levels deep to get plate + one well
   "v0.1/idr0001-plate": {
@@ -78,7 +78,7 @@ const SOURCES: Record<string, { url: string; maxDepth: number }> = {
   // v0.4 multiscale with image-label metadata
   "v0.4/idr0062-with-labels": {
     url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr",
-    maxDepth: 3,
+    maxDepth: 4,
   },
   // v0.1 single-channel image
   "v0.1/idr0083-singlechannel": {

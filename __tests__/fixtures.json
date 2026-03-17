@@ -700,6 +700,70 @@
   "v0.1/idr0062-multiscale/labels/masks/.zgroup": {
     "zarr_format": 2
   },
+  "v0.1/idr0062-multiscale/labels/masks/0/.zarray": {
+    "chunks": [1, 1, 30, 69, 68],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dtype": "<i8",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [1, 1, 236, 275, 271],
+    "zarr_format": 2
+  },
+  "v0.1/idr0062-multiscale/labels/masks/1/.zarray": {
+    "chunks": [1, 1, 59, 34, 69],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dtype": "<f8",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [1, 1, 236, 135, 137],
+    "zarr_format": 2
+  },
+  "v0.1/idr0062-multiscale/labels/masks/2/.zarray": {
+    "chunks": [1, 1, 59, 34, 34],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dtype": "<f8",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [1, 1, 236, 68, 67],
+    "zarr_format": 2
+  },
+  "v0.1/idr0062-multiscale/labels/masks/3/.zarray": {
+    "chunks": [1, 1, 118, 17, 17],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dtype": "<f8",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [1, 1, 236, 33, 34],
+    "zarr_format": 2
+  },
   "v0.1/idr0001-plate/.zattrs": {
     "_creator": {
       "name": "omero-zarr",
