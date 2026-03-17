@@ -85,6 +85,31 @@ const SOURCES: Record<string, { url: string; maxDepth: number }> = {
     url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/9836831.zarr",
     maxDepth: 2,
   },
+  // v0.4 CYX only — 50 channels, no z or t (multiplexed imaging)
+  "v0.4/idr0076-cyx-50ch": {
+    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0076A/10501752.zarr",
+    maxDepth: 4,
+  },
+  // v0.4 5D single-channel greyscale with time
+  "v0.4/idr0083-5d-greyscale": {
+    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0083A/9822152.zarr",
+    maxDepth: 2,
+  },
+  // v0.4 tyx — time series, no channels, no z
+  "v0.4/embl-tyx": {
+    url: "https://s3.embl.de/i2k-2020/ngff-example-data/v0.4/tyx.ome.zarr",
+    maxDepth: 2,
+  },
+  // v0.4 yx — minimal 2D, no omero metadata
+  "v0.4/embl-yx": {
+    url: "https://s3.embl.de/i2k-2020/ngff-example-data/v0.4/yx.ome.zarr",
+    maxDepth: 2,
+  },
+  // v0.4 zyx — 3D volume, no channels, no time, nanometer units
+  "v0.4/embl-zyx": {
+    url: "https://s3.embl.de/i2k-2020/ngff-example-data/v0.4/zyx.ome.zarr",
+    maxDepth: 2,
+  },
   // v0.5 (zarr v3) multiscale with ome wrapper (from ome2024-ngff-challenge)
   "v0.5/idr0047-multiscale": {
     url: "https://uk1s3.embassy.ebi.ac.uk/idr/share/ome2024-ngff-challenge/4496763.zarr",

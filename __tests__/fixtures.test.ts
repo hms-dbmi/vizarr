@@ -189,8 +189,7 @@ describe("initLayerStateFromSource", () => {
       "image | opacity=1 | colormap="" | on | axes=[t,c,z,y,x]
         ch 0  LaminB1           ON   rgb(0,0,255)    [0,1500]      sel=[0,0,118,0,0]
         ch 1  Dapi              ON   rgb(255,255,0)  [0,1500]      sel=[0,1,118,0,0]
-        matrix: none
-        labels: 1"
+        matrix: none"
     `);
   });
 
@@ -210,8 +209,7 @@ describe("initLayerStateFromSource", () => {
       "image | opacity=1 | colormap="" | on | axes=[c,z,y,x]
         ch 0  LaminB1           ON   rgb(0,0,255)    [0,1500]      sel=[0,118,0,0]
         ch 1  Dapi              ON   rgb(255,255,0)  [0,1500]      sel=[1,118,0,0]
-        matrix: scale=[0.3604,0.3604,0.5002]
-        labels: 1"
+        matrix: scale=[0.3604,0.3604,0.5002]"
     `);
   });
 
@@ -248,6 +246,32 @@ describe("initLayerStateFromSource", () => {
         ch 1  Cell              ON   rgb(255,255,255)[4283,65535]  sel=[1,0,0,0]
         ch 2  Microtubules      ON   rgb(0,255,0)    [15,10391]    sel=[2,0,0,0]
         matrix: scale=[0.1020,0.1020,0.5920]"
+    `);
+  });
+
+  it("v0.4 idr0076 CYX 50 channels (multiplexed imaging)", async () => {
+    const source = await sourceDataFromFixture("v0.4/idr0076-cyx-50ch");
+    const state = initLayerStateFromSource(source);
+    expect(formatLayerState(state, source)).toMatchInlineSnapshot(`
+      "multiscale | opacity=1 | colormap="" | on | axes=[c,y,x]
+        ch 0  Total HH3-113In   ON   rgb(0,255,0)    [0,10]        sel=[0,0,0]
+        ch 1  Xe126-126Xe       ON   rgb(255,0,0)    [0,10]        sel=[7,0,0]
+        ch 2  I127-127I         ON   rgb(0,0,255)    [0,10]        sel=[12,0,0]
+        ch 3  Xe131-131Xe       ON   rgb(0,0,255)    [0,34.952999114990234]sel=[14,0,0]
+        ch 4  Xe134-134Xe       ON   rgb(255,255,0)  [0,10]        sel=[25,0,0]
+        ch 5  H3K27me3-139La    ON   rgb(0,255,255)  [0,10]        sel=[29,0,0]
+        matrix: none
+        labels: 1"
+    `);
+  });
+
+  it("v0.4 idr0083 5D single-channel greyscale", async () => {
+    const source = await sourceDataFromFixture("v0.4/idr0083-5d-greyscale");
+    const state = initLayerStateFromSource(source);
+    expect(formatLayerState(state, source)).toMatchInlineSnapshot(`
+      "multiscale | opacity=1 | colormap="" | on | axes=[t,c,z,y,x]
+        ch 0  0                 ON   rgb(255,255,255)[1500,6000]   sel=[0,0,0,0,0]
+        matrix: scale=[1.003,1.003,1.000]"
     `);
   });
 });
