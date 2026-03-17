@@ -20,10 +20,12 @@ jobs:
           touch dist/.nojekyll
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+        uses: JamesIves/github-pages-deploy-action@v4.8.0
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: dist
-          CLEAN: true
-          CLEAN_EXCLUDE: '["v0.1", "v0.2", "v0.3"]' # Manually add endpoints to keep
+          branch: gh-pages
+          folder: dist
+          clean: true
+          clean-exclude: |
+            v0.1
+            v0.2
+            v0.3
