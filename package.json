@@ -11,13 +11,13 @@
     "check": "tsc"
   },
   "dependencies": {
-    "@hms-dbmi/viv": "~0.17.2",
+    "@hms-dbmi/viv": "~0.19.0",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/styles": "^4.11.5",
-    "@vivjs/types": "~0.17.0",
-    "@zarrita/storage": "0.1.0",
-    "deck.gl": "~9.0.0",
+    "@vivjs/types": "~0.19.0",
+    "@zarrita/storage": "~0.1.4",
+    "deck.gl": "~9.1.0",
     "jotai": "^1.0.0",
     "just-debounce-it": "^3.1.1",
     "math.gl": "^4.1.0",
@@ -25,21 +25,21 @@
     "quick-lru": "^7.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "zarrita": "0.5.0"
+    "zarrita": "~0.6.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@types/node": "^24.3.0",
+    "@types/node": "^25.5.0",
     "@types/react": "^18.3.10",
     "@types/react-dom": "^18.2.18",
-    "@vitejs/plugin-react": "^5.1.4",
+    "@vitejs/plugin-react": "^6.0.1",
     "typescript": "^5.9.3",
     "vite": "^8.0.0"
   },
   "packageManager": "pnpm@9.5.0",
   "pnpm": {
-    "patchedDependencies": {
-      "@vivjs/loaders@0.17.2": "patches/@vivjs__loaders@0.17.2.patch"
+    "peerDependencyRules": {
+      "autoInstallPeers": true
     }
   }
 }

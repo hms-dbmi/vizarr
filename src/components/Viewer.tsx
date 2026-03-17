@@ -29,11 +29,6 @@ export default function Viewer() {
     );
   }
 
-  // Enables screenshots of the canvas: https://github.com/visgl/deck.gl/issues/2200
-  const glOptions: WebGLContextAttributes = {
-    preserveDrawingBuffer: true,
-  };
-
   return (
     <DeckGL
       ref={deckRef}
@@ -44,7 +39,6 @@ export default function Viewer() {
         setViewState(e.viewState)
       }
       views={[new OrthographicView({ id: "ortho", controller: true })]}
-      glOptions={glOptions}
     />
   );
 }
