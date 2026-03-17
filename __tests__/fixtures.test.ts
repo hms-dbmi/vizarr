@@ -67,7 +67,14 @@ function formatLayerState(state: LayerState, source?: SourceData): string {
   } else {
     lines.push("  matrix: none");
   }
-  if (state.labels) {
+  if (state.labels && source?.labels) {
+    for (let i = 0; i < source.labels.length; i++) {
+      const l = source.labels[i];
+      const name = truncate(l.name, 16).padEnd(NAME_WIDTH);
+      const levels = `${l.loader.length} level${l.loader.length === 1 ? "" : "s"}`;
+      lines.push(`  lbl ${i}  ${name}${levels}`);
+    }
+  } else if (state.labels) {
     lines.push(`  labels: ${state.labels.length}`);
   }
   return lines.join("\n");
@@ -162,7 +169,7 @@ describe("initLayerStateFromSource", () => {
         ch 0  LaminB1           ON   rgb(0,0,255)    [0,1500]      sel=[0,0,118,0,0]
         ch 1  Dapi              ON   rgb(255,255,0)  [0,1500]      sel=[0,1,118,0,0]
         matrix: none
-        labels: 1"
+        lbl 0  masks             4 levels"
     `);
   });
 
@@ -189,7 +196,8 @@ describe("initLayerStateFromSource", () => {
       "image | opacity=1 | colormap="" | on | axes=[t,c,z,y,x]
         ch 0  LaminB1           ON   rgb(0,0,255)    [0,1500]      sel=[0,0,118,0,0]
         ch 1  Dapi              ON   rgb(255,255,0)  [0,1500]      sel=[0,1,118,0,0]
-        matrix: none"
+        matrix: none
+        lbl 0  masks             4 levels"
     `);
   });
 
@@ -209,7 +217,8 @@ describe("initLayerStateFromSource", () => {
       "image | opacity=1 | colormap="" | on | axes=[c,z,y,x]
         ch 0  LaminB1           ON   rgb(0,0,255)    [0,1500]      sel=[0,118,0,0]
         ch 1  Dapi              ON   rgb(255,255,0)  [0,1500]      sel=[1,118,0,0]
-        matrix: scale=[0.3604,0.3604,0.5002]"
+        matrix: scale=[0.3604,0.3604,0.5002]
+        lbl 0  0                 1 level"
     `);
   });
 
@@ -261,7 +270,7 @@ describe("initLayerStateFromSource", () => {
         ch 4  Xe134-134Xe       ON   rgb(255,255,0)  [0,10]        sel=[25,0,0]
         ch 5  H3K27me3-139La    ON   rgb(0,255,255)  [0,10]        sel=[29,0,0]
         matrix: none
-        labels: 1"
+        lbl 0  0                 5 levels"
     `);
   });
 
