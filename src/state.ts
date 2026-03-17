@@ -8,7 +8,7 @@ import type { AtomFamily } from "jotai/vanilla/utils/atomFamily";
 import type { Matrix4 } from "math.gl";
 import type * as zarr from "zarrita";
 import type { ZarrPixelSource } from "./ZarrPixelSource";
-import { initLayerStateFromSource } from "./io";
+import { createSourceData, initLayerStateFromSource } from "./io";
 
 import { GridLayer, type GridLayerProps, type GridLoader } from "./layers/grid-layer";
 import { LabelLayer, type LabelLayerProps, type OmeColor } from "./layers/label-layer";
@@ -118,7 +118,6 @@ export const redirectObjAtom = atom<Redirect | null>(null);
 export const sourceInfoAtom = atom<WithId<SourceData>[]>([]);
 
 export const addImageAtom = atom(null, async (get, set, config: ImageLayerConfig) => {
-  const { createSourceData } = await import("./io");
   const id = Math.random().toString(36).slice(2);
 
   try {
