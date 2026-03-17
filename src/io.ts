@@ -243,17 +243,6 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
     };
   }
 
-  if (source.loader.length === 1) {
-    return {
-      kind: "image",
-      layerProps: {
-        ...layerProps,
-        loader: source.loader[0],
-      },
-      on: true,
-    };
-  }
-
   let labels = undefined;
   if (source.labels && source.labels.length > 0) {
     labels = source.labels.map((label, i) => ({
@@ -267,6 +256,18 @@ export function initLayerStateFromSource(source: SourceData & { id: string }): L
         colors: label.colors,
       },
     }));
+  }
+
+  if (source.loader.length === 1) {
+    return {
+      kind: "image",
+      layerProps: {
+        ...layerProps,
+        loader: source.loader[0],
+      },
+      on: true,
+      labels,
+    };
   }
 
   return {
