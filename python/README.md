@@ -17,7 +17,7 @@ viewer
 ### development
 
 ```sh
-ANYWIDGET_HMR=1 uv run jupyter lab notebooks/
+ANYWIDGET_HMR=1 uv run --group examples jupyter lab notebooks/
 ```
 
 ```sh

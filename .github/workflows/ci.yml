@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+
+  typescript-lint:
+    name: TypeScript / Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+      - run: pnpm lint
+
+  typescript-typecheck:
+    name: TypeScript / Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+      - run: pnpm check
+
+  typescript-test:
+    name: TypeScript / Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+      - run: pnpm test
+
+  typescript-build:
+    name: TypeScript / Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+      - run: pnpm build
+      - name: Verify entry point
+        run: test -f dist/index.js
+
+  python-lint:
+    name: Python / Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+      - run: |
+          uv run --directory python ruff format --check
+          uv run --directory python ruff check
+
+  python-test:
+    name: Python / Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+      - run: uv run --directory python pytest
+
+  python-typecheck:
+    name: Python / Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+      - run: uv run --directory python ty check

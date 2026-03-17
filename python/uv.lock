@@ -2083,13 +2083,15 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "pytest" },
+    { name = "ruff" },
+    { name = "ty" },
+]
+examples = [
     { name = "jupyterlab" },
     { name = "numba" },
     { name = "obstore" },
-    { name = "pytest" },
-    { name = "ruff" },
     { name = "scikit-image" },
-    { name = "ty" },
     { name = "watchfiles" },
 ]
 
@@ -2102,13 +2104,15 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "jupyterlab", specifier = ">=4.5.5" },
-    { name = "numba", specifier = ">=0.64.0" },
-    { name = "obstore", specifier = ">=0.9.2" },
     { name = "pytest", specifier = ">=9.0.2" },
     { name = "ruff", specifier = ">=0.15.6" },
-    { name = "scikit-image", specifier = ">=0.26.0" },
     { name = "ty", specifier = ">=0.0.23" },
+]
+examples = [
+    { name = "jupyterlab", specifier = ">=4.5.6" },
+    { name = "numba", specifier = ">=0.64.0" },
+    { name = "obstore", specifier = ">=0.9.2" },
+    { name = "scikit-image", specifier = ">=0.26.0" },
     { name = "watchfiles", specifier = ">=1.1.1" },
 ]
 

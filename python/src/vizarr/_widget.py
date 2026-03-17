@@ -89,7 +89,10 @@ class Viewer(anywidget.AnyWidget):
         self.on_msg(self._handle_custom_message)
 
     def _handle_custom_message(
-        self, _widget: object, msg: object, _buffers: list[object],
+        self,
+        _widget: object,
+        msg: object,
+        _buffers: list[object],
     ) -> None:
         message = msgspec.convert(msg, type=Message[StoreOperation])
         store_id, path = message.payload.target
