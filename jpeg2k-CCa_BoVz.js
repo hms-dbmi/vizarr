@@ -1,0 +1,2 @@
+import{JpxImage as e}from"https://cdn.jsdelivr.net/gh/mozilla/pdf.js@30bd5f0/src/core/jpx.js";var t=class t{kind=`bytes_to_bytes`;static codecId=`jpeg2k`;static fromConfig(){return new t}encode(e){throw Error(`encode not implemented`)}async decode(t){let n=new e;return n.failOnCorruptedImage=!0,n.parse(t),n.tiles[0].items}};export{t as default};
+//# sourceMappingURL=jpeg2k-CCa_BoVz.js.map
