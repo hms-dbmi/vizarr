@@ -42,13 +42,23 @@ function get_source(model, source) {
 	return {
 		/**
 		 * @param {string} key
+		 * @return {Promise<boolean>}
+		 */
+		async has(key) {
+			const { data } = await send(model, {
+				method: "has",
+				target: [source.id, key],
+			});
+			return data.success;
+		},
+		/**
+		 * @param {string} key
 		 * @return {Promise<Uint8Array | undefined>}
 		 */
 		async get(key) {
 			const { data, buffers } = await send(model, {
-				type: "get",
-				source_id: source.id,
-				key,
+				method: "get",
+				target: [source.id, key],
 			});
 			if (!data.success) {
 				return undefined;

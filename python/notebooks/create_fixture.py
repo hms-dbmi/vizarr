@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-import argparse
-import zarr
 import numpy as np
-import os
-import json
+import zarr
 from skimage import data
 from skimage.transform import pyramid_gaussian
+
 
 # Modified from https://github.com/ome/ome-zarr-py/blob/master/tests/create_test_data.py
 def create_ome_zarr(zarr_directory, dtype="f4"):
@@ -28,7 +26,7 @@ def create_ome_zarr(zarr_directory, dtype="f4"):
     grp = zarr.create_group(store, overwrite=True, zarr_format=2)
     paths = []
     for path, dataset in enumerate(pyramid):
-        grp.create_array(str(path), data=pyramid[path])
+        grp.create_array(str(path), data=dataset)
         paths.append({"path": str(path)})
 
     image_data = {
