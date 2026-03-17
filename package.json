@@ -8,7 +8,8 @@
     "preview": "vite preview",
     "lint": "biome ci",
     "fix": "biome check --write",
-    "check": "tsc"
+    "check": "tsc",
+    "test": "vitest run"
   },
   "dependencies": {
     "@chunkd/source-http": "^11.2.0",
@@ -37,7 +38,8 @@
     "@types/react-dom": "^18.2.18",
     "@vitejs/plugin-react": "^6.0.1",
     "typescript": "^5.9.3",
-    "vite": "^8.0.0"
+    "vite": "^8.0.0",
+    "vitest": "^4.1.0"
   },
   "packageManager": "pnpm@9.5.0",
   "pnpm": {

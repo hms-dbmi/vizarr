@@ -595,3 +595,156 @@ export function zip<T extends unknown[]>(...arrays: { [K in keyof T]: ReadonlyAr
   }
   return result;
 }
+
+if (import.meta.vitest) {
+  const { describe, it, expect } = import.meta.vitest;
+
+  describe("hexToRGB", () => {
+    it("converts 6-char hex", () => {
+      expect(hexToRGB("FF0000")).toEqual([255, 0, 0]);
+    });
+
+    it("strips leading #", () => {
+      expect(hexToRGB("#00FF00")).toEqual([0, 255, 0]);
+    });
+
+    it("handles lowercase", () => {
+      expect(hexToRGB("0000ff")).toEqual([0, 0, 255]);
+    });
+  });
+
+  describe("getNgffAxes", () => {
+    it("returns 5D defaults for v0.1 (no axes field)", () => {
+      const axes = getNgffAxes([{ datasets: [{ path: "0" }] }] as Ome.Multiscale[]);
+      expect(axes.map((a) => a.name)).toEqual(["t", "c", "z", "y", "x"]);
+      expect(axes.map((a) => a.type)).toEqual(["time", "channel", "space", "space", "space"]);
+    });
+
+    it("parses v0.3 string axes", () => {
+      const axes = getNgffAxes([
+        {
+          datasets: [{ path: "0" }],
+          axes: ["c", "y", "x"],
+        },
+      ] satisfies Ome.Multiscale[]);
+      expect(axes).toEqual([
+        { name: "c", type: "channel" },
+        { name: "y", type: "space" },
+        { name: "x", type: "space" },
+      ]);
+    });
+
+    it("parses v0.4 object axes and fills missing type", () => {
+      const axes = getNgffAxes([
+        {
+          datasets: [{ path: "0" }],
+          axes: [{ name: "z", type: "space" }, { name: "y" }, { name: "x" }],
+        },
+      ] as Ome.Multiscale[]);
+      expect(axes).toEqual([
+        { name: "z", type: "space" },
+        { name: "y", type: "space" },
+        { name: "x", type: "space" },
+      ]);
+    });
+  });
+
+  describe("getDefaultVisibilities", () => {
+    it("all visible for <= 6 channels", () => {
+      expect(getDefaultVisibilities(3)).toEqual([true, true, true]);
+    });
+
+    it("first 6 visible for > 6 channels", () => {
+      const vis = getDefaultVisibilities(8);
+      expect(vis.length).toBe(8);
+      expect(vis.slice(0, 6)).toEqual([true, true, true, true, true, true]);
+      expect(vis.slice(6)).toEqual([false, false]);
+    });
+
+    it("passes through explicit visibilities unchanged", () => {
+      const explicit = [false, true, false];
+      expect(getDefaultVisibilities(3, explicit)).toBe(explicit);
+    });
+  });
+
+  describe("getDefaultColors", () => {
+    it("single channel gets white", () => {
+      expect(getDefaultColors(1, [true])).toEqual(["#FFFFFF"]);
+    });
+
+    it("two channels get magenta/green", () => {
+      expect(getDefaultColors(2, [true, true])).toEqual(["#FF00FF", "#00FF00"]);
+    });
+
+    it("three channels get RGB", () => {
+      expect(getDefaultColors(3, [true, true, true])).toEqual(["#FF0000", "#00FF00", "#0000FF"]);
+    });
+
+    it("many channels: visible get CYMRGB, rest get white", () => {
+      const vis = [true, true, true, true, true, true, false, false];
+      const colors = getDefaultColors(8, vis);
+      expect(colors[6]).toBe("#FFFFFF");
+      expect(colors[7]).toBe("#FFFFFF");
+      // first 6 should be CYMRGB
+      expect(colors.slice(0, 6)).toEqual(CYMRGB);
+    });
+  });
+
+  describe("isInterleaved", () => {
+    it("true for last dim 3 (RGB)", () => {
+      expect(isInterleaved([100, 100, 3])).toBe(true);
+    });
+
+    it("true for last dim 4 (RGBA)", () => {
+      expect(isInterleaved([100, 100, 4])).toBe(true);
+    });
+
+    it("false for typical zarr shapes", () => {
+      expect(isInterleaved([1, 1, 256, 256])).toBe(false);
+      expect(isInterleaved([512, 512])).toBe(false);
+    });
+  });
+
+  describe("resolveAttrs", () => {
+    it("unwraps v0.5 ome wrapper", () => {
+      const inner = { multiscales: [{ datasets: [] }] };
+      expect(resolveAttrs({ ome: inner })).toBe(inner);
+    });
+
+    it("passes through pre-v0.5 attrs", () => {
+      const attrs = { multiscales: [{ datasets: [] }] };
+      expect(resolveAttrs(attrs)).toBe(attrs);
+    });
+  });
+
+  describe("rethrowUnless", () => {
+    it("does not throw for matching error class", () => {
+      const err = new TypeError("bad");
+      expect(() => rethrowUnless(err, TypeError)).not.toThrow();
+    });
+
+    it("rethrows for non-matching error class", () => {
+      const err = new RangeError("bad");
+      expect(() => rethrowUnless(err, TypeError)).toThrow(RangeError);
+    });
+
+    it("matches any of multiple classes", () => {
+      const err = new RangeError("bad");
+      expect(() => rethrowUnless(err, TypeError, RangeError)).not.toThrow();
+    });
+  });
+
+  describe("join", () => {
+    it("joins path segments", () => {
+      expect(join("a", "b", "c")).toBe("a/b/c");
+    });
+
+    it("strips trailing slashes", () => {
+      expect(join("a/", "b/", "c")).toBe("a/b/c");
+    });
+
+    it("filters undefined", () => {
+      expect(join("a", undefined, "c")).toBe("a/c");
+    });
+  });
+}

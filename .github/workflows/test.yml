@@ -1,17 +1,15 @@
-name: Node CI
+name: CI
 
 on:
   push:
-  pull_request:
     branches:
       - main
+  pull_request:
 
 jobs:
 
-  build:
-
+  Lint:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -19,3 +17,23 @@ jobs:
           run_install: true
       - run: pnpm check
       - run: pnpm lint
+
+  Test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+      - run: pnpm test
+
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+      - run: pnpm build
+      - name: Verify entry point
+        run: test -f dist/index.js

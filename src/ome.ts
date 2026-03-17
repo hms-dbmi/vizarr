@@ -371,7 +371,7 @@ async function defaultMeta(loader: ZarrPixelSource, axis_labels: string[]): Prom
   };
 }
 
-function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axes: Ome.Axis[]): Meta {
+export function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axes: Ome.Axis[]): Meta {
   const t = rdefs?.defaultT ?? 0;
   const z = rdefs?.defaultZ ?? 0;
   const greyscale = rdefs?.model === "greyscale";
@@ -408,4 +408,176 @@ function parseOmeroMeta({ rdefs, channels, name }: Ome.Omero, axes: Ome.Axis[]):
     channel_axis,
     defaultSelection,
   };
+}
+
+if (import.meta.vitest) {
+  const { describe, it, expect } = import.meta.vitest;
+
+  describe("parseOmeroMeta", () => {
+    const axes: Ome.Axis[] = [
+      { name: "t", type: "time" },
+      { name: "c", type: "channel" },
+      { name: "z", type: "space" },
+      { name: "y", type: "space" },
+      { name: "x", type: "space" },
+    ];
+
+    it("extracts channel colors and contrast limits", () => {
+      const omero: Ome.Omero = {
+        id: 1,
+        version: "0.1",
+        channels: [
+          {
+            color: "0000FF",
+            active: true,
+            label: "LaminB1",
+            coefficient: 1,
+            family: "linear",
+            inverted: false,
+            window: { start: 0, end: 800, min: 0, max: 65535 },
+          },
+          {
+            color: "FFFF00",
+            active: true,
+            label: "Dapi",
+            coefficient: 1,
+            family: "linear",
+            inverted: false,
+            window: { start: 100, end: 300, min: 0, max: 65535 },
+          },
+        ],
+        rdefs: { model: "color" },
+      };
+      const meta = parseOmeroMeta(omero, axes);
+      expect(meta.colors).toEqual(["0000FF", "FFFF00"]);
+      expect(meta.contrast_limits).toEqual([
+        [0, 800],
+        [100, 300],
+      ]);
+      expect(meta.names).toEqual(["LaminB1", "Dapi"]);
+      expect(meta.visibilities).toEqual([true, true]);
+      expect(meta.channel_axis).toBe(1);
+    });
+
+    it("uses defaultT and defaultZ for selection", () => {
+      const omero: Ome.Omero = {
+        id: 1,
+        version: "0.1",
+        channels: [
+          {
+            color: "FF0000",
+            active: true,
+            label: "ch",
+            coefficient: 1,
+            family: "linear",
+            inverted: false,
+            window: { start: 0, end: 255, min: 0, max: 255 },
+          },
+        ],
+        rdefs: { model: "color", defaultT: 3, defaultZ: 10 },
+      };
+      const meta = parseOmeroMeta(omero, axes);
+      // t=3, c=0, z=10, y=0, x=0
+      expect(meta.defaultSelection).toEqual([3, 0, 10, 0, 0]);
+    });
+
+    it("forces white for single greyscale channel", () => {
+      const omero: Ome.Omero = {
+        id: 1,
+        version: "0.1",
+        channels: [
+          {
+            color: "0000FF",
+            active: true,
+            label: "ch",
+            coefficient: 1,
+            family: "linear",
+            inverted: false,
+            window: { start: 0, end: 255, min: 0, max: 255 },
+          },
+        ],
+        rdefs: { model: "greyscale" },
+      };
+      const meta = parseOmeroMeta(omero, axes);
+      expect(meta.colors).toEqual(["FFFFFF"]);
+    });
+
+    it("keeps original colors for multi-channel greyscale", () => {
+      const omero: Ome.Omero = {
+        id: 1,
+        version: "0.1",
+        channels: [
+          {
+            color: "0000FF",
+            active: true,
+            label: "a",
+            coefficient: 1,
+            family: "linear",
+            inverted: false,
+            window: { start: 0, end: 255, min: 0, max: 255 },
+          },
+          {
+            color: "FF0000",
+            active: false,
+            label: "b",
+            coefficient: 1,
+            family: "linear",
+            inverted: false,
+            window: { start: 0, end: 255, min: 0, max: 255 },
+          },
+        ],
+        rdefs: { model: "greyscale" },
+      };
+      const meta = parseOmeroMeta(omero, axes);
+      // greyscale override only applies to single-channel
+      expect(meta.colors).toEqual(["0000FF", "FF0000"]);
+    });
+
+    it("falls back to index for unnamed channels", () => {
+      const omero: Ome.Omero = {
+        id: 1,
+        version: "0.1",
+        channels: [
+          {
+            color: "FF0000",
+            active: true,
+            label: "",
+            coefficient: 1,
+            family: "linear",
+            inverted: false,
+            window: { start: 0, end: 255, min: 0, max: 255 },
+          },
+        ],
+        rdefs: { model: "color" },
+      };
+      const meta = parseOmeroMeta(omero, axes);
+      expect(meta.names).toEqual(["0"]);
+    });
+
+    it("finds channel_axis from axes", () => {
+      const yx: Ome.Axis[] = [
+        { name: "y", type: "space" },
+        { name: "x", type: "space" },
+      ];
+      const omero: Ome.Omero = {
+        id: 1,
+        version: "0.1",
+        channels: [
+          {
+            color: "FF0000",
+            active: true,
+            label: "ch",
+            coefficient: 1,
+            family: "linear",
+            inverted: false,
+            window: { start: 0, end: 255, min: 0, max: 255 },
+          },
+        ],
+        rdefs: { model: "color" },
+      };
+      const meta = parseOmeroMeta(omero, yx);
+      // no channel axis in yx
+      expect(meta.channel_axis).toBe(-1);
+    });
+  });
 }

@@ -486,7 +486,7 @@ function getTileSize(image: TiffImage) {
  * Converts 32-bit integer color representation to a 6-character hexadecimal RGB string.
  *
  * > console.log(intToHexColor(100100));
- * > // "018704"
+ * > // "000187"
  */
 function intToHexColor(int: number): string {
   if (!Number.isInteger(int)) {
@@ -502,4 +502,132 @@ function intToHexColor(int: number): string {
   const bytes = new Uint8Array(buffer);
 
   return [bytes[0], bytes[1], bytes[2]].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+if (import.meta.vitest) {
+  const { describe, it, expect } = import.meta.vitest;
+
+  describe("getRelativeOmeIfdIndex", () => {
+    const sizes = { z: 3, t: 2, c: 4 };
+
+    it("returns 0 for the origin in all dimension orders", () => {
+      const sel = { z: 0, t: 0, c: 0 };
+      for (const order of ["XYZCT", "XYZTC", "XYCTZ", "XYCZT", "XYTCZ", "XYTZC"]) {
+        expect(getRelativeOmeIfdIndex(sel, { sizes, dimensionOrder: order })).toBe(0);
+      }
+    });
+
+    it("XYCZT: c varies fastest, then z, then t", () => {
+      // c=1, z=0, t=0 → 1
+      expect(getRelativeOmeIfdIndex({ z: 0, t: 0, c: 1 }, { sizes, dimensionOrder: "XYCZT" })).toBe(1);
+      // c=0, z=1, t=0 → sizes.c * 1 = 4
+      expect(getRelativeOmeIfdIndex({ z: 1, t: 0, c: 0 }, { sizes, dimensionOrder: "XYCZT" })).toBe(4);
+      // c=0, z=0, t=1 → sizes.c * sizes.z * 1 = 12
+      expect(getRelativeOmeIfdIndex({ z: 0, t: 1, c: 0 }, { sizes, dimensionOrder: "XYCZT" })).toBe(12);
+    });
+
+    it("XYZCT: z varies fastest, then c, then t", () => {
+      expect(getRelativeOmeIfdIndex({ z: 1, t: 0, c: 0 }, { sizes, dimensionOrder: "XYZCT" })).toBe(1);
+      expect(getRelativeOmeIfdIndex({ z: 0, t: 0, c: 1 }, { sizes, dimensionOrder: "XYZCT" })).toBe(3);
+      expect(getRelativeOmeIfdIndex({ z: 0, t: 1, c: 0 }, { sizes, dimensionOrder: "XYZCT" })).toBe(12);
+    });
+
+    it("throws on invalid dimension order", () => {
+      expect(() => getRelativeOmeIfdIndex({ z: 0, t: 0, c: 0 }, { sizes, dimensionOrder: "INVALID" })).toThrow(
+        "Invalid dimension order",
+      );
+    });
+  });
+
+  describe("parseKey", () => {
+    it("parses root zarr.json", () => {
+      expect(parseKey("/zarr.json" as `/${string}`)).toEqual({
+        kind: "meta",
+        value: { kind: "root" },
+      });
+    });
+
+    it("parses resolution-level zarr.json", () => {
+      expect(parseKey("/3/zarr.json" as `/${string}`)).toEqual({
+        kind: "meta",
+        value: { kind: "resolution", value: 3 },
+      });
+    });
+
+    it("parses chunk keys", () => {
+      expect(parseKey("/2/c/1/3/0/5/10" as `/${string}`)).toEqual({
+        kind: "chunk",
+        resolution: 2,
+        coords: { t: 1, c: 3, z: 0, y: 5, x: 10 },
+      });
+    });
+
+    it("returns unknown for unrecognized keys", () => {
+      expect(parseKey("/foo/bar" as `/${string}`)).toEqual({ kind: "unknown" });
+      expect(parseKey("/" as `/${string}`)).toEqual({ kind: "unknown" });
+    });
+  });
+
+  describe("undoHorizontalDifferencing", () => {
+    it("accumulates differences for uint8 (1 byte per pixel)", () => {
+      // 2x2 tile, 1 byte per pixel: row0=[10, 5], row1=[20, 3]
+      const data = new Uint8Array([10, 5, 20, 3]);
+      undoHorizontalDifferencing(data, { tileSize: 2, bytesPerPixel: 1 });
+      // row0: [10, 10+5=15], row1: [20, 20+3=23]
+      expect(Array.from(data)).toEqual([10, 15, 20, 23]);
+    });
+
+    it("accumulates per byte lane for uint16 (2 bytes per pixel)", () => {
+      // 2x1 tile, 2 bytes per pixel: pixel0=[0x01, 0x00], pixel1=[0x01, 0x02]
+      const data = new Uint8Array([0x01, 0x00, 0x01, 0x02]);
+      undoHorizontalDifferencing(data, { tileSize: 2, bytesPerPixel: 2 });
+      // high bytes: 0x01, 0x01+0x01=0x02; low bytes: 0x00, 0x00+0x02=0x02
+      expect(Array.from(data)).toEqual([0x01, 0x00, 0x02, 0x02]);
+    });
+
+    it("wraps around at 0xff", () => {
+      const data = new Uint8Array([0xff, 0x02]);
+      undoHorizontalDifferencing(data, { tileSize: 2, bytesPerPixel: 1 });
+      expect(Array.from(data)).toEqual([0xff, 0x01]); // (0xff + 0x02) & 0xff = 0x01
+    });
+  });
+
+  describe("swapEndianness", () => {
+    it("swaps 16-bit samples", () => {
+      const data = new Uint8Array([0x01, 0x02, 0x03, 0x04]);
+      swapEndianness(data, 2);
+      expect(Array.from(data)).toEqual([0x02, 0x01, 0x04, 0x03]);
+    });
+
+    it("swaps 32-bit samples", () => {
+      const data = new Uint8Array([0x01, 0x02, 0x03, 0x04]);
+      swapEndianness(data, 4);
+      expect(Array.from(data)).toEqual([0x04, 0x03, 0x02, 0x01]);
+    });
+
+    it("is a no-op for 1-byte samples", () => {
+      const data = new Uint8Array([0x01, 0x02]);
+      swapEndianness(data, 1);
+      expect(Array.from(data)).toEqual([0x01, 0x02]);
+    });
+  });
+
+  describe("intToHexColor", () => {
+    it("converts positive int to hex RGB", () => {
+      expect(intToHexColor(100100)).toBe("000187");
+    });
+
+    it("handles zero", () => {
+      expect(intToHexColor(0)).toBe("000000");
+    });
+
+    it("handles negative (signed int32)", () => {
+      // -1 as int32 = 0xFFFFFFFF → RGB = "ffffff"
+      expect(intToHexColor(-1)).toBe("ffffff");
+    });
+
+    it("throws on non-integer", () => {
+      expect(() => intToHexColor(1.5)).toThrow("Not an integer");
+    });
+  });
 }
