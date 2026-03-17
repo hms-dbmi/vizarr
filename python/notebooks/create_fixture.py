@@ -24,11 +24,11 @@ def create_ome_zarr(zarr_directory, dtype="f4"):
         pixels = np.array([pixels]).astype(dtype)
         pyramid.append(pixels)
 
-    store = zarr.DirectoryStore(zarr_directory)
-    grp = zarr.group(store, overwrite=True)
+    store = zarr.storage.LocalStore(zarr_directory)
+    grp = zarr.create_group(store, overwrite=True, zarr_format=2)
     paths = []
     for path, dataset in enumerate(pyramid):
-        grp.create_dataset(str(path), data=pyramid[path])
+        grp.create_array(str(path), data=pyramid[path])
         paths.append({"path": str(path)})
 
     image_data = {
@@ -64,8 +64,7 @@ def create_ome_zarr(zarr_directory, dtype="f4"):
             "datasets": paths,
         }
     ]
-    grp.attrs["multiscales"] = multiscales
-    grp.attrs["omero"] = image_data
+    grp.update_attributes({"multiscales": multiscales, "omero": image_data})
 
 
 if __name__ == "__main__":

@@ -3,24 +3,46 @@ import traitlets
 import pathlib
 
 import zarr
+import zarr.storage
 import numpy as np
+from zarr.core.sync import sync as _sync
+from zarr.core.buffer import default_buffer_prototype
 
 __all__ = ["Viewer"]
+
+
+class _ReadableStore:
+    """Wraps a zarr v3 Store for synchronous, dict-like read access."""
+
+    def __init__(self, store):
+        self._store = store
+
+    def __contains__(self, key):
+        return _sync(self._store.exists(key))
+
+    def __getitem__(self, key):
+        buf = _sync(self._store.get(key, prototype=default_buffer_prototype()))
+        if buf is None:
+            raise KeyError(key)
+        return buf.to_bytes()
 
 
 def _store_keyprefix(obj):
     # Just grab the store and key_prefix from zarr.Array and zarr.Group objects
     if isinstance(obj, (zarr.Array, zarr.Group)):
-        return obj.store, obj._key_prefix
+        prefix = obj.path + "/" if obj.path else ""
+        return _ReadableStore(obj.store), prefix
 
     if isinstance(obj, np.ndarray):
-        # Create an in-memory store, and write array as as single chunk
-        store = {}
-        arr = zarr.create(
-            store=store, shape=obj.shape, chunks=obj.shape, dtype=obj.dtype
+        # Create an in-memory store, and write array as a single chunk
+        store = zarr.storage.MemoryStore()
+        zarr.create_array(
+            store=store,
+            data=obj,
+            chunks=obj.shape,
+            zarr_format=2,
         )
-        arr[:] = obj
-        return store, ""
+        return _ReadableStore(store), ""
 
     if hasattr(obj, "__getitem__") and hasattr(obj, "__contains__"):
         return obj, ""
