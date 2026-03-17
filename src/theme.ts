@@ -1,4 +1,4 @@
-import grey from "@material-ui/core/colors/grey";
+import { grey } from "@material-ui/core/colors";
 import { createTheme } from "@material-ui/core/styles";
 
 export default createTheme({
