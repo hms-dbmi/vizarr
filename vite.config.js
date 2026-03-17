@@ -1,3 +1,5 @@
+/// <reference types="vitest/config" />
+
 // @ts-check
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
@@ -44,6 +46,12 @@ export default vite.defineConfig({
   plugins: [react(), writeEntryPoint("index.js", /^vizarr-/)],
   base: process.env.VIZARR_PREFIX || "./",
   publicDir: path.resolve(__dirname, "assets"),
+  define: {
+    "import.meta.vitest": "undefined",
+  },
+  test: {
+    includeSource: ["src/**/*.ts"],
+  },
   build: {
     assetsDir: "",
     sourcemap: true,

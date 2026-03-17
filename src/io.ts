@@ -73,6 +73,40 @@ async function loadMultiChannel(
   };
 }
 
+export type SourceKind =
+  | { kind: "plate"; plate: Ome.Plate }
+  | { kind: "well"; well: Ome.Well }
+  | { kind: "multiscales"; attrs: { multiscales: Ome.Multiscale[] } }
+  | { kind: "bioformats2raw" }
+  | { kind: "empty-group" }
+  | { kind: "array" };
+
+/** Classify a zarr node by its attributes to determine the loading strategy. */
+export function classifySource(
+  node: zarr.Group<zarr.Readable> | zarr.Array<zarr.DataType, zarr.Readable>,
+  attrs: zarr.Attributes,
+): SourceKind {
+  if (!(node instanceof zarr.Group)) {
+    return { kind: "array" };
+  }
+  if (utils.isOmePlate(attrs)) {
+    return { kind: "plate", plate: attrs.plate };
+  }
+  if (utils.isOmeWell(attrs)) {
+    return { kind: "well", well: attrs.well };
+  }
+  if (utils.isMultiscales(attrs)) {
+    return { kind: "multiscales", attrs };
+  }
+  if (utils.isBioformats2rawlayout(attrs)) {
+    return { kind: "bioformats2raw" };
+  }
+  if (Object.keys(attrs).length === 0 && node.path) {
+    return { kind: "empty-group" };
+  }
+  return { kind: "multiscales", attrs: attrs as { multiscales: Ome.Multiscale[] } };
+}
+
 export async function createSourceData(config: ImageLayerConfig): Promise<SourceData> {
   const node = await utils.open(config.source);
   let data: zarr.Array<zarr.DataType, zarr.Readable>[];
@@ -80,32 +114,33 @@ export async function createSourceData(config: ImageLayerConfig): Promise<Source
 
   if (node instanceof zarr.Group) {
     let attrs = utils.resolveAttrs(node.attrs);
+    let source = classifySource(node, attrs);
 
-    if (utils.isOmePlate(attrs)) {
-      return loadPlate(config, node, attrs.plate);
-    }
-
-    if (utils.isOmeWell(attrs)) {
-      return loadWell(config, node, attrs.well);
-    }
-
-    if (utils.isMultiscales(attrs)) {
-      return loadOmeMultiscales(config, node, attrs);
-    }
-
-    if (Object.keys(attrs).length === 0 && node.path) {
-      // No rootAttrs in this group.
+    // Empty group — check parent for plate metadata
+    if (source.kind === "empty-group") {
       const parent = await zarr.open(node.resolve(".."), { kind: "group" });
       const parentAttrs = utils.resolveAttrs(parent.attrs);
-      if (utils.isOmePlate(parentAttrs)) {
-        return loadPlate(config, parent, parentAttrs.plate);
+      const parentSource = classifySource(parent, parentAttrs);
+      if (parentSource.kind === "plate") {
+        return loadPlate(config, parent, parentSource.plate);
       }
     }
 
-    if (utils.isBioformats2rawlayout(attrs)) {
-      let toUrl = `${utils.OME_VALIDATOR_URL}?source=${config.source}`;
-      throw new utils.RedirectError("Please open in ome-ngff-validator", toUrl);
+    switch (source.kind) {
+      case "plate":
+        return loadPlate(config, node, source.plate);
+      case "well":
+        return loadWell(config, node, source.well);
+      case "multiscales":
+        return loadOmeMultiscales(config, node, source.attrs);
+      case "bioformats2raw": {
+        let toUrl = `${utils.OME_VALIDATOR_URL}?source=${config.source}`;
+        throw new utils.RedirectError("Please open in ome-ngff-validator", toUrl);
+      }
+      case "empty-group":
+        utils.assert(false, "Group is missing multiscales specification.");
     }
+
     utils.assert(utils.isMultiscales(attrs), "Group is missing multiscales specification.");
     data = await utils.loadMultiscales(node, attrs.multiscales);
     if (attrs.multiscales[0].axes) {
@@ -273,4 +308,127 @@ function getSourceSelectionTransform(
       excludeFromTransformedSelection.has(name) ? 0 : sourceSelection[source.labels.indexOf(name)],
     );
   };
+}
+
+if (import.meta.vitest) {
+  const { describe, it, expect } = import.meta.vitest;
+
+  describe("classifySource", () => {
+    function fakeGroup(path: `/${string}` = "/") {
+      const store = new Map<string, Uint8Array>();
+      return new zarr.Group(store, path, { zarr_format: 3, node_type: "group", attributes: {} });
+    }
+
+    function fakeArray() {
+      const store = new Map<string, Uint8Array>();
+      return new zarr.Array(store, "/", {
+        zarr_format: 3,
+        node_type: "array",
+        attributes: {},
+        shape: [1],
+        data_type: "uint8",
+        chunk_grid: { name: "regular", configuration: { chunk_shape: [1] } },
+        chunk_key_encoding: { name: "default", configuration: { separator: "/" } },
+        codecs: [{ name: "bytes", configuration: { endian: "little" } }],
+        fill_value: 0,
+      });
+    }
+
+    it("classifies a plate (IDR 5966)", () => {
+      const attrs = {
+        plate: {
+          columns: [{ name: "1" }, { name: "2" }],
+          rows: [{ name: "A" }, { name: "B" }],
+          wells: [{ path: "A/1" }, { path: "B/2" }],
+          version: "0.1",
+          name: "test_plate",
+        },
+      };
+      const result = classifySource(fakeGroup(), attrs);
+      expect(result.kind).toBe("plate");
+      expect(result).toHaveProperty("plate");
+    });
+
+    it("classifies a well", () => {
+      const attrs = {
+        well: {
+          images: [{ path: "0" }, { path: "1" }],
+          version: "0.1",
+        },
+      };
+      const result = classifySource(fakeGroup(), attrs);
+      expect(result.kind).toBe("well");
+      expect(result).toHaveProperty("well");
+    });
+
+    it("classifies multiscales v0.1 with omero", () => {
+      const attrs = {
+        multiscales: [
+          {
+            datasets: [{ path: "0" }, { path: "1" }],
+            version: "0.1",
+          },
+        ],
+        omero: {
+          channels: [{ color: "0000FF", window: { start: 0, end: 255 } }],
+          rdefs: { model: "color" },
+        },
+      };
+      const result = classifySource(fakeGroup(), attrs);
+      expect(result.kind).toBe("multiscales");
+    });
+
+    it("classifies multiscales v0.4 with axes", () => {
+      const attrs = {
+        multiscales: [
+          {
+            axes: [
+              { name: "c", type: "channel" },
+              { name: "z", type: "space" },
+              { name: "y", type: "space" },
+              { name: "x", type: "space" },
+            ],
+            datasets: [{ path: "0", coordinateTransformations: [{ type: "scale", scale: [1, 1, 0.5, 0.5] }] }],
+            version: "0.4",
+          },
+        ],
+      };
+      const result = classifySource(fakeGroup(), attrs);
+      expect(result.kind).toBe("multiscales");
+    });
+
+    it("classifies bioformats2raw layout", () => {
+      const attrs = { "bioformats2raw.layout": 3 };
+      const result = classifySource(fakeGroup(), attrs);
+      expect(result.kind).toBe("bioformats2raw");
+    });
+
+    it("classifies empty group (no attrs, has path)", () => {
+      const result = classifySource(fakeGroup("/A/1"), {});
+      expect(result.kind).toBe("empty-group");
+    });
+
+    it("classifies a bare array", () => {
+      const result = classifySource(fakeArray(), {});
+      expect(result.kind).toBe("array");
+    });
+
+    it("plate takes priority over multiscales", () => {
+      const attrs = {
+        plate: { columns: [], rows: [], wells: [] },
+        multiscales: [{ datasets: [{ path: "0" }] }],
+      };
+      const result = classifySource(fakeGroup(), attrs);
+      expect(result.kind).toBe("plate");
+    });
+
+    it("well takes priority over multiscales", () => {
+      const attrs = {
+        well: { images: [{ path: "0" }] },
+        multiscales: [{ datasets: [{ path: "0" }] }],
+      };
+      const result = classifySource(fakeGroup(), attrs);
+      expect(result.kind).toBe("well");
+    });
+  });
 }

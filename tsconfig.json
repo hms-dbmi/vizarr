@@ -9,6 +9,6 @@
     "forceConsistentCasingInFileNames": true,
     "verbatimModuleSyntax": true,
     "jsx": "preserve",
-    "types": ["vite/client"]
+    "types": ["vite/client", "vitest/importMeta"]
   }
 }
