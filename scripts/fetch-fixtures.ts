@@ -213,6 +213,79 @@ async function crawl(
   }
 }
 
+// ---------------------------------------------------------------------------
+// Synthetic fixtures — plain multiscale groups without omero metadata
+// ---------------------------------------------------------------------------
+
+function v2Array(shape: number[], chunks: number[]): Record<string, unknown> {
+  return {
+    shape,
+    chunks,
+    dtype: "|u1",
+    fill_value: 0,
+    order: "C",
+    filters: null,
+    compressor: { id: "blosc", cname: "lz4", clevel: 5, shuffle: 1, blocksize: 0 },
+    zarr_format: 2,
+  };
+}
+
+function plainMultiscale(
+  prefix: string,
+  levels: Array<{ shape: number[]; chunks: number[] }>,
+  attrs: Record<string, unknown>,
+): Record<string, Record<string, unknown>> {
+  const entries: Record<string, Record<string, unknown>> = {};
+  entries[`${prefix}/.zgroup`] = { zarr_format: 2 };
+  entries[`${prefix}/.zattrs`] = attrs;
+  for (let i = 0; i < levels.length; i++) {
+    entries[`${prefix}/${i}/.zarray`] = v2Array(levels[i].shape, levels[i].chunks);
+    entries[`${prefix}/${i}/.zattrs`] = {};
+  }
+  return entries;
+}
+
+const SYNTHETIC: Record<string, Record<string, unknown>> = {
+  // 2D multiscale, no omero, no axes (v0.1)
+  ...plainMultiscale(
+    "generated/plain-yx",
+    [
+      { shape: [1024, 1024], chunks: [256, 256] },
+      { shape: [512, 512], chunks: [256, 256] },
+    ],
+    { multiscales: [{ datasets: [{ path: "0" }, { path: "1" }], version: "0.1" }] },
+  ),
+  // 3D multiscale (t,y,x), no omero, no axes (v0.1)
+  ...plainMultiscale(
+    "generated/plain-tyx",
+    [
+      { shape: [10, 512, 512], chunks: [1, 256, 256] },
+      { shape: [10, 256, 256], chunks: [1, 256, 256] },
+    ],
+    { multiscales: [{ datasets: [{ path: "0" }, { path: "1" }], version: "0.1" }] },
+  ),
+  // 2D multiscale with explicit axes (v0.4), no omero
+  ...plainMultiscale(
+    "generated/plain-yx-with-axes",
+    [
+      { shape: [1024, 1024], chunks: [256, 256] },
+      { shape: [512, 512], chunks: [256, 256] },
+    ],
+    {
+      multiscales: [
+        {
+          datasets: [{ path: "0" }, { path: "1" }],
+          version: "0.4",
+          axes: [
+            { name: "y", type: "space" },
+            { name: "x", type: "space" },
+          ],
+        },
+      ],
+    },
+  ),
+};
+
 async function main() {
   const manifest: Record<string, unknown> = {};
 
@@ -221,8 +294,12 @@ async function main() {
     await crawl(url, name, 0, maxDepth, manifest);
   }
 
+  // Add synthetic fixtures
+  Object.assign(manifest, SYNTHETIC);
+  console.log(`\ngenerated/ (${Object.keys(SYNTHETIC).length} entries)`);
+
   await fs.writeFile(OUT_FILE, `${JSON.stringify(manifest, null, 2)}\n`);
-  console.log(`\nWrote ${Object.keys(manifest).length} entries to ${path.relative(process.cwd(), OUT_FILE)}`);
+  console.log(`Wrote ${Object.keys(manifest).length} entries to ${path.relative(process.cwd(), OUT_FILE)}`);
 }
 
 main().catch((err) => {
