@@ -64,13 +64,7 @@
     "zarr_format": 2
   },
   "v0.1/idr0062-multiscale/0/.zarray": {
-    "chunks": [
-      1,
-      1,
-      1,
-      275,
-      271
-    ],
+    "chunks": [1, 1, 1, 275, 271],
     "compressor": {
       "blocksize": 0,
       "clevel": 5,
@@ -82,23 +76,11 @@
     "fill_value": 0,
     "filters": null,
     "order": "C",
-    "shape": [
-      1,
-      2,
-      236,
-      275,
-      271
-    ],
+    "shape": [1, 2, 236, 275, 271],
     "zarr_format": 2
   },
   "v0.1/idr0062-multiscale/1/.zarray": {
-    "chunks": [
-      1,
-      1,
-      1,
-      137,
-      135
-    ],
+    "chunks": [1, 1, 1, 137, 135],
     "compressor": {
       "blocksize": 0,
       "clevel": 5,
@@ -110,23 +92,11 @@
     "fill_value": 0,
     "filters": null,
     "order": "C",
-    "shape": [
-      1,
-      2,
-      236,
-      137,
-      135
-    ],
+    "shape": [1, 2, 236, 137, 135],
     "zarr_format": 2
   },
   "v0.1/idr0062-multiscale/2/.zarray": {
-    "chunks": [
-      1,
-      1,
-      1,
-      68,
-      67
-    ],
+    "chunks": [1, 1, 1, 68, 67],
     "compressor": {
       "blocksize": 0,
       "clevel": 5,
@@ -138,13 +108,596 @@
     "fill_value": 0,
     "filters": null,
     "order": "C",
-    "shape": [
-      1,
-      2,
-      236,
-      68,
-      67
-    ],
+    "shape": [1, 2, 236, 68, 67],
+    "zarr_format": 2
+  },
+  "v0.1/idr0062-multiscale/labels/.zattrs": {
+    "labels": ["masks"]
+  },
+  "v0.1/idr0062-multiscale/labels/.zgroup": {
+    "zarr_format": 2
+  },
+  "v0.1/idr0062-multiscale/labels/masks/.zattrs": {
+    "image-label": {
+      "colors": [
+        {
+          "label-value": 1380887,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380888,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380889,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380890,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380891,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380892,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380893,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380894,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380895,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380896,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380897,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380898,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380899,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380900,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380901,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380902,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380903,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380904,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380905,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380906,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380907,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380908,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380909,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380910,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380911,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380912,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380913,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380914,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380915,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380916,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380917,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380918,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380919,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380920,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380921,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380922,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380923,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380924,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380925,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380926,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380927,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380928,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380929,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380930,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380931,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380932,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380933,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380934,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380935,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380936,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380937,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380938,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380939,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380940,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380941,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380942,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380943,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380944,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380945,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380946,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 1380947,
+          "rgba": [128, 128, 128, 128]
+        }
+      ],
+      "properties": [
+        {
+          "label-value": 1380887,
+          "omero:roiId": 1380887,
+          "omero:shapeId": 1664569
+        },
+        {
+          "label-value": 1380888,
+          "omero:roiId": 1380888,
+          "omero:shapeId": 1664617
+        },
+        {
+          "label-value": 1380889,
+          "omero:roiId": 1380889,
+          "omero:shapeId": 1664664
+        },
+        {
+          "label-value": 1380890,
+          "omero:roiId": 1380890,
+          "omero:shapeId": 1664709
+        },
+        {
+          "label-value": 1380891,
+          "omero:roiId": 1380891,
+          "omero:shapeId": 1664749
+        },
+        {
+          "label-value": 1380892,
+          "omero:roiId": 1380892,
+          "omero:shapeId": 1664787
+        },
+        {
+          "label-value": 1380893,
+          "omero:roiId": 1380893,
+          "omero:shapeId": 1664826
+        },
+        {
+          "label-value": 1380894,
+          "omero:roiId": 1380894,
+          "omero:shapeId": 1664859
+        },
+        {
+          "label-value": 1380895,
+          "omero:roiId": 1380895,
+          "omero:shapeId": 1664898
+        },
+        {
+          "label-value": 1380896,
+          "omero:roiId": 1380896,
+          "omero:shapeId": 1664932
+        },
+        {
+          "label-value": 1380897,
+          "omero:roiId": 1380897,
+          "omero:shapeId": 1664967
+        },
+        {
+          "label-value": 1380898,
+          "omero:roiId": 1380898,
+          "omero:shapeId": 1665000
+        },
+        {
+          "label-value": 1380899,
+          "omero:roiId": 1380899,
+          "omero:shapeId": 1665036
+        },
+        {
+          "label-value": 1380900,
+          "omero:roiId": 1380900,
+          "omero:shapeId": 1665078
+        },
+        {
+          "label-value": 1380901,
+          "omero:roiId": 1380901,
+          "omero:shapeId": 1665118
+        },
+        {
+          "label-value": 1380902,
+          "omero:roiId": 1380902,
+          "omero:shapeId": 1665156
+        },
+        {
+          "label-value": 1380903,
+          "omero:roiId": 1380903,
+          "omero:shapeId": 1665200
+        },
+        {
+          "label-value": 1380904,
+          "omero:roiId": 1380904,
+          "omero:shapeId": 1665238
+        },
+        {
+          "label-value": 1380905,
+          "omero:roiId": 1380905,
+          "omero:shapeId": 1665283
+        },
+        {
+          "label-value": 1380906,
+          "omero:roiId": 1380906,
+          "omero:shapeId": 1665319
+        },
+        {
+          "label-value": 1380907,
+          "omero:roiId": 1380907,
+          "omero:shapeId": 1665356
+        },
+        {
+          "label-value": 1380908,
+          "omero:roiId": 1380908,
+          "omero:shapeId": 1665396
+        },
+        {
+          "label-value": 1380909,
+          "omero:roiId": 1380909,
+          "omero:shapeId": 1665428
+        },
+        {
+          "label-value": 1380910,
+          "omero:roiId": 1380910,
+          "omero:shapeId": 1665467
+        },
+        {
+          "label-value": 1380911,
+          "omero:roiId": 1380911,
+          "omero:shapeId": 1665513
+        },
+        {
+          "label-value": 1380912,
+          "omero:roiId": 1380912,
+          "omero:shapeId": 1665541
+        },
+        {
+          "label-value": 1380913,
+          "omero:roiId": 1380913,
+          "omero:shapeId": 1665575
+        },
+        {
+          "label-value": 1380914,
+          "omero:roiId": 1380914,
+          "omero:shapeId": 1665611
+        },
+        {
+          "label-value": 1380915,
+          "omero:roiId": 1380915,
+          "omero:shapeId": 1665662
+        },
+        {
+          "label-value": 1380916,
+          "omero:roiId": 1380916,
+          "omero:shapeId": 1665709
+        },
+        {
+          "label-value": 1380917,
+          "omero:roiId": 1380917,
+          "omero:shapeId": 1665743
+        },
+        {
+          "label-value": 1380918,
+          "omero:roiId": 1380918,
+          "omero:shapeId": 1665777
+        },
+        {
+          "label-value": 1380919,
+          "omero:roiId": 1380919,
+          "omero:shapeId": 1665808
+        },
+        {
+          "label-value": 1380920,
+          "omero:roiId": 1380920,
+          "omero:shapeId": 1665853
+        },
+        {
+          "label-value": 1380921,
+          "omero:roiId": 1380921,
+          "omero:shapeId": 1665891
+        },
+        {
+          "label-value": 1380922,
+          "omero:roiId": 1380922,
+          "omero:shapeId": 1665935
+        },
+        {
+          "label-value": 1380923,
+          "omero:roiId": 1380923,
+          "omero:shapeId": 1665970
+        },
+        {
+          "label-value": 1380924,
+          "omero:roiId": 1380924,
+          "omero:shapeId": 1666013
+        },
+        {
+          "label-value": 1380925,
+          "omero:roiId": 1380925,
+          "omero:shapeId": 1666052
+        },
+        {
+          "label-value": 1380926,
+          "omero:roiId": 1380926,
+          "omero:shapeId": 1666085
+        },
+        {
+          "label-value": 1380927,
+          "omero:roiId": 1380927,
+          "omero:shapeId": 1666118
+        },
+        {
+          "label-value": 1380928,
+          "omero:roiId": 1380928,
+          "omero:shapeId": 1666158
+        },
+        {
+          "label-value": 1380929,
+          "omero:roiId": 1380929,
+          "omero:shapeId": 1666194
+        },
+        {
+          "label-value": 1380930,
+          "omero:roiId": 1380930,
+          "omero:shapeId": 1666235
+        },
+        {
+          "label-value": 1380931,
+          "omero:roiId": 1380931,
+          "omero:shapeId": 1666268
+        },
+        {
+          "label-value": 1380932,
+          "omero:roiId": 1380932,
+          "omero:shapeId": 1666307
+        },
+        {
+          "label-value": 1380933,
+          "omero:roiId": 1380933,
+          "omero:shapeId": 1666338
+        },
+        {
+          "label-value": 1380934,
+          "omero:roiId": 1380934,
+          "omero:shapeId": 1666378
+        },
+        {
+          "label-value": 1380935,
+          "omero:roiId": 1380935,
+          "omero:shapeId": 1666411
+        },
+        {
+          "label-value": 1380936,
+          "omero:roiId": 1380936,
+          "omero:shapeId": 1666446
+        },
+        {
+          "label-value": 1380937,
+          "omero:roiId": 1380937,
+          "omero:shapeId": 1666481
+        },
+        {
+          "label-value": 1380938,
+          "omero:roiId": 1380938,
+          "omero:shapeId": 1666518
+        },
+        {
+          "label-value": 1380939,
+          "omero:roiId": 1380939,
+          "omero:shapeId": 1666558
+        },
+        {
+          "label-value": 1380940,
+          "omero:roiId": 1380940,
+          "omero:shapeId": 1666596
+        },
+        {
+          "label-value": 1380941,
+          "omero:roiId": 1380941,
+          "omero:shapeId": 1666671
+        },
+        {
+          "label-value": 1380942,
+          "omero:roiId": 1380942,
+          "omero:shapeId": 1666711
+        },
+        {
+          "label-value": 1380943,
+          "omero:roiId": 1380943,
+          "omero:shapeId": 1666746
+        },
+        {
+          "label-value": 1380944,
+          "omero:roiId": 1380944,
+          "omero:shapeId": 1666789
+        },
+        {
+          "label-value": 1380945,
+          "omero:roiId": 1380945,
+          "omero:shapeId": 1666826
+        },
+        {
+          "label-value": 1380946,
+          "omero:roiId": 1380946,
+          "omero:shapeId": 1666846
+        },
+        {
+          "label-value": 1380947,
+          "omero:roiId": 1380947,
+          "omero:shapeId": 1666891
+        }
+      ],
+      "source": {
+        "image": "../.."
+      },
+      "version": "0.1"
+    },
+    "multiscales": [
+      {
+        "datasets": [
+          {
+            "path": "0"
+          },
+          {
+            "path": "1"
+          },
+          {
+            "path": "2"
+          },
+          {
+            "path": "3"
+          }
+        ],
+        "version": "0.1"
+      }
+    ]
+  },
+  "v0.1/idr0062-multiscale/labels/masks/.zgroup": {
     "zarr_format": 2
   },
   "v0.1/idr0001-plate/.zattrs": {
@@ -2296,12 +2849,7 @@
           {
             "coordinateTransformations": [
               {
-                "scale": [
-                  1,
-                  0.5002025531914894,
-                  0.3603981534640209,
-                  0.3603981534640209
-                ],
+                "scale": [1, 0.5002025531914894, 0.3603981534640209, 0.3603981534640209],
                 "type": "scale"
               }
             ],
@@ -2310,12 +2858,7 @@
           {
             "coordinateTransformations": [
               {
-                "scale": [
-                  1,
-                  0.5002025531914894,
-                  0.7207963069280418,
-                  0.7207963069280418
-                ],
+                "scale": [1, 0.5002025531914894, 0.7207963069280418, 0.7207963069280418],
                 "type": "scale"
               }
             ],
@@ -2324,12 +2867,7 @@
           {
             "coordinateTransformations": [
               {
-                "scale": [
-                  1,
-                  0.5002025531914894,
-                  1.4415926138560835,
-                  1.4415926138560835
-                ],
+                "scale": [1, 0.5002025531914894, 1.4415926138560835, 1.4415926138560835],
                 "type": "scale"
               }
             ],
@@ -2383,12 +2921,7 @@
     "zarr_format": 2
   },
   "v0.4/idr0062-multiscale/0/.zarray": {
-    "chunks": [
-      1,
-      1,
-      275,
-      271
-    ],
+    "chunks": [1, 1, 275, 271],
     "compressor": {
       "blocksize": 0,
       "clevel": 5,
@@ -2401,21 +2934,11 @@
     "fill_value": 0,
     "filters": null,
     "order": "C",
-    "shape": [
-      2,
-      236,
-      275,
-      271
-    ],
+    "shape": [2, 236, 275, 271],
     "zarr_format": 2
   },
   "v0.4/idr0062-multiscale/1/.zarray": {
-    "chunks": [
-      1,
-      1,
-      137,
-      135
-    ],
+    "chunks": [1, 1, 137, 135],
     "compressor": {
       "blocksize": 0,
       "clevel": 5,
@@ -2428,21 +2951,11 @@
     "fill_value": 0,
     "filters": null,
     "order": "C",
-    "shape": [
-      2,
-      236,
-      137,
-      135
-    ],
+    "shape": [2, 236, 137, 135],
     "zarr_format": 2
   },
   "v0.4/idr0062-multiscale/2/.zarray": {
-    "chunks": [
-      1,
-      1,
-      68,
-      67
-    ],
+    "chunks": [1, 1, 68, 67],
     "compressor": {
       "blocksize": 0,
       "clevel": 5,
@@ -2455,12 +2968,642 @@
     "fill_value": 0,
     "filters": null,
     "order": "C",
-    "shape": [
-      2,
-      236,
-      68,
-      67
-    ],
+    "shape": [2, 236, 68, 67],
+    "zarr_format": 2
+  },
+  "v0.4/idr0062-multiscale/labels/.zattrs": {
+    "labels": ["0"]
+  },
+  "v0.4/idr0062-multiscale/labels/.zgroup": {
+    "zarr_format": 2
+  },
+  "v0.4/idr0062-multiscale/labels/0/.zattrs": {
+    "image-label": {
+      "colors": [
+        {
+          "label-value": 1,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 2,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 3,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 4,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 5,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 6,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 7,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 8,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 9,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 10,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 11,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 12,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 13,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 14,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 15,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 16,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 17,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 18,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 19,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 20,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 21,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 22,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 23,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 24,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 25,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 26,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 27,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 28,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 29,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 30,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 31,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 32,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 33,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 34,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 35,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 36,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 37,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 38,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 39,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 40,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 41,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 42,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 43,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 44,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 45,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 46,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 47,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 48,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 49,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 50,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 51,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 52,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 53,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 54,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 55,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 56,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 57,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 58,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 59,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 60,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 61,
+          "rgba": [128, 128, 128, 128]
+        }
+      ],
+      "properties": [
+        {
+          "label-value": 1,
+          "omero:roiId": 1380887,
+          "omero:shapeId": 1664569
+        },
+        {
+          "label-value": 2,
+          "omero:roiId": 1380888,
+          "omero:shapeId": 1664617
+        },
+        {
+          "label-value": 3,
+          "omero:roiId": 1380889,
+          "omero:shapeId": 1664664
+        },
+        {
+          "label-value": 4,
+          "omero:roiId": 1380890,
+          "omero:shapeId": 1664709
+        },
+        {
+          "label-value": 5,
+          "omero:roiId": 1380891,
+          "omero:shapeId": 1664749
+        },
+        {
+          "label-value": 6,
+          "omero:roiId": 1380892,
+          "omero:shapeId": 1664787
+        },
+        {
+          "label-value": 7,
+          "omero:roiId": 1380893,
+          "omero:shapeId": 1664826
+        },
+        {
+          "label-value": 8,
+          "omero:roiId": 1380894,
+          "omero:shapeId": 1664859
+        },
+        {
+          "label-value": 9,
+          "omero:roiId": 1380895,
+          "omero:shapeId": 1664898
+        },
+        {
+          "label-value": 10,
+          "omero:roiId": 1380896,
+          "omero:shapeId": 1664932
+        },
+        {
+          "label-value": 11,
+          "omero:roiId": 1380897,
+          "omero:shapeId": 1664967
+        },
+        {
+          "label-value": 12,
+          "omero:roiId": 1380898,
+          "omero:shapeId": 1665000
+        },
+        {
+          "label-value": 13,
+          "omero:roiId": 1380899,
+          "omero:shapeId": 1665036
+        },
+        {
+          "label-value": 14,
+          "omero:roiId": 1380900,
+          "omero:shapeId": 1665078
+        },
+        {
+          "label-value": 15,
+          "omero:roiId": 1380901,
+          "omero:shapeId": 1665118
+        },
+        {
+          "label-value": 16,
+          "omero:roiId": 1380902,
+          "omero:shapeId": 1665156
+        },
+        {
+          "label-value": 17,
+          "omero:roiId": 1380903,
+          "omero:shapeId": 1665200
+        },
+        {
+          "label-value": 18,
+          "omero:roiId": 1380904,
+          "omero:shapeId": 1665238
+        },
+        {
+          "label-value": 19,
+          "omero:roiId": 1380905,
+          "omero:shapeId": 1665283
+        },
+        {
+          "label-value": 20,
+          "omero:roiId": 1380906,
+          "omero:shapeId": 1665319
+        },
+        {
+          "label-value": 21,
+          "omero:roiId": 1380907,
+          "omero:shapeId": 1665356
+        },
+        {
+          "label-value": 22,
+          "omero:roiId": 1380908,
+          "omero:shapeId": 1665396
+        },
+        {
+          "label-value": 23,
+          "omero:roiId": 1380909,
+          "omero:shapeId": 1665428
+        },
+        {
+          "label-value": 24,
+          "omero:roiId": 1380910,
+          "omero:shapeId": 1665467
+        },
+        {
+          "label-value": 25,
+          "omero:roiId": 1380911,
+          "omero:shapeId": 1665513
+        },
+        {
+          "label-value": 26,
+          "omero:roiId": 1380912,
+          "omero:shapeId": 1665541
+        },
+        {
+          "label-value": 27,
+          "omero:roiId": 1380913,
+          "omero:shapeId": 1665575
+        },
+        {
+          "label-value": 28,
+          "omero:roiId": 1380914,
+          "omero:shapeId": 1665611
+        },
+        {
+          "label-value": 29,
+          "omero:roiId": 1380915,
+          "omero:shapeId": 1665662
+        },
+        {
+          "label-value": 30,
+          "omero:roiId": 1380916,
+          "omero:shapeId": 1665709
+        },
+        {
+          "label-value": 31,
+          "omero:roiId": 1380917,
+          "omero:shapeId": 1665743
+        },
+        {
+          "label-value": 32,
+          "omero:roiId": 1380918,
+          "omero:shapeId": 1665777
+        },
+        {
+          "label-value": 33,
+          "omero:roiId": 1380919,
+          "omero:shapeId": 1665808
+        },
+        {
+          "label-value": 34,
+          "omero:roiId": 1380920,
+          "omero:shapeId": 1665853
+        },
+        {
+          "label-value": 35,
+          "omero:roiId": 1380921,
+          "omero:shapeId": 1665891
+        },
+        {
+          "label-value": 36,
+          "omero:roiId": 1380922,
+          "omero:shapeId": 1665935
+        },
+        {
+          "label-value": 37,
+          "omero:roiId": 1380923,
+          "omero:shapeId": 1665970
+        },
+        {
+          "label-value": 38,
+          "omero:roiId": 1380924,
+          "omero:shapeId": 1666013
+        },
+        {
+          "label-value": 39,
+          "omero:roiId": 1380925,
+          "omero:shapeId": 1666052
+        },
+        {
+          "label-value": 40,
+          "omero:roiId": 1380926,
+          "omero:shapeId": 1666085
+        },
+        {
+          "label-value": 41,
+          "omero:roiId": 1380927,
+          "omero:shapeId": 1666118
+        },
+        {
+          "label-value": 42,
+          "omero:roiId": 1380928,
+          "omero:shapeId": 1666158
+        },
+        {
+          "label-value": 43,
+          "omero:roiId": 1380929,
+          "omero:shapeId": 1666194
+        },
+        {
+          "label-value": 44,
+          "omero:roiId": 1380930,
+          "omero:shapeId": 1666235
+        },
+        {
+          "label-value": 45,
+          "omero:roiId": 1380931,
+          "omero:shapeId": 1666268
+        },
+        {
+          "label-value": 46,
+          "omero:roiId": 1380932,
+          "omero:shapeId": 1666307
+        },
+        {
+          "label-value": 47,
+          "omero:roiId": 1380933,
+          "omero:shapeId": 1666338
+        },
+        {
+          "label-value": 48,
+          "omero:roiId": 1380934,
+          "omero:shapeId": 1666378
+        },
+        {
+          "label-value": 49,
+          "omero:roiId": 1380935,
+          "omero:shapeId": 1666411
+        },
+        {
+          "label-value": 50,
+          "omero:roiId": 1380936,
+          "omero:shapeId": 1666446
+        },
+        {
+          "label-value": 51,
+          "omero:roiId": 1380937,
+          "omero:shapeId": 1666481
+        },
+        {
+          "label-value": 52,
+          "omero:roiId": 1380938,
+          "omero:shapeId": 1666518
+        },
+        {
+          "label-value": 53,
+          "omero:roiId": 1380939,
+          "omero:shapeId": 1666558
+        },
+        {
+          "label-value": 54,
+          "omero:roiId": 1380940,
+          "omero:shapeId": 1666596
+        },
+        {
+          "label-value": 55,
+          "omero:roiId": 1380941,
+          "omero:shapeId": 1666671
+        },
+        {
+          "label-value": 56,
+          "omero:roiId": 1380942,
+          "omero:shapeId": 1666711
+        },
+        {
+          "label-value": 57,
+          "omero:roiId": 1380943,
+          "omero:shapeId": 1666746
+        },
+        {
+          "label-value": 58,
+          "omero:roiId": 1380944,
+          "omero:shapeId": 1666789
+        },
+        {
+          "label-value": 59,
+          "omero:roiId": 1380945,
+          "omero:shapeId": 1666826
+        },
+        {
+          "label-value": 60,
+          "omero:roiId": 1380946,
+          "omero:shapeId": 1666846
+        },
+        {
+          "label-value": 61,
+          "omero:roiId": 1380947,
+          "omero:shapeId": 1666891
+        }
+      ],
+      "source": {
+        "image": "../.."
+      },
+      "version": "0.4"
+    },
+    "multiscales": [
+      {
+        "axes": [
+          {
+            "name": "c",
+            "type": "channel"
+          },
+          {
+            "name": "z",
+            "type": "space",
+            "unit": "micrometer"
+          },
+          {
+            "name": "y",
+            "type": "space",
+            "unit": "micrometer"
+          },
+          {
+            "name": "x",
+            "type": "space",
+            "unit": "micrometer"
+          }
+        ],
+        "datasets": [
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5002025531914894, 0.3603981534640209, 0.3603981534640209],
+                "type": "scale"
+              }
+            ],
+            "path": "0"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5002025531914894, 0.7207963069280418, 0.7207963069280418],
+                "type": "scale"
+              }
+            ],
+            "path": "1"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5002025531914894, 1.4415926138560835, 1.4415926138560835],
+                "type": "scale"
+              }
+            ],
+            "path": "2"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5002025531914894, 2.883185227712167, 2.883185227712167],
+                "type": "scale"
+              }
+            ],
+            "path": "3"
+          }
+        ],
+        "name": "0",
+        "version": "0.4"
+      }
+    ]
+  },
+  "v0.4/idr0062-multiscale/labels/0/.zgroup": {
     "zarr_format": 2
   },
   "v0.4/idr0054-multichannel/.zattrs": {
@@ -2496,13 +3639,7 @@
           {
             "coordinateTransformations": [
               {
-                "scale": [
-                  1,
-                  1,
-                  1,
-                  1,
-                  1
-                ],
+                "scale": [1, 1, 1, 1, 1],
                 "type": "scale"
               }
             ],
@@ -2511,13 +3648,7 @@
           {
             "coordinateTransformations": [
               {
-                "scale": [
-                  1,
-                  1,
-                  1,
-                  2,
-                  2
-                ],
+                "scale": [1, 1, 1, 2, 2],
                 "type": "scale"
               }
             ],
@@ -2526,13 +3657,7 @@
           {
             "coordinateTransformations": [
               {
-                "scale": [
-                  1,
-                  1,
-                  1,
-                  4,
-                  4
-                ],
+                "scale": [1, 1, 1, 4, 4],
                 "type": "scale"
               }
             ],
@@ -2541,13 +3666,7 @@
           {
             "coordinateTransformations": [
               {
-                "scale": [
-                  1,
-                  1,
-                  1,
-                  8,
-                  8
-                ],
+                "scale": [1, 1, 1, 8, 8],
                 "type": "scale"
               }
             ],
@@ -2556,13 +3675,7 @@
           {
             "coordinateTransformations": [
               {
-                "scale": [
-                  1,
-                  1,
-                  1,
-                  16,
-                  16
-                ],
+                "scale": [1, 1, 1, 16, 16],
                 "type": "scale"
               }
             ],
@@ -2970,13 +4083,7 @@
     "zarr_format": 2
   },
   "v0.4/idr0054-multichannel/0/.zarray": {
-    "chunks": [
-      1,
-      1,
-      1,
-      1024,
-      1024
-    ],
+    "chunks": [1, 1, 1, 1024, 1024],
     "compressor": {
       "clevel": 5,
       "blocksize": 0,
@@ -2988,24 +4095,12 @@
     "fill_value": 0,
     "filters": null,
     "order": "C",
-    "shape": [
-      1,
-      27,
-      1,
-      2700,
-      2702
-    ],
+    "shape": [1, 27, 1, 2700, 2702],
     "dimension_separator": "/",
     "zarr_format": 2
   },
   "v0.4/idr0054-multichannel/1/.zarray": {
-    "chunks": [
-      1,
-      1,
-      1,
-      1024,
-      1024
-    ],
+    "chunks": [1, 1, 1, 1024, 1024],
     "compressor": {
       "clevel": 5,
       "blocksize": 0,
@@ -3017,24 +4112,12 @@
     "fill_value": 0,
     "filters": null,
     "order": "C",
-    "shape": [
-      1,
-      27,
-      1,
-      1350,
-      1351
-    ],
+    "shape": [1, 27, 1, 1350, 1351],
     "dimension_separator": "/",
     "zarr_format": 2
   },
   "v0.4/idr0054-multichannel/2/.zarray": {
-    "chunks": [
-      1,
-      1,
-      1,
-      675,
-      675
-    ],
+    "chunks": [1, 1, 1, 675, 675],
     "compressor": {
       "clevel": 5,
       "blocksize": 0,
@@ -3046,24 +4129,12 @@
     "fill_value": 0,
     "filters": null,
     "order": "C",
-    "shape": [
-      1,
-      27,
-      1,
-      675,
-      675
-    ],
+    "shape": [1, 27, 1, 675, 675],
     "dimension_separator": "/",
     "zarr_format": 2
   },
   "v0.4/idr0054-multichannel/3/.zarray": {
-    "chunks": [
-      1,
-      1,
-      1,
-      337,
-      337
-    ],
+    "chunks": [1, 1, 1, 337, 337],
     "compressor": {
       "clevel": 5,
       "blocksize": 0,
@@ -3075,24 +4146,12 @@
     "fill_value": 0,
     "filters": null,
     "order": "C",
-    "shape": [
-      1,
-      27,
-      1,
-      337,
-      337
-    ],
+    "shape": [1, 27, 1, 337, 337],
     "dimension_separator": "/",
     "zarr_format": 2
   },
   "v0.4/idr0054-multichannel/4/.zarray": {
-    "chunks": [
-      1,
-      1,
-      1,
-      168,
-      168
-    ],
+    "chunks": [1, 1, 1, 168, 168],
     "compressor": {
       "clevel": 5,
       "blocksize": 0,
@@ -3104,15 +4163,1565 @@
     "fill_value": 0,
     "filters": null,
     "order": "C",
-    "shape": [
-      1,
-      27,
-      1,
-      168,
-      168
-    ],
+    "shape": [1, 27, 1, 168, 168],
     "dimension_separator": "/",
     "zarr_format": 2
+  },
+  "v0.4/idr0050-multiscale/.zattrs": {
+    "_creator": {
+      "name": "omero-zarr",
+      "version": "0.5.0"
+    },
+    "multiscales": [
+      {
+        "axes": [
+          {
+            "name": "c",
+            "type": "channel"
+          },
+          {
+            "name": "z",
+            "type": "space",
+            "unit": "micrometer"
+          },
+          {
+            "name": "y",
+            "type": "space",
+            "unit": "micrometer"
+          },
+          {
+            "name": "x",
+            "type": "space",
+            "unit": "micrometer"
+          }
+        ],
+        "datasets": [
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5920416817598223, 0.10202959397405088, 0.10202959397405088],
+                "type": "scale"
+              }
+            ],
+            "path": "0"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5920416817598223, 0.20405918794810177, 0.20405918794810177],
+                "type": "scale"
+              }
+            ],
+            "path": "1"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5920416817598223, 0.40811837589620353, 0.40811837589620353],
+                "type": "scale"
+              }
+            ],
+            "path": "2"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5920416817598223, 0.8162367517924071, 0.8162367517924071],
+                "type": "scale"
+              }
+            ],
+            "path": "3"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5920416817598223, 1.6324735035848141, 1.6324735035848141],
+                "type": "scale"
+              }
+            ],
+            "path": "4"
+          }
+        ],
+        "name": "4995115",
+        "version": "0.4"
+      },
+      {
+        "axes": [
+          {
+            "name": "c",
+            "type": "channel"
+          },
+          {
+            "name": "y",
+            "type": "space",
+            "unit": "micrometer"
+          },
+          {
+            "name": "x",
+            "type": "space",
+            "unit": "micrometer"
+          }
+        ],
+        "datasets": [
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.10202959397405088, 0.10202959397405088],
+                "type": "scale"
+              }
+            ],
+            "path": "multiscales2_0"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.20405918794810177, 0.20405918794810177],
+                "type": "scale"
+              }
+            ],
+            "path": "multiscales2_1"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.40811837589620353, 0.40811837589620353],
+                "type": "scale"
+              }
+            ],
+            "path": "multiscales2_2"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.8162367517924071, 0.8162367517924071],
+                "type": "scale"
+              }
+            ],
+            "path": "multiscales2_3"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 1.6324735035848141, 1.6324735035848141],
+                "type": "scale"
+              }
+            ],
+            "path": "multiscales2_4"
+          }
+        ],
+        "name": "4995097",
+        "version": "0.4"
+      }
+    ],
+    "omero": {
+      "channels": [
+        {
+          "active": true,
+          "coefficient": 1,
+          "color": "FF0000",
+          "family": "linear",
+          "inverted": false,
+          "label": "Actin",
+          "window": {
+            "end": 31890,
+            "max": 65535,
+            "min": 37,
+            "start": 52
+          }
+        },
+        {
+          "active": true,
+          "coefficient": 1,
+          "color": "FFFFFF",
+          "family": "linear",
+          "inverted": false,
+          "label": "Cell",
+          "window": {
+            "end": 65535,
+            "max": 65535,
+            "min": 4283,
+            "start": 4283
+          }
+        },
+        {
+          "active": true,
+          "coefficient": 1,
+          "color": "00FF00",
+          "family": "linear",
+          "inverted": false,
+          "label": "Microtubules",
+          "window": {
+            "end": 10391,
+            "max": 31674,
+            "min": 6,
+            "start": 15
+          }
+        }
+      ],
+      "id": 1,
+      "rdefs": {
+        "defaultT": 0,
+        "defaultZ": 0,
+        "model": "color"
+      },
+      "version": "0.4"
+    }
+  },
+  "v0.4/idr0050-multiscale/.zgroup": {
+    "zarr_format": 2
+  },
+  "v0.4/idr0050-multiscale/0/.zarray": {
+    "chunks": [1, 1, 1488, 1488],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dimension_separator": "/",
+    "dtype": "<u2",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [3, 12, 1488, 1488],
+    "zarr_format": 2
+  },
+  "v0.4/idr0050-multiscale/1/.zarray": {
+    "chunks": [1, 1, 744, 744],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dimension_separator": "/",
+    "dtype": "<u2",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [3, 12, 744, 744],
+    "zarr_format": 2
+  },
+  "v0.4/idr0050-multiscale/2/.zarray": {
+    "chunks": [1, 1, 372, 372],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dimension_separator": "/",
+    "dtype": "<u2",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [3, 12, 372, 372],
+    "zarr_format": 2
+  },
+  "v0.4/idr0050-multiscale/3/.zarray": {
+    "chunks": [1, 1, 186, 186],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dimension_separator": "/",
+    "dtype": "<u2",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [3, 12, 186, 186],
+    "zarr_format": 2
+  },
+  "v0.4/idr0050-multiscale/4/.zarray": {
+    "chunks": [1, 1, 93, 93],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dimension_separator": "/",
+    "dtype": "<u2",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [3, 12, 93, 93],
+    "zarr_format": 2
+  },
+  "v0.4/idr0048-bioformats2raw/.zattrs": {
+    "bioformats2raw.layout": 3
+  },
+  "v0.4/idr0048-bioformats2raw/.zgroup": {
+    "zarr_format": 2
+  },
+  "v0.4/idr0048-bioformats2raw/0/.zattrs": {
+    "multiscales": [
+      {
+        "metadata": {
+          "method": "loci.common.image.SimpleImageScaler",
+          "version": "Bio-Formats 6.10.1"
+        },
+        "axes": [
+          {
+            "name": "t",
+            "type": "time"
+          },
+          {
+            "name": "c",
+            "type": "channel"
+          },
+          {
+            "unit": "pixel",
+            "name": "z",
+            "type": "space"
+          },
+          {
+            "unit": "pixel",
+            "name": "y",
+            "type": "space"
+          },
+          {
+            "unit": "pixel",
+            "name": "x",
+            "type": "space"
+          }
+        ],
+        "name": "P_t00000, W_s00_0",
+        "datasets": [
+          {
+            "path": "0",
+            "coordinateTransformations": [
+              {
+                "scale": [1, 1, 1, 1, 1],
+                "type": "scale"
+              }
+            ]
+          },
+          {
+            "path": "1",
+            "coordinateTransformations": [
+              {
+                "scale": [1, 1, 1, 2, 2],
+                "type": "scale"
+              }
+            ]
+          },
+          {
+            "path": "2",
+            "coordinateTransformations": [
+              {
+                "scale": [1, 1, 1, 4, 4],
+                "type": "scale"
+              }
+            ]
+          },
+          {
+            "path": "3",
+            "coordinateTransformations": [
+              {
+                "scale": [1, 1, 1, 8, 8],
+                "type": "scale"
+              }
+            ]
+          },
+          {
+            "path": "4",
+            "coordinateTransformations": [
+              {
+                "scale": [1, 1, 1, 16, 16],
+                "type": "scale"
+              }
+            ]
+          },
+          {
+            "path": "5",
+            "coordinateTransformations": [
+              {
+                "scale": [1, 1, 1, 32, 32],
+                "type": "scale"
+              }
+            ]
+          }
+        ],
+        "version": "0.4"
+      }
+    ],
+    "omero": {
+      "channels": [
+        {
+          "color": "FF0000",
+          "coefficient": 1,
+          "active": true,
+          "label": "Channel 0",
+          "window": {
+            "min": 0,
+            "max": 5990,
+            "start": 0,
+            "end": 5990
+          },
+          "family": "linear",
+          "inverted": false
+        },
+        {
+          "color": "00FF00",
+          "coefficient": 1,
+          "active": true,
+          "label": "Channel 1",
+          "window": {
+            "min": 0,
+            "max": 7082,
+            "start": 0,
+            "end": 7082
+          },
+          "family": "linear",
+          "inverted": false
+        },
+        {
+          "color": "0000FF",
+          "coefficient": 1,
+          "active": true,
+          "label": "Channel 2",
+          "window": {
+            "min": 0,
+            "max": 8507,
+            "start": 0,
+            "end": 8507
+          },
+          "family": "linear",
+          "inverted": false
+        }
+      ],
+      "rdefs": {
+        "defaultT": 0,
+        "model": "color",
+        "defaultZ": 701
+      }
+    }
+  },
+  "v0.4/idr0048-bioformats2raw/0/.zgroup": {
+    "zarr_format": 2
+  },
+  "v0.4/idr0048-bioformats2raw/0/0/.zarray": {
+    "chunks": [1, 1, 1, 1024, 1024],
+    "compressor": {
+      "clevel": 5,
+      "blocksize": 0,
+      "shuffle": 1,
+      "cname": "lz4",
+      "id": "blosc"
+    },
+    "dtype": ">u2",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [1, 3, 1402, 5192, 2947],
+    "dimension_separator": "/",
+    "zarr_format": 2
+  },
+  "v0.4/idr0048-bioformats2raw/0/1/.zarray": {
+    "chunks": [1, 1, 1, 1024, 1024],
+    "compressor": {
+      "clevel": 5,
+      "blocksize": 0,
+      "shuffle": 1,
+      "cname": "lz4",
+      "id": "blosc"
+    },
+    "dtype": ">u2",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [1, 3, 1402, 2596, 1473],
+    "dimension_separator": "/",
+    "zarr_format": 2
+  },
+  "v0.4/idr0048-bioformats2raw/0/2/.zarray": {
+    "chunks": [1, 1, 1, 1024, 736],
+    "compressor": {
+      "clevel": 5,
+      "blocksize": 0,
+      "shuffle": 1,
+      "cname": "lz4",
+      "id": "blosc"
+    },
+    "dtype": ">u2",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [1, 3, 1402, 1298, 736],
+    "dimension_separator": "/",
+    "zarr_format": 2
+  },
+  "v0.4/idr0048-bioformats2raw/0/3/.zarray": {
+    "chunks": [1, 1, 1, 649, 368],
+    "compressor": {
+      "clevel": 5,
+      "blocksize": 0,
+      "shuffle": 1,
+      "cname": "lz4",
+      "id": "blosc"
+    },
+    "dtype": ">u2",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [1, 3, 1402, 649, 368],
+    "dimension_separator": "/",
+    "zarr_format": 2
+  },
+  "v0.4/idr0048-bioformats2raw/0/4/.zarray": {
+    "chunks": [1, 1, 1, 324, 184],
+    "compressor": {
+      "clevel": 5,
+      "blocksize": 0,
+      "shuffle": 1,
+      "cname": "lz4",
+      "id": "blosc"
+    },
+    "dtype": ">u2",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [1, 3, 1402, 324, 184],
+    "dimension_separator": "/",
+    "zarr_format": 2
+  },
+  "v0.4/idr0048-bioformats2raw/0/5/.zarray": {
+    "chunks": [1, 1, 1, 162, 92],
+    "compressor": {
+      "clevel": 5,
+      "blocksize": 0,
+      "shuffle": 1,
+      "cname": "lz4",
+      "id": "blosc"
+    },
+    "dtype": ">u2",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [1, 3, 1402, 162, 92],
+    "dimension_separator": "/",
+    "zarr_format": 2
+  },
+  "v0.4/idr0062-with-labels/.zattrs": {
+    "_creator": {
+      "name": "omero-zarr",
+      "version": "0.4.0"
+    },
+    "multiscales": [
+      {
+        "axes": [
+          {
+            "name": "c",
+            "type": "channel"
+          },
+          {
+            "name": "z",
+            "type": "space",
+            "unit": "micrometer"
+          },
+          {
+            "name": "y",
+            "type": "space",
+            "unit": "micrometer"
+          },
+          {
+            "name": "x",
+            "type": "space",
+            "unit": "micrometer"
+          }
+        ],
+        "datasets": [
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5002025531914894, 0.3603981534640209, 0.3603981534640209],
+                "type": "scale"
+              }
+            ],
+            "path": "0"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5002025531914894, 0.7207963069280418, 0.7207963069280418],
+                "type": "scale"
+              }
+            ],
+            "path": "1"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5002025531914894, 1.4415926138560835, 1.4415926138560835],
+                "type": "scale"
+              }
+            ],
+            "path": "2"
+          }
+        ],
+        "version": "0.4"
+      }
+    ],
+    "omero": {
+      "channels": [
+        {
+          "active": true,
+          "coefficient": 1,
+          "color": "0000FF",
+          "family": "linear",
+          "inverted": false,
+          "label": "LaminB1",
+          "window": {
+            "end": 1500,
+            "max": 65535,
+            "min": 0,
+            "start": 0
+          }
+        },
+        {
+          "active": true,
+          "coefficient": 1,
+          "color": "FFFF00",
+          "family": "linear",
+          "inverted": false,
+          "label": "Dapi",
+          "window": {
+            "end": 1500,
+            "max": 65535,
+            "min": 0,
+            "start": 0
+          }
+        }
+      ],
+      "id": 1,
+      "rdefs": {
+        "defaultT": 0,
+        "defaultZ": 118,
+        "model": "color"
+      },
+      "version": "0.4"
+    }
+  },
+  "v0.4/idr0062-with-labels/.zgroup": {
+    "zarr_format": 2
+  },
+  "v0.4/idr0062-with-labels/0/.zarray": {
+    "chunks": [1, 1, 275, 271],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dimension_separator": "/",
+    "dtype": "<u2",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [2, 236, 275, 271],
+    "zarr_format": 2
+  },
+  "v0.4/idr0062-with-labels/1/.zarray": {
+    "chunks": [1, 1, 137, 135],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dimension_separator": "/",
+    "dtype": "<u2",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [2, 236, 137, 135],
+    "zarr_format": 2
+  },
+  "v0.4/idr0062-with-labels/2/.zarray": {
+    "chunks": [1, 1, 68, 67],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dimension_separator": "/",
+    "dtype": "<u2",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [2, 236, 68, 67],
+    "zarr_format": 2
+  },
+  "v0.4/idr0062-with-labels/labels/.zattrs": {
+    "labels": ["0"]
+  },
+  "v0.4/idr0062-with-labels/labels/.zgroup": {
+    "zarr_format": 2
+  },
+  "v0.4/idr0062-with-labels/labels/0/.zattrs": {
+    "image-label": {
+      "colors": [
+        {
+          "label-value": 1,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 2,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 3,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 4,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 5,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 6,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 7,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 8,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 9,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 10,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 11,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 12,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 13,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 14,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 15,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 16,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 17,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 18,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 19,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 20,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 21,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 22,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 23,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 24,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 25,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 26,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 27,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 28,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 29,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 30,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 31,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 32,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 33,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 34,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 35,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 36,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 37,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 38,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 39,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 40,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 41,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 42,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 43,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 44,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 45,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 46,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 47,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 48,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 49,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 50,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 51,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 52,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 53,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 54,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 55,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 56,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 57,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 58,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 59,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 60,
+          "rgba": [128, 128, 128, 128]
+        },
+        {
+          "label-value": 61,
+          "rgba": [128, 128, 128, 128]
+        }
+      ],
+      "properties": [
+        {
+          "label-value": 1,
+          "omero:roiId": 1380887,
+          "omero:shapeId": 1664569
+        },
+        {
+          "label-value": 2,
+          "omero:roiId": 1380888,
+          "omero:shapeId": 1664617
+        },
+        {
+          "label-value": 3,
+          "omero:roiId": 1380889,
+          "omero:shapeId": 1664664
+        },
+        {
+          "label-value": 4,
+          "omero:roiId": 1380890,
+          "omero:shapeId": 1664709
+        },
+        {
+          "label-value": 5,
+          "omero:roiId": 1380891,
+          "omero:shapeId": 1664749
+        },
+        {
+          "label-value": 6,
+          "omero:roiId": 1380892,
+          "omero:shapeId": 1664787
+        },
+        {
+          "label-value": 7,
+          "omero:roiId": 1380893,
+          "omero:shapeId": 1664826
+        },
+        {
+          "label-value": 8,
+          "omero:roiId": 1380894,
+          "omero:shapeId": 1664859
+        },
+        {
+          "label-value": 9,
+          "omero:roiId": 1380895,
+          "omero:shapeId": 1664898
+        },
+        {
+          "label-value": 10,
+          "omero:roiId": 1380896,
+          "omero:shapeId": 1664932
+        },
+        {
+          "label-value": 11,
+          "omero:roiId": 1380897,
+          "omero:shapeId": 1664967
+        },
+        {
+          "label-value": 12,
+          "omero:roiId": 1380898,
+          "omero:shapeId": 1665000
+        },
+        {
+          "label-value": 13,
+          "omero:roiId": 1380899,
+          "omero:shapeId": 1665036
+        },
+        {
+          "label-value": 14,
+          "omero:roiId": 1380900,
+          "omero:shapeId": 1665078
+        },
+        {
+          "label-value": 15,
+          "omero:roiId": 1380901,
+          "omero:shapeId": 1665118
+        },
+        {
+          "label-value": 16,
+          "omero:roiId": 1380902,
+          "omero:shapeId": 1665156
+        },
+        {
+          "label-value": 17,
+          "omero:roiId": 1380903,
+          "omero:shapeId": 1665200
+        },
+        {
+          "label-value": 18,
+          "omero:roiId": 1380904,
+          "omero:shapeId": 1665238
+        },
+        {
+          "label-value": 19,
+          "omero:roiId": 1380905,
+          "omero:shapeId": 1665283
+        },
+        {
+          "label-value": 20,
+          "omero:roiId": 1380906,
+          "omero:shapeId": 1665319
+        },
+        {
+          "label-value": 21,
+          "omero:roiId": 1380907,
+          "omero:shapeId": 1665356
+        },
+        {
+          "label-value": 22,
+          "omero:roiId": 1380908,
+          "omero:shapeId": 1665396
+        },
+        {
+          "label-value": 23,
+          "omero:roiId": 1380909,
+          "omero:shapeId": 1665428
+        },
+        {
+          "label-value": 24,
+          "omero:roiId": 1380910,
+          "omero:shapeId": 1665467
+        },
+        {
+          "label-value": 25,
+          "omero:roiId": 1380911,
+          "omero:shapeId": 1665513
+        },
+        {
+          "label-value": 26,
+          "omero:roiId": 1380912,
+          "omero:shapeId": 1665541
+        },
+        {
+          "label-value": 27,
+          "omero:roiId": 1380913,
+          "omero:shapeId": 1665575
+        },
+        {
+          "label-value": 28,
+          "omero:roiId": 1380914,
+          "omero:shapeId": 1665611
+        },
+        {
+          "label-value": 29,
+          "omero:roiId": 1380915,
+          "omero:shapeId": 1665662
+        },
+        {
+          "label-value": 30,
+          "omero:roiId": 1380916,
+          "omero:shapeId": 1665709
+        },
+        {
+          "label-value": 31,
+          "omero:roiId": 1380917,
+          "omero:shapeId": 1665743
+        },
+        {
+          "label-value": 32,
+          "omero:roiId": 1380918,
+          "omero:shapeId": 1665777
+        },
+        {
+          "label-value": 33,
+          "omero:roiId": 1380919,
+          "omero:shapeId": 1665808
+        },
+        {
+          "label-value": 34,
+          "omero:roiId": 1380920,
+          "omero:shapeId": 1665853
+        },
+        {
+          "label-value": 35,
+          "omero:roiId": 1380921,
+          "omero:shapeId": 1665891
+        },
+        {
+          "label-value": 36,
+          "omero:roiId": 1380922,
+          "omero:shapeId": 1665935
+        },
+        {
+          "label-value": 37,
+          "omero:roiId": 1380923,
+          "omero:shapeId": 1665970
+        },
+        {
+          "label-value": 38,
+          "omero:roiId": 1380924,
+          "omero:shapeId": 1666013
+        },
+        {
+          "label-value": 39,
+          "omero:roiId": 1380925,
+          "omero:shapeId": 1666052
+        },
+        {
+          "label-value": 40,
+          "omero:roiId": 1380926,
+          "omero:shapeId": 1666085
+        },
+        {
+          "label-value": 41,
+          "omero:roiId": 1380927,
+          "omero:shapeId": 1666118
+        },
+        {
+          "label-value": 42,
+          "omero:roiId": 1380928,
+          "omero:shapeId": 1666158
+        },
+        {
+          "label-value": 43,
+          "omero:roiId": 1380929,
+          "omero:shapeId": 1666194
+        },
+        {
+          "label-value": 44,
+          "omero:roiId": 1380930,
+          "omero:shapeId": 1666235
+        },
+        {
+          "label-value": 45,
+          "omero:roiId": 1380931,
+          "omero:shapeId": 1666268
+        },
+        {
+          "label-value": 46,
+          "omero:roiId": 1380932,
+          "omero:shapeId": 1666307
+        },
+        {
+          "label-value": 47,
+          "omero:roiId": 1380933,
+          "omero:shapeId": 1666338
+        },
+        {
+          "label-value": 48,
+          "omero:roiId": 1380934,
+          "omero:shapeId": 1666378
+        },
+        {
+          "label-value": 49,
+          "omero:roiId": 1380935,
+          "omero:shapeId": 1666411
+        },
+        {
+          "label-value": 50,
+          "omero:roiId": 1380936,
+          "omero:shapeId": 1666446
+        },
+        {
+          "label-value": 51,
+          "omero:roiId": 1380937,
+          "omero:shapeId": 1666481
+        },
+        {
+          "label-value": 52,
+          "omero:roiId": 1380938,
+          "omero:shapeId": 1666518
+        },
+        {
+          "label-value": 53,
+          "omero:roiId": 1380939,
+          "omero:shapeId": 1666558
+        },
+        {
+          "label-value": 54,
+          "omero:roiId": 1380940,
+          "omero:shapeId": 1666596
+        },
+        {
+          "label-value": 55,
+          "omero:roiId": 1380941,
+          "omero:shapeId": 1666671
+        },
+        {
+          "label-value": 56,
+          "omero:roiId": 1380942,
+          "omero:shapeId": 1666711
+        },
+        {
+          "label-value": 57,
+          "omero:roiId": 1380943,
+          "omero:shapeId": 1666746
+        },
+        {
+          "label-value": 58,
+          "omero:roiId": 1380944,
+          "omero:shapeId": 1666789
+        },
+        {
+          "label-value": 59,
+          "omero:roiId": 1380945,
+          "omero:shapeId": 1666826
+        },
+        {
+          "label-value": 60,
+          "omero:roiId": 1380946,
+          "omero:shapeId": 1666846
+        },
+        {
+          "label-value": 61,
+          "omero:roiId": 1380947,
+          "omero:shapeId": 1666891
+        }
+      ],
+      "source": {
+        "image": "../.."
+      },
+      "version": "0.4"
+    },
+    "multiscales": [
+      {
+        "axes": [
+          {
+            "name": "c",
+            "type": "channel"
+          },
+          {
+            "name": "z",
+            "type": "space",
+            "unit": "micrometer"
+          },
+          {
+            "name": "y",
+            "type": "space",
+            "unit": "micrometer"
+          },
+          {
+            "name": "x",
+            "type": "space",
+            "unit": "micrometer"
+          }
+        ],
+        "datasets": [
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5002025531914894, 0.3603981534640209, 0.3603981534640209],
+                "type": "scale"
+              }
+            ],
+            "path": "0"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5002025531914894, 0.7207963069280418, 0.7207963069280418],
+                "type": "scale"
+              }
+            ],
+            "path": "1"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5002025531914894, 1.4415926138560835, 1.4415926138560835],
+                "type": "scale"
+              }
+            ],
+            "path": "2"
+          },
+          {
+            "coordinateTransformations": [
+              {
+                "scale": [1, 0.5002025531914894, 2.883185227712167, 2.883185227712167],
+                "type": "scale"
+              }
+            ],
+            "path": "3"
+          }
+        ],
+        "name": "0",
+        "version": "0.4"
+      }
+    ]
+  },
+  "v0.4/idr0062-with-labels/labels/0/.zgroup": {
+    "zarr_format": 2
+  },
+  "v0.4/idr0062-with-labels/labels/0/0/.zarray": {
+    "chunks": [1, 59, 69, 136],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dimension_separator": "/",
+    "dtype": "|i1",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [1, 236, 275, 271],
+    "zarr_format": 2
+  },
+  "v0.4/idr0062-with-labels/labels/0/1/.zarray": {
+    "chunks": [1, 118, 69, 68],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dimension_separator": "/",
+    "dtype": "|i1",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [1, 236, 137, 135],
+    "zarr_format": 2
+  },
+  "v0.4/idr0062-with-labels/labels/0/2/.zarray": {
+    "chunks": [1, 118, 34, 67],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dimension_separator": "/",
+    "dtype": "|i1",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [1, 236, 68, 67],
+    "zarr_format": 2
+  },
+  "v0.4/idr0062-with-labels/labels/0/3/.zarray": {
+    "chunks": [1, 118, 34, 33],
+    "compressor": {
+      "blocksize": 0,
+      "clevel": 5,
+      "cname": "lz4",
+      "id": "blosc",
+      "shuffle": 1
+    },
+    "dimension_separator": "/",
+    "dtype": "|i1",
+    "fill_value": 0,
+    "filters": null,
+    "order": "C",
+    "shape": [1, 236, 34, 33],
+    "zarr_format": 2
+  },
+  "v0.1/idr0083-singlechannel/.zattrs": {
+    "multiscales": [
+      {
+        "datasets": [
+          {
+            "path": "0"
+          },
+          {
+            "path": "1"
+          },
+          {
+            "path": "2"
+          },
+          {
+            "path": "3"
+          }
+        ],
+        "version": "0.1"
+      }
+    ],
+    "omero": {
+      "channels": [
+        {
+          "active": true,
+          "coefficient": 1,
+          "color": "FF0000",
+          "family": "linear",
+          "inverted": false,
+          "label": "Cam2-T1",
+          "window": {
+            "end": 3110,
+            "max": 65535,
+            "min": 0,
+            "start": 138
+          }
+        },
+        {
+          "active": true,
+          "coefficient": 1,
+          "color": "00C000",
+          "family": "linear",
+          "inverted": false,
+          "label": "Cam1-T2",
+          "window": {
+            "end": 2738,
+            "max": 65535,
+            "min": 0,
+            "start": 140
+          }
+        },
+        {
+          "active": true,
+          "coefficient": 1,
+          "color": "FFFFFF",
+          "family": "linear",
+          "inverted": false,
+          "label": "2",
+          "window": {
+            "end": 3090,
+            "max": 65535,
+            "min": 0,
+            "start": 138
+          }
+        },
+        {
+          "active": false,
+          "coefficient": 1,
+          "color": "FFFFFF",
+          "family": "linear",
+          "inverted": false,
+          "label": "3",
+          "window": {
+            "end": 3094,
+            "max": 65535,
+            "min": 0,
+            "start": 144
+          }
+        }
+      ],
+      "id": 9836831,
+      "name": "2018-12-18 ASY H2B bud 05 3D 8 angles.czi [0]",
+      "rdefs": {
+        "defaultT": 0,
+        "defaultZ": 129,
+        "model": "color"
+      },
+      "version": "0.1"
+    }
+  },
+  "v0.1/idr0083-singlechannel/.zgroup": {
+    "zarr_format": 2
+  },
+  "v0.1/idr0083-singlechannel/0/.zarray": {
+    "shape": [1, 4, 259, 1920, 1920],
+    "chunks": [1, 1, 1, 1024, 1024],
+    "fill_value": "0",
+    "dtype": ">u2",
+    "filters": [],
+    "zarr_format": 2,
+    "compressor": {
+      "id": "blosc",
+      "cname": "lz4",
+      "clevel": 5,
+      "shuffle": 1,
+      "blocksize": 0
+    },
+    "order": "C"
+  },
+  "v0.1/idr0083-singlechannel/1/.zarray": {
+    "shape": [1, 4, 259, 960, 960],
+    "chunks": [1, 1, 1, 960, 960],
+    "fill_value": "0",
+    "dtype": ">u2",
+    "filters": [],
+    "zarr_format": 2,
+    "compressor": {
+      "id": "blosc",
+      "cname": "lz4",
+      "clevel": 5,
+      "shuffle": 1,
+      "blocksize": 0
+    },
+    "order": "C"
+  },
+  "v0.1/idr0083-singlechannel/2/.zarray": {
+    "shape": [1, 4, 259, 480, 480],
+    "chunks": [1, 1, 1, 480, 480],
+    "fill_value": "0",
+    "dtype": ">u2",
+    "filters": [],
+    "zarr_format": 2,
+    "compressor": {
+      "id": "blosc",
+      "cname": "lz4",
+      "clevel": 5,
+      "shuffle": 1,
+      "blocksize": 0
+    },
+    "order": "C"
+  },
+  "v0.1/idr0083-singlechannel/3/.zarray": {
+    "shape": [1, 4, 259, 240, 240],
+    "chunks": [1, 1, 1, 240, 240],
+    "fill_value": "0",
+    "dtype": ">u2",
+    "filters": [],
+    "zarr_format": 2,
+    "compressor": {
+      "id": "blosc",
+      "cname": "lz4",
+      "clevel": 5,
+      "shuffle": 1,
+      "blocksize": 0
+    },
+    "order": "C"
   },
   "v0.5/idr0047-multiscale/zarr.json": {
     "attributes": {
@@ -3146,12 +5755,7 @@
               {
                 "coordinateTransformations": [
                   {
-                    "scale": [
-                      1,
-                      0.20000000000000018,
-                      1,
-                      1
-                    ],
+                    "scale": [1, 0.20000000000000018, 1, 1],
                     "type": "scale"
                   }
                 ],
@@ -3160,12 +5764,7 @@
               {
                 "coordinateTransformations": [
                   {
-                    "scale": [
-                      1,
-                      0.20000000000000018,
-                      2,
-                      2
-                    ],
+                    "scale": [1, 0.20000000000000018, 2, 2],
                     "type": "scale"
                   }
                 ],
@@ -3174,12 +5773,7 @@
               {
                 "coordinateTransformations": [
                   {
-                    "scale": [
-                      1,
-                      0.20000000000000018,
-                      4,
-                      4
-                    ],
+                    "scale": [1, 0.20000000000000018, 4, 4],
                     "type": "scale"
                   }
                 ],
@@ -3188,12 +5782,7 @@
               {
                 "coordinateTransformations": [
                   {
-                    "scale": [
-                      1,
-                      0.20000000000000018,
-                      8,
-                      8
-                    ],
+                    "scale": [1, 0.20000000000000018, 8, 8],
                     "type": "scale"
                   }
                 ],
@@ -3202,12 +5791,7 @@
               {
                 "coordinateTransformations": [
                   {
-                    "scale": [
-                      1,
-                      0.20000000000000018,
-                      16,
-                      16
-                    ],
+                    "scale": [1, 0.20000000000000018, 16, 16],
                     "type": "scale"
                   }
                 ],
@@ -3216,12 +5800,7 @@
               {
                 "coordinateTransformations": [
                   {
-                    "scale": [
-                      1,
-                      0.20000000000000018,
-                      32,
-                      32
-                    ],
+                    "scale": [1, 0.20000000000000018, 32, 32],
                     "type": "scale"
                   }
                 ],
@@ -3304,12 +5883,7 @@
   "v0.5/idr0047-multiscale/0/zarr.json": {
     "chunk_grid": {
       "configuration": {
-        "chunk_shape": [
-          4,
-          1,
-          2048,
-          2048
-        ]
+        "chunk_shape": [4, 1, 2048, 2048]
       },
       "name": "regular"
     },
@@ -3319,12 +5893,7 @@
     "codecs": [
       {
         "configuration": {
-          "chunk_shape": [
-            1,
-            1,
-            2048,
-            2048
-          ],
+          "chunk_shape": [1, 1, 2048, 2048],
           "codecs": [
             {
               "configuration": {
@@ -3359,31 +5928,16 @@
       }
     ],
     "data_type": "uint16",
-    "dimension_names": [
-      "c",
-      "z",
-      "y",
-      "x"
-    ],
+    "dimension_names": ["c", "z", "y", "x"],
     "fill_value": 0,
     "node_type": "array",
-    "shape": [
-      4,
-      25,
-      2048,
-      2048
-    ],
+    "shape": [4, 25, 2048, 2048],
     "zarr_format": 3
   },
   "v0.5/idr0047-multiscale/1/zarr.json": {
     "chunk_grid": {
       "configuration": {
-        "chunk_shape": [
-          4,
-          1,
-          1024,
-          1024
-        ]
+        "chunk_shape": [4, 1, 1024, 1024]
       },
       "name": "regular"
     },
@@ -3393,12 +5947,7 @@
     "codecs": [
       {
         "configuration": {
-          "chunk_shape": [
-            1,
-            1,
-            1024,
-            1024
-          ],
+          "chunk_shape": [1, 1, 1024, 1024],
           "codecs": [
             {
               "configuration": {
@@ -3433,31 +5982,16 @@
       }
     ],
     "data_type": "uint16",
-    "dimension_names": [
-      "c",
-      "z",
-      "y",
-      "x"
-    ],
+    "dimension_names": ["c", "z", "y", "x"],
     "fill_value": 0,
     "node_type": "array",
-    "shape": [
-      4,
-      25,
-      1024,
-      1024
-    ],
+    "shape": [4, 25, 1024, 1024],
     "zarr_format": 3
   },
   "v0.5/idr0047-multiscale/2/zarr.json": {
     "chunk_grid": {
       "configuration": {
-        "chunk_shape": [
-          4,
-          1,
-          512,
-          512
-        ]
+        "chunk_shape": [4, 1, 512, 512]
       },
       "name": "regular"
     },
@@ -3467,12 +6001,7 @@
     "codecs": [
       {
         "configuration": {
-          "chunk_shape": [
-            1,
-            1,
-            512,
-            512
-          ],
+          "chunk_shape": [1, 1, 512, 512],
           "codecs": [
             {
               "configuration": {
@@ -3507,31 +6036,16 @@
       }
     ],
     "data_type": "uint16",
-    "dimension_names": [
-      "c",
-      "z",
-      "y",
-      "x"
-    ],
+    "dimension_names": ["c", "z", "y", "x"],
     "fill_value": 0,
     "node_type": "array",
-    "shape": [
-      4,
-      25,
-      512,
-      512
-    ],
+    "shape": [4, 25, 512, 512],
     "zarr_format": 3
   },
   "v0.5/idr0047-multiscale/3/zarr.json": {
     "chunk_grid": {
       "configuration": {
-        "chunk_shape": [
-          4,
-          1,
-          256,
-          256
-        ]
+        "chunk_shape": [4, 1, 256, 256]
       },
       "name": "regular"
     },
@@ -3541,12 +6055,7 @@
     "codecs": [
       {
         "configuration": {
-          "chunk_shape": [
-            1,
-            1,
-            256,
-            256
-          ],
+          "chunk_shape": [1, 1, 256, 256],
           "codecs": [
             {
               "configuration": {
@@ -3581,31 +6090,16 @@
       }
     ],
     "data_type": "uint16",
-    "dimension_names": [
-      "c",
-      "z",
-      "y",
-      "x"
-    ],
+    "dimension_names": ["c", "z", "y", "x"],
     "fill_value": 0,
     "node_type": "array",
-    "shape": [
-      4,
-      25,
-      256,
-      256
-    ],
+    "shape": [4, 25, 256, 256],
     "zarr_format": 3
   },
   "v0.5/idr0047-multiscale/4/zarr.json": {
     "chunk_grid": {
       "configuration": {
-        "chunk_shape": [
-          4,
-          1,
-          128,
-          128
-        ]
+        "chunk_shape": [4, 1, 128, 128]
       },
       "name": "regular"
     },
@@ -3615,12 +6109,7 @@
     "codecs": [
       {
         "configuration": {
-          "chunk_shape": [
-            1,
-            1,
-            128,
-            128
-          ],
+          "chunk_shape": [1, 1, 128, 128],
           "codecs": [
             {
               "configuration": {
@@ -3655,31 +6144,16 @@
       }
     ],
     "data_type": "uint16",
-    "dimension_names": [
-      "c",
-      "z",
-      "y",
-      "x"
-    ],
+    "dimension_names": ["c", "z", "y", "x"],
     "fill_value": 0,
     "node_type": "array",
-    "shape": [
-      4,
-      25,
-      128,
-      128
-    ],
+    "shape": [4, 25, 128, 128],
     "zarr_format": 3
   },
   "v0.5/idr0047-multiscale/5/zarr.json": {
     "chunk_grid": {
       "configuration": {
-        "chunk_shape": [
-          4,
-          1,
-          64,
-          64
-        ]
+        "chunk_shape": [4, 1, 64, 64]
       },
       "name": "regular"
     },
@@ -3689,12 +6163,7 @@
     "codecs": [
       {
         "configuration": {
-          "chunk_shape": [
-            1,
-            1,
-            64,
-            64
-          ],
+          "chunk_shape": [1, 1, 64, 64],
           "codecs": [
             {
               "configuration": {
@@ -3729,20 +6198,10 @@
       }
     ],
     "data_type": "uint16",
-    "dimension_names": [
-      "c",
-      "z",
-      "y",
-      "x"
-    ],
+    "dimension_names": ["c", "z", "y", "x"],
     "fill_value": 0,
     "node_type": "array",
-    "shape": [
-      4,
-      25,
-      64,
-      64
-    ],
+    "shape": [4, 25, 64, 64],
     "zarr_format": 3
   }
 }

@@ -14,16 +14,18 @@ import * as path from "node:path";
 // Inline the type guards rather than importing from src/utils.ts,
 // which pulls in the full app module graph with bundler-style imports
 // that Node's native TS stripping can't resolve.
-function isMultiscales(attrs: Record<string, unknown>): attrs is { multiscales: Array<{ datasets: Array<{ path: string }> }> } {
-	return "multiscales" in attrs;
+function isMultiscales(
+  attrs: Record<string, unknown>,
+): attrs is { multiscales: Array<{ datasets: Array<{ path: string }> }> } {
+  return "multiscales" in attrs;
 }
 
 function isOmePlate(attrs: Record<string, unknown>): attrs is { plate: { wells: Array<{ path: string }> } } {
-	return "plate" in attrs;
+  return "plate" in attrs;
 }
 
 function isOmeWell(attrs: Record<string, unknown>): attrs is { well: { images: Array<{ path: string }> } } {
-	return "well" in attrs;
+  return "well" in attrs;
 }
 
 const OUT_FILE = path.resolve(import.meta.dirname, "../__tests__/fixtures.json");
@@ -63,6 +65,26 @@ const SOURCES: Record<string, { url: string; maxDepth: number }> = {
     url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0054A/5025551.zarr",
     maxDepth: 2,
   },
+  // v0.4 with coordinateTransformations including real physical scale
+  "v0.4/idr0050-multiscale": {
+    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0050A/4995115.zarr",
+    maxDepth: 2,
+  },
+  // v0.4 bioformats2raw layout (group with nested image at /0)
+  "v0.4/idr0048-bioformats2raw": {
+    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0048A/9846151.zarr",
+    maxDepth: 3,
+  },
+  // v0.4 multiscale with image-label metadata
+  "v0.4/idr0062-with-labels": {
+    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr",
+    maxDepth: 3,
+  },
+  // v0.1 single-channel image
+  "v0.1/idr0083-singlechannel": {
+    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/9836831.zarr",
+    maxDepth: 2,
+  },
   // v0.5 (zarr v3) multiscale with ome wrapper (from ome2024-ngff-challenge)
   "v0.5/idr0047-multiscale": {
     url: "https://uk1s3.embassy.ebi.ac.uk/idr/share/ome2024-ngff-challenge/4496763.zarr",
@@ -87,12 +109,24 @@ function resolveAttrs(attrs: Record<string, unknown>): Record<string, unknown> {
   return attrs;
 }
 
+function isLabelsGroup(attrs: Record<string, unknown>): attrs is { labels: string[] } {
+  return "labels" in attrs && Array.isArray(attrs.labels);
+}
+
 function discoverChildren(attrs: Record<string, unknown>): string[] {
   const children: string[] = [];
 
   if (isMultiscales(attrs)) {
     for (const ds of attrs.multiscales[0].datasets) {
       children.push(ds.path);
+    }
+    // Also crawl labels if present at sibling path
+    children.push("labels");
+  }
+
+  if (isLabelsGroup(attrs)) {
+    for (const name of attrs.labels.slice(0, 1)) {
+      children.push(name);
     }
   }
 
@@ -106,6 +140,11 @@ function discoverChildren(attrs: Record<string, unknown>): string[] {
     for (const img of attrs.well.images.slice(0, 1)) {
       children.push(img.path);
     }
+  }
+
+  // bioformats2raw layout — the image is at /0
+  if ("bioformats2raw.layout" in attrs) {
+    children.push("0");
   }
 
   return children;
