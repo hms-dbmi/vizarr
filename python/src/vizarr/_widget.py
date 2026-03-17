@@ -1,5 +1,6 @@
 """Vizarr: an anywidget for viewing Zarr-based images."""
 
+import asyncio
 import pathlib
 from typing import Literal
 
@@ -11,7 +12,6 @@ import zarr
 import zarr.storage
 from zarr.abc.store import Store
 from zarr.core.buffer import default_buffer_prototype
-from zarr.core.sync import sync as _sync
 
 __all__ = ["Viewer"]
 
@@ -86,6 +86,7 @@ class Viewer(anywidget.AnyWidget):
     def __init__(self, **kwargs: object) -> None:
         super().__init__(**kwargs)
         self._store_paths: list[tuple[Store, str]] = []
+        self._pending_tasks: set[asyncio.Task[None]] = set()
         self.on_msg(self._handle_custom_message)
 
     def _handle_custom_message(
@@ -94,19 +95,24 @@ class Viewer(anywidget.AnyWidget):
         msg: object,
         _buffers: list[object],
     ) -> None:
+        task = asyncio.create_task(self._handle_store_request(msg))
+        self._pending_tasks.add(task)
+        task.add_done_callback(self._pending_tasks.discard)
+
+    async def _handle_store_request(self, msg: object) -> None:
         message = msgspec.convert(msg, type=Message[StoreOperation])
         store_id, path = message.payload.target
         store, key_prefix = self._store_paths[store_id]
         key = key_prefix + path.lstrip("/")
 
         if message.payload.method == "has":
-            success = _sync(store.exists(key))
+            success = await store.exists(key)
             reply = Message(message.uuid, StoreResult(success))
             self.send(msgspec.to_builtins(reply))
             return
 
         if message.payload.method == "get":
-            buf = _sync(store.get(key, prototype=default_buffer_prototype()))
+            buf = await store.get(key, prototype=default_buffer_prototype())
             if buf is not None:
                 reply = Message(message.uuid, StoreResult(success=True))
                 self.send(msgspec.to_builtins(reply), [buf.to_bytes()])
