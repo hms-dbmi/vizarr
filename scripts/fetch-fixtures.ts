@@ -42,57 +42,57 @@ const OUT_FILE = path.resolve(import.meta.dirname, "../__tests__/fixtures.json")
 const SOURCES: Record<string, { url: string; maxDepth: number }> = {
   // A 5D multiscale image (t, c, z, y, x) with omero rendering metadata
   "v0.1/idr0062-multiscale": {
-    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/6001240.zarr",
+    url: "https://livingobjects.ebi.ac.uk/idr/zarr/v0.1/6001240.zarr",
     maxDepth: 4,
   },
   // An HCS plate — we only crawl 2 levels deep to get plate + one well
   "v0.1/idr0001-plate": {
-    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/plates/422.zarr",
+    url: "https://livingobjects.ebi.ac.uk/idr/zarr/v0.1/plates/422.zarr",
     maxDepth: 2,
   },
   // A plate with more fields per well
   "v0.1/idr0033-plate": {
-    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/plates/5966.zarr",
+    url: "https://livingobjects.ebi.ac.uk/idr/zarr/v0.1/plates/5966.zarr",
     maxDepth: 2,
   },
   // v0.4 multiscale with typed axes, units, and coordinateTransformations
   "v0.4/idr0062-multiscale": {
-    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr",
+    url: "https://livingobjects.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr",
     maxDepth: 2,
   },
   // v0.4 multiscale with 27 channels (from issue #153)
   "v0.4/idr0054-multichannel": {
-    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0054A/5025551.zarr",
+    url: "https://livingobjects.ebi.ac.uk/idr/zarr/v0.4/idr0054A/5025551.zarr",
     maxDepth: 2,
   },
   // v0.4 with coordinateTransformations including real physical scale
   "v0.4/idr0050-multiscale": {
-    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0050A/4995115.zarr",
+    url: "https://livingobjects.ebi.ac.uk/idr/zarr/v0.4/idr0050A/4995115.zarr",
     maxDepth: 2,
   },
   // v0.4 bioformats2raw layout (group with nested image at /0)
   "v0.4/idr0048-bioformats2raw": {
-    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0048A/9846151.zarr",
+    url: "https://livingobjects.ebi.ac.uk/idr/zarr/v0.4/idr0048A/9846151.zarr",
     maxDepth: 3,
   },
   // v0.4 multiscale with image-label metadata
   "v0.4/idr0062-with-labels": {
-    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr",
+    url: "https://livingobjects.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr",
     maxDepth: 4,
   },
   // v0.1 single-channel image
   "v0.1/idr0083-singlechannel": {
-    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.1/9836831.zarr",
+    url: "https://livingobjects.ebi.ac.uk/idr/zarr/v0.1/9836831.zarr",
     maxDepth: 2,
   },
   // v0.4 CYX only — 50 channels, no z or t (multiplexed imaging)
   "v0.4/idr0076-cyx-50ch": {
-    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0076A/10501752.zarr",
+    url: "https://livingobjects.ebi.ac.uk/idr/zarr/v0.4/idr0076A/10501752.zarr",
     maxDepth: 4,
   },
   // v0.4 5D single-channel greyscale with time
   "v0.4/idr0083-5d-greyscale": {
-    url: "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0083A/9822152.zarr",
+    url: "https://livingobjects.ebi.ac.uk/idr/zarr/v0.4/idr0083A/9822152.zarr",
     maxDepth: 2,
   },
   // v0.4 tyx — time series, no channels, no z
@@ -112,7 +112,7 @@ const SOURCES: Record<string, { url: string; maxDepth: number }> = {
   },
   // v0.5 (zarr v3) multiscale with ome wrapper (from ome2024-ngff-challenge)
   "v0.5/idr0047-multiscale": {
-    url: "https://uk1s3.embassy.ebi.ac.uk/idr/share/ome2024-ngff-challenge/4496763.zarr",
+    url: "https://livingobjects.ebi.ac.uk/idr/share/ome2024-ngff-challenge/4496763.zarr",
     maxDepth: 2,
   },
 };
