@@ -12,7 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@chunkd/source-http": "^11.2.0",
+    "@chunkd/source-http": "^11.4.0",
     "@cogeotiff/core": "^9.4.0",
     "@developmentseed/lzw-tiff-decoder": "^0.2.2",
     "@hms-dbmi/viv": "~0.19.0",
