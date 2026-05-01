@@ -21,7 +21,7 @@
     "@material-ui/styles": "^4.11.5",
     "@vivjs/types": "~0.19.0",
     "@zarrita/storage": "~0.1.4",
-    "deck.gl": "~9.1.0",
+    "deck.gl": "~9.3.2",
     "jotai": "^1.0.0",
     "just-debounce-it": "^3.1.1",
     "math.gl": "^4.1.0",
