@@ -54,7 +54,7 @@ jobs:
     name: Python / Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v7
       - run: |
           uv run --directory python ruff format --check
@@ -64,7 +64,7 @@ jobs:
     name: Python / Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v7
       - run: uv run --directory python pytest
 
@@ -72,6 +72,6 @@ jobs:
     name: Python / Typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v7
       - run: uv run --directory python ty check
